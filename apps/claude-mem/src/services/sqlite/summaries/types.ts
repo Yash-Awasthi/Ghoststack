@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger.js';
+import { logger } from "../../../utils/logger.js";
 
 export interface SummaryInput {
   request: string;
@@ -68,7 +68,7 @@ export interface FullSummary {
 }
 
 export interface GetByIdsOptions {
-  orderBy?: 'date_desc' | 'date_asc';
+  orderBy?: "date_desc" | "date_asc";
   limit?: number;
   project?: string;
 }

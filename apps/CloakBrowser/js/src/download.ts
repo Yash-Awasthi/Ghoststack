@@ -30,7 +30,7 @@ import {
   getFallbackDownloadUrl,
   getLocalBinaryOverride,
   getPlatformTag,
-  versionNewer,
+  versionNewer
 } from "./config.js";
 
 const DOWNLOAD_TIMEOUT_MS = 600_000; // 10 minutes
@@ -49,9 +49,7 @@ export async function ensureBinary(): Promise<string> {
   const localOverride = getLocalBinaryOverride();
   if (localOverride) {
     if (!fs.existsSync(localOverride)) {
-      throw new Error(
-        `CLOAKBROWSER_BINARY_PATH set to '${localOverride}' but file does not exist`
-      );
+      throw new Error(`CLOAKBROWSER_BINARY_PATH set to '${localOverride}' but file does not exist`);
     }
     console.log(`[cloakbrowser] Using local binary override: ${localOverride}`);
     return localOverride;
@@ -81,17 +79,15 @@ export async function ensureBinary(): Promise<string> {
   }
 
   // Download platform's hardcoded version
-  console.log(
-    `[cloakbrowser] Stealth Chromium ${platformVersion} not found. Downloading for ${getPlatformTag()}...`
-  );
+  console.log(`[cloakbrowser] Stealth Chromium ${platformVersion} not found. Downloading for ${getPlatformTag()}...`);
   await downloadAndExtract();
 
   const downloadedPath = getBinaryPath();
   if (!fs.existsSync(downloadedPath)) {
     throw new Error(
       `Download completed but binary not found at expected path: ${downloadedPath}. ` +
-      `This may indicate a packaging issue. Please report at ` +
-      `https://github.com/CloakHQ/cloakbrowser/issues`
+        `This may indicate a packaging issue. Please report at ` +
+        `https://github.com/CloakHQ/cloakbrowser/issues`
     );
   }
 
@@ -118,7 +114,7 @@ export function binaryInfo(): BinaryInfo {
     binaryPath,
     installed: fs.existsSync(binaryPath),
     cacheDir: getBinaryDir(effective),
-    downloadUrl: getDownloadUrl(effective),
+    downloadUrl: getDownloadUrl(effective)
   };
 }
 
@@ -176,10 +172,7 @@ async function downloadAndExtract(version?: string): Promise<void> {
   fs.mkdirSync(path.dirname(binaryDir), { recursive: true });
 
   // Download to temp file (atomic — no partial downloads in cache)
-  const tmpPath = path.join(
-    path.dirname(binaryDir),
-    `_download_${Date.now()}${getArchiveExt()}`
-  );
+  const tmpPath = path.join(path.dirname(binaryDir), `_download_${Date.now()}${getArchiveExt()}`);
 
   try {
     // Try primary server, fall back to GitHub Releases (skip fallback if custom URL)
@@ -243,7 +236,7 @@ export async function fetchChecksums(version?: string): Promise<Map<string, stri
     try {
       const resp = await fetch(url, {
         redirect: "follow",
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(10_000)
       });
       if (!resp.ok) continue;
       return parseChecksums(await resp.text());
@@ -278,10 +271,10 @@ async function verifyChecksum(filePath: string, expectedHash: string): Promise<v
   if (actual !== expectedHash) {
     throw new Error(
       `Checksum verification failed!\n` +
-      `  Expected: ${expectedHash}\n` +
-      `  Got:      ${actual}\n` +
-      `  File may be corrupted or tampered with. ` +
-      `Please retry or report at https://github.com/CloakHQ/cloakbrowser/issues`
+        `  Expected: ${expectedHash}\n` +
+        `  Got:      ${actual}\n` +
+        `  File may be corrupted or tampered with. ` +
+        `Please retry or report at https://github.com/CloakHQ/cloakbrowser/issues`
     );
   }
   console.log("[cloakbrowser] Checksum verified: SHA-256 OK");
@@ -299,7 +292,7 @@ async function downloadFile(url: string, dest: string): Promise<void> {
   try {
     const response = await fetch(url, {
       signal: controller.signal,
-      redirect: "follow",
+      redirect: "follow"
     });
 
     if (!response.ok) {
@@ -330,9 +323,7 @@ async function downloadFile(url: string, dest: string): Promise<void> {
           lastLoggedPct = pct;
           const dlMB = Math.floor(downloaded / (1024 * 1024));
           const totalMB = Math.floor(total / (1024 * 1024));
-          console.log(
-            `[cloakbrowser] Download progress: ${pct}% (${dlMB}/${totalMB} MB)`
-          );
+          console.log(`[cloakbrowser] Download progress: ${pct}% (${dlMB}/${totalMB} MB)`);
         }
       }
     }
@@ -362,12 +353,7 @@ async function downloadFile(url: string, dest: string): Promise<void> {
   }
 }
 
-
-async function extractArchive(
-  archivePath: string,
-  destDir: string,
-  binaryPath?: string
-): Promise<void> {
+async function extractArchive(archivePath: string, destDir: string, binaryPath?: string): Promise<void> {
   console.log(`[cloakbrowser] Extracting to ${destDir}`);
 
   // Clean existing dir if partial download existed
@@ -408,28 +394,31 @@ async function extractTar(archivePath: string, destDir: string): Promise<void> {
     strip: 0,
     filter: (entryPath: string) => {
       if (path.isAbsolute(entryPath) || entryPath.includes("..")) {
-        console.warn(
-          `[cloakbrowser] Skipping suspicious archive entry: ${entryPath}`
-        );
+        console.warn(`[cloakbrowser] Skipping suspicious archive entry: ${entryPath}`);
         return false;
       }
       return true;
-    },
+    }
   });
 }
 
 async function extractZip(archivePath: string, destDir: string): Promise<void> {
   // Brief delay to ensure OS fully releases file handles (Windows)
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   if (process.platform === "win32") {
     // PowerShell 5.1's Expand-Archive uses .NET FileStream which can conflict
     // with recently-closed Node.js file handles. Use ZipFile API directly.
-    execFileSync("powershell", [
-      "-NoProfile", "-Command",
-      `Add-Type -AssemblyName System.IO.Compression.FileSystem; ` +
-      `[System.IO.Compression.ZipFile]::ExtractToDirectory('${archivePath}', '${destDir}')`,
-    ], { timeout: 120_000 });
+    execFileSync(
+      "powershell",
+      [
+        "-NoProfile",
+        "-Command",
+        `Add-Type -AssemblyName System.IO.Compression.FileSystem; ` +
+          `[System.IO.Compression.ZipFile]::ExtractToDirectory('${archivePath}', '${destDir}')`
+      ],
+      { timeout: 120_000 }
+    );
   } else {
     execFileSync("unzip", ["-o", archivePath, "-d", destDir], { timeout: 120_000 });
   }
@@ -448,10 +437,7 @@ function flattenSingleSubdir(destDir: string): void {
     if (fs.statSync(subdir).isDirectory()) {
       const children = fs.readdirSync(subdir);
       for (const child of children) {
-        fs.renameSync(
-          path.join(subdir, child),
-          path.join(destDir, child)
-        );
+        fs.renameSync(path.join(subdir, child), path.join(destDir, child));
       }
       fs.rmdirSync(subdir);
     }
@@ -481,8 +467,7 @@ function isExecutable(filePath: string): boolean {
 // ---------------------------------------------------------------------------
 
 function shouldCheckForUpdate(): boolean {
-  if (process.env.CLOAKBROWSER_AUTO_UPDATE?.toLowerCase() === "false")
-    return false;
+  if (process.env.CLOAKBROWSER_AUTO_UPDATE?.toLowerCase() === "false") return false;
   if (getLocalBinaryOverride()) return false;
   if (process.env.CLOAKBROWSER_DOWNLOAD_URL) return false;
 
@@ -500,7 +485,7 @@ function shouldCheckForUpdate(): boolean {
 export async function getLatestChromiumVersion(): Promise<string | null> {
   try {
     const resp = await fetch(`${GITHUB_API_URL}?per_page=10`, {
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(10_000)
     });
     if (!resp.ok) return null;
     const releases = (await resp.json()) as Array<{
@@ -511,9 +496,7 @@ export async function getLatestChromiumVersion(): Promise<string | null> {
     const platformTarball = getArchiveName();
     for (const release of releases) {
       if (release.tag_name.startsWith("chromium-v") && !release.draft) {
-        const assetNames = new Set(
-          (release.assets ?? []).map((a) => a.name)
-        );
+        const assetNames = new Set((release.assets ?? []).map((a) => a.name));
         if (assetNames.has(platformTarball)) {
           return release.tag_name.replace(/^chromium-v/, "");
         }
@@ -549,14 +532,14 @@ export async function checkWrapperUpdate(): Promise<void> {
   if (process.env.CLOAKBROWSER_DOWNLOAD_URL) return;
   try {
     const resp = await fetch("https://registry.npmjs.org/cloakbrowser/latest", {
-      signal: AbortSignal.timeout(5_000),
+      signal: AbortSignal.timeout(5_000)
     });
     if (!resp.ok) return;
     const data = (await resp.json()) as { version: string };
     if (data.version && versionNewer(data.version, WRAPPER_VERSION)) {
       console.warn(
         `[cloakbrowser] Update available: ${WRAPPER_VERSION} → ${data.version}. ` +
-        `Run: npm install cloakbrowser@latest`
+          `Run: npm install cloakbrowser@latest`
       );
     }
   } catch {
@@ -569,10 +552,7 @@ async function checkAndDownloadUpdate(): Promise<void> {
     // Record check timestamp first (rate limiting)
     const cacheDir = getCacheDir();
     fs.mkdirSync(cacheDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(cacheDir, ".last_update_check"),
-      String(Date.now())
-    );
+    fs.writeFileSync(path.join(cacheDir, ".last_update_check"), String(Date.now()));
 
     const platformVersion = getChromiumVersion();
     const latest = await getLatestChromiumVersion();
@@ -589,9 +569,7 @@ async function checkAndDownloadUpdate(): Promise<void> {
     );
     await downloadAndExtract(latest);
     writeVersionMarker(latest);
-    console.log(
-      `[cloakbrowser] Background update complete: Chromium ${latest} ready. Will use on next launch.`
-    );
+    console.log(`[cloakbrowser] Background update complete: Chromium ${latest} ready. Will use on next launch.`);
   } catch (err) {
     // Background update failed — don't disrupt the user
     if (process.env.DEBUG) {
@@ -603,10 +581,10 @@ async function checkAndDownloadUpdate(): Promise<void> {
 function maybeTriggerUpdateCheck(): void {
   // Wrapper update: once per process, not rate-limited
   if (!wrapperUpdateChecked) {
-    checkWrapperUpdate().catch(() => { });
+    checkWrapperUpdate().catch(() => {});
   }
 
   // Binary update: rate-limited to once per hour
   if (!shouldCheckForUpdate()) return;
-  checkAndDownloadUpdate().catch(() => { });
+  checkAndDownloadUpdate().catch(() => {});
 }

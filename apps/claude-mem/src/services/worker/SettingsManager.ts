@@ -1,14 +1,13 @@
-
-import { DatabaseManager } from './DatabaseManager.js';
-import { logger } from '../../utils/logger.js';
-import type { ViewerSettings } from '../worker-types.js';
+import { DatabaseManager } from "./DatabaseManager.js";
+import { logger } from "../../utils/logger.js";
+import type { ViewerSettings } from "../worker-types.js";
 
 export class SettingsManager {
   private dbManager: DatabaseManager;
   private readonly defaultSettings: ViewerSettings = {
     sidebarOpen: true,
     selectedProject: null,
-    theme: 'system'
+    theme: "system"
   };
 
   constructor(dbManager: DatabaseManager) {
@@ -19,7 +18,7 @@ export class SettingsManager {
     const db = this.dbManager.getSessionStore().db;
 
     try {
-      const stmt = db.prepare('SELECT key, value FROM viewer_settings');
+      const stmt = db.prepare("SELECT key, value FROM viewer_settings");
       const rows = stmt.all() as Array<{ key: string; value: string }>;
 
       const settings: ViewerSettings = { ...this.defaultSettings };
@@ -33,9 +32,9 @@ export class SettingsManager {
       return settings;
     } catch (error) {
       if (error instanceof Error) {
-        logger.debug('WORKER', 'Failed to load settings, using defaults', {}, error);
+        logger.debug("WORKER", "Failed to load settings, using defaults", {}, error);
       } else {
-        logger.debug('WORKER', 'Failed to load settings, using defaults', { rawError: String(error) });
+        logger.debug("WORKER", "Failed to load settings, using defaults", { rawError: String(error) });
       }
       return { ...this.defaultSettings };
     }

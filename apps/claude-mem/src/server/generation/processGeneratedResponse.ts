@@ -1,24 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { parseAgentXml, type ParsedObservation, type ParsedSummary } from '../../sdk/parser.js';
-import { logger } from '../../utils/logger.js';
+import { parseAgentXml, type ParsedObservation, type ParsedSummary } from "../../sdk/parser.js";
+import { logger } from "../../utils/logger.js";
 import {
   PostgresObservationRepository,
   PostgresObservationSourcesRepository,
   buildObservationGenerationKey,
-  type PostgresObservation,
-} from '../../storage/postgres/observations.js';
+  type PostgresObservation
+} from "../../storage/postgres/observations.js";
 import {
   PostgresObservationGenerationJobEventsRepository,
   PostgresObservationGenerationJobRepository,
-  type PostgresObservationGenerationJob,
-} from '../../storage/postgres/generation-jobs.js';
-import { PostgresAuthRepository } from '../../storage/postgres/auth.js';
-import {
-  withPostgresTransaction,
-  type PostgresPool,
-} from '../../storage/postgres/pool.js';
-import { stripTags } from '../../utils/tag-stripping.js';
+  type PostgresObservationGenerationJob
+} from "../../storage/postgres/generation-jobs.js";
+import { PostgresAuthRepository } from "../../storage/postgres/auth.js";
+import { withPostgresTransaction, type PostgresPool } from "../../storage/postgres/pool.js";
+import { stripTags } from "../../utils/tag-stripping.js";
 
 // processGeneratedResponse owns the full "we got XML from a provider →
 // persist + link + advance outbox" pipeline. Every side-effect runs inside
@@ -36,12 +33,12 @@ import { stripTags } from '../../utils/tag-stripping.js';
 
 export type ProcessGeneratedResponseOutcome =
   | {
-      kind: 'completed';
+      kind: "completed";
       jobId: string;
       observations: PostgresObservation[];
       privateContentDetected: boolean;
     }
-  | { kind: 'parse_error'; jobId: string; reason: string };
+  | { kind: "parse_error"; jobId: string; reason: string };
 
 export interface ProcessGeneratedResponseInput {
   pool: PostgresPool;
@@ -60,13 +57,13 @@ export interface ProcessGeneratedResponseInput {
 }
 
 export async function processGeneratedResponse(
-  input: ProcessGeneratedResponseInput,
+  input: ProcessGeneratedResponseInput
 ): Promise<ProcessGeneratedResponseOutcome> {
   const { job, rawText } = input;
 
   const parsed = parseAgentXml(rawText, job.id);
   if (!parsed.valid) {
-    return { kind: 'parse_error', jobId: job.id, reason: 'parser rejected response' };
+    return { kind: "parse_error", jobId: job.id, reason: "parser rejected response" };
   }
 
   // Skip-summary or zero-observation responses are still a success — the
@@ -88,21 +85,21 @@ export async function processGeneratedResponse(
     const fresh = await jobsRepo.getByIdForScope({
       id: job.id,
       projectId: job.projectId,
-      teamId: job.teamId,
+      teamId: job.teamId
     });
     if (!fresh) {
       throw new Error(`generation job ${job.id} not found in scope`);
     }
-    if (fresh.status === 'completed' || fresh.status === 'cancelled' || fresh.status === 'failed') {
-      logger.info('SYSTEM', 'generation job already in terminal status; skipping persistence', {
+    if (fresh.status === "completed" || fresh.status === "cancelled" || fresh.status === "failed") {
+      logger.info("SYSTEM", "generation job already in terminal status; skipping persistence", {
         jobId: fresh.id,
-        status: fresh.status,
+        status: fresh.status
       });
       return {
-        kind: 'completed' as const,
+        kind: "completed" as const,
         jobId: fresh.id,
         observations: [],
-        privateContentDetected,
+        privateContentDetected
       };
     }
 
@@ -124,14 +121,14 @@ export async function processGeneratedResponse(
       const generationKey = buildObservationGenerationKey({
         generationJobId: fresh.id,
         parsedObservationIndex: index,
-        content: scrubbed.stripped,
+        content: scrubbed.stripped
       });
 
       const observation = await obsRepo.create({
         projectId: fresh.projectId,
         teamId: fresh.teamId,
         serverSessionId: fresh.serverSessionId,
-        kind: parsedObservation.type ?? 'observation',
+        kind: parsedObservation.type ?? "observation",
         content: scrubbed.stripped,
         generationKey,
         metadata: {
@@ -143,9 +140,9 @@ export async function processGeneratedResponse(
           files_read: parsedObservation.files_read,
           files_modified: parsedObservation.files_modified,
           provider: input.providerLabel,
-          model: input.modelId ?? null,
+          model: input.modelId ?? null
         },
-        createdByJobId: fresh.id,
+        createdByJobId: fresh.id
       });
       persisted.push(observation);
 
@@ -165,8 +162,8 @@ export async function processGeneratedResponse(
           // without joining back through generation_job → outbox → key.
           source_adapter: input.sourceAdapter ?? null,
           actor_id: input.actorId ?? null,
-          api_key_id: input.apiKeyId ?? null,
-        },
+          api_key_id: input.apiKeyId ?? null
+        }
       });
 
       // Phase 11 — audit each generated observation. Using the SAME
@@ -179,8 +176,8 @@ export async function processGeneratedResponse(
           projectId: fresh.projectId,
           actorId: input.actorId ?? null,
           apiKeyId: input.apiKeyId ?? null,
-          action: 'observation.created',
-          resourceType: 'observation',
+          action: "observation.created",
+          resourceType: "observation",
           resourceId: observation.id,
           details: {
             generationJobId: fresh.id,
@@ -189,13 +186,13 @@ export async function processGeneratedResponse(
             provider: input.providerLabel,
             model: input.modelId ?? null,
             sourceAdapter: input.sourceAdapter ?? null,
-            parsedObservationIndex: index,
-          },
+            parsedObservationIndex: index
+          }
         });
       } catch (auditError) {
-        logger.warn('SYSTEM', 'audit_log observation.created insert failed', {
+        logger.warn("SYSTEM", "audit_log observation.created insert failed", {
           observationId: observation.id,
-          error: auditError instanceof Error ? auditError.message : String(auditError),
+          error: auditError instanceof Error ? auditError.message : String(auditError)
         });
       }
     }
@@ -206,22 +203,22 @@ export async function processGeneratedResponse(
       id: fresh.id,
       projectId: fresh.projectId,
       teamId: fresh.teamId,
-      status: 'completed',
+      status: "completed"
     });
     await eventsLogRepo.append({
       generationJobId: fresh.id,
       projectId: fresh.projectId,
       teamId: fresh.teamId,
-      eventType: 'completed',
-      statusAfter: 'completed',
+      eventType: "completed",
+      statusAfter: "completed",
       attempt: fresh.attempts,
       details: {
         provider: input.providerLabel,
         model: input.modelId ?? null,
         observationCount: persisted.length,
         privateContentDetected,
-        workerId: input.workerId ?? null,
-      },
+        workerId: input.workerId ?? null
+      }
     });
 
     // Audit log — best-effort; failure here would already be inside the
@@ -233,32 +230,32 @@ export async function processGeneratedResponse(
         projectId: fresh.projectId,
         actorId: input.actorId ?? null,
         apiKeyId: input.apiKeyId ?? null,
-        action: 'generation_job.completed',
-        resourceType: 'observation_generation_job',
+        action: "generation_job.completed",
+        resourceType: "observation_generation_job",
         resourceId: fresh.id,
         details: {
           generationJobId: fresh.id,
           provider: input.providerLabel,
           model: input.modelId ?? null,
           observationCount: persisted.length,
-          observationIds: persisted.map(o => o.id),
-          sourceAdapter: input.sourceAdapter ?? null,
-        },
+          observationIds: persisted.map((o) => o.id),
+          sourceAdapter: input.sourceAdapter ?? null
+        }
       });
     } catch (auditError) {
       // The audit log table may not have a metadata column on older
       // schemas; swallow rather than failing generation.
-      logger.warn('SYSTEM', 'audit log insert failed during generation', {
+      logger.warn("SYSTEM", "audit log insert failed during generation", {
         jobId: fresh.id,
-        error: auditError instanceof Error ? auditError.message : String(auditError),
+        error: auditError instanceof Error ? auditError.message : String(auditError)
       });
     }
 
     return {
-      kind: 'completed' as const,
+      kind: "completed" as const,
       jobId: fresh.id,
       observations: persisted,
-      privateContentDetected,
+      privateContentDetected
     };
   });
 }
@@ -286,14 +283,14 @@ export async function markGenerationFailed(input: MarkGenerationFailedInput): Pr
     const fresh = await jobsRepo.getByIdForScope({
       id: input.job.id,
       projectId: input.job.projectId,
-      teamId: input.job.teamId,
+      teamId: input.job.teamId
     });
-    if (!fresh || fresh.status === 'completed' || fresh.status === 'cancelled') {
+    if (!fresh || fresh.status === "completed" || fresh.status === "cancelled") {
       return;
     }
 
     const canRetry = input.retryable && fresh.attempts < fresh.maxAttempts;
-    const target = canRetry ? 'queued' : 'failed';
+    const target = canRetry ? "queued" : "failed";
 
     await jobsRepo.transitionStatus({
       id: fresh.id,
@@ -301,21 +298,21 @@ export async function markGenerationFailed(input: MarkGenerationFailedInput): Pr
       teamId: fresh.teamId,
       status: target,
       lastError: { reason: input.reason, classification: input.classification ?? null },
-      ...(canRetry ? { nextAttemptAt: new Date(Date.now() + retryDelayMs(fresh.attempts)) } : {}),
+      ...(canRetry ? { nextAttemptAt: new Date(Date.now() + retryDelayMs(fresh.attempts)) } : {})
     });
 
     await eventsLogRepo.append({
       generationJobId: fresh.id,
       projectId: fresh.projectId,
       teamId: fresh.teamId,
-      eventType: canRetry ? 'retry_scheduled' : 'failed',
+      eventType: canRetry ? "retry_scheduled" : "failed",
       statusAfter: target,
       attempt: fresh.attempts,
       details: {
         reason: input.reason,
         classification: input.classification ?? null,
-        workerId: input.workerId ?? null,
-      },
+        workerId: input.workerId ?? null
+      }
     });
   });
 }
@@ -330,22 +327,22 @@ export async function markGenerationFailed(input: MarkGenerationFailedInput): Pr
  * after a restart will collapse to one row.
  */
 export async function processSessionSummaryResponse(
-  input: ProcessGeneratedResponseInput,
+  input: ProcessGeneratedResponseInput
 ): Promise<ProcessGeneratedResponseOutcome> {
   const { job, rawText } = input;
 
-  if (job.sourceType !== 'session_summary') {
-    return { kind: 'parse_error', jobId: job.id, reason: 'session summary processor invoked on non-summary job' };
+  if (job.sourceType !== "session_summary") {
+    return { kind: "parse_error", jobId: job.id, reason: "session summary processor invoked on non-summary job" };
   }
 
   const parsed = parseAgentXml(rawText, job.id);
   if (!parsed.valid) {
-    return { kind: 'parse_error', jobId: job.id, reason: 'parser rejected summary response' };
+    return { kind: "parse_error", jobId: job.id, reason: "parser rejected summary response" };
   }
 
   const summary = parsed.summary ?? null;
   const skipped = summary?.skipped === true;
-  const summaryContent = summary ? renderSummaryContent(summary) : '';
+  const summaryContent = summary ? renderSummaryContent(summary) : "";
   const privateContentDetected = skipped || summaryContent.trim().length === 0;
 
   return await withPostgresTransaction(input.pool, async (client) => {
@@ -358,39 +355,39 @@ export async function processSessionSummaryResponse(
     const fresh = await jobsRepo.getByIdForScope({
       id: job.id,
       projectId: job.projectId,
-      teamId: job.teamId,
+      teamId: job.teamId
     });
     if (!fresh) {
       throw new Error(`session summary generation job ${job.id} not found in scope`);
     }
-    if (fresh.status === 'completed' || fresh.status === 'cancelled' || fresh.status === 'failed') {
-      logger.info('SYSTEM', 'session summary job already in terminal status; skipping persistence', {
+    if (fresh.status === "completed" || fresh.status === "cancelled" || fresh.status === "failed") {
+      logger.info("SYSTEM", "session summary job already in terminal status; skipping persistence", {
         jobId: fresh.id,
-        status: fresh.status,
+        status: fresh.status
       });
       return {
-        kind: 'completed' as const,
+        kind: "completed" as const,
         jobId: fresh.id,
         observations: [],
-        privateContentDetected,
+        privateContentDetected
       };
     }
 
     const persisted: PostgresObservation[] = [];
     if (!privateContentDetected) {
       const scrubbed = stripTags(summaryContent);
-      const scrubbedContent = scrubbed.stripped ?? '';
+      const scrubbedContent = scrubbed.stripped ?? "";
       if (scrubbedContent.trim().length > 0) {
         const generationKey = buildObservationGenerationKey({
           generationJobId: fresh.id,
           parsedObservationIndex: 0,
-          content: scrubbedContent,
+          content: scrubbedContent
         });
         const observation = await obsRepo.create({
           projectId: fresh.projectId,
           teamId: fresh.teamId,
           serverSessionId: fresh.serverSessionId,
-          kind: 'summary',
+          kind: "summary",
           content: scrubbedContent,
           generationKey,
           metadata: {
@@ -401,9 +398,9 @@ export async function processSessionSummaryResponse(
             next_steps: summary?.next_steps ?? null,
             notes: summary?.notes ?? null,
             provider: input.providerLabel,
-            model: input.modelId ?? null,
+            model: input.modelId ?? null
           },
-          createdByJobId: fresh.id,
+          createdByJobId: fresh.id
         });
         persisted.push(observation);
 
@@ -411,7 +408,7 @@ export async function processSessionSummaryResponse(
           observationId: observation.id,
           projectId: fresh.projectId,
           teamId: fresh.teamId,
-          sourceType: 'session_summary',
+          sourceType: "session_summary",
           sourceId: fresh.sourceId,
           generationJobId: fresh.id,
           metadata: {
@@ -419,8 +416,8 @@ export async function processSessionSummaryResponse(
             parsedObservationIndex: 0,
             source_adapter: input.sourceAdapter ?? null,
             actor_id: input.actorId ?? null,
-            api_key_id: input.apiKeyId ?? null,
-          },
+            api_key_id: input.apiKeyId ?? null
+          }
         });
 
         // Phase 11 — observation.created audit for the summary observation.
@@ -430,23 +427,23 @@ export async function processSessionSummaryResponse(
             projectId: fresh.projectId,
             actorId: input.actorId ?? null,
             apiKeyId: input.apiKeyId ?? null,
-            action: 'observation.created',
-            resourceType: 'observation',
+            action: "observation.created",
+            resourceType: "observation",
             resourceId: observation.id,
             details: {
               generationJobId: fresh.id,
-              sourceType: 'session_summary',
+              sourceType: "session_summary",
               sourceId: fresh.sourceId,
               provider: input.providerLabel,
               model: input.modelId ?? null,
               sourceAdapter: input.sourceAdapter ?? null,
-              kind: 'summary',
-            },
+              kind: "summary"
+            }
           });
         } catch (auditError) {
-          logger.warn('SYSTEM', 'audit_log observation.created (summary) insert failed', {
+          logger.warn("SYSTEM", "audit_log observation.created (summary) insert failed", {
             observationId: observation.id,
-            error: auditError instanceof Error ? auditError.message : String(auditError),
+            error: auditError instanceof Error ? auditError.message : String(auditError)
           });
         }
       }
@@ -456,14 +453,14 @@ export async function processSessionSummaryResponse(
       id: fresh.id,
       projectId: fresh.projectId,
       teamId: fresh.teamId,
-      status: 'completed',
+      status: "completed"
     });
     await eventsLogRepo.append({
       generationJobId: fresh.id,
       projectId: fresh.projectId,
       teamId: fresh.teamId,
-      eventType: 'completed',
-      statusAfter: 'completed',
+      eventType: "completed",
+      statusAfter: "completed",
       attempt: fresh.attempts,
       details: {
         provider: input.providerLabel,
@@ -471,8 +468,8 @@ export async function processSessionSummaryResponse(
         observationCount: persisted.length,
         privateContentDetected,
         workerId: input.workerId ?? null,
-        sourceType: 'session_summary',
-      },
+        sourceType: "session_summary"
+      }
     });
 
     try {
@@ -481,31 +478,31 @@ export async function processSessionSummaryResponse(
         projectId: fresh.projectId,
         actorId: input.actorId ?? null,
         apiKeyId: input.apiKeyId ?? null,
-        action: 'generation_job.completed',
-        resourceType: 'observation_generation_job',
+        action: "generation_job.completed",
+        resourceType: "observation_generation_job",
         resourceId: fresh.id,
         details: {
           generationJobId: fresh.id,
           provider: input.providerLabel,
           model: input.modelId ?? null,
           observationCount: persisted.length,
-          observationIds: persisted.map(o => o.id),
+          observationIds: persisted.map((o) => o.id),
           sourceAdapter: input.sourceAdapter ?? null,
-          sourceType: 'session_summary',
-        },
+          sourceType: "session_summary"
+        }
       });
     } catch (auditError) {
-      logger.warn('SYSTEM', 'audit log insert failed during summary generation', {
+      logger.warn("SYSTEM", "audit log insert failed during summary generation", {
         jobId: fresh.id,
-        error: auditError instanceof Error ? auditError.message : String(auditError),
+        error: auditError instanceof Error ? auditError.message : String(auditError)
       });
     }
 
     return {
-      kind: 'completed' as const,
+      kind: "completed" as const,
       jobId: fresh.id,
       observations: persisted,
-      privateContentDetected,
+      privateContentDetected
     };
   });
 }
@@ -518,7 +515,7 @@ function renderSummaryContent(summary: ParsedSummary): string {
   if (summary.completed) parts.push(`Completed: ${summary.completed}`);
   if (summary.next_steps) parts.push(`Next steps: ${summary.next_steps}`);
   if (summary.notes) parts.push(`Notes: ${summary.notes}`);
-  return parts.join('\n\n').trim();
+  return parts.join("\n\n").trim();
 }
 
 function renderObservationContent(observation: ParsedObservation): string {
@@ -527,9 +524,9 @@ function renderObservationContent(observation: ParsedObservation): string {
   if (observation.subtitle) parts.push(observation.subtitle);
   if (observation.narrative) parts.push(observation.narrative);
   if (observation.facts && observation.facts.length > 0) {
-    parts.push(observation.facts.map(f => `- ${f}`).join('\n'));
+    parts.push(observation.facts.map((f) => `- ${f}`).join("\n"));
   }
-  return parts.join('\n\n').trim();
+  return parts.join("\n\n").trim();
 }
 
 function retryDelayMs(attempts: number): number {

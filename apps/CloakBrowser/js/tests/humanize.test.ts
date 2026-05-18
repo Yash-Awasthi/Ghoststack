@@ -33,7 +33,7 @@ describe("resolveConfig", () => {
   it("preserves idle_between_actions override", () => {
     const cfg = resolveConfig("default", {
       idle_between_actions: true,
-      idle_between_duration: [50, 100],
+      idle_between_duration: [50, 100]
     });
     expect(cfg.idle_between_actions).toBe(true);
     expect(cfg.idle_between_duration[0]).toBe(50);
@@ -47,10 +47,17 @@ describe("resolveConfig", () => {
   it("returns all required fields including mistype", () => {
     const cfg = resolveConfig("default");
     const required = [
-      "mouse_min_steps", "mouse_max_steps", "typing_delay",
-      "initial_cursor_x", "initial_cursor_y", "idle_between_actions",
-      "idle_between_duration", "field_switch_delay",
-      "mistype_chance", "mistype_delay_notice", "mistype_delay_correct",
+      "mouse_min_steps",
+      "mouse_max_steps",
+      "typing_delay",
+      "initial_cursor_x",
+      "initial_cursor_y",
+      "idle_between_actions",
+      "idle_between_duration",
+      "field_switch_delay",
+      "mistype_chance",
+      "mistype_delay_notice",
+      "mistype_delay_correct"
     ];
     for (const f of required) {
       expect(cfg).toHaveProperty(f);
@@ -105,12 +112,14 @@ describe("humanMove", () => {
     const moves: Array<{ x: number; y: number }> = [];
     return {
       raw: {
-        move: vi.fn(async (x: number, y: number) => { moves.push({ x, y }); }),
-        down: vi.fn(async () => { }),
-        up: vi.fn(async () => { }),
-        wheel: vi.fn(async () => { }),
+        move: vi.fn(async (x: number, y: number) => {
+          moves.push({ x, y });
+        }),
+        down: vi.fn(async () => {}),
+        up: vi.fn(async () => {}),
+        wheel: vi.fn(async () => {})
       },
-      moves,
+      moves
     };
   }
 
@@ -150,7 +159,7 @@ describe("humanMove", () => {
     for (let trial = 0; trial < 10; trial++) {
       const { raw, moves } = makeFakeRaw();
       await humanMove(raw, 0, 0, 500, 0, cfg);
-      const dev = Math.max(...moves.map(m => Math.abs(m.y)));
+      const dev = Math.max(...moves.map((m) => Math.abs(m.y)));
       if (dev > maxDev) maxDev = dev;
     }
     expect(maxDev).toBeGreaterThan(0.5);
@@ -180,10 +189,14 @@ describe("humanClick", () => {
     const cfg = resolveConfig("default");
     const callOrder: string[] = [];
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { callOrder.push("down"); }),
-      up: vi.fn(async () => { callOrder.push("up"); }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {
+        callOrder.push("down");
+      }),
+      up: vi.fn(async () => {
+        callOrder.push("up");
+      }),
+      wheel: vi.fn(async () => {})
     };
     await humanClick(raw, false, cfg);
     expect(raw.down).toHaveBeenCalledTimes(1);
@@ -199,10 +212,10 @@ describe("humanIdle", () => {
   it("calls raw.move at least once during idle", async () => {
     const cfg = resolveConfig("default");
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
     await humanIdle(raw, 100, 100, cfg);
     expect(raw.move).toHaveBeenCalled();
@@ -257,14 +270,18 @@ describe("patchPage fill", () => {
 
     const pressedKeys: string[] = [];
     const page = buildMockPage({
-      keyboardPress: async (key: string) => { pressedKeys.push(key); },
+      keyboardPress: async (key: string) => {
+        pressedKeys.push(key);
+      }
     });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
     patchPage(page as any, cfg, cursor as any);
 
-    try { await (page as any).fill("input#name", "hello", { timeout: 2000 }); } catch (_) { }
+    try {
+      await (page as any).fill("input#name", "hello", { timeout: 2000 });
+    } catch (_) {}
 
     const expected = process.platform === "darwin" ? "Meta+a" : "Control+a";
     const wrong = process.platform === "darwin" ? "Control+a" : "Meta+a";
@@ -274,7 +291,6 @@ describe("patchPage fill", () => {
     }
   }, 5000);
 });
-
 
 // =========================================================================
 // patchPage behavioral: check/uncheck with idle_between_actions
@@ -286,18 +302,22 @@ describe("patchPage check/uncheck idle", () => {
     let downCalled = false;
     const page = buildMockPage({
       isChecked: async () => false,
-      evaluate: async () => ({ hit: true }),
+      evaluate: async () => ({ hit: true })
     });
-    page.mouse.down = vi.fn(async () => { downCalled = true; });
+    page.mouse.down = vi.fn(async () => {
+      downCalled = true;
+    });
 
     const cfg = resolveConfig("default", {
       idle_between_actions: true,
-      idle_between_duration: [0.01, 0.02],
+      idle_between_duration: [0.01, 0.02]
     });
     const cursor = { x: 100, y: 100, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    try { await (page as any).check("input#cb", { timeout: 2000 }); } catch (_) { }
+    try {
+      await (page as any).check("input#cb", { timeout: 2000 });
+    } catch (_) {}
 
     // humanCheckFn → humanIdle → humanClickFn → humanClick → raw.down
     expect(downCalled).toBe(true);
@@ -309,18 +329,22 @@ describe("patchPage check/uncheck idle", () => {
     let downCalled = false;
     const page = buildMockPage({
       isChecked: async () => true,
-      evaluate: async () => ({ hit: true }),
+      evaluate: async () => ({ hit: true })
     });
-    page.mouse.down = vi.fn(async () => { downCalled = true; });
+    page.mouse.down = vi.fn(async () => {
+      downCalled = true;
+    });
 
     const cfg = resolveConfig("default", {
       idle_between_actions: true,
-      idle_between_duration: [0.01, 0.02],
+      idle_between_duration: [0.01, 0.02]
     });
     const cursor = { x: 100, y: 100, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    try { await (page as any).uncheck("input#cb", { timeout: 2000 }); } catch (e: any) {
+    try {
+      await (page as any).uncheck("input#cb", { timeout: 2000 });
+    } catch (e: any) {
       console.error("UNCHECK ERROR:", e?.message?.slice(0, 200));
     }
 
@@ -330,7 +354,7 @@ describe("patchPage check/uncheck idle", () => {
   it("config with idle=true is accepted by resolveConfig", () => {
     const cfg = resolveConfig("default", {
       idle_between_actions: true,
-      idle_between_duration: [5, 10],
+      idle_between_duration: [5, 10]
     });
     expect(cfg.idle_between_actions).toBe(true);
     expect(cfg.idle_between_duration).toEqual([5, 10]);
@@ -347,18 +371,22 @@ describe("patchPage press focus", () => {
     let downCount = 0;
     const page = buildMockPage({
       evaluate: async (expr: string) => {
-        if (typeof expr === 'string' && expr.includes('elementFromPoint')) return { hit: true };
+        if (typeof expr === "string" && expr.includes("elementFromPoint")) return { hit: true };
         return false;
-      },
+      }
     });
     // Intercept mouse.down before patching so raw captures it
-    page.mouse.down = vi.fn(async () => { downCount++; });
+    page.mouse.down = vi.fn(async () => {
+      downCount++;
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    try { await (page as any).press("input#field", "Enter", { timeout: 2000 }); } catch (_) { }
+    try {
+      await (page as any).press("input#field", "Enter", { timeout: 2000 });
+    } catch (_) {}
 
     expect(downCount).toBeGreaterThan(0);
   });
@@ -368,15 +396,19 @@ describe("patchPage press focus", () => {
 
     let downCount = 0;
     const page = buildMockPage({
-      evaluate: async () => true,
+      evaluate: async () => true
     });
-    page.mouse.down = vi.fn(async () => { downCount++; });
+    page.mouse.down = vi.fn(async () => {
+      downCount++;
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    try { await (page as any).press("input#field", "Enter", { timeout: 2000 }); } catch (_) { }
+    try {
+      await (page as any).press("input#field", "Enter", { timeout: 2000 });
+    } catch (_) {}
 
     expect(downCount).toBe(0);
   });
@@ -392,7 +424,7 @@ describe("patchPage frame patching", () => {
     const childFrame = buildMockFrame();
     const mainFrame = {
       ...buildMockFrame(),
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
 
     const page = buildMockPage({ mainFrameReturn: mainFrame });
@@ -409,7 +441,7 @@ describe("patchPage frame patching", () => {
     const childFrame = buildMockFrame();
     const mainFrame = {
       ...buildMockFrame(),
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
     const page = buildMockPage({ mainFrameReturn: mainFrame });
     const originalPageClick = page.click;
@@ -426,7 +458,7 @@ describe("patchPage frame patching", () => {
   it.each([
     ["type", async (frame: any) => frame.type("input.email", "@")],
     ["fill", async (frame: any) => frame.fill("input.email", "@")],
-    ["pressSequentially", async (frame: any) => frame.pressSequentially("input.email", "@")],
+    ["pressSequentially", async (frame: any) => frame.pressSequentially("input.email", "@")]
   ])("passes the page CDP session to frame.%s", async (_name, runFrameAction) => {
     const { patchPage } = await import("../src/human/index.js");
 
@@ -434,13 +466,13 @@ describe("patchPage frame patching", () => {
     const childFrame = buildMockFrame();
     const mainFrame = {
       ...buildMockFrame(),
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
     const page = buildMockPage({ mainFrameReturn: mainFrame });
     page.context = vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => ({ send: cdpSend })),
+      newCDPSession: vi.fn(async () => ({ send: cdpSend }))
     }));
 
     const cfg = resolveConfig("default", {
@@ -454,7 +486,7 @@ describe("patchPage frame patching", () => {
       mistype_chance: 0,
       mouse_min_steps: 1,
       mouse_max_steps: 1,
-      idle_between_actions: false,
+      idle_between_actions: false
     });
     const cursor = { x: 0, y: 0, initialized: true };
     patchPage(page as any, cfg, cursor as any);
@@ -532,12 +564,12 @@ describe("patchBrowser CDP-connected workflow", () => {
       pages: vi.fn(() => [page]),
       on: vi.fn(),
       newPage: vi.fn(async () => buildMockPage()),
-      addInitScript: vi.fn(async () => { }),
+      addInitScript: vi.fn(async () => {})
     };
     const browser: any = {
       contexts: vi.fn(() => [context]),
       newContext: vi.fn(async () => context),
-      newPage: vi.fn(async () => page),
+      newPage: vi.fn(async () => page)
     };
 
     const cfg = resolveConfig("default");
@@ -555,24 +587,28 @@ describe("patchBrowser CDP-connected workflow", () => {
 
     let downCalled = false;
     const page = buildMockPage();
-    page.mouse.down = vi.fn(async () => { downCalled = true; });
+    page.mouse.down = vi.fn(async () => {
+      downCalled = true;
+    });
 
     const context: any = {
       pages: vi.fn(() => [page]),
       on: vi.fn(),
       newPage: vi.fn(async () => buildMockPage()),
-      addInitScript: vi.fn(async () => { }),
+      addInitScript: vi.fn(async () => {})
     };
     const browser: any = {
       contexts: vi.fn(() => [context]),
       newContext: vi.fn(async () => context),
-      newPage: vi.fn(async () => page),
+      newPage: vi.fn(async () => page)
     };
 
     patchBrowser(browser, resolveConfig("default"));
 
     // Click through the patched method — should go through humanize path
-    try { await (page as any).click("button", { timeout: 2000 }); } catch (_) { }
+    try {
+      await (page as any).click("button", { timeout: 2000 });
+    } catch (_) {}
 
     expect(downCalled).toBe(true);
   }, 30000);
@@ -585,12 +621,12 @@ describe("patchBrowser CDP-connected workflow", () => {
       pages: vi.fn(() => [newPage]),
       on: vi.fn(),
       newPage: vi.fn(async () => buildMockPage()),
-      addInitScript: vi.fn(async () => { }),
+      addInitScript: vi.fn(async () => {})
     };
     const browser: any = {
       contexts: vi.fn(() => []),
       newContext: vi.fn(async () => newContext),
-      newPage: vi.fn(async () => newPage),
+      newPage: vi.fn(async () => newPage)
     };
 
     patchBrowser(browser, resolveConfig("default"));
@@ -609,17 +645,17 @@ describe("patchBrowser CDP-connected workflow", () => {
 function buildMockPage(overrides: Record<string, any> = {}): any {
   const mainFrameObj = overrides.mainFrameReturn ?? {
     childFrames: vi.fn(() => []),
-    click: vi.fn(async () => { }),
-    dblclick: vi.fn(async () => { }),
-    hover: vi.fn(async () => { }),
-    type: vi.fn(async () => { }),
-    fill: vi.fn(async () => { }),
-    check: vi.fn(async () => { }),
-    uncheck: vi.fn(async () => { }),
-    selectOption: vi.fn(async () => { }),
-    press: vi.fn(async () => { }),
-    clear: vi.fn(async () => { }),
-    dragAndDrop: vi.fn(async () => { }),
+    click: vi.fn(async () => {}),
+    dblclick: vi.fn(async () => {}),
+    hover: vi.fn(async () => {}),
+    type: vi.fn(async () => {}),
+    fill: vi.fn(async () => {}),
+    check: vi.fn(async () => {}),
+    uncheck: vi.fn(async () => {}),
+    selectOption: vi.fn(async () => {}),
+    press: vi.fn(async () => {}),
+    clear: vi.fn(async () => {}),
+    dragAndDrop: vi.fn(async () => {}),
     locator: vi.fn(() => {
       const frameLoc: any = {
         boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 })),
@@ -627,23 +663,23 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
         isVisible: vi.fn(async () => true),
         isEnabled: vi.fn(async () => true),
         isEditable: vi.fn(async () => true),
-        evaluate: vi.fn(async () => ({ hit: true })),
+        evaluate: vi.fn(async () => ({ hit: true }))
       };
       frameLoc.first = vi.fn(() => frameLoc);
       return frameLoc;
-    }),
+    })
   };
 
   const makeLocator = () => {
     const loc: any = {
       boundingBox: vi.fn(async () => ({ x: 100, y: 300, width: 200, height: 30 })),
-      scrollIntoViewIfNeeded: vi.fn(async () => { }),
+      scrollIntoViewIfNeeded: vi.fn(async () => {}),
       isChecked: overrides.isChecked ?? vi.fn(async () => false),
       waitFor: vi.fn(async () => {}),
       isVisible: vi.fn(async () => true),
       isEnabled: vi.fn(async () => true),
       isEditable: vi.fn(async () => true),
-      evaluate: vi.fn(async () => ({ hit: true })),
+      evaluate: vi.fn(async () => ({ hit: true }))
     };
     loc.first = vi.fn(() => loc);
     return loc;
@@ -651,33 +687,31 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
 
   const page: any = {
     evaluate: overrides.evaluate ?? vi.fn(async () => ({ hit: true })),
-    addInitScript: vi.fn(async () => { }),
+    addInitScript: vi.fn(async () => {}),
     mouse: {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      click: vi.fn(async () => { }),
-      dblclick: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      click: vi.fn(async () => {}),
+      dblclick: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     },
     keyboard: {
-      press: overrides.keyboardPress
-        ? vi.fn(overrides.keyboardPress)
-        : vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      insertText: vi.fn(async () => { }),
+      press: overrides.keyboardPress ? vi.fn(overrides.keyboardPress) : vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     },
-    click: vi.fn(async () => { }),
-    dblclick: vi.fn(async () => { }),
-    hover: vi.fn(async () => { }),
-    type: vi.fn(async () => { }),
-    fill: vi.fn(async () => { }),
-    check: vi.fn(async () => { }),
-    uncheck: vi.fn(async () => { }),
-    selectOption: vi.fn(async () => { }),
-    press: vi.fn(async () => { }),
+    click: vi.fn(async () => {}),
+    dblclick: vi.fn(async () => {}),
+    hover: vi.fn(async () => {}),
+    type: vi.fn(async () => {}),
+    fill: vi.fn(async () => {}),
+    check: vi.fn(async () => {}),
+    uncheck: vi.fn(async () => {}),
+    selectOption: vi.fn(async () => {}),
+    press: vi.fn(async () => {}),
     goto: vi.fn(async () => ({})),
     isChecked: overrides.isChecked ?? vi.fn(async () => false),
     locator: vi.fn(() => makeLocator()),
@@ -686,11 +720,13 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
     frames: vi.fn(() => []),
     context: vi.fn(() => ({
       pages: vi.fn(() => []),
-      addInitScript: vi.fn(async () => { }),
-      newCDPSession: vi.fn(async () => { throw new Error('no cdp'); }),
+      addInitScript: vi.fn(async () => {}),
+      newCDPSession: vi.fn(async () => {
+        throw new Error("no cdp");
+      })
     })),
     url: vi.fn(() => "about:blank"),
-    waitForTimeout: vi.fn(async () => { }),
+    waitForTimeout: vi.fn(async () => {})
   };
   return page;
 }
@@ -703,10 +739,14 @@ describe("humanType non-ASCII", () => {
     const downKeys: string[] = [];
     const insertedChars: string[] = [];
     const raw = {
-      down: vi.fn(async (k: string) => { downKeys.push(k); }),
-      up: vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      insertText: vi.fn(async (t: string) => { insertedChars.push(t); }),
+      down: vi.fn(async (k: string) => {
+        downKeys.push(k);
+      }),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async (t: string) => {
+        insertedChars.push(t);
+      })
     };
     return { raw, downKeys, insertedChars };
   }
@@ -769,26 +809,24 @@ describe("humanType non-ASCII", () => {
   });
 });
 
-
-
 // =========================================================================
 // ElementHandle patching (Playwright)
 // =========================================================================
 
 function buildMockElementHandle(overrides: Record<string, any> = {}): any {
   const el: any = {
-    click: vi.fn(async () => { }),
-    dblclick: vi.fn(async () => { }),
-    hover: vi.fn(async () => { }),
-    type: vi.fn(async () => { }),
-    fill: vi.fn(async () => { }),
-    press: vi.fn(async () => { }),
-    selectOption: vi.fn(async () => { }),
-    check: vi.fn(async () => { }),
-    uncheck: vi.fn(async () => { }),
-    setChecked: vi.fn(async () => { }),
-    tap: vi.fn(async () => { }),
-    focus: vi.fn(async () => { }),
+    click: vi.fn(async () => {}),
+    dblclick: vi.fn(async () => {}),
+    hover: vi.fn(async () => {}),
+    type: vi.fn(async () => {}),
+    fill: vi.fn(async () => {}),
+    press: vi.fn(async () => {}),
+    selectOption: vi.fn(async () => {}),
+    check: vi.fn(async () => {}),
+    uncheck: vi.fn(async () => {}),
+    setChecked: vi.fn(async () => {}),
+    tap: vi.fn(async () => {}),
+    focus: vi.fn(async () => {}),
     boundingBox: overrides.boundingBox ?? vi.fn(async () => ({ x: 100, y: 100, width: 200, height: 30 })),
     evaluate: overrides.evaluate ?? vi.fn(async () => ({ hit: true })),
     isChecked: overrides.isChecked ?? vi.fn(async () => false),
@@ -796,7 +834,7 @@ function buildMockElementHandle(overrides: Record<string, any> = {}): any {
     $: vi.fn(async () => null),
     $$: vi.fn(async () => []),
     waitForSelector: vi.fn(async () => null),
-    _humanPatched: false,
+    _humanPatched: false
   };
   return el;
 }
@@ -807,21 +845,21 @@ describe("patchSingleElementHandle", () => {
     const cfg = resolveConfig("default");
     const cursor = { x: 100, y: 100, initialized: true };
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
     const rawKb = {
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      insertText: vi.fn(async () => { }),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
     const originals = {
-      keyboardPress: vi.fn(async () => { }),
-      keyboardDown: vi.fn(async () => { }),
-      keyboardUp: vi.fn(async () => { }),
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
     };
 
     const el = buildMockElementHandle();
@@ -841,26 +879,32 @@ describe("patchSingleElementHandle", () => {
     let downCalled = false;
     let upCalled = false;
     const raw = {
-      move: vi.fn(async () => { moveCount++; }),
-      down: vi.fn(async () => { downCalled = true; }),
-      up: vi.fn(async () => { upCalled = true; }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {
+        moveCount++;
+      }),
+      down: vi.fn(async () => {
+        downCalled = true;
+      }),
+      up: vi.fn(async () => {
+        upCalled = true;
+      }),
+      wheel: vi.fn(async () => {})
     };
     const rawKb = {
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      insertText: vi.fn(async () => { }),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
     const originals = {
-      keyboardPress: vi.fn(async () => { }),
-      keyboardDown: vi.fn(async () => { }),
-      keyboardUp: vi.fn(async () => { }),
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
     };
 
     const el = buildMockElementHandle();
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
 
@@ -878,22 +922,28 @@ describe("patchSingleElementHandle", () => {
 
     let downCalled = false;
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { downCalled = true; }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {
+        downCalled = true;
+      }),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
     const rawKb = {
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      insertText: vi.fn(async () => { }),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const el = buildMockElementHandle();
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
 
@@ -909,22 +959,28 @@ describe("patchSingleElementHandle", () => {
     const cursor = { x: 50, y: 50, initialized: true };
 
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
     const rawKb = {
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      insertText: vi.fn(async () => { }),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
-    const el = buildMockElementHandle({ evaluate: vi.fn(async (js: string) => js.includes('elementFromPoint') ? { hit: true } : true) });
+    const el = buildMockElementHandle({
+      evaluate: vi.fn(async (js: string) => (js.includes("elementFromPoint") ? { hit: true } : true))
+    });
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
 
@@ -942,26 +998,30 @@ describe("patchSingleElementHandle", () => {
 
     const pressedKeys: string[] = [];
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
     const rawKb = {
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      type: vi.fn(async () => { }),
-      insertText: vi.fn(async () => { }),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
     const originals = {
-      keyboardPress: vi.fn(async (key: string) => { pressedKeys.push(key); }),
-      keyboardDown: vi.fn(async () => { }),
-      keyboardUp: vi.fn(async () => { }),
+      keyboardPress: vi.fn(async (key: string) => {
+        pressedKeys.push(key);
+      }),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
     };
 
-    const el = buildMockElementHandle({ evaluate: vi.fn(async (js: string) => js.includes('elementFromPoint') ? { hit: true } : true) });
+    const el = buildMockElementHandle({
+      evaluate: vi.fn(async (js: string) => (js.includes("elementFromPoint") ? { hit: true } : true))
+    });
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
 
@@ -976,9 +1036,23 @@ describe("patchSingleElementHandle", () => {
     const { patchSingleElementHandle } = await import("../src/human/elementhandle.js");
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const el = buildMockElementHandle();
     const page = buildMockPage();
@@ -995,9 +1069,23 @@ describe("patchSingleElementHandle", () => {
     const { patchSingleElementHandle } = await import("../src/human/elementhandle.js");
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const child = buildMockElementHandle();
     const el = buildMockElementHandle();
@@ -1017,9 +1105,23 @@ describe("patchPageElementHandles", () => {
     const { patchPageElementHandles } = await import("../src/human/elementhandle.js");
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const el = buildMockElementHandle();
     const page = buildMockPage();
@@ -1037,9 +1139,23 @@ describe("patchPageElementHandles", () => {
     const { patchPageElementHandles } = await import("../src/human/elementhandle.js");
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const el1 = buildMockElementHandle();
     const el2 = buildMockElementHandle();
@@ -1059,9 +1175,23 @@ describe("patchPageElementHandles", () => {
     const { patchPageElementHandles } = await import("../src/human/elementhandle.js");
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const el = buildMockElementHandle();
     const page = buildMockPage();
@@ -1079,9 +1209,23 @@ describe("patchPageElementHandles", () => {
     const { patchPageElementHandles } = await import("../src/human/elementhandle.js");
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const page = buildMockPage();
     (page as any).$ = vi.fn(async () => null);
@@ -1114,32 +1258,31 @@ describe("patchPage integrates ElementHandle patching", () => {
   });
 });
 
-
 function buildMockFrame(): any {
   const locator: any = {
     boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 })),
     scrollIntoViewIfNeeded: vi.fn(async () => {}),
     evaluate: vi.fn(async () => ({ hit: true })),
-    isChecked: vi.fn(async () => false),
+    isChecked: vi.fn(async () => false)
   };
   locator.first = vi.fn(() => locator);
 
   return {
-    click: vi.fn(async () => { }),
-    dblclick: vi.fn(async () => { }),
-    hover: vi.fn(async () => { }),
-    type: vi.fn(async () => { }),
-    fill: vi.fn(async () => { }),
-    check: vi.fn(async () => { }),
-    uncheck: vi.fn(async () => { }),
-    selectOption: vi.fn(async () => { }),
-    press: vi.fn(async () => { }),
-    pressSequentially: vi.fn(async () => { }),
-    tap: vi.fn(async () => { }),
-    clear: vi.fn(async () => { }),
-    dragAndDrop: vi.fn(async () => { }),
+    click: vi.fn(async () => {}),
+    dblclick: vi.fn(async () => {}),
+    hover: vi.fn(async () => {}),
+    type: vi.fn(async () => {}),
+    fill: vi.fn(async () => {}),
+    check: vi.fn(async () => {}),
+    uncheck: vi.fn(async () => {}),
+    selectOption: vi.fn(async () => {}),
+    press: vi.fn(async () => {}),
+    pressSequentially: vi.fn(async () => {}),
+    tap: vi.fn(async () => {}),
+    clear: vi.fn(async () => {}),
+    dragAndDrop: vi.fn(async () => {}),
     locator: vi.fn(() => locator),
-    childFrames: vi.fn(() => []),
+    childFrames: vi.fn(() => [])
   };
 }
 
@@ -1173,7 +1316,6 @@ describe("mergeConfig", () => {
   });
 });
 
-
 // =========================================================================
 // Per-call timeout forwarding (issue #137)
 // =========================================================================
@@ -1185,13 +1327,13 @@ describe("page.click(selector, { timeout }) forwards timeout to scroll", () => {
     const boundingBox = vi.fn(async () => ({ x: 100, y: 200, width: 50, height: 30 }));
     const page: any = {
       viewportSize: () => ({ width: 1280, height: 720 }),
-      locator: vi.fn(() => ({ first: () => ({ boundingBox }) })),
+      locator: vi.fn(() => ({ first: () => ({ boundingBox }) }))
     };
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
 
     await scrollToElement(page, raw, "#x", 0, 0, cfg, 5000);
@@ -1205,13 +1347,13 @@ describe("page.click(selector, { timeout }) forwards timeout to scroll", () => {
     const boundingBox = vi.fn(async () => ({ x: 100, y: 200, width: 50, height: 30 }));
     const page: any = {
       viewportSize: () => ({ width: 1280, height: 720 }),
-      locator: vi.fn(() => ({ first: () => ({ boundingBox }) })),
+      locator: vi.fn(() => ({ first: () => ({ boundingBox }) }))
     };
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
 
     await scrollToElement(page, raw, "#x", 0, 0, cfg);
@@ -1224,19 +1366,19 @@ describe("page.click(selector, { timeout }) forwards timeout to scroll", () => {
     const cfg = resolveConfig("default", { idle_between_actions: false });
 
     let captured = -1;
-    const spy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(
-      async (_page, _raw, _sel, cx, cy, _cfg, timeout?: number) => {
+    const spy = vi
+      .spyOn(scrollMod, "scrollToElement")
+      .mockImplementation(async (_page, _raw, _sel, cx, cy, _cfg, timeout?: number) => {
         captured = timeout ?? -1;
         return { box: { x: 100, y: 100, width: 50, height: 30 }, cursorX: cx, cursorY: cy, didScroll: false };
-      },
-    );
+      });
 
     const page = buildMockPage();
     const cursor = { x: 100, y: 100, initialized: true };
     patchPage(page as any, cfg, cursor as any);
     try {
       await (page as any).click("#slow", { timeout: 2000 });
-    } catch (_) { }
+    } catch (_) {}
 
     if (captured > 0) {
       expect(captured).toBeGreaterThan(1500);
@@ -1245,7 +1387,6 @@ describe("page.click(selector, { timeout }) forwards timeout to scroll", () => {
     spy.mockRestore();
   });
 });
-
 
 // =========================================================================
 // Per-call human config override
@@ -1259,20 +1400,20 @@ describe("page.type / page.fill accept per-call human config override", () => {
     // Make field_switch_delay tiny so the test runs fast
     const cfg = resolveConfig("default", {
       idle_between_actions: false,
-      field_switch_delay: [0, 1],
+      field_switch_delay: [0, 1]
     });
     expect(cfg.typing_delay).toBe(70); // baseline
 
     let captured: any = null;
-    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(
-      async (_page, _raw, _text, callCfg) => { captured = callCfg; },
-    );
-    const scrollSpy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(
-      async (_page, _raw, _sel, cx, cy) => ({
-        box: { x: 100, y: 100, width: 50, height: 30 },
-        cursorX: cx, cursorY: cy, didScroll: false,
-      }),
-    );
+    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(async (_page, _raw, _text, callCfg) => {
+      captured = callCfg;
+    });
+    const scrollSpy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(async (_page, _raw, _sel, cx, cy) => ({
+      box: { x: 100, y: 100, width: 50, height: 30 },
+      cursorX: cx,
+      cursorY: cy,
+      didScroll: false
+    }));
 
     const page = buildMockPage();
     const cursor = { x: 100, y: 100, initialized: true };
@@ -1281,9 +1422,9 @@ describe("page.type / page.fill accept per-call human config override", () => {
     try {
       await (page as any).type("#email", "hi", {
         timeout: 2000,
-        human_config: { typing_delay: 30, mistype_chance: 0 },
+        human_config: { typing_delay: 30, mistype_chance: 0 }
       });
-    } catch (_) { }
+    } catch (_) {}
 
     if (captured) {
       expect(captured.typing_delay).toBe(30);
@@ -1302,19 +1443,19 @@ describe("page.type / page.fill accept per-call human config override", () => {
 
     const cfg = resolveConfig("default", {
       idle_between_actions: false,
-      field_switch_delay: [0, 1],
+      field_switch_delay: [0, 1]
     });
 
     let captured: any = null;
-    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(
-      async (_page, _raw, _text, callCfg) => { captured = callCfg; },
-    );
-    const scrollSpy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(
-      async (_page, _raw, _sel, cx, cy) => ({
-        box: { x: 100, y: 100, width: 50, height: 30 },
-        cursorX: cx, cursorY: cy, didScroll: false,
-      }),
-    );
+    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(async (_page, _raw, _text, callCfg) => {
+      captured = callCfg;
+    });
+    const scrollSpy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(async (_page, _raw, _sel, cx, cy) => ({
+      box: { x: 100, y: 100, width: 50, height: 30 },
+      cursorX: cx,
+      cursorY: cy,
+      didScroll: false
+    }));
 
     const page = buildMockPage();
     const cursor = { x: 100, y: 100, initialized: true };
@@ -1323,9 +1464,9 @@ describe("page.type / page.fill accept per-call human config override", () => {
     try {
       await (page as any).fill("#password", "secret", {
         timeout: 2000,
-        typing_delay: 150,
+        typing_delay: 150
       });
-    } catch (_) { }
+    } catch (_) {}
 
     if (captured) {
       expect(captured.typing_delay).toBe(150);
@@ -1342,17 +1483,33 @@ describe("page.type / page.fill accept per-call human config override", () => {
     const cursor = { x: 50, y: 50, initialized: true };
 
     let captured: any = null;
-    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(
-      async (_page, _raw, _text, callCfg) => { captured = callCfg; },
-    );
+    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(async (_page, _raw, _text, callCfg) => {
+      captured = callCfg;
+    });
 
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
-    const el = buildMockElementHandle({ evaluate: vi.fn(async (js: string) => js.includes('elementFromPoint') ? { hit: true } : true) });
+    const el = buildMockElementHandle({
+      evaluate: vi.fn(async (js: string) => (js.includes("elementFromPoint") ? { hit: true } : true))
+    });
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
 
@@ -1362,7 +1519,6 @@ describe("page.type / page.fill accept per-call human config override", () => {
     typeSpy.mockRestore();
   }, 30000);
 });
-
 
 // =========================================================================
 // scrollIntoViewIfNeeded humanization
@@ -1374,10 +1530,10 @@ describe("humanScrollIntoView", () => {
 
     const page: any = { viewportSize: () => ({ width: 1280, height: 720 }) };
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
     // Box centered in viewport — squarely in scroll_target_zone
     const inViewBox = { x: 200, y: 300, width: 50, height: 30 };
@@ -1394,24 +1550,24 @@ describe("humanScrollIntoView", () => {
       scroll_pre_move_delay: [0, 1],
       scroll_pause_fast: [0, 1],
       scroll_pause_slow: [0, 1],
-      scroll_settle_delay: [0, 1],
+      scroll_settle_delay: [0, 1]
     });
 
     const page: any = { viewportSize: () => ({ width: 1280, height: 720 }) };
     const raw = {
-      move: vi.fn(async () => { }),
-      down: vi.fn(async () => { }),
-      up: vi.fn(async () => { }),
-      wheel: vi.fn(async () => { }),
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     };
 
     const boxes = [
       { x: 200, y: 2000, width: 50, height: 30 }, // far below
       { x: 200, y: 1500, width: 50, height: 30 },
       { x: 200, y: 1000, width: 50, height: 30 },
-      { x: 200, y: 400, width: 50, height: 30 },  // in view
+      { x: 200, y: 400, width: 50, height: 30 }, // in view
       { x: 200, y: 400, width: 50, height: 30 },
-      { x: 200, y: 400, width: 50, height: 30 },
+      { x: 200, y: 400, width: 50, height: 30 }
     ];
     let i = 0;
     const getBox = async () => boxes[Math.min(i++, boxes.length - 1)];
@@ -1427,23 +1583,35 @@ describe("el.scrollIntoViewIfNeeded humanization", () => {
     const { patchSingleElementHandle } = await import("../src/human/elementhandle.js");
 
     let called = 0;
-    const spy = vi.spyOn(scrollMod, "humanScrollIntoView").mockImplementation(
-      async (_p, _raw, _gb, cx, cy) => {
-        called++;
-        return { box: { x: 200, y: 200, width: 50, height: 30 }, cursorX: cx, cursorY: cy };
-      },
-    );
+    const spy = vi.spyOn(scrollMod, "humanScrollIntoView").mockImplementation(async (_p, _raw, _gb, cx, cy) => {
+      called++;
+      return { box: { x: 200, y: 200, width: 50, height: 30 }, cursorX: cx, cursorY: cy };
+    });
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
     const cursor = { x: 50, y: 50, initialized: true };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
     const el = buildMockElementHandle();
-    el.scrollIntoViewIfNeeded = vi.fn(async () => { });
+    el.scrollIntoViewIfNeeded = vi.fn(async () => {});
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
     await el.scrollIntoViewIfNeeded();
@@ -1456,21 +1624,35 @@ describe("el.scrollIntoViewIfNeeded humanization", () => {
     const scrollMod = await import("../src/human/scroll.js");
     const { patchSingleElementHandle } = await import("../src/human/elementhandle.js");
 
-    const spy = vi.spyOn(scrollMod, "humanScrollIntoView").mockImplementation(
-      async () => { throw new Error("detached"); },
-    );
+    const spy = vi.spyOn(scrollMod, "humanScrollIntoView").mockImplementation(async () => {
+      throw new Error("detached");
+    });
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
     const cursor = { x: 50, y: 50, initialized: true };
-    const raw = { move: vi.fn(async () => { }), down: vi.fn(async () => { }), up: vi.fn(async () => { }), wheel: vi.fn(async () => { }) };
-    const rawKb = { down: vi.fn(async () => { }), up: vi.fn(async () => { }), type: vi.fn(async () => { }), insertText: vi.fn(async () => { }) };
-    const originals = { keyboardPress: vi.fn(async () => { }), keyboardDown: vi.fn(async () => { }), keyboardUp: vi.fn(async () => { }) };
+    const raw = {
+      move: vi.fn(async () => {}),
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
+    };
+    const rawKb = {
+      down: vi.fn(async () => {}),
+      up: vi.fn(async () => {}),
+      type: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
+    };
+    const originals = {
+      keyboardPress: vi.fn(async () => {}),
+      keyboardDown: vi.fn(async () => {}),
+      keyboardUp: vi.fn(async () => {})
+    };
 
-    const nativeFallback = vi.fn(async () => { });
+    const nativeFallback = vi.fn(async () => {});
     const el = buildMockElementHandle();
     el.scrollIntoViewIfNeeded = nativeFallback;
     const page = buildMockPage();
-    (page as any)._ensureCursorInit = vi.fn(async () => { });
+    (page as any)._ensureCursorInit = vi.fn(async () => {});
 
     patchSingleElementHandle(el, page as any, cfg, cursor as any, raw, rawKb, originals, null);
     await el.scrollIntoViewIfNeeded();

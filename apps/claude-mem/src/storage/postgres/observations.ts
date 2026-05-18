@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsonObject, JsonValue, PostgresQueryable } from './utils.js';
+import type { JsonObject, JsonValue, PostgresQueryable } from "./utils.js";
 import {
   assertProjectOwnership,
   assertSessionOwnership,
@@ -10,9 +10,9 @@ import {
   queryOne,
   toEpoch,
   toJsonObject
-} from './utils.js';
+} from "./utils.js";
 
-export type ObservationSourceType = 'agent_event' | 'session_summary' | 'observation_reindex' | 'manual';
+export type ObservationSourceType = "agent_event" | "session_summary" | "observation_reindex" | "manual";
 
 export interface PostgresObservation {
   id: string;
@@ -106,7 +106,7 @@ export class PostgresObservationRepository {
         input.projectId,
         input.teamId,
         input.serverSessionId ?? null,
-        input.kind ?? 'observation',
+        input.kind ?? "observation",
         input.content,
         input.generationKey ?? null,
         JSON.stringify(input.metadata ?? {}),
@@ -117,14 +117,10 @@ export class PostgresObservationRepository {
     return mapObservationRow(row!);
   }
 
-  async getByIdForScope(input: {
-    id: string;
-    projectId: string;
-    teamId: string;
-  }): Promise<PostgresObservation | null> {
+  async getByIdForScope(input: { id: string; projectId: string; teamId: string }): Promise<PostgresObservation | null> {
     const row = await queryOne<ObservationRow>(
       this.client,
-      'SELECT * FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT * FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.id, input.projectId, input.teamId]
     );
     return row ? mapObservationRow(row) : null;
@@ -187,25 +183,23 @@ export class PostgresObservationSourcesRepository {
   }): Promise<PostgresObservationSource> {
     const observation = await queryOne<{ id: string }>(
       this.client,
-      'SELECT id FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT id FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.observationId, input.projectId, input.teamId]
     );
     if (!observation) {
-      throw new Error('observation_id does not exist');
+      throw new Error("observation_id does not exist");
     }
 
-    const agentEventId = input.sourceType === 'agent_event'
-      ? input.agentEventId ?? input.sourceId
-      : null;
+    const agentEventId = input.sourceType === "agent_event" ? (input.agentEventId ?? input.sourceId) : null;
 
-    if (input.sourceType === 'agent_event') {
+    if (input.sourceType === "agent_event") {
       if (agentEventId !== input.sourceId) {
-        throw new Error('agent_event source_id must equal agent_event_id');
+        throw new Error("agent_event source_id must equal agent_event_id");
       }
       await assertAgentEventOwnership(this.client, input.sourceId, input.projectId, input.teamId);
-    } else if (input.sourceType === 'session_summary' && !input.generationJobId) {
+    } else if (input.sourceType === "session_summary" && !input.generationJobId) {
       await assertSessionOwnership(this.client, input.sourceId, input.projectId, input.teamId);
-    } else if (input.sourceType === 'observation_reindex' && !input.generationJobId) {
+    } else if (input.sourceType === "observation_reindex" && !input.generationJobId) {
       await assertObservationOwnership(this.client, input.sourceId, input.projectId, input.teamId);
     }
     if (input.generationJobId) {
@@ -284,11 +278,11 @@ async function assertJobOwnership(
 ): Promise<void> {
   const row = await queryOne<{ id: string }>(
     client,
-    'SELECT id FROM observation_generation_jobs WHERE id = $1 AND project_id = $2 AND team_id = $3',
+    "SELECT id FROM observation_generation_jobs WHERE id = $1 AND project_id = $2 AND team_id = $3",
     [generationJobId, projectId, teamId]
   );
   if (!row) {
-    throw new Error('generation_job_id must belong to project_id and team_id');
+    throw new Error("generation_job_id must belong to project_id and team_id");
   }
 }
 
@@ -303,8 +297,8 @@ async function assertGenerationJobMatchesSource(
     agentEventId: string | null;
   }
 ): Promise<void> {
-  if (input.sourceType === 'manual') {
-    throw new Error('manual observation sources cannot be linked to a generation_job_id');
+  if (input.sourceType === "manual") {
+    throw new Error("manual observation sources cannot be linked to a generation_job_id");
   }
 
   const row = await queryOne<{
@@ -322,13 +316,13 @@ async function assertGenerationJobMatchesSource(
     [input.generationJobId, input.projectId, input.teamId]
   );
   if (!row) {
-    throw new Error('generation_job_id must belong to project_id and team_id');
+    throw new Error("generation_job_id must belong to project_id and team_id");
   }
   if (row.source_type !== input.sourceType || row.source_id !== input.sourceId) {
-    throw new Error('generation_job_id source model must match observation source');
+    throw new Error("generation_job_id source model must match observation source");
   }
-  if (input.sourceType === 'agent_event' && row.agent_event_id !== input.agentEventId) {
-    throw new Error('generation_job_id agent_event_id must match observation source');
+  if (input.sourceType === "agent_event" && row.agent_event_id !== input.agentEventId) {
+    throw new Error("generation_job_id agent_event_id must match observation source");
   }
 }
 
@@ -340,11 +334,11 @@ async function assertAgentEventOwnership(
 ): Promise<void> {
   const row = await queryOne<{ id: string }>(
     client,
-    'SELECT id FROM agent_events WHERE id = $1 AND project_id = $2 AND team_id = $3',
+    "SELECT id FROM agent_events WHERE id = $1 AND project_id = $2 AND team_id = $3",
     [agentEventId, projectId, teamId]
   );
   if (!row) {
-    throw new Error('agent_event_id must belong to project_id and team_id');
+    throw new Error("agent_event_id must belong to project_id and team_id");
   }
 }
 
@@ -356,11 +350,11 @@ async function assertObservationOwnership(
 ): Promise<void> {
   const row = await queryOne<{ id: string }>(
     client,
-    'SELECT id FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3',
+    "SELECT id FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3",
     [observationId, projectId, teamId]
   );
   if (!row) {
-    throw new Error('observation_reindex source_id must belong to project_id and team_id');
+    throw new Error("observation_reindex source_id must belong to project_id and team_id");
   }
 }
 

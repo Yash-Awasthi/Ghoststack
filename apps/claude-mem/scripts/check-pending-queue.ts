@@ -4,7 +4,7 @@ const DEFAULT_WORKER_PORT = 37777;
 
 function resolveWorkerPort(): number {
   const raw = process.env.CLAUDE_MEM_WORKER_PORT;
-  if (raw === undefined || raw === '') return DEFAULT_WORKER_PORT;
+  if (raw === undefined || raw === "") return DEFAULT_WORKER_PORT;
   const parsed = parseInt(raw, 10);
   if (!Number.isInteger(parsed) || parsed < 1 || parsed > 65535) {
     console.warn(
@@ -36,14 +36,14 @@ async function fetchWithTimeout(
   url: string,
   init: RequestInit | undefined,
   timeoutMessage: string,
-  timeoutMs: number = WORKER_FETCH_TIMEOUT_MS,
+  timeoutMs: number = WORKER_FETCH_TIMEOUT_MS
 ): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetch(url, { ...init, signal: controller.signal });
   } catch (err) {
-    if ((err as { name?: string })?.name === 'AbortError') {
+    if ((err as { name?: string })?.name === "AbortError") {
       throw new Error(`${timeoutMessage} (timed out after ${timeoutMs}ms)`);
     }
     throw err;
@@ -54,11 +54,7 @@ async function fetchWithTimeout(
 
 async function checkWorkerHealth(): Promise<boolean> {
   try {
-    const res = await fetchWithTimeout(
-      `${WORKER_URL}/api/health`,
-      undefined,
-      'Health check did not respond',
-    );
+    const res = await fetchWithTimeout(`${WORKER_URL}/api/health`, undefined, "Health check did not respond");
     return res.ok;
   } catch {
     return false;
@@ -69,7 +65,7 @@ async function getProcessingStatus(): Promise<ProcessingStatusResponse> {
   const res = await fetchWithTimeout(
     `${WORKER_URL}/api/processing-status`,
     undefined,
-    'Failed to get processing status',
+    "Failed to get processing status"
   );
   if (!res.ok) {
     throw new Error(`Failed to get processing status: ${res.status}`);
@@ -81,11 +77,11 @@ async function triggerProcessing(): Promise<SetProcessingResponse> {
   const res = await fetchWithTimeout(
     `${WORKER_URL}/api/processing`,
     {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({})
     },
-    'Failed to trigger processing',
+    "Failed to trigger processing"
   );
   if (!res.ok) {
     throw new Error(`Failed to trigger processing: ${res.status}`);
@@ -95,15 +91,15 @@ async function triggerProcessing(): Promise<SetProcessingResponse> {
 
 async function prompt(question: string): Promise<string> {
   if (!process.stdin.isTTY) {
-    console.log(question + '(no TTY, use --process flag for non-interactive mode)');
-    return 'n';
+    console.log(question + "(no TTY, use --process flag for non-interactive mode)");
+    return "n";
   }
 
   return new Promise((resolve) => {
     process.stdout.write(question);
     process.stdin.setRawMode(false);
     process.stdin.resume();
-    process.stdin.once('data', (data) => {
+    process.stdin.once("data", (data) => {
       process.stdin.pause();
       resolve(data.toString().trim());
     });
@@ -113,7 +109,7 @@ async function prompt(question: string): Promise<string> {
 async function main() {
   const args = process.argv.slice(2);
 
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.includes("--help") || args.includes("-h")) {
     console.log(`
 Claude-Mem Pending Queue Manager
 
@@ -143,54 +139,54 @@ What is this for?
     process.exit(0);
   }
 
-  const autoProcess = args.includes('--process');
+  const autoProcess = args.includes("--process");
 
-  console.log('\n=== Claude-Mem Pending Queue Status ===\n');
+  console.log("\n=== Claude-Mem Pending Queue Status ===\n");
 
   const healthy = await checkWorkerHealth();
   if (!healthy) {
     console.log(`Worker is not running at ${WORKER_URL}. Start it with:`);
-    console.log('  cd ~/.claude/plugins/marketplaces/thedotmack && npm run worker:start\n');
+    console.log("  cd ~/.claude/plugins/marketplaces/thedotmack && npm run worker:start\n");
     process.exit(1);
   }
   console.log(`Worker status: Running at ${WORKER_URL}\n`);
 
   const status = await getProcessingStatus();
 
-  console.log('Queue Summary:');
-  console.log(`  Processing: ${status.isProcessing ? 'yes' : 'no'}`);
+  console.log("Queue Summary:");
+  console.log(`  Processing: ${status.isProcessing ? "yes" : "no"}`);
   console.log(`  Queue depth: ${status.queueDepth}\n`);
 
   const hasBacklog = status.queueDepth > 0;
 
   if (!hasBacklog) {
-    console.log('No backlog detected. Queue is empty.\n');
+    console.log("No backlog detected. Queue is empty.\n");
     process.exit(0);
   }
 
   if (autoProcess) {
-    console.log('Triggering processing...\n');
+    console.log("Triggering processing...\n");
   } else {
     const answer = await prompt(`Trigger processing for ${status.queueDepth} queued items? [y/N]: `);
-    if (answer.toLowerCase() !== 'y') {
-      console.log('\nSkipped. Run with --process to auto-process.\n');
+    if (answer.toLowerCase() !== "y") {
+      console.log("\nSkipped. Run with --process to auto-process.\n");
       process.exit(0);
     }
-    console.log('');
+    console.log("");
   }
 
   const result = await triggerProcessing();
 
-  console.log('Processing Result:');
+  console.log("Processing Result:");
   console.log(`  Status:           ${result.status}`);
-  console.log(`  Is processing:    ${result.isProcessing ? 'yes' : 'no'}`);
+  console.log(`  Is processing:    ${result.isProcessing ? "yes" : "no"}`);
   console.log(`  Queue depth:      ${result.queueDepth}`);
   console.log(`  Active sessions:  ${result.activeSessions}`);
 
-  console.log('\nProcessing handled by worker. Check status again in a few minutes.\n');
+  console.log("\nProcessing handled by worker. Check status again in a few minutes.\n");
 }
 
-main().catch(err => {
-  console.error('Error:', err.message);
+main().catch((err) => {
+  console.error("Error:", err.message);
   process.exit(1);
 });

@@ -1,4 +1,3 @@
-
 export interface CursorMcpConfig {
   mcpServers: {
     [name: string]: {
@@ -9,7 +8,7 @@ export interface CursorMcpConfig {
   };
 }
 
-export type CursorInstallTarget = 'project' | 'user' | 'enterprise';
+export type CursorInstallTarget = "project" | "user" | "enterprise";
 
 export interface CursorHooksJson {
   version: number;

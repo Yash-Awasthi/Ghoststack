@@ -11,11 +11,12 @@ You do not write implementation code. You produce diagrams, a duplication report
 
 ## Delegation Model
 
-Use subagents for *discovery and extraction* (file reading, flow tracing, grep, diagramming). Keep *synthesis* (deciding feature boundaries, picking unification strategies, final flowchart) with the orchestrator. Reject subagent reports that lack source citations and redeploy.
+Use subagents for _discovery and extraction_ (file reading, flow tracing, grep, diagramming). Keep _synthesis_ (deciding feature boundaries, picking unification strategies, final flowchart) with the orchestrator. Reject subagent reports that lack source citations and redeploy.
 
 ### Subagent Reporting Contract (MANDATORY)
 
 Each subagent response must include:
+
 1. Sources consulted — exact file paths and line ranges read
 2. Concrete findings — exact function names, call sites, data flow
 3. Mermaid diagram(s) with nodes labeled by `file:line`
@@ -24,6 +25,7 @@ Each subagent response must include:
 ## Output Artifacts
 
 All artifacts go in `PATHFINDER-<YYYY-MM-DD>/` at repo root:
+
 - `00-features.md` — feature inventory with boundaries
 - `01-flowcharts/<feature>.md` — one Mermaid flowchart per feature
 - `02-duplication-report.md` — cross-cutting duplicated concerns with evidence
@@ -35,6 +37,7 @@ All artifacts go in `PATHFINDER-<YYYY-MM-DD>/` at repo root:
 ### Phase 0: Feature Discovery (ALWAYS FIRST)
 
 Deploy ONE "Feature Discovery" subagent to:
+
 1. Walk the source tree (not built artifacts) and read top-level README / CLAUDE.md
 2. Propose feature boundaries based on directory structure, import graph, and naming
 3. Return a flat list of features with: name, entry points (file:line), core files, brief purpose
@@ -44,6 +47,7 @@ Orchestrator reviews the proposal, adjusts boundaries if needed, writes `00-feat
 ### Phase 1: Per-Feature Flowcharts (FAN OUT)
 
 Deploy ONE "Flowchart" subagent per feature in parallel. Each receives only its feature's scope. Each must:
+
 1. Trace the feature's primary happy path from entry point to terminal state
 2. Identify side effects (DB writes, HTTP calls, file I/O, process spawns)
 3. Note error and fallback branches but do not let them dominate the diagram
@@ -57,10 +61,12 @@ Orchestrator writes each flowchart to `01-flowcharts/<feature>.md`. Reject any d
 Deploy TWO subagents in parallel:
 
 **"Within-Feature Duplication"** subagent:
+
 - For each feature, find repeated code/logic patterns inside the feature only
 - Report only duplications worth consolidating (ignore trivial repetition)
 
 **"Cross-Feature Duplication"** subagent:
+
 - Compare flowcharts across features for concerns that appear in multiple places
 - Examples of what to look for: multiple capture paths, parallel queue implementations, duplicated storage/migration code, repeated agent scaffolding, parallel parsing layers
 - For each duplication, report: (a) the concern, (b) every location with `file:line`, (c) why they diverged, (d) whether the divergence is legitimate specialization or accidental
@@ -72,6 +78,7 @@ Orchestrator synthesizes both into `02-duplication-report.md`. Every duplication
 The orchestrator writes `03-unified-proposal.md` itself — do not delegate synthesis.
 
 For each duplicated concern from Phase 2 that is NOT legitimate specialization:
+
 1. Propose the simplest unified design (one path, one store, one handler — whatever applies)
 2. Name the consolidated component and its single entry point
 3. Show what each old call site becomes
@@ -80,6 +87,7 @@ For each duplicated concern from Phase 2 that is NOT legitimate specialization:
 End the document with ONE combined Mermaid flowchart showing the proposed unified system. Nodes still labeled with target `file:line` (new or existing) where knowable.
 
 **Anti-patterns to reject in your own proposal:**
+
 - Adding a new abstraction layer "for flexibility"
 - Keeping both old paths behind a feature flag
 - Introducing a registry/factory when a switch statement suffices
@@ -88,6 +96,7 @@ End the document with ONE combined Mermaid flowchart showing the proposed unifie
 ### Phase 4: Per-System Handoff Prompts
 
 For each unified system in the proposal, write a ready-to-run `/make-plan` prompt to `04-handoff-prompts.md`. Each prompt must:
+
 1. State the target unified component and its single entry point
 2. List the exact call sites to rewrite (from Phase 2 evidence)
 3. Cite the relevant flowchart file from `01-flowcharts/`

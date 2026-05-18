@@ -11,86 +11,86 @@ import {
   renameSync,
   statSync,
   unlinkSync,
-  writeSync,
-} from 'fs';
-import { homedir } from 'os';
-import { basename, dirname, join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { randomBytes } from 'crypto';
+  writeSync
+} from "fs";
+import { homedir } from "os";
+import { basename, dirname, join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { randomBytes } from "crypto";
 
-export const IS_WINDOWS = process.platform === 'win32';
+export const IS_WINDOWS = process.platform === "win32";
 
 export function claudeConfigDirectory(): string {
-  return process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+  return process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
 }
 
 export function marketplaceDirectory(): string {
-  return join(claudeConfigDirectory(), 'plugins', 'marketplaces', 'thedotmack');
+  return join(claudeConfigDirectory(), "plugins", "marketplaces", "thedotmack");
 }
 
 export function pluginsDirectory(): string {
-  return join(claudeConfigDirectory(), 'plugins');
+  return join(claudeConfigDirectory(), "plugins");
 }
 
 export function knownMarketplacesPath(): string {
-  return join(pluginsDirectory(), 'known_marketplaces.json');
+  return join(pluginsDirectory(), "known_marketplaces.json");
 }
 
 export function installedPluginsPath(): string {
-  return join(pluginsDirectory(), 'installed_plugins.json');
+  return join(pluginsDirectory(), "installed_plugins.json");
 }
 
 export function claudeSettingsPath(): string {
-  return join(claudeConfigDirectory(), 'settings.json');
+  return join(claudeConfigDirectory(), "settings.json");
 }
 
 export function pluginCacheDirectory(version: string): string {
-  return join(pluginsDirectory(), 'cache', 'thedotmack', 'claude-mem', version);
+  return join(pluginsDirectory(), "cache", "thedotmack", "claude-mem", version);
 }
 
 export function npmPackageRootDirectory(): string {
   const currentFilePath = fileURLToPath(import.meta.url);
-  const root = join(dirname(currentFilePath), '..', '..');
-  if (!existsSync(join(root, 'package.json'))) {
+  const root = join(dirname(currentFilePath), "..", "..");
+  if (!existsSync(join(root, "package.json"))) {
     throw new Error(
       `npmPackageRootDirectory: expected package.json at ${root}. ` +
-      `Bundle structure may have changed — update the path walk.`,
+        `Bundle structure may have changed — update the path walk.`
     );
   }
   return root;
 }
 
 export function npmPackagePluginDirectory(): string {
-  return join(npmPackageRootDirectory(), 'plugin');
+  return join(npmPackageRootDirectory(), "plugin");
 }
 
 export function readPluginVersion(): string {
-  const pluginJsonPath = join(npmPackagePluginDirectory(), '.claude-plugin', 'plugin.json');
+  const pluginJsonPath = join(npmPackagePluginDirectory(), ".claude-plugin", "plugin.json");
   if (existsSync(pluginJsonPath)) {
     try {
-      const pluginJson = JSON.parse(readFileSync(pluginJsonPath, 'utf-8'));
+      const pluginJson = JSON.parse(readFileSync(pluginJsonPath, "utf-8"));
       if (pluginJson.version) return pluginJson.version;
     } catch {
       // Fall through to package.json
     }
   }
 
-  const packageJsonPath = join(npmPackageRootDirectory(), 'package.json');
+  const packageJsonPath = join(npmPackageRootDirectory(), "package.json");
   if (existsSync(packageJsonPath)) {
     try {
-      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
       if (packageJson.version) return packageJson.version;
     } catch {
       // Unable to read
     }
   }
 
-  return '0.0.0';
+  return "0.0.0";
 }
 
 export function isPluginInstalled(): boolean {
   const marketplaceDir = marketplaceDirectory();
-  return existsSync(join(marketplaceDir, 'plugin', '.claude-plugin', 'plugin.json'));
+  return existsSync(join(marketplaceDir, "plugin", ".claude-plugin", "plugin.json"));
 }
 
 export function ensureDirectoryExists(directoryPath: string): void {
@@ -99,7 +99,7 @@ export function ensureDirectoryExists(directoryPath: string): void {
   }
 }
 
-export { readJsonSafe } from '../../utils/json-utils.js';
+export { readJsonSafe } from "../../utils/json-utils.js";
 
 /**
  * Write JSON to disk with crash-safe atomic-rename semantics.
@@ -137,7 +137,7 @@ export function writeJsonFileAtomic(filepath: string, data: any): void {
     }
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code !== 'ENOENT' && code !== 'ENOTDIR') {
+    if (code !== "ENOENT" && code !== "ENOTDIR") {
       throw err;
     }
     // Destination doesn't exist yet - write directly to the literal path.
@@ -147,8 +147,8 @@ export function writeJsonFileAtomic(filepath: string, data: any): void {
 
   const dir = dirname(resolved);
   const base = basename(resolved);
-  const tmpPath = join(dir, `.${base}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`);
-  const payload = Buffer.from(JSON.stringify(data, null, 2) + '\n', 'utf-8');
+  const tmpPath = join(dir, `.${base}.${process.pid}.${randomBytes(6).toString("hex")}.tmp`);
+  const payload = Buffer.from(JSON.stringify(data, null, 2) + "\n", "utf-8");
 
   // Preserve existing mode if the destination already exists; otherwise let
   // the OS apply the standard new-file default (0o666 minus umask via openSync).
@@ -161,7 +161,7 @@ export function writeJsonFileAtomic(filepath: string, data: any): void {
 
   let fd: number | undefined;
   try {
-    fd = mode !== undefined ? openSync(tmpPath, 'w', mode) : openSync(tmpPath, 'w');
+    fd = mode !== undefined ? openSync(tmpPath, "w", mode) : openSync(tmpPath, "w");
 
     // writeSync wraps POSIX write(2), which may short-write — loop until the
     // full payload is committed before fsync.
@@ -185,21 +185,33 @@ export function writeJsonFileAtomic(filepath: string, data: any): void {
     if (!IS_WINDOWS) {
       let dirFd: number | undefined;
       try {
-        dirFd = openSync(dir, 'r');
+        dirFd = openSync(dir, "r");
         fsyncSync(dirFd);
       } catch {
         // Best-effort durability.
       } finally {
         if (dirFd !== undefined) {
-          try { closeSync(dirFd); } catch { /* ignore */ }
+          try {
+            closeSync(dirFd);
+          } catch {
+            /* ignore */
+          }
         }
       }
     }
   } catch (err) {
     if (fd !== undefined) {
-      try { closeSync(fd); } catch { /* ignore close-after-error */ }
+      try {
+        closeSync(fd);
+      } catch {
+        /* ignore close-after-error */
+      }
     }
-    try { unlinkSync(tmpPath); } catch { /* tempfile may not exist */ }
+    try {
+      unlinkSync(tmpPath);
+    } catch {
+      /* tempfile may not exist */
+    }
     throw err;
   }
 }

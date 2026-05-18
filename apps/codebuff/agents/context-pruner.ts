@@ -151,15 +151,11 @@ const definition: AgentDefinition = {
         }
         case 'propose_write_file': {
           const path = input.path as string | undefined
-          return path
-            ? `proposed writing: ${path}`
-            : 'proposed a file write'
+          return path ? `proposed writing: ${path}` : 'proposed a file write'
         }
         case 'propose_str_replace': {
           const path = input.path as string | undefined
-          return path
-            ? `proposed editing: ${path}`
-            : 'proposed a file edit'
+          return path ? `proposed editing: ${path}` : 'proposed a file edit'
         }
         case 'read_subtree': {
           const paths = input.paths as string[] | undefined
@@ -174,21 +170,15 @@ const definition: AgentDefinition = {
           if (pattern && flags) {
             return `code search for "${pattern}" (${flags})`
           }
-          return pattern
-            ? `code search for "${pattern}"`
-            : 'code search'
+          return pattern ? `code search for "${pattern}"` : 'code search'
         }
         case 'glob': {
           const pattern = input.pattern as string | undefined
-          return pattern
-            ? `glob search for ${pattern}`
-            : 'glob search'
+          return pattern ? `glob search for ${pattern}` : 'glob search'
         }
         case 'list_directory': {
           const path = input.path as string | undefined
-          return path
-            ? `listed directory: ${path}`
-            : 'listed a directory'
+          return path ? `listed directory: ${path}` : 'listed a directory'
         }
         case 'find_files': {
           const prompt = input.prompt as string | undefined
@@ -303,9 +293,7 @@ const definition: AgentDefinition = {
           return 'Suggested followups'
         case 'web_search': {
           const query = input.query as string | undefined
-          return query
-            ? `web search for "${query}"`
-            : 'web search'
+          return query ? `web search for "${query}"` : 'web search'
         }
         case 'gravity_index': {
           const query = input.query as string | undefined
@@ -313,9 +301,7 @@ const definition: AgentDefinition = {
           if (query) {
             return `Gravity Index ${action ?? 'search'} for "${query}"`
           }
-          return action
-            ? `Gravity Index ${action}`
-            : 'Gravity Index use'
+          return action ? `Gravity Index ${action}` : 'Gravity Index use'
         }
         case 'read_docs': {
           const libraryTitle = input.libraryTitle as string | undefined

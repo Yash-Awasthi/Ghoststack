@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
-import { homedir } from 'os';
-import { SessionStore } from '../services/sqlite/SessionStore.js';
-import { logger } from '../utils/logger.js';
+import { readFileSync, readdirSync } from "fs";
+import { join } from "path";
+import { homedir } from "os";
+import { SessionStore } from "../services/sqlite/SessionStore.js";
+import { logger } from "../utils/logger.js";
 
 interface ObservationData {
   type: string;
@@ -36,18 +36,18 @@ interface TimestampMapping {
 }
 
 function buildTimestampMap(): TimestampMapping {
-  const transcriptDir = join(homedir(), '.claude', 'projects', '-Users-alexnewman-Scripts-claude-mem');
+  const transcriptDir = join(homedir(), ".claude", "projects", "-Users-alexnewman-Scripts-claude-mem");
   const map: TimestampMapping = {};
 
   console.log(`Reading transcript files from ${transcriptDir}...`);
 
-  const files = readdirSync(transcriptDir).filter(f => f.endsWith('.jsonl'));
+  const files = readdirSync(transcriptDir).filter((f) => f.endsWith(".jsonl"));
   console.log(`Found ${files.length} transcript files`);
 
   for (const filename of files) {
     const filepath = join(transcriptDir, filename);
-    const content = readFileSync(filepath, 'utf-8');
-    const lines = content.split('\n').filter(l => l.trim());
+    const content = readFileSync(filepath, "utf-8");
+    const lines = content.split("\n").filter((l) => l.trim());
 
     for (let index = 0; index < lines.length; index++) {
       const line = lines[index];
@@ -55,7 +55,7 @@ function buildTimestampMap(): TimestampMapping {
       try {
         data = JSON.parse(line);
       } catch (e: unknown) {
-        logger.debug('IMPORT', 'Skipping invalid JSON line', {
+        logger.debug("IMPORT", "Skipping invalid JSON line", {
           lineNumber: index + 1,
           filename,
           error: e instanceof Error ? e.message : String(e)
@@ -87,13 +87,13 @@ function buildTimestampMap(): TimestampMapping {
 }
 
 function extractTag(xml: string, tagName: string): string {
-  const regex = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, 'i');
+  const regex = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, "i");
   const match = xml.match(regex);
-  return match ? match[1].trim() : '';
+  return match ? match[1].trim() : "";
 }
 
 function extractArrayTags(xml: string, containerTag: string, itemTag: string): string[] {
-  const containerRegex = new RegExp(`<${containerTag}>([\\s\\S]*?)</${containerTag}>`, 'i');
+  const containerRegex = new RegExp(`<${containerTag}>([\\s\\S]*?)</${containerTag}>`, "i");
   const containerMatch = xml.match(containerRegex);
 
   if (!containerMatch) {
@@ -101,7 +101,7 @@ function extractArrayTags(xml: string, containerTag: string, itemTag: string): s
   }
 
   const containerContent = containerMatch[1];
-  const itemRegex = new RegExp(`<${itemTag}>([\\s\\S]*?)</${itemTag}>`, 'gi');
+  const itemRegex = new RegExp(`<${itemTag}>([\\s\\S]*?)</${itemTag}>`, "gi");
   const items: string[] = [];
   let match;
 
@@ -113,19 +113,19 @@ function extractArrayTags(xml: string, containerTag: string, itemTag: string): s
 }
 
 function parseObservation(xml: string): ObservationData | null {
-  if (!xml.includes('<observation>') || !xml.includes('</observation>')) {
+  if (!xml.includes("<observation>") || !xml.includes("</observation>")) {
     return null;
   }
 
   const observation: ObservationData = {
-    type: extractTag(xml, 'type'),
-    title: extractTag(xml, 'title'),
-    subtitle: extractTag(xml, 'subtitle'),
-    facts: extractArrayTags(xml, 'facts', 'fact'),
-    narrative: extractTag(xml, 'narrative'),
-    concepts: extractArrayTags(xml, 'concepts', 'concept'),
-    files_read: extractArrayTags(xml, 'files_read', 'file'),
-    files_modified: extractArrayTags(xml, 'files_modified', 'file'),
+    type: extractTag(xml, "type"),
+    title: extractTag(xml, "title"),
+    subtitle: extractTag(xml, "subtitle"),
+    facts: extractArrayTags(xml, "facts", "fact"),
+    narrative: extractTag(xml, "narrative"),
+    concepts: extractArrayTags(xml, "concepts", "concept"),
+    files_read: extractArrayTags(xml, "files_read", "file"),
+    files_modified: extractArrayTags(xml, "files_modified", "file")
   };
 
   if (!observation.type || !observation.title) {
@@ -136,17 +136,17 @@ function parseObservation(xml: string): ObservationData | null {
 }
 
 function parseSummary(xml: string): SummaryData | null {
-  if (!xml.includes('<summary>') || !xml.includes('</summary>')) {
+  if (!xml.includes("<summary>") || !xml.includes("</summary>")) {
     return null;
   }
 
   const summary: SummaryData = {
-    request: extractTag(xml, 'request'),
-    investigated: extractTag(xml, 'investigated'),
-    learned: extractTag(xml, 'learned'),
-    completed: extractTag(xml, 'completed'),
-    next_steps: extractTag(xml, 'next_steps'),
-    notes: extractTag(xml, 'notes') || null,
+    request: extractTag(xml, "request"),
+    investigated: extractTag(xml, "investigated"),
+    learned: extractTag(xml, "learned"),
+    completed: extractTag(xml, "completed"),
+    next_steps: extractTag(xml, "next_steps"),
+    notes: extractTag(xml, "notes") || null
   };
 
   if (!summary.request) {
@@ -159,27 +159,27 @@ function parseSummary(xml: string): SummaryData | null {
 function extractTimestamp(commentLine: string): string | null {
   const match = commentLine.match(/<!-- Block \d+ \| (.+?) -->/);
   if (match) {
-    const dateStr = match[1].replace(' UTC', '').replace(' ', 'T') + 'Z';
+    const dateStr = match[1].replace(" UTC", "").replace(" ", "T") + "Z";
     return new Date(dateStr).toISOString();
   }
   return null;
 }
 
 function main() {
-  console.log('Starting XML observation import...\n');
+  console.log("Starting XML observation import...\n");
 
   const timestampMap = buildTimestampMap();
 
   const db = new SessionStore();
 
-  console.log('\nCreating SDK sessions for imported data...');
+  console.log("\nCreating SDK sessions for imported data...");
   const claudeSessionToSdkSession = new Map<string, string>();
 
   for (const sessionMeta of Object.values(timestampMap)) {
     if (!claudeSessionToSdkSession.has(sessionMeta.sessionId)) {
       const syntheticSdkSessionId = `imported-${sessionMeta.sessionId}`;
 
-      const existingQuery = db['db'].prepare(`
+      const existingQuery = db["db"].prepare(`
         SELECT memory_session_id
         FROM sdk_sessions
         WHERE content_session_id = ?
@@ -189,17 +189,15 @@ function main() {
       if (existing && existing.memory_session_id) {
         claudeSessionToSdkSession.set(sessionMeta.sessionId, existing.memory_session_id);
       } else if (existing && !existing.memory_session_id) {
-        db['db'].prepare('UPDATE sdk_sessions SET memory_session_id = ? WHERE content_session_id = ?')
+        db["db"]
+          .prepare("UPDATE sdk_sessions SET memory_session_id = ? WHERE content_session_id = ?")
           .run(syntheticSdkSessionId, sessionMeta.sessionId);
         claudeSessionToSdkSession.set(sessionMeta.sessionId, syntheticSdkSessionId);
       } else {
-        db.createSDKSession(
-          sessionMeta.sessionId,
-          sessionMeta.project,
-          'Imported from transcript XML'
-        );
+        db.createSDKSession(sessionMeta.sessionId, sessionMeta.project, "Imported from transcript XML");
 
-        db['db'].prepare('UPDATE sdk_sessions SET memory_session_id = ? WHERE content_session_id = ?')
+        db["db"]
+          .prepare("UPDATE sdk_sessions SET memory_session_id = ? WHERE content_session_id = ?")
           .run(syntheticSdkSessionId, sessionMeta.sessionId);
 
         claudeSessionToSdkSession.set(sessionMeta.sessionId, syntheticSdkSessionId);
@@ -209,9 +207,9 @@ function main() {
 
   console.log(`Prepared ${claudeSessionToSdkSession.size} SDK sessions\n`);
 
-  const xmlPath = join(process.cwd(), 'actual_xml_only_with_timestamps.xml');
+  const xmlPath = join(process.cwd(), "actual_xml_only_with_timestamps.xml");
   console.log(`Reading XML file: ${xmlPath}`);
-  const xmlContent = readFileSync(xmlPath, 'utf-8');
+  const xmlContent = readFileSync(xmlPath, "utf-8");
 
   const blocks = xmlContent.split(/(?=<!-- Block \d+)/);
   console.log(`Found ${blocks.length} blocks in XML file\n`);
@@ -224,7 +222,7 @@ function main() {
   let noSession = 0;
 
   for (const block of blocks) {
-    if (!block.trim() || block.startsWith('<?xml') || block.startsWith('<transcript_extracts')) {
+    if (!block.trim() || block.startsWith("<?xml") || block.startsWith("<transcript_extracts")) {
       continue;
     }
 
@@ -252,10 +250,14 @@ function main() {
 
     const observation = parseObservation(block);
     if (observation) {
-      const existingObs = db['db'].prepare(`
+      const existingObs = db["db"]
+        .prepare(
+          `
         SELECT id FROM observations
         WHERE memory_session_id = ? AND title = ? AND subtitle = ? AND type = ?
-      `).get(memorySessionId, observation.title, observation.subtitle, observation.type);
+      `
+        )
+        .get(memorySessionId, observation.title, observation.subtitle, observation.type);
 
       if (existingObs) {
         duplicateObs++;
@@ -263,11 +265,7 @@ function main() {
       }
 
       try {
-        db.storeObservation(
-          memorySessionId,
-          sessionMeta.project,
-          observation
-        );
+        db.storeObservation(memorySessionId, sessionMeta.project, observation);
         importedObs++;
 
         if (importedObs % 50 === 0) {
@@ -282,10 +280,14 @@ function main() {
 
     const summary = parseSummary(block);
     if (summary) {
-      const existingSum = db['db'].prepare(`
+      const existingSum = db["db"]
+        .prepare(
+          `
         SELECT id FROM session_summaries
         WHERE memory_session_id = ? AND request = ? AND completed = ? AND learned = ?
-      `).get(memorySessionId, summary.request, summary.completed, summary.learned);
+      `
+        )
+        .get(memorySessionId, summary.request, summary.completed, summary.learned);
 
       if (existingSum) {
         duplicateSum++;
@@ -293,11 +295,7 @@ function main() {
       }
 
       try {
-        db.storeSummary(
-          memorySessionId,
-          sessionMeta.project,
-          summary
-        );
+        db.storeSummary(memorySessionId, sessionMeta.project, summary);
         importedSum++;
 
         if (importedSum % 10 === 0) {
@@ -315,16 +313,16 @@ function main() {
 
   db.close();
 
-  console.log('\n' + '='.repeat(60));
-  console.log('Import Complete!');
-  console.log('='.repeat(60));
+  console.log("\n" + "=".repeat(60));
+  console.log("Import Complete!");
+  console.log("=".repeat(60));
   console.log(`✓ Imported: ${importedObs} observations`);
   console.log(`✓ Imported: ${importedSum} summaries`);
   console.log(`✓ Total: ${importedObs + importedSum} items`);
   console.log(`⊘ Skipped: ${skipped} blocks (not full observations or summaries)`);
   console.log(`⊘ Duplicates skipped: ${duplicateObs} observations, ${duplicateSum} summaries`);
   console.log(`⚠️  No session: ${noSession} blocks (timestamp not in transcripts)`);
-  console.log('='.repeat(60));
+  console.log("=".repeat(60));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

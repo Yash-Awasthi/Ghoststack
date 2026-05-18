@@ -1,5 +1,4 @@
-
-import { logger } from '../utils/logger.js';
+import { logger } from "../utils/logger.js";
 
 function isStdinAvailable(): boolean {
   try {
@@ -13,7 +12,9 @@ function isStdinAvailable(): boolean {
     stdin.readable;
     return true;
   } catch (error) {
-    logger.debug('HOOK', 'stdin not available (expected for some runtimes)', { error: error instanceof Error ? error.message : String(error) });
+    logger.debug("HOOK", "stdin not available (expected for some runtimes)", {
+      error: error instanceof Error ? error.message : String(error)
+    });
     return false;
   }
 }
@@ -28,7 +29,9 @@ function tryParseJson(input: string): { success: true; value: unknown } | { succ
     const value = JSON.parse(trimmed);
     return { success: true, value };
   } catch (error) {
-    logger.debug('HOOK', 'JSON parse attempt incomplete', { error: error instanceof Error ? error.message : String(error) });
+    logger.debug("HOOK", "JSON parse attempt incomplete", {
+      error: error instanceof Error ? error.message : String(error)
+    });
     return { success: false };
   }
 }
@@ -43,15 +46,15 @@ export async function readJsonFromStdin(): Promise<unknown> {
   }
 
   return new Promise((resolve, reject) => {
-    let input = '';
+    let input = "";
     let resolved = false;
     let parseDelayId: ReturnType<typeof setTimeout> | null = null;
 
     const cleanup = () => {
       try {
-        process.stdin.removeAllListeners('data');
-        process.stdin.removeAllListeners('end');
-        process.stdin.removeAllListeners('error');
+        process.stdin.removeAllListeners("data");
+        process.stdin.removeAllListeners("end");
+        process.stdin.removeAllListeners("error");
       } catch {
         // Ignore cleanup errors
       }
@@ -132,11 +135,13 @@ export async function readJsonFromStdin(): Promise<unknown> {
     };
 
     try {
-      process.stdin.on('data', onData);
-      process.stdin.on('end', onEnd);
-      process.stdin.on('error', onError);
+      process.stdin.on("data", onData);
+      process.stdin.on("end", onEnd);
+      process.stdin.on("error", onError);
     } catch (error) {
-      logger.debug('HOOK', 'Failed to attach stdin listeners', { error: error instanceof Error ? error.message : String(error) });
+      logger.debug("HOOK", "Failed to attach stdin listeners", {
+        error: error instanceof Error ? error.message : String(error)
+      });
       resolved = true;
       clearTimeout(safetyTimeoutId);
       cleanup();

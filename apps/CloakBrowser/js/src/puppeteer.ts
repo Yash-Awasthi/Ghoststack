@@ -32,8 +32,8 @@ export async function launch(options: LaunchOptions = {}): Promise<Browser> {
   const binaryPath = process.env.CLOAKBROWSER_BINARY_PATH || (await ensureBinary());
   const { exitIp, ...resolved } = (await maybeResolveGeoip(options)) ?? {};
   let resolvedArgs = (await resolveWebrtcArgs(options)) ?? options.args;
-  
-  if (exitIp && !(resolvedArgs ?? []).some(a => a.startsWith("--fingerprint-webrtc-ip"))) {
+
+  if (exitIp && !(resolvedArgs ?? []).some((a) => a.startsWith("--fingerprint-webrtc-ip"))) {
     resolvedArgs = [...(resolvedArgs ?? []), `--fingerprint-webrtc-ip=${exitIp}`];
   }
   const args = buildArgs({ ...options, ...resolved, args: resolvedArgs });
@@ -73,7 +73,7 @@ export async function launch(options: LaunchOptions = {}): Promise<Browser> {
     headless: options.headless ?? true,
     args,
     ignoreDefaultArgs: IGNORE_DEFAULT_ARGS,
-    ...options.launchOptions,
+    ...options.launchOptions
   });
 
   // Monkey-patch newPage() to auto-authenticate proxy credentials
@@ -88,15 +88,12 @@ export async function launch(options: LaunchOptions = {}): Promise<Browser> {
   }
 
   // Human-like behavioral patching — FULL coverage, same as Playwright.
-  // This enables Bézier mouse movements, organic typing rhythms, and 
+  // This enables Bézier mouse movements, organic typing rhythms, and
   // natural scrolling to bypass advanced anti-bot detection.
   if (options.humanize) {
-    const { patchBrowser } = await import('./human-puppeteer/index.js');
-    const { resolveConfig } = await import('./human/config.js');
-    const cfg = resolveConfig(
-      options.humanPreset ?? 'default',
-      options.humanConfig,
-    );
+    const { patchBrowser } = await import("./human-puppeteer/index.js");
+    const { resolveConfig } = await import("./human/config.js");
+    const cfg = resolveConfig(options.humanPreset ?? "default", options.humanConfig);
     patchBrowser(browser, cfg);
   }
 

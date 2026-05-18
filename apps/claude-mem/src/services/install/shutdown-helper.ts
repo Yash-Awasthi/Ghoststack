@@ -1,19 +1,15 @@
-
 export interface ShutdownResult {
   workerWasRunning: boolean;
 }
 
-export async function shutdownWorkerAndWait(
-  port: number | string,
-  timeoutMs: number = 10000,
-): Promise<ShutdownResult> {
+export async function shutdownWorkerAndWait(port: number | string, timeoutMs: number = 10000): Promise<ShutdownResult> {
   const baseUrl = `http://127.0.0.1:${port}`;
   let workerWasRunning = false;
 
   try {
     await fetch(`${baseUrl}/api/admin/shutdown`, {
-      method: 'POST',
-      signal: AbortSignal.timeout(5000),
+      method: "POST",
+      signal: AbortSignal.timeout(5000)
     });
     workerWasRunning = true;
   } catch {
@@ -26,10 +22,10 @@ export async function shutdownWorkerAndWait(
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
     try {
       await fetch(`${baseUrl}/api/health`, {
-        signal: AbortSignal.timeout(1000),
+        signal: AbortSignal.timeout(1000)
       });
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') continue;
+      if (err instanceof Error && err.name === "AbortError") continue;
       return { workerWasRunning };
     }
   }

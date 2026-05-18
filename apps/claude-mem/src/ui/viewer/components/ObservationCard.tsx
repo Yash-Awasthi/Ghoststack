@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Observation } from '../types';
-import { formatDate } from '../utils/formatters';
+import React, { useState } from "react";
+import { Observation } from "../types";
+import { formatDate } from "../utils/formatters";
 
 interface ObservationCardProps {
   observation: Observation;
 }
 
 function stripProjectRoot(filePath: string): string {
-  const markers = ['/Scripts/', '/src/', '/plugin/', '/docs/'];
+  const markers = ["/Scripts/", "/src/", "/plugin/", "/docs/"];
 
   for (const marker of markers) {
     const index = filePath.indexOf(marker);
@@ -16,13 +16,13 @@ function stripProjectRoot(filePath: string): string {
     }
   }
 
-  const projectIndex = filePath.indexOf('claude-mem/');
+  const projectIndex = filePath.indexOf("claude-mem/");
   if (projectIndex !== -1) {
-    return filePath.substring(projectIndex + 'claude-mem/'.length);
+    return filePath.substring(projectIndex + "claude-mem/".length);
   }
 
-  const parts = filePath.split('/');
-  return parts.length > 3 ? parts.slice(-3).join('/') : filePath;
+  const parts = filePath.split("/");
+  return parts.length > 3 ? parts.slice(-3).join("/") : filePath;
 }
 
 export function ObservationCard({ observation }: ObservationCardProps) {
@@ -42,11 +42,9 @@ export function ObservationCard({ observation }: ObservationCardProps) {
       {/* Header with toggle buttons in top right */}
       <div className="card-header">
         <div className="card-header-left">
-          <span className={`card-type type-${observation.type}`}>
-            {observation.type}
-          </span>
-          <span className={`card-source source-${observation.platform_source || 'claude'}`}>
-            {observation.platform_source || 'claude'}
+          <span className={`card-type type-${observation.type}`}>{observation.type}</span>
+          <span className={`card-source source-${observation.platform_source || "claude"}`}>
+            {observation.platform_source || "claude"}
           </span>
           <span className="card-project">{observation.project}</span>
           {observation.merged_into_project && (
@@ -58,13 +56,22 @@ export function ObservationCard({ observation }: ObservationCardProps) {
         <div className="view-mode-toggles">
           {hasFactsContent && (
             <button
-              className={`view-mode-toggle ${showFacts ? 'active' : ''}`}
+              className={`view-mode-toggle ${showFacts ? "active" : ""}`}
               onClick={() => {
                 setShowFacts(!showFacts);
-                if (!showFacts) setShowNarrative(false); 
+                if (!showFacts) setShowNarrative(false);
               }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="9 11 12 14 22 4"></polyline>
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
               </svg>
@@ -73,13 +80,22 @@ export function ObservationCard({ observation }: ObservationCardProps) {
           )}
           {observation.narrative && (
             <button
-              className={`view-mode-toggle ${showNarrative ? 'active' : ''}`}
+              className={`view-mode-toggle ${showNarrative ? "active" : ""}`}
               onClick={() => {
                 setShowNarrative(!showNarrative);
-                if (!showNarrative) setShowFacts(false); 
+                if (!showNarrative) setShowFacts(false);
               }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -92,7 +108,7 @@ export function ObservationCard({ observation }: ObservationCardProps) {
       </div>
 
       {/* Title */}
-      <div className="card-title">{observation.title || 'Untitled'}</div>
+      <div className="card-title">{observation.title || "Untitled"}</div>
 
       {/* Content based on toggle state */}
       <div className="view-mode-content">
@@ -106,38 +122,39 @@ export function ObservationCard({ observation }: ObservationCardProps) {
             ))}
           </ul>
         )}
-        {showNarrative && observation.narrative && (
-          <div className="narrative">
-            {observation.narrative}
-          </div>
-        )}
+        {showNarrative && observation.narrative && <div className="narrative">{observation.narrative}</div>}
       </div>
 
       {/* Metadata footer - id, date, and conditionally concepts/files when facts toggle is on */}
       <div className="card-meta">
-        <span className="meta-date">#{observation.id} • {date}</span>
+        <span className="meta-date">
+          #{observation.id} • {date}
+        </span>
         {showFacts && (concepts.length > 0 || filesRead.length > 0 || filesModified.length > 0) && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
             {concepts.map((concept: string, i: number) => (
-              <span key={i} style={{
-                padding: '2px 8px',
-                background: 'var(--color-type-badge-bg)',
-                color: 'var(--color-type-badge-text)',
-                borderRadius: '3px',
-                fontWeight: '500',
-                fontSize: '10px'
-              }}>
+              <span
+                key={i}
+                style={{
+                  padding: "2px 8px",
+                  background: "var(--color-type-badge-bg)",
+                  color: "var(--color-type-badge-text)",
+                  borderRadius: "3px",
+                  fontWeight: "500",
+                  fontSize: "10px"
+                }}
+              >
                 {concept}
               </span>
             ))}
             {filesRead.length > 0 && (
               <span className="meta-files">
-                <span className="file-label">read:</span> {filesRead.join(', ')}
+                <span className="file-label">read:</span> {filesRead.join(", ")}
               </span>
             )}
             {filesModified.length > 0 && (
               <span className="meta-files">
-                <span className="file-label">modified:</span> {filesModified.join(', ')}
+                <span className="file-label">modified:</span> {filesModified.join(", ")}
               </span>
             )}
           </div>

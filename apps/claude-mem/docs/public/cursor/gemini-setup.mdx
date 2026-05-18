@@ -7,9 +7,7 @@ description: "Use Claude-Mem in Cursor with Google's free Gemini API"
 
 This guide walks you through setting up Claude-Mem in Cursor using Google's Gemini API. Gemini offers a generous free tier that handles typical individual usage.
 
-<Info>
-**Free Tier:** 1,500 requests per day with `gemini-2.5-flash-lite`. No credit card required.
-</Info>
+<Info>**Free Tier:** 1,500 requests per day with `gemini-2.5-flash-lite`. No credit card required.</Info>
 
 ## Step 1: Get a Gemini API Key
 
@@ -21,7 +19,8 @@ This guide walks you through setting up Claude-Mem in Cursor using Google's Gemi
 6. Copy your API key - you'll need it in Step 3
 
 <Tip>
-**Higher rate limits:** Enable billing on your Google Cloud project to unlock 4,000 RPM (vs 10 RPM without billing). You won't be charged unless you exceed the free quota.
+  **Higher rate limits:** Enable billing on your Google Cloud project to unlock 4,000 RPM (vs 10 RPM without billing).
+  You won't be charged unless you exceed the free quota.
 </Tip>
 
 ## Step 2: Clone and Build Claude-Mem
@@ -49,6 +48,7 @@ bun run cursor:setup
 ```
 
 The wizard will:
+
 1. Detect you don't have Claude Code
 2. Ask you to choose Gemini as your provider
 3. Prompt for your API key
@@ -99,11 +99,11 @@ Open http://localhost:37777 to see the memory viewer.
 
 ## Available Gemini Models
 
-| Model | Free Tier RPM | Notes |
-|-------|---------------|-------|
-| `gemini-2.5-flash-lite` | 10 (4,000 with billing) | **Default.** Fastest, highest free tier RPM |
-| `gemini-2.5-flash` | 5 (1,000 with billing) | Higher capability |
-| `gemini-3-flash-preview` | 5 (1,000 with billing) | Latest model |
+| Model                    | Free Tier RPM           | Notes                                       |
+| ------------------------ | ----------------------- | ------------------------------------------- |
+| `gemini-2.5-flash-lite`  | 10 (4,000 with billing) | **Default.** Fastest, highest free tier RPM |
+| `gemini-2.5-flash`       | 5 (1,000 with billing)  | Higher capability                           |
+| `gemini-3-flash-preview` | 5 (1,000 with billing)  | Latest model                                |
 
 To change the model, update your settings:
 
@@ -144,6 +144,7 @@ cat ~/.claude-mem/settings.json
 ```
 
 Should output something like:
+
 ```json
 {
   "CLAUDE_MEM_PROVIDER": "gemini",
@@ -154,6 +155,7 @@ Should output something like:
 ### Rate limit errors (HTTP 429)
 
 You're exceeding the free tier limits. Options:
+
 1. Wait a few minutes for the rate limit to reset
 2. Enable billing on Google Cloud to unlock higher limits
 3. Switch to OpenRouter for higher volume needs

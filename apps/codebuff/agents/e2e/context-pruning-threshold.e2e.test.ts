@@ -175,12 +175,15 @@ function makeLargeContent(prefix: string, size: number): string {
 
 function buildMessageHistory(targetApproxTokens: number): Message[] {
   const messages: Message[] = []
-  const roundsNeeded = Math.max(1, Math.ceil(targetApproxTokens / TOKENS_PER_ROUND))
+  const roundsNeeded = Math.max(
+    1,
+    Math.ceil(targetApproxTokens / TOKENS_PER_ROUND),
+  )
   const now = Date.now()
 
   console.log(
     `  Building ${roundsNeeded} rounds for ~${targetApproxTokens} tokens ` +
-    `(est ${TOKENS_PER_ROUND} tokens/round)`,
+      `(est ${TOKENS_PER_ROUND} tokens/round)`,
   )
 
   for (let i = 0; i < roundsNeeded; i++) {
@@ -208,7 +211,9 @@ function buildMessageHistory(targetApproxTokens: number): Message[] {
     if (i % 2 === 0) {
       const callId = `call-${i}`
       messages.push(
-        createToolCallMessage(callId, 'read_files', { paths: [`file-${i}.ts`] }),
+        createToolCallMessage(callId, 'read_files', {
+          paths: [`file-${i}.ts`],
+        }),
       )
       messages.push(
         createToolResultMessage(callId, 'read_files', {
@@ -266,8 +271,7 @@ function detectPruning(
       ? 1 - finalMessages.length / originalMessageCount
       : 0
 
-  const wasPruned =
-    hasSummary || hasTrimFallback || messageReduction > 0.5
+  const wasPruned = hasSummary || hasTrimFallback || messageReduction > 0.5
 
   return { wasPruned, hasSummary, hasTrimFallback, messageReduction }
 }
@@ -343,7 +347,10 @@ describe('Context Pruning Threshold E2E', () => {
 
       // Should complete without error
       if (run.output.type === 'error') {
-        console.error('Below-limit test error:', JSON.stringify(run.output, null, 2))
+        console.error(
+          'Below-limit test error:',
+          JSON.stringify(run.output, null, 2),
+        )
       }
       expect(run.output.type).not.toEqual('error')
 
@@ -417,7 +424,10 @@ describe('Context Pruning Threshold E2E', () => {
 
       // Should complete without error
       if (run.output.type === 'error') {
-        console.error('Above-limit test error:', JSON.stringify(run.output, null, 2))
+        console.error(
+          'Above-limit test error:',
+          JSON.stringify(run.output, null, 2),
+        )
       }
       expect(run.output.type).not.toEqual('error')
 
@@ -508,7 +518,10 @@ describe('Context Pruning Threshold E2E', () => {
         params: { maxContextLength: 200_000 },
         handleEvent: (event) => {
           if (event.type === 'text') {
-            console.log('  [accuracy-cal] Agent text:', event.text.slice(0, 100))
+            console.log(
+              '  [accuracy-cal] Agent text:',
+              event.text.slice(0, 100),
+            )
           }
         },
       })
@@ -558,13 +571,19 @@ describe('Context Pruning Threshold E2E', () => {
         params: { maxContextLength: MAX_CONTEXT_LENGTH },
         handleEvent: (event) => {
           if (event.type === 'text') {
-            console.log('  [accuracy-100k] Agent text:', event.text.slice(0, 100))
+            console.log(
+              '  [accuracy-100k] Agent text:',
+              event.text.slice(0, 100),
+            )
           }
         },
       })
 
       if (run.output.type === 'error') {
-        console.error('Accuracy test error:', JSON.stringify(run.output, null, 2))
+        console.error(
+          'Accuracy test error:',
+          JSON.stringify(run.output, null, 2),
+        )
       }
       expect(run.output.type).not.toEqual('error')
 
@@ -593,7 +612,9 @@ describe('Context Pruning Threshold E2E', () => {
         MAX_CONTEXT_LENGTH,
         ')',
       )
-      console.log('  [accuracy] ================================================')
+      console.log(
+        '  [accuracy] ================================================',
+      )
 
       // =========================================================================
       // DIAGNOSIS: Compare true tokens vs limit

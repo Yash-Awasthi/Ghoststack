@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'bun:test';
-import { execSync, ChildProcess } from 'child_process';
-import { existsSync, readFileSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from 'fs';
-import { homedir } from 'os';
-import path from 'path';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "bun:test";
+import { execSync, ChildProcess } from "child_process";
+import { existsSync, readFileSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from "fs";
+import { homedir } from "os";
+import path from "path";
 
 const TEST_PORT = 37877;
-const TEST_DATA_DIR = path.join(homedir(), '.claude-mem-test');
-const TEST_PID_FILE = path.join(TEST_DATA_DIR, 'worker.pid');
-const WORKER_SCRIPT = path.join(__dirname, '../plugin/scripts/worker-service.cjs');
+const TEST_DATA_DIR = path.join(homedir(), ".claude-mem-test");
+const TEST_PID_FILE = path.join(TEST_DATA_DIR, "worker.pid");
+const WORKER_SCRIPT = path.join(__dirname, "../plugin/scripts/worker-service.cjs");
 
 interface PidInfo {
   pid: number;
@@ -30,7 +30,7 @@ async function waitForHealth(port: number, timeoutMs: number = 30000): Promise<b
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     if (await isPortInUse(port)) return true;
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
   return false;
 }
@@ -38,13 +38,13 @@ async function waitForHealth(port: number, timeoutMs: number = 30000): Promise<b
 function runWorkerCommand(command: string, env: Record<string, string> = {}): string {
   const result = execSync(`bun "${WORKER_SCRIPT}" ${command}`, {
     env: { ...process.env, ...env },
-    encoding: 'utf-8',
+    encoding: "utf-8",
     timeout: 60000
   });
   return result.trim();
 }
 
-describe('Worker Self-Spawn CLI', () => {
+describe("Worker Self-Spawn CLI", () => {
   beforeAll(async () => {
     if (existsSync(TEST_DATA_DIR)) {
       rmSync(TEST_DATA_DIR, { recursive: true });
@@ -57,23 +57,23 @@ describe('Worker Self-Spawn CLI', () => {
     }
   });
 
-  describe('status command', () => {
-    it('should report worker status in expected format', async () => {
-      const output = runWorkerCommand('status');
-      expect(output.includes('running')).toBe(true);
+  describe("status command", () => {
+    it("should report worker status in expected format", async () => {
+      const output = runWorkerCommand("status");
+      expect(output.includes("running")).toBe(true);
     });
 
-    it('should include PID and port when running', async () => {
-      const output = runWorkerCommand('status');
-      if (output.includes('Worker running')) {
+    it("should include PID and port when running", async () => {
+      const output = runWorkerCommand("status");
+      if (output.includes("Worker running")) {
         expect(output).toMatch(/PID: \d+/);
         expect(output).toMatch(/Port: \d+/);
       }
     });
   });
 
-  describe('PID file management', () => {
-    it('should create and read PID file with correct structure', () => {
+  describe("PID file management", () => {
+    it("should create and read PID file with correct structure", () => {
       mkdirSync(TEST_DATA_DIR, { recursive: true });
 
       const testPidInfo: PidInfo = {
@@ -85,7 +85,7 @@ describe('Worker Self-Spawn CLI', () => {
       writeFileSync(TEST_PID_FILE, JSON.stringify(testPidInfo, null, 2));
       expect(existsSync(TEST_PID_FILE)).toBe(true);
 
-      const readInfo = JSON.parse(readFileSync(TEST_PID_FILE, 'utf-8')) as PidInfo;
+      const readInfo = JSON.parse(readFileSync(TEST_PID_FILE, "utf-8")) as PidInfo;
       expect(readInfo.pid).toBe(12345);
       expect(readInfo.port).toBe(TEST_PORT);
       expect(readInfo.startedAt).toBe(testPidInfo.startedAt);
@@ -95,14 +95,14 @@ describe('Worker Self-Spawn CLI', () => {
     });
   });
 
-  describe('health check utilities', () => {
-    it('should return false for non-existent server', async () => {
+  describe("health check utilities", () => {
+    it("should return false for non-existent server", async () => {
       const unusedPort = 39999;
       const result = await isPortInUse(unusedPort);
       expect(result).toBe(false);
     });
 
-    it('should timeout appropriately for unreachable server', async () => {
+    it("should timeout appropriately for unreachable server", async () => {
       const start = Date.now();
       const result = await isPortInUse(39998);
       const elapsed = Date.now() - start;
@@ -113,58 +113,58 @@ describe('Worker Self-Spawn CLI', () => {
   });
 });
 
-describe('Worker Health Endpoints', () => {
+describe("Worker Health Endpoints", () => {
   let workerProcess: ChildProcess | null = null;
 
   beforeAll(async () => {
     if (!existsSync(WORKER_SCRIPT)) {
-      console.log('Skipping worker health tests - worker script not built');
+      console.log("Skipping worker health tests - worker script not built");
       return;
     }
   });
 
   afterAll(async () => {
     if (workerProcess) {
-      workerProcess.kill('SIGTERM');
+      workerProcess.kill("SIGTERM");
       workerProcess = null;
     }
   });
 
-  describe('health endpoint contract', () => {
-    it('should expect /api/health to return status ok with expected fields', async () => {
+  describe("health endpoint contract", () => {
+    it("should expect /api/health to return status ok with expected fields", async () => {
       const mockResponse = {
-        status: 'ok',
-        build: 'TEST-008-wrapper-ipc',
+        status: "ok",
+        build: "TEST-008-wrapper-ipc",
         managed: false,
         hasIpc: false,
-        platform: 'darwin',
+        platform: "darwin",
         pid: 12345,
         initialized: true,
         mcpReady: true
       };
 
-      expect(mockResponse.status).toBe('ok');
-      expect(typeof mockResponse.build).toBe('string');
-      expect(typeof mockResponse.pid).toBe('number');
-      expect(typeof mockResponse.managed).toBe('boolean');
-      expect(typeof mockResponse.initialized).toBe('boolean');
+      expect(mockResponse.status).toBe("ok");
+      expect(typeof mockResponse.build).toBe("string");
+      expect(typeof mockResponse.pid).toBe("number");
+      expect(typeof mockResponse.managed).toBe("boolean");
+      expect(typeof mockResponse.initialized).toBe("boolean");
     });
 
-    it('should expect /api/readiness to distinguish ready vs initializing states', async () => {
-      const readyResponse = { status: 'ready', mcpReady: true };
-      const initializingResponse = { status: 'initializing', message: 'Worker is still initializing, please retry' };
+    it("should expect /api/readiness to distinguish ready vs initializing states", async () => {
+      const readyResponse = { status: "ready", mcpReady: true };
+      const initializingResponse = { status: "initializing", message: "Worker is still initializing, please retry" };
 
-      expect(readyResponse.status).toBe('ready');
-      expect(initializingResponse.status).toBe('initializing');
+      expect(readyResponse.status).toBe("ready");
+      expect(initializingResponse.status).toBe("initializing");
     });
   });
 });
 
-describe('Windows-specific behavior', () => {
+describe("Windows-specific behavior", () => {
   const originalPlatform = process.platform;
 
   afterEach(() => {
-    Object.defineProperty(process, 'platform', {
+    Object.defineProperty(process, "platform", {
       value: originalPlatform,
       writable: true,
       configurable: true
@@ -172,22 +172,22 @@ describe('Windows-specific behavior', () => {
     delete process.env.CLAUDE_MEM_MANAGED;
   });
 
-  it('should detect Windows managed worker mode correctly', () => {
-    Object.defineProperty(process, 'platform', {
-      value: 'win32',
+  it("should detect Windows managed worker mode correctly", () => {
+    Object.defineProperty(process, "platform", {
+      value: "win32",
       writable: true,
       configurable: true
     });
-    process.env.CLAUDE_MEM_MANAGED = 'true';
+    process.env.CLAUDE_MEM_MANAGED = "true";
 
-    const isWindows = process.platform === 'win32';
-    const isManaged = process.env.CLAUDE_MEM_MANAGED === 'true';
+    const isWindows = process.platform === "win32";
+    const isManaged = process.env.CLAUDE_MEM_MANAGED === "true";
 
     expect(isWindows).toBe(true);
     expect(isManaged).toBe(true);
 
-    const hasProcessSend = typeof process.send === 'function';
+    const hasProcessSend = typeof process.send === "function";
     const isWindowsManaged = isWindows && isManaged && hasProcessSend;
-    expect(isWindowsManaged).toBe(false); 
+    expect(isWindowsManaged).toBe(false);
   });
 });

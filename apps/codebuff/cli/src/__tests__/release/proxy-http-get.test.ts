@@ -25,7 +25,11 @@ const helperModules = [
   },
 ]
 
-function createResponse(statusCode: number, headers: Record<string, string>, body = '') {
+function createResponse(
+  statusCode: number,
+  headers: Record<string, string>,
+  body = '',
+) {
   const response = Readable.from(body.length > 0 ? [body] : [])
   return Object.assign(response, {
     statusCode,
@@ -97,7 +101,10 @@ for (const helperModule of helperModules) {
               this.options = options
             }
           },
-          get(options: Record<string, any>, callback: (response: Readable) => void) {
+          get(
+            options: Record<string, any>,
+            callback: (response: Readable) => void,
+          ) {
             httpsGetCalls.push(options)
             options.agent.createConnection(options)
             queueMicrotask(() => {
@@ -179,7 +186,10 @@ for (const helperModule of helperModules) {
         },
         httpsModule: {
           Agent: class FakeAgent {},
-          get(options: Record<string, any>, callback: (response: Readable) => void) {
+          get(
+            options: Record<string, any>,
+            callback: (response: Readable) => void,
+          ) {
             httpsGetCalls.push(options)
             callCount += 1
 
@@ -228,9 +238,9 @@ for (const helperModule of helperModules) {
         hostname: 'registry.npmjs.org',
         path: '/redirected',
       })
-      expect(httpsGetCalls.every((call) => call.createConnection === undefined)).toBe(
-        true,
-      )
+      expect(
+        httpsGetCalls.every((call) => call.createConnection === undefined),
+      ).toBe(true)
       expect(httpsGetCalls.every((call) => call.agent != null)).toBe(true)
     })
   })

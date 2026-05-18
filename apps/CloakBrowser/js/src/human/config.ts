@@ -23,7 +23,6 @@ export interface HumanConfig {
   mistype_delay_notice: [number, number];
   mistype_delay_correct: [number, number];
 
-
   // Mouse — movement
   mouse_steps_divisor: number;
   mouse_min_steps: number;
@@ -62,13 +61,12 @@ export interface HumanConfig {
   initial_cursor_x: [number, number];
   initial_cursor_y: [number, number];
 
-
   // Idle micro-movements between actions (opt-in, adds latency)
   idle_between_actions: boolean;
   idle_between_duration: [number, number];
 }
 
-export type HumanPreset = 'default' | 'careful';
+export type HumanPreset = "default" | "careful";
 
 export type HumanActionOptions = Partial<HumanConfig> & {
   timeout?: number;
@@ -110,7 +108,7 @@ const DEFAULT_CONFIG: HumanConfig = {
   click_aim_delay_button: [80, 200],
   click_hold_input: [40, 100],
   click_hold_button: [60, 150],
-  click_input_x_range: [0.05, 0.30],
+  click_input_x_range: [0.05, 0.3],
 
   // Mouse — idle
   idle_drift_px: 3,
@@ -126,7 +124,7 @@ const DEFAULT_CONFIG: HumanConfig = {
   scroll_overshoot_chance: 0.1,
   scroll_overshoot_px: [50, 150],
   scroll_settle_delay: [300, 600],
-  scroll_target_zone: [0.20, 0.80],
+  scroll_target_zone: [0.2, 0.8],
   scroll_pre_move_delay: [100, 300],
 
   // Initial cursor position (as if coming from the address bar area)
@@ -135,7 +133,7 @@ const DEFAULT_CONFIG: HumanConfig = {
 
   // Idle micro-movements between actions (off by default)
   idle_between_actions: false,
-  idle_between_duration: [0.3, 0.8],
+  idle_between_duration: [0.3, 0.8]
 };
 
 // ---------------------------------------------------------------------------
@@ -159,7 +157,7 @@ const CAREFUL_CONFIG: HumanConfig = {
   mistype_delay_correct: [80, 200],
 
   // Mouse — slower, more precise
-  mouse_overshoot_chance: 0.10,
+  mouse_overshoot_chance: 0.1,
   mouse_burst_pause: [12, 25],
 
   // Mouse — clicks (longer aiming and holding)
@@ -176,7 +174,7 @@ const CAREFUL_CONFIG: HumanConfig = {
 
   // Idle between actions enabled for careful preset
   idle_between_actions: true,
-  idle_between_duration: [0.4, 1.0],
+  idle_between_duration: [0.4, 1.0]
 };
 
 // ---------------------------------------------------------------------------
@@ -185,7 +183,7 @@ const CAREFUL_CONFIG: HumanConfig = {
 
 const PRESETS: Record<HumanPreset, HumanConfig> = {
   default: DEFAULT_CONFIG,
-  careful: CAREFUL_CONFIG,
+  careful: CAREFUL_CONFIG
 };
 
 /**
@@ -193,15 +191,10 @@ const PRESETS: Record<HumanPreset, HumanConfig> = {
  * If `preset` is a string, returns the corresponding built-in config.
  * Any keys in `overrides` replace the preset values.
  */
-export function resolveConfig(
-  preset: HumanPreset = 'default',
-  overrides?: Partial<HumanConfig>,
-): HumanConfig {
+export function resolveConfig(preset: HumanPreset = "default", overrides?: Partial<HumanConfig>): HumanConfig {
   const base = PRESETS[preset];
   if (!base) {
-    throw new Error(
-      `Unknown humanize preset "${preset}". Valid presets: ${Object.keys(PRESETS).join(', ')}`
-    );
+    throw new Error(`Unknown humanize preset "${preset}". Valid presets: ${Object.keys(PRESETS).join(", ")}`);
   }
   if (!overrides) return { ...base };
   return { ...base, ...overrides };
@@ -215,14 +208,10 @@ export function resolveConfig(
  * so the same patched page can type different fields at different speeds
  * without re-patching.
  */
-export function mergeConfig(
-  cfg: HumanConfig,
-  overrides?: Partial<HumanConfig> | null,
-): HumanConfig {
+export function mergeConfig(cfg: HumanConfig, overrides?: Partial<HumanConfig> | null): HumanConfig {
   if (!overrides) return cfg;
   return { ...cfg, ...overrides };
 }
-
 
 // ---------------------------------------------------------------------------
 // Utility: random number in range
@@ -250,5 +239,5 @@ export function randIntRange(range: [number, number]): number {
 
 /** Sleep for `ms` milliseconds. */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

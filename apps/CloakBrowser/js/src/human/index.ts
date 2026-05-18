@@ -22,27 +22,32 @@
  * return patched ElementHandles automatically.
  */
 
-import type { Browser, BrowserContext, Page, Frame, CDPSession } from 'playwright-core';
-import { HumanConfig, HumanActionOptions, resolveConfig, mergeConfig, rand, randRange, sleep } from './config.js';
-import { RawMouse, RawKeyboard, humanMove, humanClick, clickTarget, humanIdle } from './mouse.js';
-import { humanType } from './keyboard.js';
-import { scrollToElement, humanScrollIntoView } from './scroll.js';
-import { patchPageElementHandles, patchFrameElementHandles, patchSingleElementHandle } from './elementhandle.js';
+import type { Browser, BrowserContext, Page, Frame, CDPSession } from "playwright-core";
+import { HumanConfig, HumanActionOptions, resolveConfig, mergeConfig, rand, randRange, sleep } from "./config.js";
+import { RawMouse, RawKeyboard, humanMove, humanClick, clickTarget, humanIdle } from "./mouse.js";
+import { humanType } from "./keyboard.js";
+import { scrollToElement, humanScrollIntoView } from "./scroll.js";
+import { patchPageElementHandles, patchFrameElementHandles, patchSingleElementHandle } from "./elementhandle.js";
 import {
-  ensureActionable, ensureStable, checkPointerEvents,
-  CHECKS_CLICK, CHECKS_HOVER, CHECKS_INPUT, CHECKS_FOCUS, CHECKS_CHECK,
-  type CheckName,
-} from './actionability.js';
+  ensureActionable,
+  ensureStable,
+  checkPointerEvents,
+  CHECKS_CLICK,
+  CHECKS_HOVER,
+  CHECKS_INPUT,
+  CHECKS_FOCUS,
+  CHECKS_CHECK,
+  type CheckName
+} from "./actionability.js";
 
-export { HumanConfig, resolveConfig, mergeConfig } from './config.js';
-export { humanMove, humanClick, clickTarget, humanIdle } from './mouse.js';
-export { humanType } from './keyboard.js';
-export { scrollToElement, humanScrollIntoView } from './scroll.js';
-export { patchSingleElementHandle } from './elementhandle.js';
+export { HumanConfig, resolveConfig, mergeConfig } from "./config.js";
+export { humanMove, humanClick, clickTarget, humanIdle } from "./mouse.js";
+export { humanType } from "./keyboard.js";
+export { scrollToElement, humanScrollIntoView } from "./scroll.js";
+export { patchSingleElementHandle } from "./elementhandle.js";
 
 // --- Platform-aware select-all shortcut (macOS uses Meta, others use Control) ---
-const SELECT_ALL = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
-
+const SELECT_ALL = process.platform === "darwin" ? "Meta+a" : "Control+a";
 
 // ============================================================================
 // CDP Isolated World — stealth DOM evaluation
@@ -73,12 +78,12 @@ class StealthEval {
 
   private async createWorld(): Promise<number> {
     const cdp = await this.ensureCdp();
-    const tree = await cdp.send('Page.getFrameTree');
+    const tree = await cdp.send("Page.getFrameTree");
     const frameId = tree.frameTree.frame.id;
-    const result = await cdp.send('Page.createIsolatedWorld', {
+    const result = await cdp.send("Page.createIsolatedWorld", {
       frameId,
-      worldName: '',
-      grantUniveralAccess: true,
+      worldName: "",
+      grantUniveralAccess: true
     });
     const ctxId = result.executionContextId;
     this.contextId = ctxId;
@@ -98,10 +103,10 @@ class StealthEval {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const cdp = await this.ensureCdp();
-        const result = await cdp.send('Runtime.evaluate', {
+        const result = await cdp.send("Runtime.evaluate", {
           expression,
           contextId: this.contextId!,
-          returnByValue: true,
+          returnByValue: true
         });
 
         if (result.exceptionDetails) {
@@ -141,7 +146,6 @@ class StealthEval {
   }
 }
 
-
 // ============================================================================
 // Cursor state
 // ============================================================================
@@ -152,7 +156,6 @@ class CursorState {
   initialized = false;
 }
 
-
 // ============================================================================
 // Stealth DOM queries — isolated world with evaluate fallback
 // ============================================================================
@@ -161,11 +164,7 @@ class CursorState {
  * Check if selector matches an input/textarea/contenteditable element.
  * Uses CDP Isolated World when available — invisible to main world.
  */
-async function isInputElement(
-  stealth: StealthEval | null,
-  page: Page,
-  selector: string,
-): Promise<boolean> {
+async function isInputElement(stealth: StealthEval | null, page: Page, selector: string): Promise<boolean> {
   if (stealth) {
     try {
       const escaped = JSON.stringify(selector);
@@ -185,24 +184,21 @@ async function isInputElement(
   }
 
   // Fallback: page.evaluate (detectable — should only happen if CDP fails)
-  return page.evaluate((sel: string) => {
-    const el = document.querySelector(sel);
-    if (!el) return false;
-    const tag = el.tagName.toLowerCase();
-    return tag === 'input' || tag === 'textarea'
-      || el.getAttribute('contenteditable') === 'true';
-  }, selector).catch(() => false);
+  return page
+    .evaluate((sel: string) => {
+      const el = document.querySelector(sel);
+      if (!el) return false;
+      const tag = el.tagName.toLowerCase();
+      return tag === "input" || tag === "textarea" || el.getAttribute("contenteditable") === "true";
+    }, selector)
+    .catch(() => false);
 }
 
 /**
  * Check if the element matching selector is currently focused.
  * Uses CDP Isolated World when available — invisible to main world.
  */
-async function isSelectorFocused(
-  stealth: StealthEval | null,
-  page: Page,
-  selector: string,
-): Promise<boolean> {
+async function isSelectorFocused(stealth: StealthEval | null, page: Page, selector: string): Promise<boolean> {
   if (stealth) {
     try {
       const escaped = JSON.stringify(selector);
@@ -218,12 +214,13 @@ async function isSelectorFocused(
     }
   }
 
-  return page.evaluate((sel: string) => {
-    const el = document.querySelector(sel);
-    return el === document.activeElement;
-  }, selector).catch(() => false);
+  return page
+    .evaluate((sel: string) => {
+      const el = document.querySelector(sel);
+      return el === document.activeElement;
+    }, selector)
+    .catch(() => false);
 }
-
 
 // ============================================================================
 // Page-level patching
@@ -255,7 +252,7 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     keyboardDown: page.keyboard.down.bind(page.keyboard),
     keyboardUp: page.keyboard.up.bind(page.keyboard),
     keyboardPress: page.keyboard.press.bind(page.keyboard),
-    keyboardInsertText: page.keyboard.insertText.bind(page.keyboard),
+    keyboardInsertText: page.keyboard.insertText.bind(page.keyboard)
   };
 
   (page as any)._original = originals;
@@ -280,14 +277,14 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     move: originals.mouseMove,
     down: originals.mouseDown,
     up: originals.mouseUp,
-    wheel: originals.mouseWheel,
+    wheel: originals.mouseWheel
   };
 
   const rawKb: RawKeyboard = {
     down: originals.keyboardDown,
     up: originals.keyboardUp,
     type: originals.keyboardType,
-    insertText: originals.keyboardInsertText,
+    insertText: originals.keyboardInsertText
   };
 
   async function ensureCursorInit(): Promise<void> {
@@ -300,11 +297,14 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   }
 
   // --- goto (invalidate isolated world on navigation) ---
-  const humanGoto = async (url: string, options?: {
-    referer?: string;
-    timeout?: number;
-    waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit';
-  }) => {
+  const humanGoto = async (
+    url: string,
+    options?: {
+      referer?: string;
+      timeout?: number;
+      waitUntil?: "load" | "domcontentloaded" | "networkidle" | "commit";
+    }
+  ) => {
     const response = await originals.goto(url, options);
     stealth.invalidate();
     patchFrames(page, cfg, cursor, raw, rawKb, originals, stealth);
@@ -327,14 +327,26 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     if (callCfg.idle_between_actions) {
       await humanIdle(raw, cursor.x, cursor.y, callCfg);
     }
-    const { box, cursorX, cursorY, didScroll } = await scrollToElement(page, raw, selector, cursor.x, cursor.y, callCfg, remainingMs());
+    const { box, cursorX, cursorY, didScroll } = await scrollToElement(
+      page,
+      raw,
+      selector,
+      cursor.x,
+      cursor.y,
+      callCfg,
+      remainingMs()
+    );
     cursor.x = cursorX;
     cursor.y = cursorY;
     const isInput = await isInputElement(stealth, page, selector);
     let finalBox = box;
     if (!force && didScroll) {
       await ensureStable(page, selector, remainingMs());
-      finalBox = await page.locator(selector).first().boundingBox({ timeout: Math.max(1, remainingMs()) }) ?? box;
+      finalBox =
+        (await page
+          .locator(selector)
+          .first()
+          .boundingBox({ timeout: Math.max(1, remainingMs()) })) ?? box;
     }
     const target = clickTarget(finalBox, isInput, callCfg);
     if (!force) {
@@ -359,14 +371,26 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     if (callCfg.idle_between_actions) {
       await humanIdle(raw, cursor.x, cursor.y, callCfg);
     }
-    const { box, cursorX, cursorY, didScroll } = await scrollToElement(page, raw, selector, cursor.x, cursor.y, callCfg, remainingMs());
+    const { box, cursorX, cursorY, didScroll } = await scrollToElement(
+      page,
+      raw,
+      selector,
+      cursor.x,
+      cursor.y,
+      callCfg,
+      remainingMs()
+    );
     cursor.x = cursorX;
     cursor.y = cursorY;
     const isInput = await isInputElement(stealth, page, selector);
     let finalBox = box;
     if (!force && didScroll) {
       await ensureStable(page, selector, remainingMs());
-      finalBox = await page.locator(selector).first().boundingBox({ timeout: Math.max(1, remainingMs()) }) ?? box;
+      finalBox =
+        (await page
+          .locator(selector)
+          .first()
+          .boundingBox({ timeout: Math.max(1, remainingMs()) })) ?? box;
     }
     const target = clickTarget(finalBox, isInput, callCfg);
     if (!force) {
@@ -394,13 +418,25 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     if (callCfg.idle_between_actions) {
       await humanIdle(raw, cursor.x, cursor.y, callCfg);
     }
-    const { box, cursorX, cursorY, didScroll } = await scrollToElement(page, raw, selector, cursor.x, cursor.y, callCfg, remainingMs());
+    const { box, cursorX, cursorY, didScroll } = await scrollToElement(
+      page,
+      raw,
+      selector,
+      cursor.x,
+      cursor.y,
+      callCfg,
+      remainingMs()
+    );
     cursor.x = cursorX;
     cursor.y = cursorY;
     let finalBox = box;
     if (!force && didScroll) {
       await ensureStable(page, selector, remainingMs());
-      finalBox = await page.locator(selector).first().boundingBox({ timeout: Math.max(1, remainingMs()) }) ?? box;
+      finalBox =
+        (await page
+          .locator(selector)
+          .first()
+          .boundingBox({ timeout: Math.max(1, remainingMs()) })) ?? box;
     }
     const target = clickTarget(finalBox, false, callCfg);
     if (!force) {
@@ -421,7 +457,12 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
 
     if (!force) await ensureActionable(page, selector, CHECKS_INPUT, remainingMs(), force);
     await sleep(randRange(callCfg.field_switch_delay));
-    await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+    await humanClickFn(selector, {
+      _skipChecks: true,
+      timeout: remainingMs(),
+      force,
+      human_config: options?.human_config
+    } as any);
     await sleep(rand(100, 250));
     const cdp = await ensureCdp();
     await humanType(page, rawKb, text, callCfg, cdp);
@@ -437,11 +478,16 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
 
     if (!force) await ensureActionable(page, selector, CHECKS_INPUT, remainingMs(), force);
     await sleep(randRange(callCfg.field_switch_delay));
-    await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+    await humanClickFn(selector, {
+      _skipChecks: true,
+      timeout: remainingMs(),
+      force,
+      human_config: options?.human_config
+    } as any);
     await sleep(rand(100, 250));
     await originals.keyboardPress(SELECT_ALL);
     await sleep(rand(30, 80));
-    await originals.keyboardPress('Backspace');
+    await originals.keyboardPress("Backspace");
     await sleep(rand(50, 150));
     const cdp = await ensureCdp();
     await humanType(page, rawKb, value, callCfg, cdp);
@@ -455,13 +501,18 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     const remainingMs = () => Math.max(0, deadline - Date.now());
 
     if (!force) await ensureActionable(page, selector, CHECKS_FOCUS, remainingMs(), force);
-    if (!await isSelectorFocused(stealth, page, selector)) {
-      await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+    if (!(await isSelectorFocused(stealth, page, selector))) {
+      await humanClickFn(selector, {
+        _skipChecks: true,
+        timeout: remainingMs(),
+        force,
+        human_config: options?.human_config
+      } as any);
     }
     await sleep(rand(50, 150));
     await originals.keyboardPress(SELECT_ALL);
     await sleep(rand(30, 80));
-    await originals.keyboardPress('Backspace');
+    await originals.keyboardPress("Backspace");
   };
 
   // --- check ---
@@ -478,7 +529,12 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     }
     const checked = await originals.isChecked(selector).catch(() => false);
     if (!checked) {
-      await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+      await humanClickFn(selector, {
+        _skipChecks: true,
+        timeout: remainingMs(),
+        force,
+        human_config: options?.human_config
+      } as any);
     }
   };
 
@@ -496,7 +552,12 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     }
     const checked = await originals.isChecked(selector).catch(() => true);
     if (checked) {
-      await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+      await humanClickFn(selector, {
+        _skipChecks: true,
+        timeout: remainingMs(),
+        force,
+        human_config: options?.human_config
+      } as any);
     }
   };
 
@@ -508,7 +569,12 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     const remainingMs = () => Math.max(0, deadline - Date.now());
 
     if (!force) await ensureActionable(page, selector, CHECKS_FOCUS, remainingMs(), force);
-    await humanHoverFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+    await humanHoverFn(selector, {
+      _skipChecks: true,
+      timeout: remainingMs(),
+      force,
+      human_config: options?.human_config
+    } as any);
     await sleep(rand(100, 300));
     return originals.selectOption(selector, values, options);
   };
@@ -521,8 +587,13 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     const remainingMs = () => Math.max(0, deadline - Date.now());
 
     if (!force) await ensureActionable(page, selector, CHECKS_FOCUS, remainingMs(), force);
-    if (!await isSelectorFocused(stealth, page, selector)) {
-      await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+    if (!(await isSelectorFocused(stealth, page, selector))) {
+      await humanClickFn(selector, {
+        _skipChecks: true,
+        timeout: remainingMs(),
+        force,
+        human_config: options?.human_config
+      } as any);
     }
     await sleep(rand(50, 150));
     await originals.keyboardPress(key);
@@ -537,8 +608,13 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     const remainingMs = () => Math.max(0, deadline - Date.now());
 
     if (!force) await ensureActionable(page, selector, CHECKS_FOCUS, remainingMs(), force);
-    if (!await isSelectorFocused(stealth, page, selector)) {
-      await humanClickFn(selector, { _skipChecks: true, timeout: remainingMs(), force, human_config: options?.human_config } as any);
+    if (!(await isSelectorFocused(stealth, page, selector))) {
+      await humanClickFn(selector, {
+        _skipChecks: true,
+        timeout: remainingMs(),
+        force,
+        human_config: options?.human_config
+      } as any);
     }
     await sleep(rand(100, 250));
     const cdp = await ensureCdp();
@@ -566,20 +642,28 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   (page as any).clear = humanClearFn;
 
   // --- mouse patches ---
-  page.mouse.move = async (x: number, y: number, options?: {
-    steps?: number;
-  }) => {
+  page.mouse.move = async (
+    x: number,
+    y: number,
+    options?: {
+      steps?: number;
+    }
+  ) => {
     await ensureCursorInit();
     await humanMove(raw, cursor.x, cursor.y, x, y, cfg);
     cursor.x = x;
     cursor.y = y;
   };
 
-  page.mouse.click = async (x: number, y: number, options?: {
-    button?: 'left' | 'right' | 'middle';
-    clickCount?: number;
-    delay?: number;
-  }) => {
+  page.mouse.click = async (
+    x: number,
+    y: number,
+    options?: {
+      button?: "left" | "right" | "middle";
+      clickCount?: number;
+      delay?: number;
+    }
+  ) => {
     await ensureCursorInit();
     await humanMove(raw, cursor.x, cursor.y, x, y, cfg);
     cursor.x = x;
@@ -609,9 +693,12 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   // Initialize cursor immediately so it doesn't visibly jump from (0,0)
   cursor.x = rand(cfg.initial_cursor_x[0], cfg.initial_cursor_x[1]);
   cursor.y = rand(cfg.initial_cursor_y[0], cfg.initial_cursor_y[1]);
-  originals.mouseMove(cursor.x, cursor.y).then(() => {
-    cursor.initialized = true;
-  }).catch(() => {});
+  originals
+    .mouseMove(cursor.x, cursor.y)
+    .then(() => {
+      cursor.initialized = true;
+    })
+    .catch(() => {});
 
   // --- Patch Frame-level methods (for sub-frames) ---
   patchFrames(page, cfg, cursor, raw, rawKb, originals, stealth);
@@ -619,7 +706,6 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   // --- Patch ElementHandle selectors (page.$, page.$$, page.waitForSelector) ---
   patchPageElementHandles(page, cfg, cursor, raw, rawKb, originals, stealth);
 }
-
 
 // ============================================================================
 // Frame-level patching
@@ -637,7 +723,7 @@ function patchFrames(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: StealthEval,
+  stealth: StealthEval
 ): void {
   for (const frame of iterFrames(page)) {
     patchSingleFrame(frame, page, cfg, cursor, raw, rawKb, originals, stealth);
@@ -648,19 +734,21 @@ function patchFrames(
 
 function firstFrameLocator(frame: Frame, selector: string): any {
   const locator = frame.locator(selector) as any;
-  return typeof locator.first === 'function' ? locator.first() : locator;
+  return typeof locator.first === "function" ? locator.first() : locator;
 }
 
 async function isFrameInputElement(frame: Frame, selector: string): Promise<boolean> {
-  return firstFrameLocator(frame, selector).evaluate((el: Element) => {
-    const tag = el.tagName.toLowerCase();
-    return tag === 'input' || tag === 'textarea'
-      || el.getAttribute('contenteditable') === 'true';
-  }).catch(() => false);
+  return firstFrameLocator(frame, selector)
+    .evaluate((el: Element) => {
+      const tag = el.tagName.toLowerCase();
+      return tag === "input" || tag === "textarea" || el.getAttribute("contenteditable") === "true";
+    })
+    .catch(() => false);
 }
 
 async function isFrameSelectorFocused(frame: Frame, selector: string): Promise<boolean> {
-  return firstFrameLocator(frame, selector).evaluate((el: Element) => el === document.activeElement)
+  return firstFrameLocator(frame, selector)
+    .evaluate((el: Element) => el === document.activeElement)
     .catch(() => false);
 }
 
@@ -672,7 +760,7 @@ function patchSingleFrame(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: StealthEval,
+  stealth: StealthEval
 ): void {
   if ((frame as any)._humanPatched) return;
   (frame as any)._humanPatched = true;
@@ -698,13 +786,13 @@ function patchSingleFrame(
     }
 
     const locator = firstFrameLocator(frame, selector);
-    if (typeof locator.scrollIntoViewIfNeeded === 'function') {
+    if (typeof locator.scrollIntoViewIfNeeded === "function") {
       await locator.scrollIntoViewIfNeeded({ timeout: options?.timeout }).catch(() => undefined);
     }
     const box = await locator.boundingBox({ timeout: options?.timeout ?? 30000 }).catch(() => null);
     if (!box) return null;
 
-    const isInput = inputBias || await isFrameInputElement(frame, selector);
+    const isInput = inputBias || (await isFrameInputElement(frame, selector));
     const target = clickTarget(box, isInput, callCfg);
     await humanMove(raw, cursor.x, cursor.y, target.x, target.y, callCfg);
     cursor.x = target.x;
@@ -753,7 +841,7 @@ function patchSingleFrame(
     await sleep(rand(100, 250));
     await originals.keyboardPress(SELECT_ALL);
     await sleep(rand(30, 80));
-    await originals.keyboardPress('Backspace');
+    await originals.keyboardPress("Backspace");
     await sleep(rand(50, 150));
     const cdp = await getFrameCdp();
     await humanType(page, rawKb, value, callCfg, cdp).catch(() => origFrameFill(selector, value, options));
@@ -761,14 +849,14 @@ function patchSingleFrame(
 
   (frame as any).check = async (selector: string, options?: HumanActionOptions) => {
     const locator = firstFrameLocator(frame, selector);
-    if (typeof locator.isChecked !== 'function') return origFrameCheck(selector, options);
+    if (typeof locator.isChecked !== "function") return origFrameCheck(selector, options);
     const checked = await locator.isChecked();
     if (!checked) await frameClick(selector, options).catch(() => origFrameCheck(selector, options));
   };
 
   (frame as any).uncheck = async (selector: string, options?: HumanActionOptions) => {
     const locator = firstFrameLocator(frame, selector);
-    if (typeof locator.isChecked !== 'function') return origFrameUncheck(selector, options);
+    if (typeof locator.isChecked !== "function") return origFrameUncheck(selector, options);
     const checked = await locator.isChecked();
     if (checked) await frameClick(selector, options).catch(() => origFrameUncheck(selector, options));
   };
@@ -780,7 +868,7 @@ function patchSingleFrame(
   };
 
   (frame as any).press = async (selector: string, key: string, options?: HumanActionOptions) => {
-    if (!await isFrameSelectorFocused(frame, selector)) {
+    if (!(await isFrameSelectorFocused(frame, selector))) {
       await frameClick(selector, options);
     }
     await sleep(rand(50, 150));
@@ -789,7 +877,7 @@ function patchSingleFrame(
 
   (frame as any).pressSequentially = async (selector: string, text: string, options?: HumanActionOptions) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
-    if (!await isFrameSelectorFocused(frame, selector)) {
+    if (!(await isFrameSelectorFocused(frame, selector))) {
       await frameClick(selector, options);
     }
     await sleep(rand(100, 250));
@@ -802,26 +890,34 @@ function patchSingleFrame(
   };
 
   (frame as any).clear = async (selector: string, options?: HumanActionOptions) => {
-    if (!await isFrameSelectorFocused(frame, selector)) {
+    if (!(await isFrameSelectorFocused(frame, selector))) {
       await frameClick(selector, options);
     }
     await sleep(rand(50, 150));
     await originals.keyboardPress(SELECT_ALL);
     await sleep(rand(30, 80));
-    await originals.keyboardPress('Backspace');
+    await originals.keyboardPress("Backspace");
   };
 
-  (frame as any).dragAndDrop = async (source: string, target: string, options?: {
-    force?: boolean;
-    noWaitAfter?: boolean;
-    sourcePosition?: { x: number; y: number };
-    strict?: boolean;
-    targetPosition?: { x: number; y: number };
-    timeout?: number;
-    trial?: boolean;
-  }) => {
-    const srcBox = await firstFrameLocator(frame, source).boundingBox({ timeout: options?.timeout ?? 30000 }).catch(() => null);
-    const tgtBox = await firstFrameLocator(frame, target).boundingBox({ timeout: options?.timeout ?? 30000 }).catch(() => null);
+  (frame as any).dragAndDrop = async (
+    source: string,
+    target: string,
+    options?: {
+      force?: boolean;
+      noWaitAfter?: boolean;
+      sourcePosition?: { x: number; y: number };
+      strict?: boolean;
+      targetPosition?: { x: number; y: number };
+      timeout?: number;
+      trial?: boolean;
+    }
+  ) => {
+    const srcBox = await firstFrameLocator(frame, source)
+      .boundingBox({ timeout: options?.timeout ?? 30000 })
+      .catch(() => null);
+    const tgtBox = await firstFrameLocator(frame, target)
+      .boundingBox({ timeout: options?.timeout ?? 30000 })
+      .catch(() => null);
 
     if (srcBox && tgtBox) {
       const sx = srcBox.x + srcBox.width / 2;
@@ -842,7 +938,6 @@ function patchSingleFrame(
   };
 }
 
-
 function* iterFrames(page: Page): Generator<Frame> {
   try {
     const mainFrame = page.mainFrame();
@@ -853,7 +948,6 @@ function* iterFrames(page: Page): Generator<Frame> {
   } catch {}
 }
 
-
 // ============================================================================
 // Context-level patching
 // ============================================================================
@@ -863,7 +957,7 @@ function patchContext(context: BrowserContext, cfg: HumanConfig): void {
   for (const page of context.pages()) {
     patchPage(page, cfg, cursor);
   }
-  context.on('page', (page: Page) => {
+  context.on("page", (page: Page) => {
     if (!(page as any)._original) {
       patchPage(page, cfg, new CursorState());
     }
@@ -878,7 +972,6 @@ function patchContext(context: BrowserContext, cfg: HumanConfig): void {
     return page;
   };
 }
-
 
 // ============================================================================
 // Browser-level patching

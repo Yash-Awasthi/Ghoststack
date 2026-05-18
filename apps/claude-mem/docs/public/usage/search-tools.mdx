@@ -64,11 +64,13 @@ get_observations(ids=[123, 456, 789])
 ### Why This Works
 
 **Traditional Approach:**
+
 - Fetch everything upfront: 20,000 tokens
 - Relevance: ~10% (2,000 tokens actually useful)
 - Waste: 18,000 tokens on irrelevant context
 
 **3-Layer Approach:**
+
 - Search index: 1,000 tokens (10 results)
 - Timeline context: 500 tokens (around 2 key results)
 - Fetch details: 1,500 tokens (3 observations)
@@ -87,6 +89,7 @@ Always visible reminder of the 3-layer workflow pattern. Helps Claude understand
 Search your memory and get a compact index with IDs.
 
 **Parameters:**
+
 - `query` - Full-text search query (supports AND, OR, NOT, phrase searches)
 - `limit` - Maximum results (default: 20)
 - `offset` - Skip first N results for pagination
@@ -100,6 +103,7 @@ Search your memory and get a compact index with IDs.
 **Returns:** Compact index table with IDs, titles, dates, types
 
 **Example:**
+
 ```
 search(query="database migration", type="bugfix", limit=5, orderBy="date_desc")
 ```
@@ -109,6 +113,7 @@ search(query="database migration", type="bugfix", limit=5, orderBy="date_desc")
 Get a chronological view of observations around a specific point or query.
 
 **Parameters:**
+
 - `anchor` - Observation ID to center timeline around (optional if query provided)
 - `query` - Search query to find anchor automatically (optional if anchor provided)
 - `depth_before` - Number of observations before anchor (default: 3)
@@ -118,11 +123,13 @@ Get a chronological view of observations around a specific point or query.
 **Returns:** Chronological list showing what happened before/during/after
 
 **Example:**
+
 ```
 timeline(anchor=12345, depth_before=5, depth_after=5)
 ```
 
 Or search-based:
+
 ```
 timeline(query="implemented JWT auth", depth_before=3, depth_after=3)
 ```
@@ -132,6 +139,7 @@ timeline(query="implemented JWT auth", depth_before=3, depth_after=3)
 Fetch complete observation details by IDs. **Always batch multiple IDs in a single call for efficiency.**
 
 **Parameters:**
+
 - `ids` - Array of observation IDs (required)
 - `orderBy` - Sort order (date_desc, date_asc)
 - `limit` - Maximum observations to return
@@ -140,6 +148,7 @@ Fetch complete observation details by IDs. **Always batch multiple IDs in a sing
 **Returns:** Complete observation details including narrative, facts, files, concepts
 
 **Example:**
+
 ```
 get_observations(ids=[123, 456, 789, 1011])
 ```
@@ -276,21 +285,23 @@ query='"user auth" AND (JWT OR session) NOT deprecated'
 
 ### Token Cost Estimates
 
-| Operation | Tokens per Result |
-|-----------|-------------------|
-| search (index) | 50-100 |
-| timeline (per observation) | 100-200 |
-| get_observations (full details) | 500-1,000 |
+| Operation                       | Tokens per Result |
+| ------------------------------- | ----------------- |
+| search (index)                  | 50-100            |
+| timeline (per observation)      | 100-200           |
+| get_observations (full details) | 500-1,000         |
 
 **Example Comparison:**
 
 **Inefficient:**
+
 ```
 # Fetching 20 full observations upfront: 10,000-20,000 tokens
 get_observations(ids=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
 ```
 
 **Efficient:**
+
 ```
 # Search index: ~1,000 tokens
 search(query="bug fix", limit=20)
@@ -362,6 +373,7 @@ All observations include rich metadata:
 ### No Results Found
 
 1. **Broaden your search:**
+
    ```
    # Too specific
    search(query="JWT authentication implementation with RS256")
@@ -371,6 +383,7 @@ All observations include rich metadata:
    ```
 
 2. **Check database has data:**
+
    ```bash
    curl "http://localhost:37777/api/search?query=test"
    ```
@@ -386,11 +399,13 @@ All observations include rich metadata:
 **Error:** "Observation IDs not found: [123, 456]"
 
 **Causes:**
+
 - IDs from different project (use `project` parameter)
 - IDs were deleted
 - Typo in ID numbers
 
 **Solution:**
+
 ```
 # Verify IDs exist
 search(query="<related-search>")
@@ -419,6 +434,7 @@ get_observations(ids=[<5-most-relevant>])  # ~2,500-5,000 tokens
 ### Search Performance
 
 If searches seem slow:
+
 1. Be more specific in queries (helps FTS5 index)
 2. Use date range filters to narrow scope
 3. Specify project filter when possible

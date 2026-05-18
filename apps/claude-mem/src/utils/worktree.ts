@@ -1,12 +1,11 @@
-
-import { statSync, readFileSync } from 'fs';
-import path from 'path';
+import { statSync, readFileSync } from "fs";
+import path from "path";
 
 export interface WorktreeInfo {
   isWorktree: boolean;
-  worktreeName: string | null;     
-  parentRepoPath: string | null;   
-  parentProjectName: string | null; 
+  worktreeName: string | null;
+  parentRepoPath: string | null;
+  parentProjectName: string | null;
 }
 
 const NOT_A_WORKTREE: WorktreeInfo = {
@@ -17,13 +16,13 @@ const NOT_A_WORKTREE: WorktreeInfo = {
 };
 
 export function detectWorktree(cwd: string): WorktreeInfo {
-  const gitPath = path.join(cwd, '.git');
+  const gitPath = path.join(cwd, ".git");
 
   let stat;
   try {
     stat = statSync(gitPath);
   } catch (error: unknown) {
-    if (error instanceof Error && (error as NodeJS.ErrnoException).code !== 'ENOENT') {
+    if (error instanceof Error && (error as NodeJS.ErrnoException).code !== "ENOENT") {
       console.warn(`[worktree] Unexpected error checking .git:`, error);
     }
     return NOT_A_WORKTREE;
@@ -35,7 +34,7 @@ export function detectWorktree(cwd: string): WorktreeInfo {
 
   let content: string;
   try {
-    content = readFileSync(gitPath, 'utf-8').trim();
+    content = readFileSync(gitPath, "utf-8").trim();
   } catch (error: unknown) {
     console.warn(`[worktree] Failed to read .git file:`, error instanceof Error ? error.message : String(error));
     return NOT_A_WORKTREE;

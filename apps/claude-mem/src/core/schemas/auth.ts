@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
+import { z } from "zod";
 
-export const ApiKeyStatusSchema = z.enum(['active', 'revoked']);
-export const AuditActorTypeSchema = z.enum(['user', 'api_key', 'system']);
+export const ApiKeyStatusSchema = z.enum(["active", "revoked"]);
+export const AuditActorTypeSchema = z.enum(["user", "api_key", "system"]);
 
 export const ApiKeySchema = z.object({
   id: z.string().min(1),
@@ -13,7 +13,7 @@ export const ApiKeySchema = z.object({
   keyHash: z.string().min(1),
   prefix: z.string().min(1).nullable().default(null),
   scopes: z.array(z.string()).default([]),
-  status: ApiKeyStatusSchema.default('active'),
+  status: ApiKeyStatusSchema.default("active"),
   lastUsedAtEpoch: z.number().int().nonnegative().nullable().default(null),
   expiresAtEpoch: z.number().int().nonnegative().nullable().default(null),
   metadata: z.record(z.string(), z.unknown()).default({}),

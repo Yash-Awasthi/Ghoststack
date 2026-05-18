@@ -38,6 +38,7 @@ The build process uses esbuild to compile TypeScript:
 5. Bundles web viewer UI to `plugin/ui/viewer.html`
 
 **Build Output**:
+
 - Hook executables: `*-hook.js` (ESM format)
 - Setup version-check: `version-check.js` (ESM format, sub-100ms)
 - Worker service: `worker-service.cjs` (CJS format)
@@ -125,6 +126,7 @@ The web viewer UI is a React application built into a self-contained HTML bundle
 **Location**: `src/ui/viewer/`
 
 **Structure**:
+
 ```
 src/ui/viewer/
 ├── index.tsx              # Entry point
@@ -195,10 +197,12 @@ export const YourCard: React.FC<YourCardProps> = ({ ... }) => {
 2. Import and use in `Feed.tsx`:
 
 ```tsx
-import { YourCard } from './cards/YourCard';
+import { YourCard } from "./cards/YourCard";
 
 // In render logic:
-{item.type === 'your_type' && <YourCard {...item} />}
+{
+  item.type === "your_type" && <YourCard {...item} />;
+}
 ```
 
 3. Update types if needed in `src/ui/viewer/types.ts`
@@ -208,6 +212,7 @@ import { YourCard } from './cards/YourCard';
 ### Viewer UI Architecture
 
 **Data Flow**:
+
 1. Worker service exposes HTTP + SSE endpoints
 2. React app fetches initial data via HTTP (paginated)
 3. SSE connection provides real-time updates
@@ -215,6 +220,7 @@ import { YourCard } from './cards/YourCard';
 5. Components render cards based on item type
 
 **Key Patterns**:
+
 - **Infinite Scroll**: `usePagination` hook with Intersection Observer
 - **Real-Time Updates**: `useSSE` hook with auto-reconnection
 - **Deduplication**: `merge.ts` utilities prevent duplicate items
@@ -229,14 +235,14 @@ import { YourCard } from './cards/YourCard';
 
 ```typescript
 #!/usr/bin/env node
-import { readStdin } from '../shared/stdin';
+import { readStdin } from "../shared/stdin";
 
 async function main() {
   const input = await readStdin();
 
   // Hook implementation
   const result = {
-    hookSpecificOutput: 'Optional output'
+    hookSpecificOutput: "Optional output"
   };
 
   console.log(JSON.stringify(result));
@@ -251,13 +257,17 @@ main().catch(console.error);
 
 ```json
 {
-  "YourHook": [{
-    "hooks": [{
-      "type": "command",
-      "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/your-hook.js",
-      "timeout": 120
-    }]
-  }]
+  "YourHook": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/your-hook.js",
+          "timeout": 120
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -346,7 +356,7 @@ npm test
 
 ```typescript
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === 'your_new_tool') {
+  if (request.params.name === "your_new_tool") {
     // Implement tool logic
     const results = await search.yourNewSearch(params);
     return formatResults(results);
@@ -382,6 +392,7 @@ Claude-mem relies on **real-world usage and manual testing** rather than traditi
 5. **Observability** - Comprehensive logging and worker health checks
 
 This approach was chosen because:
+
 - Hook behavior depends heavily on Claude Code's runtime environment
 - SDK interactions require real API calls and responses
 - SQLite and Bun runtime provide stability guarantees
@@ -392,6 +403,7 @@ This approach was chosen because:
 When developing new features:
 
 1. **Build and sync**:
+
    ```bash
    npm run build
    npm run sync-marketplace
@@ -404,11 +416,13 @@ When developing new features:
    - Verify expected behavior
 
 3. **Check database state**:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "SELECT * FROM your_table;"
    ```
 
 4. **Monitor worker logs**:
+
    ```bash
    npm run worker:logs
    ```
@@ -421,6 +435,7 @@ When developing new features:
 ### Testing Tools
 
 **Health Checks**:
+
 ```bash
 # Worker status
 npm run worker:status
@@ -433,6 +448,7 @@ sqlite3 ~/.claude-mem/claude-mem.db "PRAGMA integrity_check;"
 ```
 
 **Hook Testing**:
+
 ```bash
 # Test context hook manually
 echo '{"session_id":"test-123","cwd":"'$(pwd)'","source":"startup"}' | node plugin/scripts/context-hook.js
@@ -442,6 +458,7 @@ echo '{"session_id":"test-123","cwd":"'$(pwd)'","prompt":"test"}' | node plugin/
 ```
 
 **Data Verification**:
+
 ```bash
 # Check recent observations
 sqlite3 ~/.claude-mem/claude-mem.db "
@@ -465,6 +482,7 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 For manual recovery features specifically:
 
 1. **Simulate stuck messages**:
+
    ```bash
    # Manually create stuck message (for testing only)
    sqlite3 ~/.claude-mem/claude-mem.db "
@@ -476,6 +494,7 @@ For manual recovery features specifically:
    ```
 
 2. **Test recovery**:
+
    ```bash
    bun scripts/check-pending-queue.ts
    ```
@@ -537,18 +556,16 @@ Before releasing:
 /**
  * Create a new observation in the database
  */
-export async function createObservation(
-  obs: Observation
-): Promise<number> {
+export async function createObservation(obs: Observation): Promise<number> {
   try {
-    const result = await db.insert('observations', {
+    const result = await db.insert("observations", {
       session_id: obs.session_id,
-      tool_name: obs.tool_name,
+      tool_name: obs.tool_name
       // ...
     });
     return result.id;
   } catch (error) {
-    logger.error('Failed to create observation', error);
+    logger.error("Failed to create observation", error);
     throw error;
   }
 }
@@ -616,6 +633,7 @@ npm run release
 ```
 
 The `release` script:
+
 1. Runs tests
 2. Builds all components
 3. Publishes to NPM registry
@@ -717,12 +735,14 @@ rm -rf plugin/scripts/*.js plugin/scripts/*.cjs
 ### Build Fails
 
 1. Clean node_modules:
+
    ```bash
    rm -rf node_modules
    npm install
    ```
 
 2. Check Node.js version:
+
    ```bash
    node --version  # Should be >= 18.0.0
    ```
@@ -735,12 +755,14 @@ rm -rf plugin/scripts/*.js plugin/scripts/*.cjs
 ### Tests Fail
 
 1. Check database:
+
    ```bash
    rm ~/.claude-mem/claude-mem.db
    npm test
    ```
 
 2. Check worker status:
+
    ```bash
    npm run worker:status
    ```
@@ -753,11 +775,13 @@ rm -rf plugin/scripts/*.js plugin/scripts/*.cjs
 ### Worker Won't Start
 
 1. Kill existing process:
+
    ```bash
    npm run worker:stop
    ```
 
 2. Check port:
+
    ```bash
    lsof -i :37777
    ```

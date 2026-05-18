@@ -179,7 +179,8 @@ Katso [Arkkitehtuurin yleiskatsaus](https://docs.claude-mem.ai/architecture/over
 Claude-Mem tarjoaa älykkään haun mem-search-taidon kautta, joka käynnistyy automaattisesti kun kysyt aiemmasta työstä:
 
 **Miten se toimii:**
-- Kysy vain luonnollisesti: *"Mitä teimme viime istunnossa?"* tai *"Korjasimmeko tämän bugin aiemmin?"*
+
+- Kysy vain luonnollisesti: _"Mitä teimme viime istunnossa?"_ tai _"Korjasimmeko tämän bugin aiemmin?"_
 - Claude käynnistää automaattisesti mem-search-taidon löytääkseen relevantin kontekstin
 
 **Saatavilla olevat hakutoiminnot:**
@@ -285,7 +286,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Tuki
 

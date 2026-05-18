@@ -1,18 +1,17 @@
-
-import { execSync, spawnSync } from 'child_process';
-import { existsSync, unlinkSync } from 'fs';
-import { join } from 'path';
-import { logger } from '../../utils/logger.js';
-import { MARKETPLACE_ROOT } from '../../shared/paths.js';
+import { execSync, spawnSync } from "child_process";
+import { existsSync, unlinkSync } from "fs";
+import { join } from "path";
+import { logger } from "../../utils/logger.js";
+import { MARKETPLACE_ROOT } from "../../shared/paths.js";
 
 const INSTALLED_PLUGIN_PATH = MARKETPLACE_ROOT;
 
 function isValidBranchName(branchName: string): boolean {
-  if (!branchName || typeof branchName !== 'string') {
+  if (!branchName || typeof branchName !== "string") {
     return false;
   }
   const validBranchRegex = /^[a-zA-Z0-9][a-zA-Z0-9._/-]*$/;
-  return validBranchRegex.test(branchName) && !branchName.includes('..');
+  return validBranchRegex.test(branchName) && !branchName.includes("..");
 }
 
 const GIT_COMMAND_TIMEOUT_MS = 300_000;
@@ -35,12 +34,12 @@ export interface SwitchResult {
 }
 
 function execGit(args: string[]): string {
-  const result = spawnSync('git', args, {
+  const result = spawnSync("git", args, {
     cwd: INSTALLED_PLUGIN_PATH,
-    encoding: 'utf-8',
+    encoding: "utf-8",
     timeout: GIT_COMMAND_TIMEOUT_MS,
     windowsHide: true,
-    shell: false  
+    shell: false
   });
 
   if (result.error) {
@@ -48,22 +47,22 @@ function execGit(args: string[]): string {
   }
 
   if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || 'Git command failed');
+    throw new Error(result.stderr || result.stdout || "Git command failed");
   }
 
   return result.stdout.trim();
 }
 
 function execNpm(args: string[], timeoutMs: number = NPM_INSTALL_TIMEOUT_MS): string {
-  const isWindows = process.platform === 'win32';
-  const npmCmd = isWindows ? 'npm.cmd' : 'npm';
+  const isWindows = process.platform === "win32";
+  const npmCmd = isWindows ? "npm.cmd" : "npm";
 
   const result = spawnSync(npmCmd, args, {
     cwd: INSTALLED_PLUGIN_PATH,
-    encoding: 'utf-8',
+    encoding: "utf-8",
     timeout: timeoutMs,
     windowsHide: true,
-    shell: false  
+    shell: false
   });
 
   if (result.error) {
@@ -71,14 +70,14 @@ function execNpm(args: string[], timeoutMs: number = NPM_INSTALL_TIMEOUT_MS): st
   }
 
   if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || 'npm command failed');
+    throw new Error(result.stderr || result.stdout || "npm command failed");
   }
 
   return result.stdout.trim();
 }
 
 export function getBranchInfo(): BranchInfo {
-  const gitDir = join(INSTALLED_PLUGIN_PATH, '.git');
+  const gitDir = join(INSTALLED_PLUGIN_PATH, ".git");
   if (!existsSync(gitDir)) {
     return {
       branch: null,
@@ -86,18 +85,18 @@ export function getBranchInfo(): BranchInfo {
       isGitRepo: false,
       isDirty: false,
       canSwitch: false,
-      error: 'Installed plugin is not a git repository'
+      error: "Installed plugin is not a git repository"
     };
   }
 
   let branch: string;
   let status: string;
   try {
-    branch = execGit(['rev-parse', '--abbrev-ref', 'HEAD']);
-    status = execGit(['status', '--porcelain']);
+    branch = execGit(["rev-parse", "--abbrev-ref", "HEAD"]);
+    status = execGit(["status", "--porcelain"]);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('WORKER', 'Failed to get branch info', {}, error instanceof Error ? error : new Error(errorMessage));
+    logger.error("WORKER", "Failed to get branch info", {}, error instanceof Error ? error : new Error(errorMessage));
     return {
       branch: null,
       isBeta: false,
@@ -109,14 +108,14 @@ export function getBranchInfo(): BranchInfo {
   }
 
   const isDirty = status.length > 0;
-  const isBeta = branch.startsWith('beta');
+  const isBeta = branch.startsWith("beta");
 
   return {
     branch,
     isBeta,
     isGitRepo: true,
     isDirty,
-    canSwitch: true 
+    canSwitch: true
   };
 }
 
@@ -133,7 +132,7 @@ export async function switchBranch(targetBranch: string): Promise<SwitchResult> 
   if (!info.isGitRepo) {
     return {
       success: false,
-      error: 'Installed plugin is not a git repository. Please reinstall.'
+      error: "Installed plugin is not a git repository. Please reinstall."
     };
   }
 
@@ -146,38 +145,41 @@ export async function switchBranch(targetBranch: string): Promise<SwitchResult> 
   }
 
   try {
-    logger.info('BRANCH', 'Starting branch switch', {
+    logger.info("BRANCH", "Starting branch switch", {
       from: info.branch,
       to: targetBranch
     });
 
-    logger.debug('BRANCH', 'Discarding local changes');
-    execGit(['checkout', '--', '.']);
-    execGit(['clean', '-fd']); 
+    logger.debug("BRANCH", "Discarding local changes");
+    execGit(["checkout", "--", "."]);
+    execGit(["clean", "-fd"]);
 
-    logger.debug('BRANCH', 'Fetching from origin');
-    execGit(['fetch', 'origin']);
+    logger.debug("BRANCH", "Fetching from origin");
+    execGit(["fetch", "origin"]);
 
-    logger.debug('BRANCH', 'Checking out branch', { branch: targetBranch });
+    logger.debug("BRANCH", "Checking out branch", { branch: targetBranch });
     try {
-      execGit(['checkout', targetBranch]);
+      execGit(["checkout", targetBranch]);
     } catch (error) {
-      logger.debug('BRANCH', 'Branch not local, tracking remote', { branch: targetBranch, error: error instanceof Error ? error.message : String(error) });
-      execGit(['checkout', '-b', targetBranch, `origin/${targetBranch}`]);
+      logger.debug("BRANCH", "Branch not local, tracking remote", {
+        branch: targetBranch,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      execGit(["checkout", "-b", targetBranch, `origin/${targetBranch}`]);
     }
 
-    logger.debug('BRANCH', 'Pulling latest');
-    execGit(['pull', 'origin', targetBranch]);
+    logger.debug("BRANCH", "Pulling latest");
+    execGit(["pull", "origin", targetBranch]);
 
-    const installMarker = join(INSTALLED_PLUGIN_PATH, '.install-version');
+    const installMarker = join(INSTALLED_PLUGIN_PATH, ".install-version");
     if (existsSync(installMarker)) {
       unlinkSync(installMarker);
     }
 
-    logger.debug('BRANCH', 'Running npm install');
-    execNpm(['install'], NPM_INSTALL_TIMEOUT_MS);
+    logger.debug("BRANCH", "Running npm install");
+    execNpm(["install"], NPM_INSTALL_TIMEOUT_MS);
 
-    logger.success('BRANCH', 'Branch switch complete', {
+    logger.success("BRANCH", "Branch switch complete", {
       branch: targetBranch
     });
 
@@ -187,15 +189,20 @@ export async function switchBranch(targetBranch: string): Promise<SwitchResult> 
       message: `Switched to ${targetBranch}. Worker will restart automatically.`
     };
   } catch (error) {
-    logger.error('BRANCH', 'Branch switch failed', { targetBranch }, error as Error);
+    logger.error("BRANCH", "Branch switch failed", { targetBranch }, error as Error);
 
     try {
       if (info.branch && isValidBranchName(info.branch)) {
-        execGit(['checkout', info.branch]);
+        execGit(["checkout", info.branch]);
       }
     } catch (recoveryError) {
       const recoveryErrorMessage = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
-      logger.error('WORKER', 'Recovery checkout also failed', { originalBranch: info.branch }, recoveryError instanceof Error ? recoveryError : new Error(recoveryErrorMessage));
+      logger.error(
+        "WORKER",
+        "Recovery checkout also failed",
+        { originalBranch: info.branch },
+        recoveryError instanceof Error ? recoveryError : new Error(recoveryErrorMessage)
+      );
     }
 
     return {
@@ -211,7 +218,7 @@ export async function pullUpdates(): Promise<SwitchResult> {
   if (!info.isGitRepo || !info.branch) {
     return {
       success: false,
-      error: 'Cannot pull updates: not a git repository'
+      error: "Cannot pull updates: not a git repository"
     };
   }
 
@@ -222,30 +229,30 @@ export async function pullUpdates(): Promise<SwitchResult> {
     };
   }
 
-  logger.info('BRANCH', 'Pulling updates', { branch: info.branch });
+  logger.info("BRANCH", "Pulling updates", { branch: info.branch });
 
-  const installMarker = join(INSTALLED_PLUGIN_PATH, '.install-version');
+  const installMarker = join(INSTALLED_PLUGIN_PATH, ".install-version");
 
   try {
-    execGit(['checkout', '--', '.']);
+    execGit(["checkout", "--", "."]);
 
-    execGit(['fetch', 'origin']);
-    execGit(['pull', 'origin', info.branch]);
+    execGit(["fetch", "origin"]);
+    execGit(["pull", "origin", info.branch]);
 
     if (existsSync(installMarker)) {
       unlinkSync(installMarker);
     }
-    execNpm(['install'], NPM_INSTALL_TIMEOUT_MS);
+    execNpm(["install"], NPM_INSTALL_TIMEOUT_MS);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('WORKER', 'Pull failed', {}, error instanceof Error ? error : new Error(errorMessage));
+    logger.error("WORKER", "Pull failed", {}, error instanceof Error ? error : new Error(errorMessage));
     return {
       success: false,
       error: `Pull failed: ${errorMessage}`
     };
   }
 
-  logger.success('BRANCH', 'Updates pulled', { branch: info.branch });
+  logger.success("BRANCH", "Updates pulled", { branch: info.branch });
 
   return {
     success: true,
@@ -253,4 +260,3 @@ export async function pullUpdates(): Promise<SwitchResult> {
     message: `Updated ${info.branch}. Worker will restart automatically.`
   };
 }
-

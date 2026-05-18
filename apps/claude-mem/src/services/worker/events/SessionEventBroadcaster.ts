@@ -1,6 +1,5 @@
-
-import { SSEBroadcaster } from '../SSEBroadcaster.js';
-import type { WorkerService } from '../../worker-service.js';
+import { SSEBroadcaster } from "../SSEBroadcaster.js";
+import type { WorkerService } from "../../worker-service.js";
 
 export class SessionEventBroadcaster {
   constructor(
@@ -18,14 +17,14 @@ export class SessionEventBroadcaster {
     created_at_epoch: number;
   }): void {
     this.sseBroadcaster.broadcast({
-      type: 'new_prompt',
+      type: "new_prompt",
       prompt
     });
   }
 
   broadcastSessionStarted(sessionDbId: number, project: string): void {
     this.sseBroadcaster.broadcast({
-      type: 'session_started',
+      type: "session_started",
       sessionDbId,
       project
     });
@@ -33,14 +32,14 @@ export class SessionEventBroadcaster {
 
   broadcastObservationQueued(sessionDbId: number): void {
     this.sseBroadcaster.broadcast({
-      type: 'observation_queued',
+      type: "observation_queued",
       sessionDbId
     });
   }
 
   broadcastSessionCompleted(sessionDbId: number): void {
     this.sseBroadcaster.broadcast({
-      type: 'session_completed',
+      type: "session_completed",
       timestamp: Date.now(),
       sessionDbId
     });

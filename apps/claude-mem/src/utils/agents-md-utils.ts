@@ -1,22 +1,28 @@
-import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { replaceTaggedContent } from './claude-md-utils.js';
-import { logger } from './logger.js';
+import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from "fs";
+import { dirname, resolve } from "path";
+import { replaceTaggedContent } from "./claude-md-utils.js";
+import { logger } from "./logger.js";
 
 export function writeAgentsMd(agentsPath: string, context: string): void {
   if (!agentsPath) return;
 
   const resolvedPath = resolve(agentsPath);
-  if (resolvedPath.includes('/.git/') || resolvedPath.includes('\\.git\\') || resolvedPath.endsWith('/.git') || resolvedPath.endsWith('\\.git')) return;
+  if (
+    resolvedPath.includes("/.git/") ||
+    resolvedPath.includes("\\.git\\") ||
+    resolvedPath.endsWith("/.git") ||
+    resolvedPath.endsWith("\\.git")
+  )
+    return;
 
   const dir = dirname(agentsPath);
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
 
-  let existingContent = '';
+  let existingContent = "";
   if (existsSync(agentsPath)) {
-    existingContent = readFileSync(agentsPath, 'utf-8');
+    existingContent = readFileSync(agentsPath, "utf-8");
   }
 
   const contentBlock = `# Memory Context\n\n${context}`;
@@ -27,6 +33,11 @@ export function writeAgentsMd(agentsPath: string, context: string): void {
     writeFileSync(tempFile, finalContent);
     renameSync(tempFile, agentsPath);
   } catch (error: unknown) {
-    logger.error('AGENTS_MD', 'Failed to write AGENTS.md', { agentsPath }, error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      "AGENTS_MD",
+      "Failed to write AGENTS.md",
+      { agentsPath },
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
 }

@@ -6,12 +6,12 @@ This document covers what the image is, how to build and locally test it, and th
 
 ## Files in this directory
 
-| File | Purpose |
-|---|---|
-| `Dockerfile` | `FROM cloakhq/cloakbrowser` plus a thin Lambda layer. Self-contained — no files outside this directory are referenced. |
+| File                   | Purpose                                                                                                                                                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dockerfile`           | `FROM cloakhq/cloakbrowser` plus a thin Lambda layer. Self-contained — no files outside this directory are referenced.                                                                                                                                               |
 | `lambda-entrypoint.sh` | Dual-mode entrypoint. Starts Xvfb, then routes `module.func` CMDs through `awslambdaric` (via the bundled `aws-lambda-rie` locally, or the AWS Runtime API in production), and execs everything else (`python`, `cloakserve`, `cloaktest`, `node`, `bash`) directly. |
-| `lambda_handler.py` | Default handler. Takes `{url, ...}`, returns `{title, url, html, screenshot_b64?}`. Always headed via Xvfb. |
-| `INSTRUCTIONS.md` | This file. |
+| `lambda_handler.py`    | Default handler. Takes `{url, ...}`, returns `{title, url, html, screenshot_b64?}`. Always headed via Xvfb.                                                                                                                                                          |
+| `INSTRUCTIONS.md`      | This file.                                                                                                                                                                                                                                                           |
 
 The Lambda layer is ~30 lines on top of the official image — no apt list, no Node install, no JS-wrapper build, no Chromium download. The canonical CloakHQ image owns those.
 
@@ -68,46 +68,46 @@ Only `url` is required. Everything else is optional.
 
 ### Launch options (forwarded to `cloakbrowser.launch_context_async`)
 
-| Field | Type | Default |
-|---|---|---|
-| `url` | str | required — `http://` and `https://` only |
-| `proxy` | str / dict | none — `http://user:pass@host:port` or a Playwright proxy dict |
-| `humanize` | bool | `false` — enable human-like mouse / keyboard / scroll |
-| `human_preset` | str | `"default"` or `"careful"` |
-| `geoip` | bool | `false` — auto timezone+locale from proxy IP |
-| `timezone` | str | none — IANA tz, e.g. `"America/New_York"` |
-| `locale` | str | none — BCP-47, e.g. `"en-US"` |
-| `viewport` | `{width,height}` | `1920x947` (cloakbrowser default) |
-| `user_agent` | str | none |
+| Field          | Type             | Default                                                        |
+| -------------- | ---------------- | -------------------------------------------------------------- |
+| `url`          | str              | required — `http://` and `https://` only                       |
+| `proxy`        | str / dict       | none — `http://user:pass@host:port` or a Playwright proxy dict |
+| `humanize`     | bool             | `false` — enable human-like mouse / keyboard / scroll          |
+| `human_preset` | str              | `"default"` or `"careful"`                                     |
+| `geoip`        | bool             | `false` — auto timezone+locale from proxy IP                   |
+| `timezone`     | str              | none — IANA tz, e.g. `"America/New_York"`                      |
+| `locale`       | str              | none — BCP-47, e.g. `"en-US"`                                  |
+| `viewport`     | `{width,height}` | `1920x947` (cloakbrowser default)                              |
+| `user_agent`   | str              | none                                                           |
 
 ### Navigation
 
-| Field | Type | Default |
-|---|---|---|
-| `wait_until` | str | `"domcontentloaded"` — `load` / `domcontentloaded` / `networkidle` / `commit` |
-| `goto_timeout_ms` | int | `30000` |
+| Field             | Type | Default                                                                       |
+| ----------------- | ---- | ----------------------------------------------------------------------------- |
+| `wait_until`      | str  | `"domcontentloaded"` — `load` / `domcontentloaded` / `networkidle` / `commit` |
+| `goto_timeout_ms` | int  | `30000`                                                                       |
 
 ### Post-navigation waits
 
 `smart_wait` is the default when no other wait is specified. It polls `document.documentElement.outerHTML.length` and returns when the size hasn't changed for `dom_stable_ms`. Robust for at-scale scraping because it ignores network activity (analytics beacons, long-poll, websockets) that doesn't mutate the DOM — `wait_until: "networkidle"` is unreliable on modern SPAs for exactly this reason.
 
-| Field | Type | Default |
-|---|---|---|
-| `smart_wait` | bool | `true` if no other wait is set |
-| `dom_stable_ms` | int | `1500` |
-| `max_settle_ms` | int | `15000` |
-| `wait_for_load_state` | str | none — `load` / `domcontentloaded` / `networkidle` |
-| `wait_for_load_state_timeout_ms` | int | `30000` |
-| `wait_for_selector` | str | none — CSS or XPath |
-| `wait_for_selector_state` | str | `"visible"` — also `attached` / `detached` / `hidden` |
-| `wait_for_selector_timeout_ms` | int | `30000` |
-| `wait_ms` | int | none — fixed pause |
+| Field                            | Type | Default                                               |
+| -------------------------------- | ---- | ----------------------------------------------------- |
+| `smart_wait`                     | bool | `true` if no other wait is set                        |
+| `dom_stable_ms`                  | int  | `1500`                                                |
+| `max_settle_ms`                  | int  | `15000`                                               |
+| `wait_for_load_state`            | str  | none — `load` / `domcontentloaded` / `networkidle`    |
+| `wait_for_load_state_timeout_ms` | int  | `30000`                                               |
+| `wait_for_selector`              | str  | none — CSS or XPath                                   |
+| `wait_for_selector_state`        | str  | `"visible"` — also `attached` / `detached` / `hidden` |
+| `wait_for_selector_timeout_ms`   | int  | `30000`                                               |
+| `wait_ms`                        | int  | none — fixed pause                                    |
 
 ### Capture
 
-| Field | Type | Default |
-|---|---|---|
-| `screenshot` | bool | `true` |
+| Field                  | Type | Default |
+| ---------------------- | ---- | ------- |
+| `screenshot`           | bool | `true`  |
 | `full_page_screenshot` | bool | `false` |
 
 ### Retry orchestration
@@ -117,17 +117,17 @@ The handler retries transient navigation failures inline within the same Lambda 
 - **Launch retries** — 3 attempts with 0.3 s + 0.6 s backoff. Recovers Xvfb / Chromium spawn races at cold start. Fast and cheap; not configurable.
 - **Strategy retries** — default 1 attempt, configurable via the `retries` event field. Recovers specific post-launch error classes by relaunching with adjusted internal Chromium args / page-load budgets.
 
-| Field | Type | Default |
-|---|---|---|
-| `retries` | int | `1` — number of strategy-retry attempts after the first failure. Set to `0` to disable retry entirely. |
+| Field     | Type | Default                                                                                                |
+| --------- | ---- | ------------------------------------------------------------------------------------------------------ |
+| `retries` | int  | `1` — number of strategy-retry attempts after the first failure. Set to `0` to disable retry entirely. |
 
 Strategies (priority order — first match wins):
 
-| Error pattern | Strategy applied |
-|---|---|
+| Error pattern                 | Strategy applied                                                        |
+| ----------------------------- | ----------------------------------------------------------------------- |
 | `ERR_CERT_*` (any cert error) | `extra_args: ["--ignore-certificate-errors"]`, `goto_timeout_ms: 60000` |
-| `Timeout … exceeded` | `goto_timeout_ms: 90000`, `max_settle_ms: 25000` |
-| `ERR_CONNECTION_TIMED_OUT` | same as `Timeout … exceeded` |
+| `Timeout … exceeded`          | `goto_timeout_ms: 90000`, `max_settle_ms: 25000`                        |
+| `ERR_CONNECTION_TIMED_OUT`    | same as `Timeout … exceeded`                                            |
 
 Errors that are **not retried** (no anonymous scraper can recover): `ERR_NAME_NOT_RESOLVED`, `ERR_SSL_PROTOCOL_ERROR`, `ERR_CONNECTION_REFUSED`, `ERR_HTTP_RESPONSE_CODE_FAILURE`. These bail immediately.
 
@@ -155,15 +155,15 @@ Two flags are forced on every launch by `lambda_handler.py`:
 
 Whatever tool you use to create the Lambda function (CLI, CDK, Terraform, SAM, console), apply these settings:
 
-| Setting | Value | Why |
-|---|---|---|
-| Package type | Image | Required — this is a container image, not a zip. |
-| Architecture | `arm64` | Roughly 20% cheaper than x86_64. Native build on Apple Silicon. Match the architecture you built for. |
-| Memory | 3008 MB | Memory in Lambda is tied to vCPU. Below ~1769 MB Chromium starts noticeably slower. |
-| Timeout | 120–180 s | Single-attempt scrapes complete in 3–15 s warm; under retry, a `Timeout`-class first failure (30 s default) plus a longer-budget retry (90 s) plus cleanup can total ~120-130 s. 180 s leaves headroom; below 120 s the function will time out before the retry completes. Cold-start init adds 5-10 s on top. |
-| Ephemeral storage (`/tmp`) | 1024 MB | Chromium profile dirs and screenshots can fill the 512 MB default. |
-| Networking | Default (no VPC) | Binary is baked in, no network needed at cold start. Add VPC + NAT only if your proxy egress requires it. |
-| Execution role | `AWSLambdaBasicExecutionRole` | Just CloudWatch Logs. Add more permissions only if your handler needs them. |
+| Setting                    | Value                         | Why                                                                                                                                                                                                                                                                                                            |
+| -------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package type               | Image                         | Required — this is a container image, not a zip.                                                                                                                                                                                                                                                               |
+| Architecture               | `arm64`                       | Roughly 20% cheaper than x86_64. Native build on Apple Silicon. Match the architecture you built for.                                                                                                                                                                                                          |
+| Memory                     | 3008 MB                       | Memory in Lambda is tied to vCPU. Below ~1769 MB Chromium starts noticeably slower.                                                                                                                                                                                                                            |
+| Timeout                    | 120–180 s                     | Single-attempt scrapes complete in 3–15 s warm; under retry, a `Timeout`-class first failure (30 s default) plus a longer-budget retry (90 s) plus cleanup can total ~120-130 s. 180 s leaves headroom; below 120 s the function will time out before the retry completes. Cold-start init adds 5-10 s on top. |
+| Ephemeral storage (`/tmp`) | 1024 MB                       | Chromium profile dirs and screenshots can fill the 512 MB default.                                                                                                                                                                                                                                             |
+| Networking                 | Default (no VPC)              | Binary is baked in, no network needed at cold start. Add VPC + NAT only if your proxy egress requires it.                                                                                                                                                                                                      |
+| Execution role             | `AWSLambdaBasicExecutionRole` | Just CloudWatch Logs. Add more permissions only if your handler needs them.                                                                                                                                                                                                                                    |
 
 ## Cold start
 
@@ -184,7 +184,8 @@ The handler validates all incoming URLs before navigation:
 - **No arbitrary JS execution** — `wait_for_function` is not exposed. Use `wait_for_selector` or `smart_wait` instead.
 
 **Limitations**:
-- Post-navigation re-validation prevents response *exfiltration*, but does not prevent the browser from *making* the request. If an internal endpoint has side effects on GET, the request will still reach it before validation rejects the response. Use network-level controls (security groups, VPC) to protect side-effect-bearing internal endpoints.
+
+- Post-navigation re-validation prevents response _exfiltration_, but does not prevent the browser from _making_ the request. If an internal endpoint has side effects on GET, the request will still reach it before validation rejects the response. Use network-level controls (security groups, VPC) to protect side-effect-bearing internal endpoints.
 - DNS rebinding attacks can bypass pre-navigation IP checks in theory, though the post-navigation re-validation provides a second layer of defense.
 
 **Trust boundary**: if this handler is exposed to untrusted callers (Lambda Function URL, API Gateway without auth, public ALB), add an authentication layer (API Gateway authorizer, IAM auth, etc.). The URL validation above is defense-in-depth, not a substitute for access control.

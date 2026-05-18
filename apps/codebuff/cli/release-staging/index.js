@@ -285,7 +285,9 @@ async function downloadBinary(version) {
   const fileName = PLATFORM_TARGETS[platformKey]
 
   if (!fileName) {
-    const error = new Error(`Unsupported platform: ${process.platform} ${process.arch}`)
+    const error = new Error(
+      `Unsupported platform: ${process.platform} ${process.arch}`,
+    )
     trackUpdateFailed(error.message, version, { stage: 'platform_check' })
     throw error
   }
@@ -310,7 +312,10 @@ async function downloadBinary(version) {
   if (res.statusCode !== 200) {
     fs.rmSync(CONFIG.tempDownloadDir, { recursive: true })
     const error = new Error(`Download failed: HTTP ${res.statusCode}`)
-    trackUpdateFailed(error.message, version, { stage: 'http_download', statusCode: res.statusCode })
+    trackUpdateFailed(error.message, version, {
+      stage: 'http_download',
+      statusCode: res.statusCode,
+    })
     throw error
   }
 
@@ -385,10 +390,7 @@ async function downloadBinary(version) {
     fs.renameSync(tempBinaryPath, CONFIG.binaryPath)
 
     // Save version metadata for fast version checking
-    fs.writeFileSync(
-      CONFIG.metadataPath,
-      JSON.stringify({ version }, null, 2),
-    )
+    fs.writeFileSync(CONFIG.metadataPath, JSON.stringify({ version }, null, 2))
   } finally {
     // Clean up temp directory even if rename fails
     if (fs.existsSync(CONFIG.tempDownloadDir)) {
@@ -478,7 +480,7 @@ async function checkForUpdates(runningProcess, exitListener) {
       newChild.on('exit', (code, signal) => {
         resetTerminal()
         printCrashDiagnostics(code, signal)
-        process.exit(signal ? 1 : (code || 0))
+        process.exit(signal ? 1 : code || 0)
       })
 
       newChild.on('error', (err) => {
@@ -495,19 +497,20 @@ async function checkForUpdates(runningProcess, exitListener) {
 
 function printCrashDiagnostics(code, signal) {
   // Windows NTSTATUS codes (unsigned DWORD)
-  const unsignedCode = code != null && code < 0 ? (code >>> 0) : code
+  const unsignedCode = code != null && code < 0 ? code >>> 0 : code
   const isIllegalInstruction =
     signal === 'SIGILL' ||
-    (process.platform === 'win32' && unsignedCode === 0xC000001D)
+    (process.platform === 'win32' && unsignedCode === 0xc000001d)
   const isAccessViolation =
     signal === 'SIGSEGV' ||
-    (process.platform === 'win32' && unsignedCode === 0xC0000005)
+    (process.platform === 'win32' && unsignedCode === 0xc0000005)
   const isBusError = signal === 'SIGBUS'
   const isAbort =
     signal === 'SIGABRT' ||
-    (process.platform === 'win32' && unsignedCode === 0xC0000409)
+    (process.platform === 'win32' && unsignedCode === 0xc0000409)
 
-  if (!isIllegalInstruction && !isAccessViolation && !isBusError && !isAbort) return
+  if (!isIllegalInstruction && !isAccessViolation && !isBusError && !isAbort)
+    return
 
   const exitInfo = signal ? `signal ${signal}` : `code ${code}`
   console.error('')
@@ -515,9 +518,13 @@ function printCrashDiagnostics(code, signal) {
   console.error('')
 
   if (isIllegalInstruction) {
-    console.error('Your CPU may not support the required instruction set (AVX2).')
+    console.error(
+      'Your CPU may not support the required instruction set (AVX2).',
+    )
     console.error('This typically affects CPUs from before 2013.')
-    console.error('Unfortunately, this binary is not compatible with your system.')
+    console.error(
+      'Unfortunately, this binary is not compatible with your system.',
+    )
     console.error('')
   } else if (isAccessViolation) {
     console.error('The binary crashed with an access violation.')
@@ -559,7 +566,7 @@ async function main() {
   const exitListener = (code, signal) => {
     resetTerminal()
     printCrashDiagnostics(code, signal)
-    process.exit(signal ? 1 : (code || 0))
+    process.exit(signal ? 1 : code || 0)
   }
 
   child.on('exit', exitListener)

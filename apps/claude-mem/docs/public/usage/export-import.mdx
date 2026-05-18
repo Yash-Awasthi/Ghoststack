@@ -19,6 +19,7 @@ Share your claude-mem knowledge with other users! These scripts allow you to exp
 ### Export Script
 
 Searches the database using **hybrid search** (combines ChromaDB vector embeddings with FTS5 full-text search) and exports all matching:
+
 - **Observations** - Individual learnings and discoveries
 - **Sessions** - Session metadata
 - **Summaries** - Session summaries
@@ -31,12 +32,14 @@ Output is a portable JSON file that can be shared.
 ### Import Script
 
 Imports memories with **duplicate prevention**:
+
 - Checks if each record already exists before inserting
 - Skips duplicates automatically
 - Maintains data integrity with transactional imports
 - Reports what was imported vs. skipped
 
 **Duplicate Detection Strategy:**
+
 - **Sessions**: By `claude_session_id` (unique)
 - **Summaries**: By `sdk_session_id` (unique)
 - **Observations**: By `sdk_session_id` + `title` + `created_at_epoch` (composite)
@@ -58,11 +61,13 @@ npx tsx scripts/export-memories.ts "progressive disclosure" progressive-disclosu
 ```
 
 **Parameters:**
+
 1. `<query>` - Search query (uses hybrid semantic + full-text search)
 2. `<output-file>` - Output JSON file path
 3. `--project=name` - Optional: filter results to a specific project
 
 **Example Output:**
+
 ```
 🔍 Searching for: "windows"
 ✅ Found 54 observations
@@ -87,9 +92,11 @@ npx tsx scripts/import-memories.ts windows-memories.json
 ```
 
 **Parameters:**
+
 1. `<input-file>` - Input JSON file (from export script)
 
 **Example Output:**
+
 ```
 📦 Import file: windows-memories.json
 📅 Exported: 2025-12-10T23:45:00.000Z
@@ -137,6 +144,7 @@ If you run the import again on the same file, duplicates are automatically skipp
 ### For Export Authors
 
 1. **Export your memories:**
+
    ```bash
    npx tsx scripts/export-memories.ts "windows" windows-memories.json
    ```
@@ -157,11 +165,13 @@ If you run the import again on the same file, duplicates are automatically skipp
 1. **Download the export file** to your local machine
 
 2. **Review what's in it** (optional):
+
    ```bash
    cat windows-memories.json | jq '.totalObservations, .totalSessions'
    ```
 
 3. **Import into your database:**
+
    ```bash
    npx tsx scripts/import-memories.ts windows-memories.json
    ```
@@ -182,10 +192,18 @@ If you run the import again on the same file, duplicates are automatically skipp
   "totalSessions": 12,
   "totalSummaries": 12,
   "totalPrompts": 7,
-  "observations": [ /* array of observation objects */ ],
-  "sessions": [ /* array of session objects */ ],
-  "summaries": [ /* array of summary objects */ ],
-  "prompts": [ /* array of prompt objects */ ]
+  "observations": [
+    /* array of observation objects */
+  ],
+  "sessions": [
+    /* array of session objects */
+  ],
+  "summaries": [
+    /* array of summary objects */
+  ],
+  "prompts": [
+    /* array of prompt objects */
+  ]
 }
 ```
 
@@ -275,21 +293,25 @@ If you've exported valuable knowledge that others might benefit from:
 ## Examples of Useful Exports
 
 **Windows Compatibility Knowledge:**
+
 ```bash
 npx tsx scripts/export-memories.ts "windows compatibility installation" windows-fixes.json
 ```
 
 **Progressive Disclosure Architecture:**
+
 ```bash
 npx tsx scripts/export-memories.ts "progressive disclosure architecture token" pd-patterns.json
 ```
 
 **Bug Fix Patterns:**
+
 ```bash
 npx tsx scripts/export-memories.ts "bugfix error handling" bugfix-patterns.json
 ```
 
 **Performance Optimization:**
+
 ```bash
 npx tsx scripts/export-memories.ts "performance optimization caching" perf-tips.json
 ```

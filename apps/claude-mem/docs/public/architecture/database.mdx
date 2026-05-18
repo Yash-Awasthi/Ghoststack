@@ -16,6 +16,7 @@ The database uses SQLite's WAL (Write-Ahead Logging) mode for concurrent reads/w
 ## Database Implementation
 
 **Primary Implementation**: bun:sqlite (native SQLite module)
+
 - Used by: SessionStore and SessionSearch
 - Format: Synchronous API with better performance
 - **Note**: Database.ts (using bun:sqlite) is legacy code
@@ -44,6 +45,7 @@ CREATE TABLE sdk_sessions (
 ```
 
 **Indexes**:
+
 - `idx_sdk_sessions_claude_session` on `claude_session_id`
 - `idx_sdk_sessions_project` on `project`
 - `idx_sdk_sessions_status` on `status`
@@ -83,6 +85,7 @@ CREATE TABLE observations (
 ```
 
 **Observation Types**:
+
 - `decision` - Architectural or design decisions
 - `bugfix` - Bug fixes and corrections
 - `feature` - New features or capabilities
@@ -91,6 +94,7 @@ CREATE TABLE observations (
 - `change` - General changes and modifications
 
 **Indexes**:
+
 - `idx_observations_session` on `session_id`
 - `idx_observations_sdk_session` on `sdk_session_id`
 - `idx_observations_project` on `project`
@@ -126,6 +130,7 @@ CREATE TABLE session_summaries (
 ```
 
 **Indexes**:
+
 - `idx_session_summaries_sdk_session` on `sdk_session_id`
 - `idx_session_summaries_project` on `project`
 - `idx_session_summaries_created_at` on `created_at_epoch DESC`
@@ -150,6 +155,7 @@ CREATE TABLE user_prompts (
 ```
 
 **Indexes**:
+
 - `idx_user_prompts_sdk_session` on `sdk_session_id`
 - `idx_user_prompts_project` on `project`
 - `idx_user_prompts_created_at` on `created_at_epoch DESC`
@@ -246,6 +252,7 @@ FTS5 supports rich query syntax:
 ### Security
 
 As of v4.2.3, all FTS5 queries are properly escaped to prevent SQL injection:
+
 - Double quotes are escaped: `query.replace(/"/g, '""')`
 - Comprehensive test suite with 332 injection attack tests
 
@@ -258,6 +265,7 @@ CRUD operations for sessions, observations, summaries, and user prompts.
 **Location**: `src/services/sqlite/SessionStore.ts`
 
 **Methods**:
+
 - `createSession()`
 - `getSession()`
 - `updateSession()`
@@ -274,6 +282,7 @@ FTS5 full-text search with 8 specialized search methods.
 **Location**: `src/services/sqlite/SessionSearch.ts`
 
 **Methods**:
+
 - `searchObservations()` - Full-text search across observations
 - `searchSessions()` - Full-text search across summaries
 - `searchUserPrompts()` - Full-text search across user prompts
@@ -288,6 +297,7 @@ FTS5 full-text search with 8 specialized search methods.
 Database schema is managed via migrations in `src/services/sqlite/migrations.ts`.
 
 **Migration History**:
+
 - Migration 001: Initial schema (sessions, memories, overviews, diagnostics, transcript_events)
 - Migration 002: Hierarchical memory fields (title, subtitle, facts, concepts, files_touched)
 - Migration 003: SDK sessions and observations

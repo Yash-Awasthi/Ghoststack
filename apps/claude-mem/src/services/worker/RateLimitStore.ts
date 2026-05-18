@@ -28,19 +28,14 @@
  * users are exempt because they authorized per-call spend.
  */
 
-export type RateLimitWindow =
-  | 'five_hour'
-  | 'seven_day'
-  | 'seven_day_opus'
-  | 'seven_day_sonnet'
-  | 'overage';
+export type RateLimitWindow = "five_hour" | "seven_day" | "seven_day_opus" | "seven_day_sonnet" | "overage";
 
 export interface RateLimitInfo {
-  status?: 'allowed' | 'allowed_warning' | 'rejected';
+  status?: "allowed" | "allowed_warning" | "rejected";
   resetsAt?: number;
   rateLimitType?: RateLimitWindow;
   utilization?: number;
-  overageStatus?: 'allowed' | 'allowed_warning' | 'rejected';
+  overageStatus?: "allowed" | "allowed_warning" | "rejected";
   overageResetsAt?: number;
   isUsingOverage?: boolean;
   surpassedThreshold?: number;
@@ -50,7 +45,7 @@ export interface RateLimitEntry extends RateLimitInfo {
   observedAt: number;
 }
 
-export type RateLimitBucketKey = RateLimitWindow | 'default';
+export type RateLimitBucketKey = RateLimitWindow | "default";
 
 export class RateLimitStore {
   private entries = new Map<RateLimitBucketKey, RateLimitEntry>();
@@ -61,22 +56,20 @@ export class RateLimitStore {
    * callers should pass the inner info.
    */
   set(info: RateLimitInfo | undefined | null): void {
-    if (!info || typeof info !== 'object') return;
-    const key: RateLimitBucketKey = info.rateLimitType ?? 'default';
+    if (!info || typeof info !== "object") return;
+    const key: RateLimitBucketKey = info.rateLimitType ?? "default";
     this.entries.set(key, { ...info, observedAt: Date.now() });
   }
 
   /** Snapshot a single bucket, or undefined if not yet seen. */
   get(type: RateLimitWindow | undefined): RateLimitEntry | undefined {
-    if (!type) return this.entries.get('default');
+    if (!type) return this.entries.get("default");
     return this.entries.get(type);
   }
 
   /** All current entries, newest-first by observedAt. */
   getAll(): RateLimitEntry[] {
-    return Array.from(this.entries.values()).sort(
-      (a, b) => b.observedAt - a.observedAt,
-    );
+    return Array.from(this.entries.values()).sort((a, b) => b.observedAt - a.observedAt);
   }
 
   /** Latest snapshot per "interesting" window for health surface. */
@@ -88,11 +81,11 @@ export class RateLimitStore {
     overage?: RateLimitEntry;
   } {
     return {
-      five_hour: this.entries.get('five_hour'),
-      seven_day: this.entries.get('seven_day'),
-      seven_day_opus: this.entries.get('seven_day_opus'),
-      seven_day_sonnet: this.entries.get('seven_day_sonnet'),
-      overage: this.entries.get('overage'),
+      five_hour: this.entries.get("five_hour"),
+      seven_day: this.entries.get("seven_day"),
+      seven_day_opus: this.entries.get("seven_day_opus"),
+      seven_day_sonnet: this.entries.get("seven_day_sonnet"),
+      overage: this.entries.get("overage")
     };
   }
 
@@ -119,7 +112,7 @@ const UTILIZATION_THRESHOLDS: Record<RateLimitWindow, number> = {
   seven_day_opus: 0.93,
   seven_day_sonnet: 0.92,
   seven_day: 0.93,
-  overage: 0.95,
+  overage: 0.95
 };
 
 /** Reset-window grace: bail early if a window resets within this many ms. */
@@ -140,7 +133,7 @@ const RESET_GRACE_UTILIZATION_FLOOR = 0.85;
 export function shouldAbortForQuota(
   authMethod: string,
   store: RateLimitStore,
-  now: number = Date.now(),
+  now: number = Date.now()
 ): { abort: boolean; reason?: string; window?: RateLimitWindow } {
   // API-key users authorized per-call spend; the wall-clock guard is for
   // subscription quota only.
@@ -148,13 +141,7 @@ export function shouldAbortForQuota(
     return { abort: false };
   }
 
-  const windows: RateLimitWindow[] = [
-    'five_hour',
-    'seven_day_opus',
-    'seven_day_sonnet',
-    'seven_day',
-    'overage',
-  ];
+  const windows: RateLimitWindow[] = ["five_hour", "seven_day_opus", "seven_day_sonnet", "seven_day", "overage"];
 
   for (const window of windows) {
     const entry = store.get(window);
@@ -167,23 +154,21 @@ export function shouldAbortForQuota(
     // status='rejected' (or overageStatus='rejected' on the overage window)
     // means the provider has already declared the bucket exhausted; we must
     // stop regardless of whether utilization is reported.
-    const isRejected =
-      entry.status === 'rejected' ||
-      (window === 'overage' && entry.overageStatus === 'rejected');
+    const isRejected = entry.status === "rejected" || (window === "overage" && entry.overageStatus === "rejected");
 
     if (isRejected) {
       return {
         abort: true,
         window,
-        reason: `quota:${window} rejected by provider`,
+        reason: `quota:${window} rejected by provider`
       };
     }
 
-    if (typeof util === 'number' && util >= threshold) {
+    if (typeof util === "number" && util >= threshold) {
       return {
         abort: true,
         window,
-        reason: `quota:${window} utilization ${(util * 100).toFixed(1)}% >= ${(threshold * 100).toFixed(0)}%`,
+        reason: `quota:${window} utilization ${(util * 100).toFixed(1)}% >= ${(threshold * 100).toFixed(0)}%`
       };
     }
 
@@ -191,9 +176,9 @@ export function shouldAbortForQuota(
     // a fresh bucket is imminent. Skip when utilization is low — no point
     // bailing on a window that just reset to ~0%.
     if (
-      window === 'five_hour' &&
-      typeof entry.resetsAt === 'number' &&
-      typeof util === 'number' &&
+      window === "five_hour" &&
+      typeof entry.resetsAt === "number" &&
+      typeof util === "number" &&
       util >= RESET_GRACE_UTILIZATION_FLOOR
     ) {
       const msUntilReset = entry.resetsAt - now;
@@ -201,7 +186,7 @@ export function shouldAbortForQuota(
         return {
           abort: true,
           window,
-          reason: `quota:${window} resets in ${Math.round(msUntilReset / 60000)}m (grace buffer ${RESET_GRACE_MS / 60000}m, util ${(util * 100).toFixed(1)}%)`,
+          reason: `quota:${window} resets in ${Math.round(msUntilReset / 60000)}m (grace buffer ${RESET_GRACE_MS / 60000}m, util ${(util * 100).toFixed(1)}%)`
         };
       }
     }
@@ -219,5 +204,5 @@ export function shouldAbortForQuota(
 export function isApiKeyAuth(authMethod: string): boolean {
   if (!authMethod) return false;
   const normalized = authMethod.toLowerCase();
-  return normalized.startsWith('api key') || normalized === 'api_key';
+  return normalized.startsWith("api key") || normalized === "api_key";
 }

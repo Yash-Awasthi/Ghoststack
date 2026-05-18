@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface ScrollToTopProps {
   targetRef: React.RefObject<HTMLDivElement>;
@@ -17,17 +17,17 @@ export function ScrollToTop({ targetRef }: ScrollToTopProps) {
 
     const target = targetRef.current;
     if (target) {
-      target.addEventListener('scroll', handleScroll);
-      return () => target.removeEventListener('scroll', handleScroll);
+      target.addEventListener("scroll", handleScroll);
+      return () => target.removeEventListener("scroll", handleScroll);
     }
-  }, []); 
+  }, []);
 
   const scrollToTop = () => {
     const target = targetRef.current;
     if (target) {
       target.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: "smooth"
       });
     }
   };
@@ -35,11 +35,7 @@ export function ScrollToTop({ targetRef }: ScrollToTopProps) {
   if (!isVisible) return null;
 
   return (
-    <button
-      onClick={scrollToTop}
-      className="scroll-to-top"
-      aria-label="Scroll to top"
-    >
+    <button onClick={scrollToTop} className="scroll-to-top" aria-label="Scroll to top">
       <svg
         width="20"
         height="20"

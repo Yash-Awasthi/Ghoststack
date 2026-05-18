@@ -9,17 +9,17 @@
  * injected days later cause 401s.
  */
 
-import { execFile, type ExecFileException } from 'child_process';
-import { promisify } from 'util';
-import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'fs';
-import { userInfo } from 'os';
-import { join } from 'path';
-import { paths } from './paths.js';
-import { logger } from '../utils/logger.js';
+import { execFile, type ExecFileException } from "child_process";
+import { promisify } from "util";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "fs";
+import { userInfo } from "os";
+import { join } from "path";
+import { paths } from "./paths.js";
+import { logger } from "../utils/logger.js";
 
 const execFileAsync = promisify(execFile);
 
-const KEYCHAIN_SERVICE_NAME = 'Claude Code-credentials';
+const KEYCHAIN_SERVICE_NAME = "Claude Code-credentials";
 const READ_TIMEOUT_MS = 5000;
 
 // Grace window: even if expiresAt is in the past by less than this, allow the
@@ -28,9 +28,9 @@ const READ_TIMEOUT_MS = 5000;
 const EXPIRY_GRACE_MS = 60_000;
 
 export type OAuthTokenResult =
-  | { kind: 'present'; token: string; source: 'keychain' | 'env-fallback'; expiresAt?: number }
-  | { kind: 'expired'; reason: string; expiresAt?: number }
-  | { kind: 'absent'; reason: string };
+  | { kind: "present"; token: string; source: "keychain" | "env-fallback"; expiresAt?: number }
+  | { kind: "expired"; reason: string; expiresAt?: number }
+  | { kind: "absent"; reason: string };
 
 interface ClaudeKeychainPayload {
   claudeAiOauth?: {
@@ -47,12 +47,12 @@ interface ClaudeKeychainPayload {
  * doesn't carry an `exp` claim.
  */
 export function decodeJwtExpMs(token: string): number | undefined {
-  const parts = token.split('.');
+  const parts = token.split(".");
   if (parts.length !== 3) return undefined;
   try {
-    const payloadB64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(Buffer.from(payloadB64, 'base64').toString('utf-8'));
-    if (typeof payload.exp === 'number') {
+    const payloadB64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(Buffer.from(payloadB64, "base64").toString("utf-8"));
+    if (typeof payload.exp === "number") {
       // JWT exp is seconds since epoch; normalize to ms.
       return payload.exp * 1000;
     }
@@ -80,21 +80,21 @@ async function readMacOsKeychain(): Promise<OAuthTokenResult> {
   const account = userInfo().username;
   try {
     const { stdout } = await execFileAsync(
-      'security',
-      ['find-generic-password', '-s', KEYCHAIN_SERVICE_NAME, '-a', account, '-w'],
-      { timeout: READ_TIMEOUT_MS, windowsHide: true },
+      "security",
+      ["find-generic-password", "-s", KEYCHAIN_SERVICE_NAME, "-a", account, "-w"],
+      { timeout: READ_TIMEOUT_MS, windowsHide: true }
     );
     const raw = stdout.trim();
     if (!raw) {
-      return { kind: 'absent', reason: 'macOS keychain returned empty value for "Claude Code-credentials"' };
+      return { kind: "absent", reason: 'macOS keychain returned empty value for "Claude Code-credentials"' };
     }
     return parseKeychainPayload(raw);
   } catch (error) {
     const err = error as ExecFileException;
     // `security` exits non-zero when the entry doesn't exist — fail-fast as absent.
     return {
-      kind: 'absent',
-      reason: `macOS keychain lookup failed for service "${KEYCHAIN_SERVICE_NAME}" (account=${account}): ${err.message ?? String(err)}`,
+      kind: "absent",
+      reason: `macOS keychain lookup failed for service "${KEYCHAIN_SERVICE_NAME}" (account=${account}): ${err.message ?? String(err)}`
     };
   }
 }
@@ -150,21 +150,20 @@ async function readWindowsCredentialManager(): Promise<OAuthTokenResult> {
   `.trim();
 
   try {
-    const { stdout } = await execFileAsync(
-      'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-Command', psScript],
-      { timeout: READ_TIMEOUT_MS, windowsHide: true },
-    );
+    const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", psScript], {
+      timeout: READ_TIMEOUT_MS,
+      windowsHide: true
+    });
     const raw = stdout.trim();
     if (!raw) {
-      return { kind: 'absent', reason: 'Windows Credential Manager has no entry for "Claude Code-credentials"' };
+      return { kind: "absent", reason: 'Windows Credential Manager has no entry for "Claude Code-credentials"' };
     }
     return parseKeychainPayload(raw);
   } catch (error) {
     const err = error as ExecFileException;
     return {
-      kind: 'absent',
-      reason: `Windows Credential Manager read failed: ${err.message ?? String(err)}`,
+      kind: "absent",
+      reason: `Windows Credential Manager read failed: ${err.message ?? String(err)}`
     };
   }
 }
@@ -178,20 +177,20 @@ async function readLinuxLibsecret(): Promise<OAuthTokenResult> {
   const account = userInfo().username;
   try {
     const { stdout } = await execFileAsync(
-      'secret-tool',
-      ['lookup', 'service', KEYCHAIN_SERVICE_NAME, 'account', account],
-      { timeout: READ_TIMEOUT_MS, windowsHide: true },
+      "secret-tool",
+      ["lookup", "service", KEYCHAIN_SERVICE_NAME, "account", account],
+      { timeout: READ_TIMEOUT_MS, windowsHide: true }
     );
     const raw = stdout.trim();
     if (!raw) {
-      return { kind: 'absent', reason: 'Linux libsecret returned empty value for "Claude Code-credentials"' };
+      return { kind: "absent", reason: 'Linux libsecret returned empty value for "Claude Code-credentials"' };
     }
     return parseKeychainPayload(raw);
   } catch (error) {
     const err = error as ExecFileException;
     return {
-      kind: 'absent',
-      reason: `Linux libsecret lookup failed (is secret-tool installed?): ${err.message ?? String(err)}`,
+      kind: "absent",
+      reason: `Linux libsecret lookup failed (is secret-tool installed?): ${err.message ?? String(err)}`
     };
   }
 }
@@ -206,25 +205,25 @@ function parseKeychainPayload(raw: string): OAuthTokenResult {
     payload = JSON.parse(raw);
   } catch {
     // Some Claude Desktop versions might store a bare token instead of JSON.
-    if (raw.startsWith('sk-ant-') || raw.split('.').length === 3) {
+    if (raw.startsWith("sk-ant-") || raw.split(".").length === 3) {
       const expFromJwt = decodeJwtExpMs(raw);
       if (isExpired(expFromJwt)) {
         return {
-          kind: 'expired',
-          reason: 'Bare keychain token has expired JWT exp claim',
-          expiresAt: expFromJwt,
+          kind: "expired",
+          reason: "Bare keychain token has expired JWT exp claim",
+          expiresAt: expFromJwt
         };
       }
-      return { kind: 'present', token: raw, source: 'keychain', expiresAt: expFromJwt };
+      return { kind: "present", token: raw, source: "keychain", expiresAt: expFromJwt };
     }
-    return { kind: 'absent', reason: 'Keychain payload is neither JSON nor a recognized token shape' };
+    return { kind: "absent", reason: "Keychain payload is neither JSON nor a recognized token shape" };
   }
 
   const accessToken = payload.claudeAiOauth?.accessToken;
   const expiresAt = payload.claudeAiOauth?.expiresAt;
 
   if (!accessToken) {
-    return { kind: 'absent', reason: 'Keychain payload has no claudeAiOauth.accessToken field' };
+    return { kind: "absent", reason: "Keychain payload has no claudeAiOauth.accessToken field" };
   }
 
   // Prefer the SDK-provided expiresAt; fall back to JWT exp if present.
@@ -232,13 +231,13 @@ function parseKeychainPayload(raw: string): OAuthTokenResult {
 
   if (isExpired(effectiveExpiresAt)) {
     return {
-      kind: 'expired',
-      reason: 'Claude Desktop OAuth token has expired — re-login via Claude Desktop to refresh',
-      expiresAt: effectiveExpiresAt,
+      kind: "expired",
+      reason: "Claude Desktop OAuth token has expired — re-login via Claude Desktop to refresh",
+      expiresAt: effectiveExpiresAt
     };
   }
 
-  return { kind: 'present', token: accessToken, source: 'keychain', expiresAt: effectiveExpiresAt };
+  return { kind: "present", token: accessToken, source: "keychain", expiresAt: effectiveExpiresAt };
 }
 
 /**
@@ -249,12 +248,12 @@ function parseKeychainPayload(raw: string): OAuthTokenResult {
  * access is blocked.
  */
 function readSidecarExpiresAt(): number | undefined {
-  const sidecarPath = join(paths.dataDir(), 'oauth-token-meta.json');
+  const sidecarPath = join(paths.dataDir(), "oauth-token-meta.json");
   if (!existsSync(sidecarPath)) return undefined;
   try {
-    const raw = readFileSync(sidecarPath, 'utf-8');
+    const raw = readFileSync(sidecarPath, "utf-8");
     const parsed = JSON.parse(raw);
-    if (typeof parsed.expiresAt === 'number') return parsed.expiresAt;
+    if (typeof parsed.expiresAt === "number") return parsed.expiresAt;
   } catch {
     // Malformed sidecar — treat as absent and let fall-through happen.
   }
@@ -271,26 +270,26 @@ export async function readClaudeOAuthToken(): Promise<OAuthTokenResult> {
   let keychainResult: OAuthTokenResult;
 
   switch (process.platform) {
-    case 'darwin':
+    case "darwin":
       keychainResult = await readMacOsKeychain();
       break;
-    case 'win32':
+    case "win32":
       keychainResult = await readWindowsCredentialManager();
       break;
-    case 'linux':
+    case "linux":
       keychainResult = await readLinuxLibsecret();
       break;
     default:
       keychainResult = {
-        kind: 'absent',
-        reason: `Unsupported platform: ${process.platform}`,
+        kind: "absent",
+        reason: `Unsupported platform: ${process.platform}`
       };
   }
 
   // If keychain produced a present or expired result, that's authoritative.
   // Expired wins over env-fallback: a known-stale keychain entry is a clearer
   // signal than an env var of unknown freshness.
-  if (keychainResult.kind === 'present' || keychainResult.kind === 'expired') {
+  if (keychainResult.kind === "present" || keychainResult.kind === "expired") {
     return keychainResult;
   }
 
@@ -304,17 +303,17 @@ export async function readClaudeOAuthToken(): Promise<OAuthTokenResult> {
 
     if (isExpired(effectiveExpiresAt)) {
       return {
-        kind: 'expired',
-        reason: 'CLAUDE_CODE_OAUTH_TOKEN env var expired (per sidecar/JWT) — re-login via Claude Desktop',
-        expiresAt: effectiveExpiresAt,
+        kind: "expired",
+        reason: "CLAUDE_CODE_OAUTH_TOKEN env var expired (per sidecar/JWT) — re-login via Claude Desktop",
+        expiresAt: effectiveExpiresAt
       };
     }
 
     return {
-      kind: 'present',
+      kind: "present",
       token: envToken,
-      source: 'env-fallback',
-      expiresAt: effectiveExpiresAt,
+      source: "env-fallback",
+      expiresAt: effectiveExpiresAt
     };
   }
 
@@ -331,16 +330,21 @@ export function writeStaleMarker(reason: string): void {
   try {
     const dir = paths.dataDir();
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true, mode: 0o700 });
-    const markerPath = join(dir, 'oauth-stale.marker');
-    writeFileSync(markerPath, reason, { encoding: 'utf-8', mode: 0o600 });
+    const markerPath = join(dir, "oauth-stale.marker");
+    writeFileSync(markerPath, reason, { encoding: "utf-8", mode: 0o600 });
   } catch (error) {
-    logger.warn('OAUTH', 'Failed to write oauth-stale marker', {}, error instanceof Error ? error : new Error(String(error)));
+    logger.warn(
+      "OAUTH",
+      "Failed to write oauth-stale marker",
+      {},
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
 }
 
 export function clearStaleMarker(): void {
   try {
-    const markerPath = join(paths.dataDir(), 'oauth-stale.marker');
+    const markerPath = join(paths.dataDir(), "oauth-stale.marker");
     if (existsSync(markerPath)) {
       unlinkSync(markerPath);
     }
@@ -353,9 +357,9 @@ export function clearStaleMarker(): void {
 
 export function readStaleMarker(): string | undefined {
   try {
-    const markerPath = join(paths.dataDir(), 'oauth-stale.marker');
+    const markerPath = join(paths.dataDir(), "oauth-stale.marker");
     if (!existsSync(markerPath)) return undefined;
-    return readFileSync(markerPath, 'utf-8');
+    return readFileSync(markerPath, "utf-8");
   } catch {
     return undefined;
   }

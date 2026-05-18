@@ -1,19 +1,19 @@
-import { Database } from 'bun:sqlite';
-import type { PendingMessage } from '../worker-types.js';
-import { logger } from '../../utils/logger.js';
+import { Database } from "bun:sqlite";
+import type { PendingMessage } from "../worker-types.js";
+import { logger } from "../../utils/logger.js";
 
 export interface PersistentPendingMessage {
   id: number;
   session_db_id: number;
   content_session_id: string;
-  message_type: 'observation' | 'summarize';
+  message_type: "observation" | "summarize";
   tool_name: string | null;
   tool_input: string | null;
   tool_response: string | null;
   cwd: string | null;
   last_assistant_message: string | null;
   prompt_number: number | null;
-  status: 'pending' | 'processing';
+  status: "pending" | "processing";
   created_at_epoch: number;
   agent_type: string | null;
   agent_id: string | null;
@@ -78,9 +78,13 @@ export class PendingMessageStore {
     `;
     const claimed = this.db.prepare(sql).get(sessionDbId) as PersistentPendingMessage | null;
     if (claimed) {
-      logger.info('QUEUE', `CLAIMED | sessionDbId=${sessionDbId} | messageId=${claimed.id} | type=${claimed.message_type}`, {
-        sessionId: sessionDbId
-      });
+      logger.info(
+        "QUEUE",
+        `CLAIMED | sessionDbId=${sessionDbId} | messageId=${claimed.id} | type=${claimed.message_type}`,
+        {
+          sessionId: sessionDbId
+        }
+      );
     }
     if (claimed) {
       this.onMutate?.();
@@ -94,7 +98,7 @@ export class PendingMessageStore {
     `);
     const changes = stmt.run(sessionDbId).changes;
     if (changes > 0) {
-      logger.info('QUEUE', `CLEARED | sessionDbId=${sessionDbId} | rowsDeleted=${changes}`, {
+      logger.info("QUEUE", `CLEARED | sessionDbId=${sessionDbId} | rowsDeleted=${changes}`, {
         sessionId: sessionDbId
       });
       this.onMutate?.();
@@ -110,7 +114,7 @@ export class PendingMessageStore {
     `);
     const changes = stmt.run(sessionDbId).changes;
     if (changes > 0) {
-      logger.info('QUEUE', `RESET_PROCESSING | sessionDbId=${sessionDbId} | rowsReset=${changes}`, {
+      logger.info("QUEUE", `RESET_PROCESSING | sessionDbId=${sessionDbId} | rowsReset=${changes}`, {
         sessionId: sessionDbId
       });
       this.onMutate?.();
@@ -146,7 +150,7 @@ export class PendingMessageStore {
       WHERE status IN ('pending', 'processing')
       ORDER BY session_db_id ASC
     `);
-    return (stmt.all() as Array<{ session_db_id: number }>).map(row => row.session_db_id);
+    return (stmt.all() as Array<{ session_db_id: number }>).map((row) => row.session_db_id);
   }
 
   confirmProcessed(messageId: number): number {

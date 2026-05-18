@@ -23,7 +23,7 @@ function parseArgs(): CliArgs {
   const parsed: CliArgs = {
     verbose: false,
     noLogs: false,
-    help: false,
+    help: false
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -88,7 +88,7 @@ EXAMPLES:
 async function promptUser(question: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout,
+    output: process.stdout
   });
 
   return new Promise((resolve) => {
@@ -105,7 +105,7 @@ async function promptMultiline(prompt: string): Promise<string> {
 
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout,
+    output: process.stdout
   });
 
   const lines: string[] = [];
@@ -138,7 +138,7 @@ async function main() {
   console.log("🔍 Collecting system diagnostics...");
 
   const diagnostics = await collectDiagnostics({
-    includeLogs: !args.noLogs,
+    includeLogs: !args.noLogs
   });
 
   console.log("✓ Version information collected");
@@ -154,9 +154,7 @@ async function main() {
   console.log("📋 System Summary:");
   console.log(`   Claude-mem: v${diagnostics.versions.claudeMem}`);
   console.log(`   Claude Code: ${diagnostics.versions.claudeCode}`);
-  console.log(
-    `   Platform: ${diagnostics.platform.osVersion} (${diagnostics.platform.arch})`
-  );
+  console.log(`   Platform: ${diagnostics.platform.osVersion} (${diagnostics.platform.arch})`);
   console.log(
     `   Worker: ${diagnostics.worker.running ? `Running (PID ${diagnostics.worker.pid}, port ${diagnostics.worker.port})` : "Not running"}\n`
   );
@@ -167,9 +165,7 @@ async function main() {
     console.log();
   }
 
-  const issueDescription = await promptMultiline(
-    "Please describe the issue you're experiencing:"
-  );
+  const issueDescription = await promptMultiline("Please describe the issue you're experiencing:");
 
   if (!issueDescription.trim()) {
     console.error("❌ Issue description is required");
@@ -177,19 +173,13 @@ async function main() {
   }
 
   console.log();
-  const expectedBehavior = await promptMultiline(
-    "Expected behavior (leave blank to skip):"
-  );
+  const expectedBehavior = await promptMultiline("Expected behavior (leave blank to skip):");
 
   console.log();
-  const stepsToReproduce = await promptMultiline(
-    "Steps to reproduce (leave blank to skip):"
-  );
+  const stepsToReproduce = await promptMultiline("Steps to reproduce (leave blank to skip):");
 
   console.log();
-  const confirm = await promptUser(
-    "Generate bug report? (y/n): "
-  );
+  const confirm = await promptUser("Generate bug report? (y/n): ");
 
   if (confirm.toLowerCase() !== "y" && confirm.toLowerCase() !== "yes") {
     console.log("❌ Bug report generation cancelled");
@@ -202,7 +192,7 @@ async function main() {
     issueDescription,
     expectedBehavior: expectedBehavior.trim() || undefined,
     stepsToReproduce: stepsToReproduce.trim() || undefined,
-    includeLogs: !args.noLogs,
+    includeLogs: !args.noLogs
   });
 
   if (!result.success) {
@@ -212,15 +202,8 @@ async function main() {
 
   console.log("✓ Issue formatted successfully\n");
 
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/:/g, "")
-    .replace(/\..+/, "")
-    .replace("T", "-");
-  const defaultOutputPath = path.join(
-    os.homedir(),
-    `bug-report-${timestamp}.md`
-  );
+  const timestamp = new Date().toISOString().replace(/:/g, "").replace(/\..+/, "").replace("T", "-");
+  const defaultOutputPath = path.join(os.homedir(), `bug-report-${timestamp}.md`);
   const outputPath = args.output || defaultOutputPath;
 
   await fs.writeFile(outputPath, result.body, "utf-8");
@@ -243,12 +226,7 @@ async function main() {
 
   console.log("🌐 Opening GitHub issue form in your browser...");
   try {
-    const openCommand =
-      process.platform === "darwin"
-        ? "open"
-        : process.platform === "win32"
-          ? "start"
-          : "xdg-open";
+    const openCommand = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
 
     await execAsync(`${openCommand} "${githubUrl}"`);
     console.log("✓ Browser opened successfully");

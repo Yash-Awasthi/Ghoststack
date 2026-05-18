@@ -1,27 +1,26 @@
-
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { execFile, execSync, type ChildProcess } from 'child_process';
-import { promisify } from 'util';
-import path from 'path';
-import os from 'os';
-import fs from 'fs';
-import { logger } from '../../utils/logger.js';
-import { SettingsDefaultsManager } from '../../shared/SettingsDefaultsManager.js';
-import { USER_SETTINGS_PATH, paths } from '../../shared/paths.js';
-import { sanitizeEnv } from '../../supervisor/env-sanitizer.js';
-import { getSupervisor } from '../../supervisor/index.js';
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { execFile, execSync, type ChildProcess } from "child_process";
+import { promisify } from "util";
+import path from "path";
+import os from "os";
+import fs from "fs";
+import { logger } from "../../utils/logger.js";
+import { SettingsDefaultsManager } from "../../shared/SettingsDefaultsManager.js";
+import { USER_SETTINGS_PATH, paths } from "../../shared/paths.js";
+import { sanitizeEnv } from "../../supervisor/env-sanitizer.js";
+import { getSupervisor } from "../../supervisor/index.js";
 
 const execFileAsync = promisify(execFile);
 
-const CHROMA_MCP_CLIENT_NAME = 'claude-mem-chroma';
-const CHROMA_MCP_CLIENT_VERSION = '1.0.0';
+const CHROMA_MCP_CLIENT_NAME = "claude-mem-chroma";
+const CHROMA_MCP_CLIENT_VERSION = "1.0.0";
 const MCP_CONNECTION_TIMEOUT_MS = 30_000;
 const RECONNECT_BACKOFF_MS = 10_000;
 const DEFAULT_CHROMA_DATA_DIR = paths.chroma();
-const CHROMA_SUPERVISOR_ID = 'chroma-mcp';
+const CHROMA_SUPERVISOR_ID = "chroma-mcp";
 
-const CHROMA_MCP_PINNED_VERSION = '0.2.6';
+const CHROMA_MCP_PINNED_VERSION = "0.2.6";
 
 // Override transitive dep resolutions for chroma-mcp 0.2.6 (issue #2371).
 //
@@ -38,10 +37,7 @@ const CHROMA_MCP_PINNED_VERSION = '0.2.6';
 //
 // These pins are runtime-only (uvx --with) so we don't have to fork
 // chroma-mcp upstream — they apply only to claude-mem's spawned subprocess.
-const CHROMA_MCP_DEP_OVERRIDES: ReadonlyArray<string> = [
-  'onnxruntime>=1.20',
-  'protobuf<7',
-];
+const CHROMA_MCP_DEP_OVERRIDES: ReadonlyArray<string> = ["onnxruntime>=1.20", "protobuf<7"];
 
 export class ChromaMcpManager {
   private static instance: ChromaMcpManager | null = null;
@@ -67,7 +63,9 @@ export class ChromaMcpManager {
 
     const timeSinceLastFailure = Date.now() - this.lastConnectionFailureTimestamp;
     if (this.lastConnectionFailureTimestamp > 0 && timeSinceLastFailure < RECONNECT_BACKOFF_MS) {
-      throw new Error(`chroma-mcp connection in backoff (${Math.ceil((RECONNECT_BACKOFF_MS - timeSinceLastFailure) / 1000)}s remaining)`);
+      throw new Error(
+        `chroma-mcp connection in backoff (${Math.ceil((RECONNECT_BACKOFF_MS - timeSinceLastFailure) / 1000)}s remaining)`
+      );
     }
 
     if (this.connecting) {
@@ -81,9 +79,9 @@ export class ChromaMcpManager {
     } catch (error) {
       this.lastConnectionFailureTimestamp = Date.now();
       if (error instanceof Error) {
-        logger.error('CHROMA_MCP', 'Connection attempt failed', {}, error);
+        logger.error("CHROMA_MCP", "Connection attempt failed", {}, error);
       } else {
-        logger.error('CHROMA_MCP', 'Connection attempt failed with non-Error value', { error: String(error) });
+        logger.error("CHROMA_MCP", "Connection attempt failed with non-Error value", { error: String(error) });
       }
       throw error;
     } finally {
@@ -103,15 +101,15 @@ export class ChromaMcpManager {
 
     const commandArgs = this.buildCommandArgs();
     const spawnEnvironment = this.getSpawnEnv();
-    getSupervisor().assertCanSpawn('chroma mcp');
+    getSupervisor().assertCanSpawn("chroma mcp");
 
-    const isWindows = process.platform === 'win32';
-    const uvxSpawnCommand = isWindows ? (process.env.ComSpec || 'cmd.exe') : 'uvx';
-    const uvxSpawnArgs = isWindows ? ['/c', 'uvx', ...commandArgs] : commandArgs;
+    const isWindows = process.platform === "win32";
+    const uvxSpawnCommand = isWindows ? process.env.ComSpec || "cmd.exe" : "uvx";
+    const uvxSpawnArgs = isWindows ? ["/c", "uvx", ...commandArgs] : commandArgs;
 
-    logger.info('CHROMA_MCP', 'Connecting to chroma-mcp via MCP stdio', {
+    logger.info("CHROMA_MCP", "Connecting to chroma-mcp via MCP stdio", {
       command: uvxSpawnCommand,
-      args: uvxSpawnArgs.join(' ')
+      args: uvxSpawnArgs.join(" ")
     });
 
     this.transport = new StdioClientTransport({
@@ -119,7 +117,7 @@ export class ChromaMcpManager {
       args: uvxSpawnArgs,
       env: spawnEnvironment,
       cwd: os.homedir(),
-      stderr: 'pipe'
+      stderr: "pipe"
     });
 
     this.client = new Client(
@@ -140,7 +138,7 @@ export class ChromaMcpManager {
       await Promise.race([mcpConnectionPromise, timeoutPromise]);
     } catch (connectionError) {
       clearTimeout(timeoutId!);
-      logger.warn('CHROMA_MCP', 'Connection failed, killing subprocess tree to prevent zombie', {
+      logger.warn("CHROMA_MCP", "Connection failed, killing subprocess tree to prevent zombie", {
         error: connectionError instanceof Error ? connectionError.message : String(connectionError)
       });
       // Tree-kill (not just transport.close) so failed-connect descendants
@@ -153,16 +151,16 @@ export class ChromaMcpManager {
     this.connected = true;
     this.registerManagedProcess();
 
-    logger.info('CHROMA_MCP', 'Connected to chroma-mcp successfully');
+    logger.info("CHROMA_MCP", "Connected to chroma-mcp successfully");
 
     const currentTransport = this.transport;
     const currentTrackedPid = (this.transport as unknown as { _process?: ChildProcess })._process?.pid;
     this.transport.onclose = () => {
       if (this.transport !== currentTransport) {
-        logger.debug('CHROMA_MCP', 'Ignoring stale onclose from previous transport');
+        logger.debug("CHROMA_MCP", "Ignoring stale onclose from previous transport");
         return;
       }
-      logger.warn('CHROMA_MCP', 'chroma-mcp subprocess closed unexpectedly, applying reconnect backoff');
+      logger.warn("CHROMA_MCP", "chroma-mcp subprocess closed unexpectedly, applying reconnect backoff");
       this.connected = false;
       getSupervisor().unregisterProcess(CHROMA_SUPERVISOR_ID);
       this.client = null;
@@ -176,7 +174,7 @@ export class ChromaMcpManager {
       // already exited (#2313).
       if (currentTrackedPid) {
         ChromaMcpManager.killProcessTree(currentTrackedPid).catch((error) => {
-          logger.debug('CHROMA_MCP', 'Background tree-kill after onclose finished (best-effort)', {
+          logger.debug("CHROMA_MCP", "Background tree-kill after onclose finished (best-effort)", {
             pid: currentTrackedPid,
             error: error instanceof Error ? error.message : String(error)
           });
@@ -187,58 +185,65 @@ export class ChromaMcpManager {
 
   private buildCommandArgs(): string[] {
     const settings = SettingsDefaultsManager.loadFromFile(USER_SETTINGS_PATH);
-    const chromaMode = settings.CLAUDE_MEM_CHROMA_MODE || 'local';
-    const pythonVersion = process.env.CLAUDE_MEM_PYTHON_VERSION || settings.CLAUDE_MEM_PYTHON_VERSION || '3.13';
+    const chromaMode = settings.CLAUDE_MEM_CHROMA_MODE || "local";
+    const pythonVersion = process.env.CLAUDE_MEM_PYTHON_VERSION || settings.CLAUDE_MEM_PYTHON_VERSION || "3.13";
 
-    const depOverrideFlags = CHROMA_MCP_DEP_OVERRIDES.flatMap(spec => ['--with', spec]);
+    const depOverrideFlags = CHROMA_MCP_DEP_OVERRIDES.flatMap((spec) => ["--with", spec]);
 
-    if (chromaMode === 'remote') {
-      const chromaHost = settings.CLAUDE_MEM_CHROMA_HOST || '127.0.0.1';
-      const chromaPort = settings.CLAUDE_MEM_CHROMA_PORT || '8000';
-      const chromaSsl = settings.CLAUDE_MEM_CHROMA_SSL === 'true';
-      const chromaTenant = settings.CLAUDE_MEM_CHROMA_TENANT || 'default_tenant';
-      const chromaDatabase = settings.CLAUDE_MEM_CHROMA_DATABASE || 'default_database';
-      const chromaApiKey = settings.CLAUDE_MEM_CHROMA_API_KEY || '';
+    if (chromaMode === "remote") {
+      const chromaHost = settings.CLAUDE_MEM_CHROMA_HOST || "127.0.0.1";
+      const chromaPort = settings.CLAUDE_MEM_CHROMA_PORT || "8000";
+      const chromaSsl = settings.CLAUDE_MEM_CHROMA_SSL === "true";
+      const chromaTenant = settings.CLAUDE_MEM_CHROMA_TENANT || "default_tenant";
+      const chromaDatabase = settings.CLAUDE_MEM_CHROMA_DATABASE || "default_database";
+      const chromaApiKey = settings.CLAUDE_MEM_CHROMA_API_KEY || "";
 
       const args = [
-        '--python', pythonVersion,
+        "--python",
+        pythonVersion,
         ...depOverrideFlags,
         `chroma-mcp==${CHROMA_MCP_PINNED_VERSION}`,
-        '--client-type', 'http',
-        '--host', chromaHost,
-        '--port', chromaPort
+        "--client-type",
+        "http",
+        "--host",
+        chromaHost,
+        "--port",
+        chromaPort
       ];
 
-      args.push('--ssl', chromaSsl ? 'true' : 'false');
+      args.push("--ssl", chromaSsl ? "true" : "false");
 
-      if (chromaTenant !== 'default_tenant') {
-        args.push('--tenant', chromaTenant);
+      if (chromaTenant !== "default_tenant") {
+        args.push("--tenant", chromaTenant);
       }
 
-      if (chromaDatabase !== 'default_database') {
-        args.push('--database', chromaDatabase);
+      if (chromaDatabase !== "default_database") {
+        args.push("--database", chromaDatabase);
       }
 
       if (chromaApiKey) {
-        args.push('--api-key', chromaApiKey);
+        args.push("--api-key", chromaApiKey);
       }
 
       return args;
     }
 
     return [
-      '--python', pythonVersion,
+      "--python",
+      pythonVersion,
       ...depOverrideFlags,
       `chroma-mcp==${CHROMA_MCP_PINNED_VERSION}`,
-      '--client-type', 'persistent',
-      '--data-dir', DEFAULT_CHROMA_DATA_DIR.replace(/\\/g, '/')
+      "--client-type",
+      "persistent",
+      "--data-dir",
+      DEFAULT_CHROMA_DATA_DIR.replace(/\\/g, "/")
     ];
   }
 
   async callTool(toolName: string, toolArguments: Record<string, unknown>): Promise<unknown> {
     await this.ensureConnected();
 
-    logger.debug('CHROMA_MCP', `Calling tool: ${toolName}`, {
+    logger.debug("CHROMA_MCP", `Calling tool: ${toolName}`, {
       arguments: JSON.stringify(toolArguments).slice(0, 200)
     });
 
@@ -249,7 +254,7 @@ export class ChromaMcpManager {
         arguments: toolArguments
       });
     } catch (transportError) {
-      logger.warn('CHROMA_MCP', `Transport error during "${toolName}", reconnecting and retrying once`, {
+      logger.warn("CHROMA_MCP", `Transport error during "${toolName}", reconnecting and retrying once`, {
         error: transportError instanceof Error ? transportError.message : String(transportError)
       });
 
@@ -266,13 +271,16 @@ export class ChromaMcpManager {
         });
       } catch (retryError) {
         this.connected = false;
-        throw new Error(`chroma-mcp transport error during "${toolName}" (retry failed): ${retryError instanceof Error ? retryError.message : String(retryError)}`);
+        throw new Error(
+          `chroma-mcp transport error during "${toolName}" (retry failed): ${retryError instanceof Error ? retryError.message : String(retryError)}`
+        );
       }
     }
 
     if (result.isError) {
-      const errorText = (result.content as Array<{ type: string; text?: string }>)
-        ?.find(item => item.type === 'text')?.text || 'Unknown chroma-mcp error';
+      const errorText =
+        (result.content as Array<{ type: string; text?: string }>)?.find((item) => item.type === "text")?.text ||
+        "Unknown chroma-mcp error";
       throw new Error(`chroma-mcp tool "${toolName}" returned error: ${errorText}`);
     }
 
@@ -281,7 +289,7 @@ export class ChromaMcpManager {
       return null;
     }
 
-    const firstTextContent = contentArray.find(item => item.type === 'text' && item.text);
+    const firstTextContent = contentArray.find((item) => item.type === "text" && item.text);
     if (!firstTextContent || !firstTextContent.text) {
       return null;
     }
@@ -290,7 +298,7 @@ export class ChromaMcpManager {
       return JSON.parse(firstTextContent.text);
     } catch (parseError: unknown) {
       if (parseError instanceof Error) {
-        logger.debug('CHROMA_MCP', 'Non-JSON response from tool, returning null', {
+        logger.debug("CHROMA_MCP", "Non-JSON response from tool, returning null", {
           toolName,
           textPreview: firstTextContent.text.slice(0, 100)
         });
@@ -301,10 +309,10 @@ export class ChromaMcpManager {
 
   async isHealthy(): Promise<boolean> {
     try {
-      await this.callTool('chroma_list_collections', { limit: 1 });
+      await this.callTool("chroma_list_collections", { limit: 1 });
       return true;
     } catch (error) {
-      logger.warn('CHROMA_MCP', 'Health check failed', {
+      logger.warn("CHROMA_MCP", "Health check failed", {
         error: error instanceof Error ? error.message : String(error)
       });
       return false;
@@ -313,7 +321,7 @@ export class ChromaMcpManager {
 
   async probeSemanticSearch(): Promise<{
     ok: boolean;
-    stage: 'connect' | 'list' | 'query' | 'done';
+    stage: "connect" | "list" | "query" | "done";
     error?: string;
     collections?: number;
     queryLatencyMs?: number;
@@ -321,43 +329,41 @@ export class ChromaMcpManager {
     let collections: number | undefined;
 
     try {
-      const listResult: any = await this.callTool('chroma_list_collections', { limit: 100 });
+      const listResult: any = await this.callTool("chroma_list_collections", { limit: 100 });
       if (Array.isArray(listResult)) {
         collections = listResult.length;
       } else if (listResult && Array.isArray(listResult.collections)) {
         collections = listResult.collections.length;
-      } else if (listResult && typeof listResult === 'object' && 'length' in listResult) {
+      } else if (listResult && typeof listResult === "object" && "length" in listResult) {
         collections = (listResult as { length: number }).length;
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.warn('CHROMA_MCP', 'Deep probe failed at list stage', { error: message });
-      return { ok: false, stage: 'list', error: message };
+      logger.warn("CHROMA_MCP", "Deep probe failed at list stage", { error: message });
+      return { ok: false, stage: "list", error: message };
     }
 
     const queryStartedAt = Date.now();
     try {
-      await this.callTool('chroma_query_documents', {
-        collection_name: 'cm__claude-mem',
-        query_texts: ['ping'],
+      await this.callTool("chroma_query_documents", {
+        collection_name: "cm__claude-mem",
+        query_texts: ["ping"],
         n_results: 1
       });
       const queryLatencyMs = Date.now() - queryStartedAt;
-      return { ok: true, stage: 'done', collections, queryLatencyMs };
+      return { ok: true, stage: "done", collections, queryLatencyMs };
     } catch (error) {
       const queryLatencyMs = Date.now() - queryStartedAt;
       const rawMessage = error instanceof Error ? error.message : String(error);
       const isMissingOrEmpty = /not exist|missing|empty|no such/i.test(rawMessage);
-      const errorMessage = isMissingOrEmpty
-        ? `collection cm__claude-mem missing or empty (${rawMessage})`
-        : rawMessage;
-      logger.warn('CHROMA_MCP', 'Deep probe failed at query stage', {
+      const errorMessage = isMissingOrEmpty ? `collection cm__claude-mem missing or empty (${rawMessage})` : rawMessage;
+      logger.warn("CHROMA_MCP", "Deep probe failed at query stage", {
         error: rawMessage,
         queryLatencyMs
       });
       return {
         ok: false,
-        stage: 'query',
+        stage: "query",
         error: errorMessage,
         collections,
         queryLatencyMs
@@ -389,7 +395,7 @@ export class ChromaMcpManager {
       try {
         await ChromaMcpManager.killProcessTree(trackedPid);
       } catch (error) {
-        logger.warn('CHROMA_MCP', 'failed to kill prior chroma-mcp tree (best-effort)', {
+        logger.warn("CHROMA_MCP", "failed to kill prior chroma-mcp tree (best-effort)", {
           pid: trackedPid,
           error: error instanceof Error ? error.message : String(error)
         });
@@ -397,10 +403,18 @@ export class ChromaMcpManager {
     }
 
     if (this.transport) {
-      try { await this.transport.close(); } catch { /* already dead */ }
+      try {
+        await this.transport.close();
+      } catch {
+        /* already dead */
+      }
     }
     if (this.client) {
-      try { await this.client.close(); } catch { /* already dead */ }
+      try {
+        await this.client.close();
+      } catch {
+        /* already dead */
+      }
     }
 
     if (trackedPid) {
@@ -426,17 +440,17 @@ export class ChromaMcpManager {
    */
   async stop(): Promise<void> {
     if (!this.client && !this.transport) {
-      logger.debug('CHROMA_MCP', 'No active MCP connection to stop');
+      logger.debug("CHROMA_MCP", "No active MCP connection to stop");
       this.connecting = null;
       return;
     }
 
-    logger.info('CHROMA_MCP', 'Stopping chroma-mcp MCP connection');
+    logger.info("CHROMA_MCP", "Stopping chroma-mcp MCP connection");
 
     await this.disposeCurrentSubprocess();
     this.connecting = null;
 
-    logger.info('CHROMA_MCP', 'chroma-mcp MCP connection stopped');
+    logger.info("CHROMA_MCP", "chroma-mcp MCP connection stopped");
   }
 
   /**
@@ -451,17 +465,17 @@ export class ChromaMcpManager {
    * Best-effort — swallows ESRCH (already dead) and logs other errors.
    */
   private static async killProcessTree(pid: number): Promise<void> {
-    logger.debug('CHROMA_MCP', `Killing process tree rooted at PID ${pid}`);
+    logger.debug("CHROMA_MCP", `Killing process tree rooted at PID ${pid}`);
 
-    if (process.platform === 'win32') {
+    if (process.platform === "win32") {
       try {
-        await execFileAsync('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        await execFileAsync("taskkill", ["/PID", String(pid), "/T", "/F"], {
           timeout: 5_000,
           windowsHide: true
         });
       } catch (error) {
         // taskkill exits non-zero when the process is already dead — that's fine.
-        logger.debug('CHROMA_MCP', `taskkill tree-kill finished (may already be dead)`, {
+        logger.debug("CHROMA_MCP", `taskkill tree-kill finished (may already be dead)`, {
           pid,
           error: error instanceof Error ? error.message : String(error)
         });
@@ -480,22 +494,22 @@ export class ChromaMcpManager {
       // Signal leaves first, then the root.
       for (const child of descendantsBeforeTerm) {
         try {
-          process.kill(child, 'SIGTERM');
+          process.kill(child, "SIGTERM");
         } catch {
           // Already gone — fine.
         }
       }
       try {
-        process.kill(pid, 'SIGTERM');
+        process.kill(pid, "SIGTERM");
       } catch (error) {
         const code = (error as NodeJS.ErrnoException).code;
-        if (code !== 'ESRCH') {
-          logger.debug('CHROMA_MCP', `Failed to SIGTERM PID ${pid}`, { code });
+        if (code !== "ESRCH") {
+          logger.debug("CHROMA_MCP", `Failed to SIGTERM PID ${pid}`, { code });
         }
       }
 
       // Brief wait for SIGTERM to propagate, then SIGKILL stragglers.
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Re-collect descendants — some layers may have re-parented during the
       // SIGTERM grace window.
@@ -511,18 +525,18 @@ export class ChromaMcpManager {
       const killTargets = Array.from(new Set([...descendantsBeforeTerm, ...descendantsBeforeKill]));
       for (const child of killTargets) {
         try {
-          process.kill(child, 'SIGKILL');
+          process.kill(child, "SIGKILL");
         } catch {
           // Already dead — fine.
         }
       }
       try {
-        process.kill(pid, 'SIGKILL');
+        process.kill(pid, "SIGKILL");
       } catch {
         // Already dead — fine.
       }
     } catch (error) {
-      logger.debug('CHROMA_MCP', `Process tree kill completed (best-effort)`, {
+      logger.debug("CHROMA_MCP", `Process tree kill completed (best-effort)`, {
         pid,
         error: error instanceof Error ? error.message : String(error)
       });
@@ -539,20 +553,20 @@ export class ChromaMcpManager {
     const collected: number[] = [];
 
     async function walk(pid: number): Promise<void> {
-      let stdout = '';
+      let stdout = "";
       try {
-        const result = await execFileAsync('pgrep', ['-P', String(pid)], { timeout: 2_000 });
+        const result = await execFileAsync("pgrep", ["-P", String(pid)], { timeout: 2_000 });
         stdout = result.stdout;
       } catch {
         // pgrep exits 1 when no children match — that's fine, just return.
         return;
       }
       const children = stdout
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .map(line => Number.parseInt(line, 10))
-        .filter(n => Number.isFinite(n) && n > 0 && !seen.has(n));
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
+        .map((line) => Number.parseInt(line, 10))
+        .filter((n) => Number.isFinite(n) && n > 0 && !seen.has(n));
 
       for (const child of children) {
         seen.add(child);
@@ -588,19 +602,20 @@ export class ChromaMcpManager {
       }
     }
 
-    if (process.platform !== 'darwin') {
+    if (process.platform !== "darwin") {
       return undefined;
     }
 
     try {
       let certifiPath: string | undefined;
       try {
-        certifiPath = execSync(
-          'uvx --with certifi python -c "import certifi; print(certifi.where())"',
-          { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 10000 }
-        ).trim();
+        certifiPath = execSync('uvx --with certifi python -c "import certifi; print(certifi.where())"', {
+          encoding: "utf8",
+          stdio: ["pipe", "pipe", "pipe"],
+          timeout: 10000
+        }).trim();
       } catch (error) {
-        logger.debug('CHROMA_MCP', 'Failed to resolve certifi path via uvx', {
+        logger.debug("CHROMA_MCP", "Failed to resolve certifi path via uvx", {
           error: error instanceof Error ? error.message : String(error)
         });
         return undefined;
@@ -610,37 +625,40 @@ export class ChromaMcpManager {
         return undefined;
       }
 
-      let zscalerCert = '';
+      let zscalerCert = "";
       try {
-        zscalerCert = execSync(
-          'security find-certificate -a -c "Zscaler" -p /Library/Keychains/System.keychain',
-          { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 5000 }
-        );
+        zscalerCert = execSync('security find-certificate -a -c "Zscaler" -p /Library/Keychains/System.keychain', {
+          encoding: "utf8",
+          stdio: ["pipe", "pipe", "pipe"],
+          timeout: 5000
+        });
       } catch (error) {
-        logger.debug('CHROMA_MCP', 'No Zscaler certificate found in system keychain', {
+        logger.debug("CHROMA_MCP", "No Zscaler certificate found in system keychain", {
           error: error instanceof Error ? error.message : String(error)
         });
         return undefined;
       }
 
-      if (!zscalerCert ||
-          !zscalerCert.includes('-----BEGIN CERTIFICATE-----') ||
-          !zscalerCert.includes('-----END CERTIFICATE-----')) {
+      if (
+        !zscalerCert ||
+        !zscalerCert.includes("-----BEGIN CERTIFICATE-----") ||
+        !zscalerCert.includes("-----END CERTIFICATE-----")
+      ) {
         return undefined;
       }
 
-      const certifiContent = fs.readFileSync(certifiPath, 'utf8');
-      const tempPath = combinedCertPath + '.tmp';
-      fs.writeFileSync(tempPath, certifiContent + '\n' + zscalerCert);
+      const certifiContent = fs.readFileSync(certifiPath, "utf8");
+      const tempPath = combinedCertPath + ".tmp";
+      fs.writeFileSync(tempPath, certifiContent + "\n" + zscalerCert);
       fs.renameSync(tempPath, combinedCertPath);
 
-      logger.info('CHROMA_MCP', 'Created combined SSL certificate bundle for Zscaler', {
+      logger.info("CHROMA_MCP", "Created combined SSL certificate bundle for Zscaler", {
         path: combinedCertPath
       });
 
       return combinedCertPath;
     } catch (error) {
-      logger.debug('CHROMA_MCP', 'Could not create combined cert bundle', {}, error as Error);
+      logger.debug("CHROMA_MCP", "Could not create combined cert bundle", {}, error as Error);
       return undefined;
     }
   }
@@ -655,14 +673,14 @@ export class ChromaMcpManager {
 
     // Disable Chroma's anonymous telemetry — it issues background HTTP from
     // the embedding subprocess on every collection touch.
-    if (!baseEnv.ANONYMIZED_TELEMETRY) baseEnv.ANONYMIZED_TELEMETRY = 'false';
+    if (!baseEnv.ANONYMIZED_TELEMETRY) baseEnv.ANONYMIZED_TELEMETRY = "false";
 
     const combinedCertPath = this.getCombinedCertPath();
     if (!combinedCertPath) {
       return baseEnv;
     }
 
-    logger.info('CHROMA_MCP', 'Using combined SSL certificates for enterprise compatibility', {
+    logger.info("CHROMA_MCP", "Using combined SSL certificates for enterprise compatibility", {
       certPath: combinedCertPath
     });
 
@@ -692,17 +710,21 @@ export class ChromaMcpManager {
     // taskkill /T on Windows when pgid is present but group signal fails.
     // On POSIX the pgid recorded here is used by killProcessTree() in
     // stop() for explicit tree teardown rather than negative-PID signaling.
-    getSupervisor().registerProcess(CHROMA_SUPERVISOR_ID, {
-      pid: chromaProcess.pid,
-      type: 'chroma',
-      startedAt: new Date().toISOString(),
-      // Store pid as pgid — shutdown.ts will attempt kill(-pgid) on POSIX.
-      // If the child isn't actually its own group leader, the ESRCH is caught
-      // and shutdown falls back to single-PID kill (see signalProcess()).
-      pgid: chromaProcess.pid
-    }, chromaProcess);
+    getSupervisor().registerProcess(
+      CHROMA_SUPERVISOR_ID,
+      {
+        pid: chromaProcess.pid,
+        type: "chroma",
+        startedAt: new Date().toISOString(),
+        // Store pid as pgid — shutdown.ts will attempt kill(-pgid) on POSIX.
+        // If the child isn't actually its own group leader, the ESRCH is caught
+        // and shutdown falls back to single-PID kill (see signalProcess()).
+        pgid: chromaProcess.pid
+      },
+      chromaProcess
+    );
 
-    chromaProcess.once('exit', () => {
+    chromaProcess.once("exit", () => {
       getSupervisor().unregisterProcess(CHROMA_SUPERVISOR_ID);
     });
   }

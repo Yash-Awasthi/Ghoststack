@@ -1,18 +1,17 @@
-
-import { logger } from '../../../utils/logger.js';
-import { parseAgentXml, type ParsedObservation, type ParsedSummary } from '../../../sdk/parser.js';
-import { ingestSummary } from '../http/shared.js';
-import { updateCursorContextForProject } from '../../integrations/CursorHooksInstaller.js';
-import { notifyTelegram } from '../../integrations/TelegramNotifier.js';
-import { updateFolderClaudeMdFiles } from '../../../utils/claude-md-utils.js';
-import { getWorkerPort } from '../../../shared/worker-utils.js';
-import { SettingsDefaultsManager } from '../../../shared/SettingsDefaultsManager.js';
-import { USER_SETTINGS_PATH } from '../../../shared/paths.js';
-import type { ActiveSession } from '../../worker-types.js';
-import type { DatabaseManager } from '../DatabaseManager.js';
-import type { SessionManager } from '../SessionManager.js';
-import type { WorkerRef, StorageResult } from './types.js';
-import { broadcastObservation, broadcastSummary } from './ObservationBroadcaster.js';
+import { logger } from "../../../utils/logger.js";
+import { parseAgentXml, type ParsedObservation, type ParsedSummary } from "../../../sdk/parser.js";
+import { ingestSummary } from "../http/shared.js";
+import { updateCursorContextForProject } from "../../integrations/CursorHooksInstaller.js";
+import { notifyTelegram } from "../../integrations/TelegramNotifier.js";
+import { updateFolderClaudeMdFiles } from "../../../utils/claude-md-utils.js";
+import { getWorkerPort } from "../../../shared/worker-utils.js";
+import { SettingsDefaultsManager } from "../../../shared/SettingsDefaultsManager.js";
+import { USER_SETTINGS_PATH } from "../../../shared/paths.js";
+import type { ActiveSession } from "../../worker-types.js";
+import type { DatabaseManager } from "../DatabaseManager.js";
+import type { SessionManager } from "../SessionManager.js";
+import type { WorkerRef, StorageResult } from "./types.js";
+import { broadcastObservation, broadcastSummary } from "./ObservationBroadcaster.js";
 
 export async function processAgentResponse(
   text: string,
@@ -29,14 +28,14 @@ export async function processAgentResponse(
   session.lastGeneratorActivity = Date.now();
 
   if (text) {
-    session.conversationHistory.push({ role: 'assistant', content: text });
+    session.conversationHistory.push({ role: "assistant", content: text });
   }
 
   const parsed = parseAgentXml(text, session.contentSessionId);
 
   if (!parsed.valid) {
-    logger.warn('PARSER', `${agentName} returned non-XML/empty response — ignoring queued batch`, {
-      sessionId: session.sessionDbId,
+    logger.warn("PARSER", `${agentName} returned non-XML/empty response — ignoring queued batch`, {
+      sessionId: session.sessionDbId
     });
     // Plain-text skip responses are intentionally ignored. Re-queueing them
     // creates an observer loop where the same low-signal batch is retried
@@ -47,7 +46,7 @@ export async function processAgentResponse(
   }
 
   if (!session.memorySessionId) {
-    logger.warn('SDK', 'memorySessionId not yet captured; deferring storage until next round', {
+    logger.warn("SDK", "memorySessionId not yet captured; deferring storage until next round", {
       sessionId: session.sessionDbId
     });
     // Reset any claimed-but-undelivered messages back to pending so they don't
@@ -63,12 +62,16 @@ export async function processAgentResponse(
   const sessionStore = dbManager.getSessionStore();
   sessionStore.ensureMemorySessionIdRegistered(session.sessionDbId, session.memorySessionId);
 
-  logger.info('DB', `STORING | sessionDbId=${session.sessionDbId} | memorySessionId=${session.memorySessionId} | obsCount=${observations.length} | hasSummary=${!!summaryForStore}`, {
-    sessionId: session.sessionDbId,
-    memorySessionId: session.memorySessionId
-  });
+  logger.info(
+    "DB",
+    `STORING | sessionDbId=${session.sessionDbId} | memorySessionId=${session.memorySessionId} | obsCount=${observations.length} | hasSummary=${!!summaryForStore}`,
+    {
+      sessionId: session.sessionDbId,
+      memorySessionId: session.memorySessionId
+    }
+  );
 
-  const labeledObservations = observations.map(obs => ({
+  const labeledObservations = observations.map((obs) => ({
     ...obs,
     agent_type: session.pendingAgentType ?? null,
     agent_id: session.pendingAgentId ?? null
@@ -91,20 +94,24 @@ export async function processAgentResponse(
     session.pendingAgentType = null;
   }
 
-  logger.info('DB', `STORED | sessionDbId=${session.sessionDbId} | memorySessionId=${session.memorySessionId} | obsCount=${result.observationIds.length} | obsIds=[${result.observationIds.join(',')}] | summaryId=${result.summaryId || 'none'}`, {
-    sessionId: session.sessionDbId,
-    memorySessionId: session.memorySessionId
-  });
+  logger.info(
+    "DB",
+    `STORED | sessionDbId=${session.sessionDbId} | memorySessionId=${session.memorySessionId} | obsCount=${result.observationIds.length} | obsIds=[${result.observationIds.join(",")}] | summaryId=${result.summaryId || "none"}`,
+    {
+      sessionId: session.sessionDbId,
+      memorySessionId: session.memorySessionId
+    }
+  );
 
   session.lastSummaryStored = result.summaryId !== null;
 
   if (summary && (summary.skipped || session.lastSummaryStored)) {
     await ingestSummary({
-      kind: 'parsed',
+      kind: "parsed",
       sessionDbId: session.sessionDbId,
       messageId: -1,
       contentSessionId: session.contentSessionId,
-      parsed: summary,
+      parsed: summary
     });
   }
 
@@ -117,7 +124,7 @@ export async function processAgentResponse(
     observations: labeledObservations,
     observationIds: result.observationIds,
     project: session.project,
-    memorySessionId: session.memorySessionId,
+    memorySessionId: session.memorySessionId
   });
 
   await syncAndBroadcastObservations(
@@ -155,11 +162,11 @@ function normalizeSummaryForStorage(summary: ParsedSummary | null): {
   if (summary.skipped) return null;
 
   return {
-    request: summary.request || '',
-    investigated: summary.investigated || '',
-    learned: summary.learned || '',
-    completed: summary.completed || '',
-    next_steps: summary.next_steps || '',
+    request: summary.request || "",
+    investigated: summary.investigated || "",
+    learned: summary.learned || "",
+    completed: summary.completed || "",
+    next_steps: summary.next_steps || "",
     notes: summary.notes
   };
 }
@@ -184,7 +191,7 @@ async function syncAndBroadcastObservations(
     const observationIndex = result.observationIds.indexOf(obsId);
     const obs = observations[observationIndex];
     if (!obs) {
-      logger.warn('DB', `${agentName} storage returned observation id without matching parsed observation`, {
+      logger.warn("DB", `${agentName} storage returned observation id without matching parsed observation`, {
         sessionId: session.sessionDbId,
         obsId,
         observationIndex
@@ -193,29 +200,38 @@ async function syncAndBroadcastObservations(
     }
     const chromaStart = Date.now();
 
-    dbManager.getChromaSync()?.syncObservation(
-      obsId,
-      session.contentSessionId,
-      session.project,
-      obs,
-      session.lastPromptNumber,
-      result.createdAtEpoch,
-      discoveryTokens
-    ).then(() => {
-      const chromaDuration = Date.now() - chromaStart;
-      logger.debug('CHROMA', 'Observation synced', {
+    dbManager
+      .getChromaSync()
+      ?.syncObservation(
         obsId,
-        duration: `${chromaDuration}ms`,
-        type: obs.type,
-        title: obs.title || '(untitled)'
+        session.contentSessionId,
+        session.project,
+        obs,
+        session.lastPromptNumber,
+        result.createdAtEpoch,
+        discoveryTokens
+      )
+      .then(() => {
+        const chromaDuration = Date.now() - chromaStart;
+        logger.debug("CHROMA", "Observation synced", {
+          obsId,
+          duration: `${chromaDuration}ms`,
+          type: obs.type,
+          title: obs.title || "(untitled)"
+        });
+      })
+      .catch((error) => {
+        logger.error(
+          "CHROMA",
+          `${agentName} chroma sync failed, continuing without vector search`,
+          {
+            obsId,
+            type: obs.type,
+            title: obs.title || "(untitled)"
+          },
+          error
+        );
       });
-    }).catch((error) => {
-      logger.error('CHROMA', `${agentName} chroma sync failed, continuing without vector search`, {
-        obsId,
-        type: obs.type,
-        title: obs.title || '(untitled)'
-      }, error);
-    });
 
     broadcastObservation(worker, {
       id: obsId,
@@ -239,7 +255,7 @@ async function syncAndBroadcastObservations(
 
   const settings = SettingsDefaultsManager.loadFromFile(USER_SETTINGS_PATH);
   const settingValue: unknown = settings.CLAUDE_MEM_FOLDER_CLAUDEMD_ENABLED;
-  const folderClaudeMdEnabled = settingValue === 'true' || settingValue === true;
+  const folderClaudeMdEnabled = settingValue === "true" || settingValue === true;
 
   if (folderClaudeMdEnabled) {
     const allFilePaths: string[] = [];
@@ -249,13 +265,13 @@ async function syncAndBroadcastObservations(
     }
 
     if (allFilePaths.length > 0) {
-      updateFolderClaudeMdFiles(
-        allFilePaths,
-        session.project,
-        getWorkerPort(),
-        projectRoot
-      ).catch(error => {
-        logger.warn('FOLDER_INDEX', 'CLAUDE.md update failed (non-critical)', { project: session.project }, error as Error);
+      updateFolderClaudeMdFiles(allFilePaths, session.project, getWorkerPort(), projectRoot).catch((error) => {
+        logger.warn(
+          "FOLDER_INDEX",
+          "CLAUDE.md update failed (non-critical)",
+          { project: session.project },
+          error as Error
+        );
       });
     }
   }
@@ -263,7 +279,14 @@ async function syncAndBroadcastObservations(
 
 async function syncAndBroadcastSummary(
   summary: ParsedSummary | null,
-  summaryForStore: { request: string; investigated: string; learned: string; completed: string; next_steps: string; notes: string | null } | null,
+  summaryForStore: {
+    request: string;
+    investigated: string;
+    learned: string;
+    completed: string;
+    next_steps: string;
+    notes: string | null;
+  } | null,
   result: StorageResult,
   session: ActiveSession,
   dbManager: DatabaseManager,
@@ -277,27 +300,36 @@ async function syncAndBroadcastSummary(
 
   const chromaStart = Date.now();
 
-  dbManager.getChromaSync()?.syncSummary(
-    result.summaryId,
-    session.contentSessionId,
-    session.project,
-    summaryForStore,
-    session.lastPromptNumber,
-    result.createdAtEpoch,
-    discoveryTokens
-  ).then(() => {
-    const chromaDuration = Date.now() - chromaStart;
-    logger.debug('CHROMA', 'Summary synced', {
-      summaryId: result.summaryId,
-      duration: `${chromaDuration}ms`,
-      request: summaryForStore.request || '(no request)'
+  dbManager
+    .getChromaSync()
+    ?.syncSummary(
+      result.summaryId,
+      session.contentSessionId,
+      session.project,
+      summaryForStore,
+      session.lastPromptNumber,
+      result.createdAtEpoch,
+      discoveryTokens
+    )
+    .then(() => {
+      const chromaDuration = Date.now() - chromaStart;
+      logger.debug("CHROMA", "Summary synced", {
+        summaryId: result.summaryId,
+        duration: `${chromaDuration}ms`,
+        request: summaryForStore.request || "(no request)"
+      });
+    })
+    .catch((error) => {
+      logger.error(
+        "CHROMA",
+        `${agentName} chroma sync failed, continuing without vector search`,
+        {
+          summaryId: result.summaryId,
+          request: summaryForStore.request || "(no request)"
+        },
+        error
+      );
     });
-  }).catch((error) => {
-    logger.error('CHROMA', `${agentName} chroma sync failed, continuing without vector search`, {
-      summaryId: result.summaryId,
-      request: summaryForStore.request || '(no request)'
-    }, error);
-  });
 
   broadcastSummary(worker, {
     id: result.summaryId,
@@ -314,7 +346,7 @@ async function syncAndBroadcastSummary(
     created_at_epoch: result.createdAtEpoch
   });
 
-  updateCursorContextForProject(session.project, getWorkerPort()).catch(error => {
-    logger.warn('CURSOR', 'Context update failed (non-critical)', { project: session.project }, error as Error);
+  updateCursorContextForProject(session.project, getWorkerPort()).catch((error) => {
+    logger.warn("CURSOR", "Context update failed (non-critical)", { project: session.project }, error as Error);
   });
 }

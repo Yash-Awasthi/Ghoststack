@@ -1,6 +1,5 @@
-
-import { logger } from '../utils/logger.js';
-import { ModeManager } from '../services/domain/ModeManager.js';
+import { logger } from "../utils/logger.js";
+import { ModeManager } from "../services/domain/ModeManager.js";
 
 // TODO(#2233): migrate to Anthropic tool-use API for deterministic JSON output. This text-XML path is the bridge.
 // Only strip fences when the entire payload is a single fenced block. Stripping
@@ -39,7 +38,7 @@ export type ParseResult =
   | { valid: false };
 
 export function parseAgentXml(raw: string, correlationId?: string | number): ParseResult {
-  if (typeof raw !== 'string' || !raw.trim()) {
+  if (typeof raw !== "string" || !raw.trim()) {
     return { valid: false };
   }
 
@@ -58,8 +57,8 @@ export function parseAgentXml(raw: string, correlationId?: string | number): Par
         next_steps: null,
         notes: null,
         skipped: true,
-        skip_reason: skipMatch[1] ?? null,
-      },
+        skip_reason: skipMatch[1] ?? null
+      }
     };
   }
 
@@ -69,7 +68,7 @@ export function parseAgentXml(raw: string, correlationId?: string | number): Par
   }
 
   const rootName = firstRoot[1].toLowerCase();
-  if (rootName === 'observation') {
+  if (rootName === "observation") {
     const observations = parseObservationBlocks(raw, correlationId);
     if (observations.length === 0) {
       return { valid: false };
@@ -93,33 +92,33 @@ function parseObservationBlocks(text: string, correlationId?: string | number): 
   while ((match = observationRegex.exec(text)) !== null) {
     const obsContent = match[1];
 
-    const type = extractField(obsContent, 'type');
-    const title = extractField(obsContent, 'title');
-    const subtitle = extractField(obsContent, 'subtitle');
-    const narrative = extractField(obsContent, 'narrative');
-    const facts = extractArrayElements(obsContent, 'facts', 'fact');
-    const concepts = extractArrayElements(obsContent, 'concepts', 'concept');
-    const files_read = extractArrayElements(obsContent, 'files_read', 'file');
-    const files_modified = extractArrayElements(obsContent, 'files_modified', 'file');
+    const type = extractField(obsContent, "type");
+    const title = extractField(obsContent, "title");
+    const subtitle = extractField(obsContent, "subtitle");
+    const narrative = extractField(obsContent, "narrative");
+    const facts = extractArrayElements(obsContent, "facts", "fact");
+    const concepts = extractArrayElements(obsContent, "concepts", "concept");
+    const files_read = extractArrayElements(obsContent, "files_read", "file");
+    const files_modified = extractArrayElements(obsContent, "files_modified", "file");
 
     const mode = ModeManager.getInstance().getActiveMode();
-    const validTypes = mode.observation_types.map(t => t.id);
+    const validTypes = mode.observation_types.map((t) => t.id);
     const fallbackType = validTypes[0];
     let finalType = fallbackType;
     if (type) {
       if (validTypes.includes(type.trim())) {
         finalType = type.trim();
       } else {
-        logger.error('PARSER', `Invalid observation type: ${type}, using "${fallbackType}"`, { correlationId });
+        logger.error("PARSER", `Invalid observation type: ${type}, using "${fallbackType}"`, { correlationId });
       }
     } else {
-      logger.error('PARSER', `Observation missing type field, using "${fallbackType}"`, { correlationId });
+      logger.error("PARSER", `Observation missing type field, using "${fallbackType}"`, { correlationId });
     }
 
-    const cleanedConcepts = concepts.filter(c => c !== finalType);
+    const cleanedConcepts = concepts.filter((c) => c !== finalType);
 
     if (cleanedConcepts.length !== concepts.length) {
-      logger.debug('PARSER', 'Removed observation type from concepts array', {
+      logger.debug("PARSER", "Removed observation type from concepts array", {
         correlationId,
         type: finalType,
         originalConcepts: concepts,
@@ -128,7 +127,7 @@ function parseObservationBlocks(text: string, correlationId?: string | number): 
     }
 
     if (!title && !narrative && facts.length === 0 && cleanedConcepts.length === 0) {
-      logger.warn('PARSER', 'Skipping empty observation (all content fields null)', {
+      logger.warn("PARSER", "Skipping empty observation (all content fields null)", {
         correlationId,
         type: finalType
       });
@@ -157,15 +156,15 @@ function parseSummaryBlock(text: string, correlationId?: string | number): Parse
 
   const summaryContent = summaryMatch[1];
 
-  const request = extractField(summaryContent, 'request');
-  const investigated = extractField(summaryContent, 'investigated');
-  const learned = extractField(summaryContent, 'learned');
-  const completed = extractField(summaryContent, 'completed');
-  const next_steps = extractField(summaryContent, 'next_steps');
-  const notes = extractField(summaryContent, 'notes'); 
+  const request = extractField(summaryContent, "request");
+  const investigated = extractField(summaryContent, "investigated");
+  const learned = extractField(summaryContent, "learned");
+  const completed = extractField(summaryContent, "completed");
+  const next_steps = extractField(summaryContent, "next_steps");
+  const notes = extractField(summaryContent, "notes");
 
   if (!request && !investigated && !learned && !completed && !next_steps) {
-    logger.warn('PARSER', 'Summary block has no sub-tags — rejecting false positive', { correlationId });
+    logger.warn("PARSER", "Summary block has no sub-tags — rejecting false positive", { correlationId });
     return null;
   }
 
@@ -175,7 +174,7 @@ function parseSummaryBlock(text: string, correlationId?: string | number): Parse
     learned,
     completed,
     next_steps,
-    notes,
+    notes
   };
 }
 
@@ -185,7 +184,7 @@ function extractField(content: string, fieldName: string): string | null {
   if (!match) return null;
 
   const trimmed = match[1].trim();
-  return trimmed === '' ? null : trimmed;
+  return trimmed === "" ? null : trimmed;
 }
 
 function extractArrayElements(content: string, arrayName: string, elementName: string): string[] {
@@ -200,7 +199,7 @@ function extractArrayElements(content: string, arrayName: string, elementName: s
 
   const arrayContent = arrayMatch[1];
 
-  const elementRegex = new RegExp(`<${elementName}>([\\s\\S]*?)</${elementName}>`, 'g');
+  const elementRegex = new RegExp(`<${elementName}>([\\s\\S]*?)</${elementName}>`, "g");
   let elementMatch;
   while ((elementMatch = elementRegex.exec(arrayContent)) !== null) {
     const trimmed = elementMatch[1].trim();

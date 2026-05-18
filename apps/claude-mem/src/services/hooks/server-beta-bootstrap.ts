@@ -20,24 +20,24 @@
 // The plaintext key is NEVER written into the generated bundle and never
 // logged.
 
-import { createHash, randomBytes } from 'crypto';
-import { chmodSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { dirname } from 'path';
-import { createPostgresPool, type PostgresPool } from '../../storage/postgres/pool.js';
-import { parsePostgresConfig } from '../../storage/postgres/config.js';
-import { PostgresAuthRepository } from '../../storage/postgres/auth.js';
-import { PostgresProjectsRepository } from '../../storage/postgres/projects.js';
-import { PostgresTeamsRepository } from '../../storage/postgres/teams.js';
+import { createHash, randomBytes } from "crypto";
+import { chmodSync, existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
+import { dirname } from "path";
+import { createPostgresPool, type PostgresPool } from "../../storage/postgres/pool.js";
+import { parsePostgresConfig } from "../../storage/postgres/config.js";
+import { PostgresAuthRepository } from "../../storage/postgres/auth.js";
+import { PostgresProjectsRepository } from "../../storage/postgres/projects.js";
+import { PostgresTeamsRepository } from "../../storage/postgres/teams.js";
 
-const LOCAL_HOOK_TEAM_NAME = 'local-hook-team';
-const LOCAL_HOOK_PROJECT_NAME = 'local-hook-project';
-const LOCAL_HOOK_ACTOR_ID = 'system:local-hook-bootstrap';
+const LOCAL_HOOK_TEAM_NAME = "local-hook-team";
+const LOCAL_HOOK_PROJECT_NAME = "local-hook-project";
+const LOCAL_HOOK_ACTOR_ID = "system:local-hook-bootstrap";
 
 export const HOOK_API_KEY_SCOPES: readonly string[] = Object.freeze([
-  'events:write',
-  'sessions:write',
-  'observations:read',
-  'jobs:read',
+  "events:write",
+  "sessions:write",
+  "observations:read",
+  "jobs:read"
 ]);
 
 export interface BootstrapResult {
@@ -53,9 +53,7 @@ export interface BootstrapDependencies {
   closePool?: boolean;
 }
 
-export async function bootstrapServerBetaApiKey(
-  deps: BootstrapDependencies = {},
-): Promise<BootstrapResult> {
+export async function bootstrapServerBetaApiKey(deps: BootstrapDependencies = {}): Promise<BootstrapResult> {
   const closePool = deps.closePool ?? deps.pool === undefined;
   const pool = deps.pool ?? buildPoolFromEnv();
 
@@ -72,24 +70,24 @@ export async function bootstrapServerBetaApiKey(
       teamId,
       projectId,
       actorId: LOCAL_HOOK_ACTOR_ID,
-      scopes: [...HOOK_API_KEY_SCOPES],
+      scopes: [...HOOK_API_KEY_SCOPES]
     });
     await repo.createAuditLog({
       teamId,
       projectId,
       actorId: LOCAL_HOOK_ACTOR_ID,
       apiKeyId: created.id,
-      action: 'api_key.create',
-      resourceType: 'api_key',
+      action: "api_key.create",
+      resourceType: "api_key",
       resourceId: created.id,
-      details: { source: 'server-beta-bootstrap' },
+      details: { source: "server-beta-bootstrap" }
     });
 
     return {
       rawKey,
       apiKeyId: created.id,
       teamId,
-      projectId,
+      projectId
     };
   } finally {
     if (closePool) {
@@ -108,10 +106,9 @@ export async function rotateServerBetaApiKey(options: RotateOptions = {}): Promi
   const pool = options.pool ?? buildPoolFromEnv();
   try {
     if (options.previousApiKeyId) {
-      await pool.query(
-        `UPDATE api_keys SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL`,
-        [options.previousApiKeyId],
-      );
+      await pool.query(`UPDATE api_keys SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL`, [
+        options.previousApiKeyId
+      ]);
     }
     return await bootstrapServerBetaApiKey({ pool, closePool: false });
   } finally {
@@ -123,7 +120,7 @@ export async function rotateServerBetaApiKey(options: RotateOptions = {}): Promi
 
 export function persistServerBetaSettings(
   settingsPath: string,
-  values: { apiKey: string; projectId: string; serverBaseUrl?: string },
+  values: { apiKey: string; projectId: string; serverBaseUrl?: string }
 ): void {
   const dir = dirname(settingsPath);
   if (!existsSync(dir)) {
@@ -133,16 +130,14 @@ export function persistServerBetaSettings(
   let existing: Record<string, unknown> = {};
   if (existsSync(settingsPath)) {
     try {
-      existing = JSON.parse(readFileSync(settingsPath, 'utf-8')) as Record<string, unknown>;
+      existing = JSON.parse(readFileSync(settingsPath, "utf-8")) as Record<string, unknown>;
     } catch {
       existing = {};
     }
   }
   // Settings file format: prefer the flat shape (modern). The migration in
   // SettingsDefaultsManager.loadFromFile already collapses nested → flat.
-  const flat = (existing.env && typeof existing.env === 'object'
-    ? existing.env
-    : existing) as Record<string, unknown>;
+  const flat = (existing.env && typeof existing.env === "object" ? existing.env : existing) as Record<string, unknown>;
 
   flat.CLAUDE_MEM_SERVER_BETA_API_KEY = values.apiKey;
   flat.CLAUDE_MEM_SERVER_BETA_PROJECT_ID = values.projectId;
@@ -150,7 +145,7 @@ export function persistServerBetaSettings(
     flat.CLAUDE_MEM_SERVER_BETA_URL = values.serverBaseUrl;
   }
 
-  writeFileSync(settingsPath, JSON.stringify(flat, null, 2), 'utf-8');
+  writeFileSync(settingsPath, JSON.stringify(flat, null, 2), "utf-8");
   // Hooks read this file on every invocation; restrict permissions so other
   // local users cannot read the API key.
   try {
@@ -161,30 +156,29 @@ export function persistServerBetaSettings(
 }
 
 export function createRawApiKey(): string {
-  return `cmem_${randomBytes(32).toString('base64url')}`;
+  return `cmem_${randomBytes(32).toString("base64url")}`;
 }
 
 export function hashApiKey(rawKey: string): string {
-  return createHash('sha256').update(rawKey).digest('hex');
+  return createHash("sha256").update(rawKey).digest("hex");
 }
 
 async function findOrCreateTeam(pool: PostgresPool): Promise<string> {
-  const existing = await pool.query<{ id: string }>(
-    `SELECT id FROM teams WHERE name = $1 LIMIT 1`,
-    [LOCAL_HOOK_TEAM_NAME],
-  );
+  const existing = await pool.query<{ id: string }>(`SELECT id FROM teams WHERE name = $1 LIMIT 1`, [
+    LOCAL_HOOK_TEAM_NAME
+  ]);
   if (existing.rows[0]) {
     return existing.rows[0].id;
   }
   const repo = new PostgresTeamsRepository(pool);
-  const team = await repo.create({ name: LOCAL_HOOK_TEAM_NAME, metadata: { source: 'local-hook-bootstrap' } });
+  const team = await repo.create({ name: LOCAL_HOOK_TEAM_NAME, metadata: { source: "local-hook-bootstrap" } });
   return team.id;
 }
 
 async function findOrCreateProject(pool: PostgresPool, teamId: string): Promise<string> {
   const existing = await pool.query<{ id: string }>(
     `SELECT id FROM projects WHERE team_id = $1 AND name = $2 LIMIT 1`,
-    [teamId, LOCAL_HOOK_PROJECT_NAME],
+    [teamId, LOCAL_HOOK_PROJECT_NAME]
   );
   if (existing.rows[0]) {
     return existing.rows[0].id;
@@ -193,7 +187,7 @@ async function findOrCreateProject(pool: PostgresPool, teamId: string): Promise<
   const project = await repo.create({
     teamId,
     name: LOCAL_HOOK_PROJECT_NAME,
-    metadata: { source: 'local-hook-bootstrap' },
+    metadata: { source: "local-hook-bootstrap" }
   });
   return project.id;
 }
@@ -201,9 +195,7 @@ async function findOrCreateProject(pool: PostgresPool, teamId: string): Promise<
 function buildPoolFromEnv(): PostgresPool {
   const config = parsePostgresConfig({ requireDatabaseUrl: true });
   if (!config) {
-    throw new Error(
-      'Cannot bootstrap server-beta API key: CLAUDE_MEM_SERVER_DATABASE_URL is not set.',
-    );
+    throw new Error("Cannot bootstrap server-beta API key: CLAUDE_MEM_SERVER_DATABASE_URL is not set.");
   }
   return createPostgresPool(config);
 }

@@ -2,6 +2,7 @@
 🌐 یہ ایک خودکار ترجمہ ہے۔ کمیونٹی کی اصلاحات کا خیر مقدم ہے!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -186,6 +187,7 @@ Claude-Mem ٹوکن-موثر **3-لیئر ورک فلو پیٹرن** کی پیر
 3. **`get_observations`** - فلٹر شدہ IDs کے لیے صرف مکمل تفصیلات حاصل کریں (~500-1,000 ٹوکن/نتیجہ)
 
 **یہ کیسے کام کرتا ہے:**
+
 - Claude آپ کی میموری میں تلاش کے لیے MCP اوزار استعمال کرتا ہے
 - نتائج کا انڈیکس حاصل کرنے کے لیے `search` سے شروع کریں
 - مخصوص مشاہدات کے ارد گرد کیا ہو رہا تھا دیکھنے کے لیے `timeline` استعمال کریں
@@ -203,12 +205,12 @@ Claude-Mem ٹوکن-موثر **3-لیئر ورک فلو پیٹرن** کی پیر
 
 ```typescript
 // مرحلہ 1: انڈیکس کے لیے تلاش کریں
-search(query="authentication bug", type="bugfix", limit=10)
+search((query = "authentication bug"), (type = "bugfix"), (limit = 10));
 
 // مرحلہ 2: انڈیکس کا جائزہ لیں، متعلقہ IDs کی شناخت کریں (مثلاً، #123, #456)
 
 // مرحلہ 3: مکمل تفصیلات حاصل کریں
-get_observations(ids=[123, 456])
+get_observations((ids = [123, 456]));
 ```
 
 تفصیلی مثالوں کے لیے [تلاش کے اوزار گائیڈ](https://docs.claude-mem.ai/usage/search-tools) دیکھیں۔
@@ -291,7 +293,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## معاونت
 

@@ -5,7 +5,7 @@ icon: plug
 ---
 
 <Note>
-**Target Audience:** Developers building claude-mem integrations (VSCode extensions, IDE plugins, CLI tools).
+  **Target Audience:** Developers building claude-mem integrations (VSCode extensions, IDE plugins, CLI tools).
 </Note>
 
 ## Quick Reference
@@ -114,30 +114,20 @@ Platform Hook/Extension
 
 <AccordionGroup>
   <Accordion title="ViewerRoutes" icon="eye">
-    - Health check endpoint
-    - Viewer UI (React app)
-    - SSE stream for real-time updates
+    - Health check endpoint - Viewer UI (React app) - SSE stream for real-time updates
   </Accordion>
   <Accordion title="SessionRoutes" icon="timeline">
-    - Session lifecycle (init, observations, summarize, complete)
-    - Privacy checks and tag stripping
-    - Auto-start SDK agent generators
+    - Session lifecycle (init, observations, summarize, complete) - Privacy checks and tag stripping - Auto-start SDK
+    agent generators
   </Accordion>
   <Accordion title="DataRoutes" icon="database">
-    - Data retrieval (observations, summaries, prompts, stats)
-    - Pagination support
-    - Processing status
+    - Data retrieval (observations, summaries, prompts, stats) - Pagination support - Processing status
   </Accordion>
   <Accordion title="SearchRoutes" icon="magnifying-glass">
-    - All search operations
-    - Unified search API
-    - Timeline context
-    - Semantic shortcuts
+    - All search operations - Unified search API - Timeline context - Semantic shortcuts
   </Accordion>
   <Accordion title="SettingsRoutes" icon="gear">
-    - User settings
-    - MCP toggle
-    - Git branch switching
+    - User settings - MCP toggle - Git branch switching
   </Accordion>
 </AccordionGroup>
 
@@ -153,19 +143,21 @@ POST /api/sessions/observations
 Content-Type: application/json
 
 {
-  "claudeSessionId": "abc123",      // Claude session identifier (string)
-  "tool_name": "Bash",
-  "tool_input": { "command": "ls" },
-  "tool_response": { "stdout": "..." },
-  "cwd": "/path/to/project"
+"claudeSessionId": "abc123", // Claude session identifier (string)
+"tool_name": "Bash",
+"tool_input": { "command": "ls" },
+"tool_response": { "stdout": "..." },
+"cwd": "/path/to/project"
 }
-```
+
+````
 
 ```json Response
 { "status": "queued" }
 // or
 { "status": "skipped", "reason": "private" }
-```
+````
+
 </CodeGroup>
 
 <Info>
@@ -182,17 +174,19 @@ POST /api/sessions/summarize
 Content-Type: application/json
 
 {
-  "claudeSessionId": "abc123",
-  "last_user_message": "User's message",
-  "last_assistant_message": "Assistant's response"
+"claudeSessionId": "abc123",
+"last_user_message": "User's message",
+"last_assistant_message": "Assistant's response"
 }
-```
+
+````
 
 ```json Response
 { "status": "queued" }
 // or
 { "status": "skipped", "reason": "private" }
-```
+````
+
 </CodeGroup>
 
 #### Complete Session (New API)
@@ -203,20 +197,20 @@ POST /api/sessions/complete
 Content-Type: application/json
 
 {
-  "claudeSessionId": "abc123"
+"claudeSessionId": "abc123"
 }
-```
+
+````
 
 ```json Response
 { "success": true }
 // or
 { "success": true, "message": "No active session found" }
-```
+````
+
 </CodeGroup>
 
-<Warning>
-**Effect:** Stops SDK agent, marks session complete, broadcasts status change.
-</Warning>
+<Warning>**Effect:** Stops SDK agent, marks session complete, broadcasts status change.</Warning>
 
 #### Legacy Endpoints (Still Supported)
 
@@ -246,30 +240,16 @@ Content-Type: application/json
   </Tab>
 </Tabs>
 
-<Note>
-New integrations should use `/api/sessions/*` endpoints with `claudeSessionId`.
-</Note>
+<Note>New integrations should use `/api/sessions/*` endpoints with `claudeSessionId`.</Note>
 
 ### Data Retrieval (DataRoutes)
 
 #### Get Paginated Data
 
 <Tabs>
-  <Tab title="Observations">
-    ```http
-    GET /api/observations?offset=0&limit=20&project=my-project
-    ```
-  </Tab>
-  <Tab title="Summaries">
-    ```http
-    GET /api/summaries?offset=0&limit=20&project=my-project
-    ```
-  </Tab>
-  <Tab title="User Prompts">
-    ```http
-    GET /api/prompts?offset=0&limit=20&project=my-project
-    ```
-  </Tab>
+  <Tab title="Observations">```http GET /api/observations?offset=0&limit=20&project=my-project ```</Tab>
+  <Tab title="Summaries">```http GET /api/summaries?offset=0&limit=20&project=my-project ```</Tab>
+  <Tab title="User Prompts">```http GET /api/prompts?offset=0&limit=20&project=my-project ```</Tab>
 </Tabs>
 
 ```json Response Format
@@ -284,21 +264,9 @@ New integrations should use `/api/sessions/*` endpoints with `claudeSessionId`.
 #### Get by ID
 
 <Tabs>
-  <Tab title="Observation">
-    ```http
-    GET /api/observation/:id
-    ```
-  </Tab>
-  <Tab title="Session">
-    ```http
-    GET /api/session/:id
-    ```
-  </Tab>
-  <Tab title="Prompt">
-    ```http
-    GET /api/prompt/:id
-    ```
-  </Tab>
+  <Tab title="Observation">```http GET /api/observation/:id ```</Tab>
+  <Tab title="Session">```http GET /api/session/:id ```</Tab>
+  <Tab title="Prompt">```http GET /api/prompt/:id ```</Tab>
 </Tabs>
 
 #### Get Database Stats
@@ -408,9 +376,8 @@ GET /api/search?query=authentication&type=observations&format=index&limit=20
 ```
 
 <Info>
-**Format Options:**
-- `index`: Minimal fields for list display (id, title, preview)
-- `full`: Complete entity with all fields
+  **Format Options:** - `index`: Minimal fields for list display (id, title, preview) - `full`: Complete entity with all
+  fields
 </Info>
 
 #### Unified Timeline
@@ -447,19 +414,13 @@ GET /api/timeline?anchor=123&depth_before=10&depth_after=10&project=my-project
 
 <CardGroup cols={3}>
   <Card title="Decisions" icon="check-circle">
-    ```http
-    GET /api/decisions?format=index&limit=20
-    ```
+    ```http GET /api/decisions?format=index&limit=20 ```
   </Card>
   <Card title="Changes" icon="code-commit">
-    ```http
-    GET /api/changes?format=index&limit=20
-    ```
+    ```http GET /api/changes?format=index&limit=20 ```
   </Card>
   <Card title="How It Works" icon="lightbulb">
-    ```http
-    GET /api/how-it-works?format=index&limit=20
-    ```
+    ```http GET /api/how-it-works?format=index&limit=20 ```
   </Card>
 </CardGroup>
 
@@ -500,9 +461,7 @@ GET /api/context/recent?project=my-project&limit=3
 GET /api/context/preview?project=my-project
 ```
 
-<Note>
-Returns plain text with ANSI colors for terminal display
-</Note>
+<Note>Returns plain text with ANSI colors for terminal display</Note>
 
 #### Context Injection (for Hooks)
 
@@ -510,9 +469,7 @@ Returns plain text with ANSI colors for terminal display
 GET /api/context/inject?project=my-project&colors=true
 ```
 
-<Note>
-Returns pre-formatted context string ready for display
-</Note>
+<Note>Returns pre-formatted context string ready for display</Note>
 
 ### Settings & Configuration (SettingsRoutes)
 
@@ -538,6 +495,7 @@ Body: { "sidebarOpen": true, "selectedProject": "my-project" }
 ```json POST Response
 { "success": true }
 ```
+
 </CodeGroup>
 
 #### MCP Server Status/Toggle
@@ -559,6 +517,7 @@ Body: { "enabled": true }
 ```json POST Response
 { "success": true, "enabled": boolean }
 ```
+
 </CodeGroup>
 
 #### Git Branch Operations
@@ -614,9 +573,7 @@ GET /api/health
 GET /
 ```
 
-<Note>
-Returns HTML for React app
-</Note>
+<Note>Returns HTML for React app</Note>
 
 #### SSE Stream
 
@@ -628,6 +585,7 @@ GET /stream
 **Server-Sent Events stream**
 
 Event Types:
+
 - `processing_status`: { type, isProcessing, queueDepth }
 - `session_started`: { type, sessionDbId, project }
 - `observation_queued`: { type, sessionDbId }
@@ -635,7 +593,7 @@ Event Types:
 - `observation_created`: { type, observation }
 - `summary_created`: { type, summary }
 - `new_prompt`: { type, id, claude_session_id, project, prompt_number, prompt_text, created_at_epoch }
-</Info>
+  </Info>
 
 ## Data Models
 
@@ -643,22 +601,22 @@ Event Types:
 
 ```typescript
 interface ActiveSession {
-  sessionDbId: number;                  // Database ID (numeric)
-  claudeSessionId: string;              // Claude session identifier (string)
-  sdkSessionId: string | null;          // SDK session ID
-  project: string;                      // Project name
-  userPrompt: string;                   // Current user prompt text
-  pendingMessages: PendingMessage[];    // Queue of pending operations
-  abortController: AbortController;     // For cancellation
+  sessionDbId: number; // Database ID (numeric)
+  claudeSessionId: string; // Claude session identifier (string)
+  sdkSessionId: string | null; // SDK session ID
+  project: string; // Project name
+  userPrompt: string; // Current user prompt text
+  pendingMessages: PendingMessage[]; // Queue of pending operations
+  abortController: AbortController; // For cancellation
   generatorPromise: Promise<void> | null; // SDK agent promise
-  lastPromptNumber: number;             // Last processed prompt number
-  startTime: number;                    // Session start timestamp
-  cumulativeInputTokens: number;        // Total input tokens
-  cumulativeOutputTokens: number;       // Total output tokens
+  lastPromptNumber: number; // Last processed prompt number
+  startTime: number; // Session start timestamp
+  cumulativeInputTokens: number; // Total input tokens
+  cumulativeOutputTokens: number; // Total output tokens
 }
 
 interface PendingMessage {
-  type: 'observation' | 'summarize';
+  type: "observation" | "summarize";
   tool_name?: string;
   tool_input?: any;
   tool_response?: any;
@@ -740,14 +698,14 @@ interface ObservationSearchResult {
   title: string;
   subtitle?: string;
   summary: string;
-  facts: string[];         // Parsed from JSON
-  concepts: string[];      // Parsed from JSON
+  facts: string[]; // Parsed from JSON
+  concepts: string[]; // Parsed from JSON
   files_touched: string[]; // Parsed from JSON
   obs_type: string;
   project: string;
   created_at_epoch: number;
   prompt_number: number;
-  rank?: number;           // FTS5 rank score
+  rank?: number; // FTS5 rank score
 }
 
 interface SessionSummarySearchResult {
@@ -776,7 +734,7 @@ interface UserPromptSearchResult {
 
 ```typescript
 interface TimelineItem {
-  type: 'observation' | 'session' | 'prompt';
+  type: "observation" | "session" | "prompt";
   id: number;
   created_at_epoch: number;
   // Entity-specific fields based on type
@@ -815,6 +773,7 @@ interface TimelineItem {
       // result.status === 'queued' | 'skipped'
     }
     ```
+
   </Step>
   <Step title="Summary Hook">
     ```typescript
@@ -832,6 +791,7 @@ interface TimelineItem {
       });
     }
     ```
+
   </Step>
   <Step title="SessionEnd Hook">
     ```typescript
@@ -847,6 +807,7 @@ interface TimelineItem {
       });
     }
     ```
+
   </Step>
 </Steps>
 
@@ -855,7 +816,7 @@ interface TimelineItem {
 #### Language Model Tool Registration
 
 ```typescript
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 interface SearchTool extends vscode.LanguageModelChatTool {
   invoke(
@@ -880,25 +841,21 @@ const searchTool: SearchTool = {
       const results = await response.json();
 
       // Format results for language model
-      return new vscode.LanguageModelToolResult([
-        new vscode.LanguageModelTextPart(JSON.stringify(results, null, 2))
-      ]);
+      return new vscode.LanguageModelToolResult([new vscode.LanguageModelTextPart(JSON.stringify(results, null, 2))]);
     } catch (error) {
-      return new vscode.LanguageModelToolResult([
-        new vscode.LanguageModelTextPart(`Error: ${error.message}`)
-      ]);
+      return new vscode.LanguageModelToolResult([new vscode.LanguageModelTextPart(`Error: ${error.message}`)]);
     }
   }
 };
 
 // Register tool
-vscode.lm.registerTool('claude-mem-search', searchTool);
+vscode.lm.registerTool("claude-mem-search", searchTool);
 ```
 
 #### Chat Participant Implementation
 
 ```typescript
-const participant = vscode.chat.createChatParticipant('claude-mem', async (request, context, stream, token) => {
+const participant = vscode.chat.createChatParticipant("claude-mem", async (request, context, stream, token) => {
   const claudeSessionId = context.session.id;
 
   // First message in conversation - no initialization needed
@@ -914,13 +871,13 @@ const participant = vscode.chat.createChatParticipant('claude-mem', async (reque
   const results = await response.json();
 
   if (results.observations?.length > 0) {
-    stream.markdown('**Found observations:**\n');
+    stream.markdown("**Found observations:**\n");
     for (const obs of results.observations) {
       stream.markdown(`- ${obs.title} (${obs.project})\n`);
     }
   }
 
-  return { metadata: { command: 'search' } };
+  return { metadata: { command: "search" } };
 });
 ```
 
@@ -929,10 +886,7 @@ const participant = vscode.chat.createChatParticipant('claude-mem', async (reque
 ### Connection Failures
 
 ```typescript
-async function callWorkerWithFallback<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T | null> {
+async function callWorkerWithFallback<T>(endpoint: string, options?: RequestInit): Promise<T | null> {
   try {
     const response = await fetch(`${WORKER_BASE_URL}${endpoint}`, {
       ...options,
@@ -954,11 +908,7 @@ async function callWorkerWithFallback<T>(
 ### Retry Logic with Exponential Backoff
 
 ```typescript
-async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  maxRetries = 3,
-  baseDelay = 100
-): Promise<T> {
+async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries = 3, baseDelay = 100): Promise<T> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
@@ -966,10 +916,10 @@ async function retryWithBackoff<T>(
       if (attempt === maxRetries - 1) throw error;
 
       const delay = baseDelay * Math.pow(2, attempt);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  throw new Error('Max retries exceeded');
+  throw new Error("Max retries exceeded");
 }
 ```
 
@@ -996,6 +946,7 @@ The worker automatically strips privacy tags before storage:
 - `<claude-mem-context>content</claude-mem-context>` - System-level tag (prevents recursive storage)
 
 **Privacy Check:** Observations/summaries are skipped if the entire user prompt was wrapped in `<private>` tags.
+
 </Info>
 
 ### Custom Error Classes
@@ -1003,15 +954,15 @@ The worker automatically strips privacy tags before storage:
 ```typescript
 class WorkerUnavailableError extends Error {
   constructor() {
-    super('Claude-mem worker is not running or unreachable');
-    this.name = 'WorkerUnavailableError';
+    super("Claude-mem worker is not running or unreachable");
+    this.name = "WorkerUnavailableError";
   }
 }
 
 class WorkerTimeoutError extends Error {
   constructor(endpoint: string) {
     super(`Worker request timed out: ${endpoint}`);
-    this.name = 'WorkerTimeoutError';
+    this.name = "WorkerTimeoutError";
   }
 }
 ```
@@ -1027,12 +978,12 @@ function connectToSSE(onEvent: (event: any) => void) {
       const data = JSON.parse(event.data);
       onEvent(data);
     } catch (error) {
-      console.error('SSE parse error:', error);
+      console.error("SSE parse error:", error);
     }
   };
 
   eventSource.onerror = (error) => {
-    console.error('SSE connection error:', error);
+    console.error("SSE connection error:", error);
     eventSource.close();
 
     // Reconnect after 5 seconds
@@ -1068,18 +1019,20 @@ vscode-extension/
 
 ```javascript
 // build.js
-const esbuild = require('esbuild');
+const esbuild = require("esbuild");
 
-esbuild.build({
-  entryPoints: ['src/extension.ts'],
-  bundle: true,
-  outfile: 'dist/extension.js',
-  external: ['vscode'],
-  format: 'cjs',
-  platform: 'node',
-  target: 'node18',
-  sourcemap: true
-}).catch(() => process.exit(1));
+esbuild
+  .build({
+    entryPoints: ["src/extension.ts"],
+    bundle: true,
+    outfile: "dist/extension.js",
+    external: ["vscode"],
+    format: "cjs",
+    platform: "node",
+    target: "node18",
+    sourcemap: true
+  })
+  .catch(() => process.exit(1));
 ```
 
 ### package.json (VSCode Extension)
@@ -1092,9 +1045,7 @@ esbuild.build({
   "engines": {
     "vscode": "^1.95.0"
   },
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "activationEvents": ["onStartupFinished"],
   "main": "./dist/extension.js",
   "contributes": {
     "chatParticipants": [
@@ -1128,26 +1079,13 @@ esbuild.build({
 ### Local Testing Loop
 
 <Steps>
-  <Step title="Terminal 1: Watch build">
-    ```bash
-    npm run watch
-    ```
-  </Step>
-  <Step title="Terminal 2: Check worker status">
-    ```bash
-    npm run worker:status
-    npm run worker:logs
-    ```
-  </Step>
+  <Step title="Terminal 1: Watch build">```bash npm run watch ```</Step>
+  <Step title="Terminal 2: Check worker status">```bash npm run worker:status npm run worker:logs ```</Step>
   <Step title="Terminal 3: Test API manually">
-    ```bash
-    curl http://127.0.0.1:$WORKER_PORT/api/health
-    curl "http://127.0.0.1:$WORKER_PORT/api/search?query=test&limit=5"
-    ```
+    ```bash curl http://127.0.0.1:$WORKER_PORT/api/health curl
+    "http://127.0.0.1:$WORKER_PORT/api/search?query=test&limit=5" ```
   </Step>
-  <Step title="VSCode: Launch extension host">
-    Press F5 to launch extension host
-  </Step>
+  <Step title="VSCode: Launch extension host">Press F5 to launch extension host</Step>
 </Steps>
 
 ### Debug Configuration (.vscode/launch.json)
@@ -1160,12 +1098,8 @@ esbuild.build({
       "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
-      ],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "preLaunchTask": "npm: build"
     }
   ]
@@ -1177,32 +1111,32 @@ esbuild.build({
 ### Unit Tests (Worker Client)
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { WorkerClient } from '../src/services/WorkerClient';
+import { describe, it, expect } from "vitest";
+import { WorkerClient } from "../src/services/WorkerClient";
 
-describe('WorkerClient', () => {
-  it('should check worker health', async () => {
+describe("WorkerClient", () => {
+  it("should check worker health", async () => {
     const client = new WorkerClient();
     const healthy = await client.isHealthy();
     expect(healthy).toBe(true);
   });
 
-  it('should queue observation', async () => {
+  it("should queue observation", async () => {
     const client = new WorkerClient();
     const result = await client.queueObservation({
-      claudeSessionId: 'test-123',
-      tool_name: 'Bash',
-      tool_input: { command: 'ls' },
-      tool_response: { stdout: 'file1.txt' },
-      cwd: '/tmp'
+      claudeSessionId: "test-123",
+      tool_name: "Bash",
+      tool_input: { command: "ls" },
+      tool_response: { stdout: "file1.txt" },
+      cwd: "/tmp"
     });
-    expect(result.status).toBe('queued');
+    expect(result.status).toBe("queued");
   });
 
-  it('should search observations', async () => {
+  it("should search observations", async () => {
     const client = new WorkerClient();
-    const results = await client.search({ query: 'test', limit: 5 });
-    expect(results).toHaveProperty('observations');
+    const results = await client.search({ query: "test", limit: 5 });
+    expect(results).toHaveProperty("observations");
   });
 });
 ```
@@ -1210,28 +1144,28 @@ describe('WorkerClient', () => {
 ### Integration Tests (With Worker Spawning)
 
 ```typescript
-import { spawn } from 'child_process';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { spawn } from "child_process";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 
-describe('Worker Integration', () => {
+describe("Worker Integration", () => {
   let workerProcess: ReturnType<typeof spawn>;
 
   beforeAll(async () => {
     // Start worker process
-    workerProcess = spawn('node', ['dist/worker-service.js'], {
-      env: { ...process.env, CLAUDE_MEM_WORKER_PORT: '37778' }
+    workerProcess = spawn("node", ["dist/worker-service.js"], {
+      env: { ...process.env, CLAUDE_MEM_WORKER_PORT: "37778" }
     });
 
     // Wait for worker to be ready
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(() => {
     workerProcess.kill();
   });
 
-  it('should respond to health check', async () => {
-    const response = await fetch('http://localhost:37778/api/health');
+  it("should respond to health check", async () => {
+    const response = await fetch("http://localhost:37778/api/health");
     expect(response.ok).toBe(true);
   });
 });
@@ -1246,30 +1180,20 @@ describe('Worker Integration', () => {
     - [ ] SSE stream connects (`curl http://127.0.0.1:$WORKER_PORT/stream`)
   </Accordion>
 
-  <Accordion title="Phase 2: Session Lifecycle">
-    - [ ] Queue observation creates session
-    - [ ] Observation appears in database
-    - [ ] Privacy tags are stripped
-    - [ ] Private prompts are skipped
-    - [ ] Queue summary creates summary
-    - [ ] Complete session stops processing
-  </Accordion>
+<Accordion title="Phase 2: Session Lifecycle">
+  - [ ] Queue observation creates session - [ ] Observation appears in database - [ ] Privacy tags are stripped - [ ]
+  Private prompts are skipped - [ ] Queue summary creates summary - [ ] Complete session stops processing
+</Accordion>
 
-  <Accordion title="Phase 3: Search & Retrieval">
-    - [ ] Search observations by query
-    - [ ] Search sessions by query
-    - [ ] Search prompts by query
-    - [ ] Get recent context for project
-    - [ ] Get timeline around observation
-    - [ ] Semantic shortcuts (decisions, changes, how-it-works)
-  </Accordion>
+<Accordion title="Phase 3: Search & Retrieval">
+  - [ ] Search observations by query - [ ] Search sessions by query - [ ] Search prompts by query - [ ] Get recent
+  context for project - [ ] Get timeline around observation - [ ] Semantic shortcuts (decisions, changes, how-it-works)
+</Accordion>
 
-  <Accordion title="Phase 4: Real-Time Updates">
-    - [ ] SSE broadcasts processing status
-    - [ ] SSE broadcasts new observations
-    - [ ] SSE broadcasts new summaries
-    - [ ] SSE broadcasts new prompts
-  </Accordion>
+<Accordion title="Phase 4: Real-Time Updates">
+  - [ ] SSE broadcasts processing status - [ ] SSE broadcasts new observations - [ ] SSE broadcasts new summaries - [ ]
+  SSE broadcasts new prompts
+</Accordion>
 
   <Accordion title="Phase 5: Error Handling">
     - [ ] Graceful degradation when worker unavailable
@@ -1287,89 +1211,92 @@ describe('Worker Integration', () => {
 export class WorkerClient {
   private baseUrl: string;
 
-  // Resolve the active worker port via env / settings.json, falling back
-  // to the deterministic per-user default. See parseWorkerPort() for an
-  // example helper; never hardcode a single value.
-  constructor(port: number = resolveWorkerPort()) {
-    this.baseUrl = `http://127.0.0.1:${port}`;
-  }
+// Resolve the active worker port via env / settings.json, falling back
+// to the deterministic per-user default. See parseWorkerPort() for an
+// example helper; never hardcode a single value.
+constructor(port: number = resolveWorkerPort()) {
+this.baseUrl = `http://127.0.0.1:${port}`;
+}
 
-  async isHealthy(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/health`, {
-        signal: AbortSignal.timeout(2000)
-      });
-      return response.ok;
-    } catch {
-      return false;
-    }
-  }
+async isHealthy(): Promise<boolean> {
+try {
+const response = await fetch(`${this.baseUrl}/api/health`, {
+signal: AbortSignal.timeout(2000)
+});
+return response.ok;
+} catch {
+return false;
+}
+}
 
-  async queueObservation(data: {
-    claudeSessionId: string;
-    tool_name: string;
-    tool_input: any;
-    tool_response: any;
-    cwd?: string;
-  }): Promise<{ status: string; reason?: string }> {
-    const response = await fetch(`${this.baseUrl}/api/sessions/observations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      signal: AbortSignal.timeout(5000)
-    });
+async queueObservation(data: {
+claudeSessionId: string;
+tool_name: string;
+tool_input: any;
+tool_response: any;
+cwd?: string;
+}): Promise<{ status: string; reason?: string }> {
+const response = await fetch(`${this.baseUrl}/api/sessions/observations`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(data),
+signal: AbortSignal.timeout(5000)
+});
 
     if (!response.ok) {
       throw new Error(`Failed to queue observation: ${response.statusText}`);
     }
 
     return await response.json();
-  }
 
-  async queueSummarize(data: {
-    claudeSessionId: string;
-    last_user_message?: string;
-    last_assistant_message?: string;
-  }): Promise<{ status: string; reason?: string }> {
-    const response = await fetch(`${this.baseUrl}/api/sessions/summarize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      signal: AbortSignal.timeout(5000)
-    });
+}
+
+async queueSummarize(data: {
+claudeSessionId: string;
+last_user_message?: string;
+last_assistant_message?: string;
+}): Promise<{ status: string; reason?: string }> {
+const response = await fetch(`${this.baseUrl}/api/sessions/summarize`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(data),
+signal: AbortSignal.timeout(5000)
+});
 
     if (!response.ok) {
       throw new Error(`Failed to queue summary: ${response.statusText}`);
     }
 
     return await response.json();
-  }
 
-  async completeSession(claudeSessionId: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/sessions/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ claudeSessionId }),
-      signal: AbortSignal.timeout(5000)
-    });
+}
+
+async completeSession(claudeSessionId: string): Promise<void> {
+const response = await fetch(`${this.baseUrl}/api/sessions/complete`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ claudeSessionId }),
+signal: AbortSignal.timeout(5000)
+});
 
     if (!response.ok) {
       throw new Error(`Failed to complete session: ${response.statusText}`);
     }
-  }
 
-  async search(params: {
-    query?: string;
-    type?: 'observations' | 'sessions' | 'prompts';
-    format?: 'index' | 'full';
-    limit?: number;
-    project?: string;
-  }): Promise<any> {
-    const queryString = new URLSearchParams(
-      Object.entries(params)
-        .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, String(v)])
-    ).toString();
+}
+
+async search(params: {
+query?: string;
+type?: 'observations' | 'sessions' | 'prompts';
+format?: 'index' | 'full';
+limit?: number;
+project?: string;
+}): Promise<any> {
+const queryString = new URLSearchParams(
+Object.entries(params)
+.filter(([_, v]) => v !== undefined)
+.map(([k, v]) => [k, String(v)])
+).toString();
 
     const response = await fetch(
       `${this.baseUrl}/api/search?${queryString}`,
@@ -1381,10 +1308,11 @@ export class WorkerClient {
     }
 
     return await response.json();
-  }
 
-  connectSSE(onEvent: (event: any) => void): EventSource {
-    const eventSource = new EventSource(`${this.baseUrl}/stream`);
+}
+
+connectSSE(onEvent: (event: any) => void): EventSource {
+const eventSource = new EventSource(`${this.baseUrl}/stream`);
 
     eventSource.onmessage = (event) => {
       try {
@@ -1400,9 +1328,11 @@ export class WorkerClient {
     };
 
     return eventSource;
-  }
+
 }
-```
+}
+
+````
 </CodeGroup>
 
 ### Search Language Model Tool
@@ -1475,7 +1405,7 @@ export function registerSearchTool(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(searchTool);
 }
-```
+````
 
 ## Critical Implementation Notes
 
@@ -1486,7 +1416,7 @@ export function registerSearchTool(context: vscode.ExtensionContext) {
 
 - `sessionDbId` - Numeric database ID (legacy endpoints only)
 - `claudeSessionId` - String identifier from Claude platform (new endpoints)
-</Warning>
+  </Warning>
 
 <Warning>
 ### JSON String Fields
@@ -1498,6 +1428,7 @@ const observation = await client.getObservationById(123);
 const facts = JSON.parse(observation.facts); // string[] array
 const concepts = JSON.parse(observation.concepts); // string[] array
 ```
+
 </Warning>
 
 <Warning>
@@ -1509,12 +1440,14 @@ All `created_at_epoch` fields are in **milliseconds**, not seconds:
 const date = new Date(observation.created_at_epoch); // ✅ Correct
 const date = new Date(observation.created_at_epoch * 1000); // ❌ Wrong (already in ms)
 ```
+
 </Warning>
 
 <Info>
 ### Asynchronous Processing
 
 Workers process observations/summaries asynchronously. Results appear in the database 1-2 seconds after queuing. Use SSE events for real-time notifications.
+
 </Info>
 
 <Info>
@@ -1523,9 +1456,10 @@ Workers process observations/summaries asynchronously. Results appear in the dat
 Always wrap sensitive content in `<private>` tags to prevent storage:
 
 ```typescript
-const userMessage = '<private>API key: sk-1234567890</private>';
+const userMessage = "<private>API key: sk-1234567890</private>";
 // This observation will be skipped (entire prompt is private)
 ```
+
 </Info>
 
 ## Additional Resources

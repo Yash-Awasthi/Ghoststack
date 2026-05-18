@@ -1,6 +1,7 @@
 🌐 Toto je automatický překlad. Komunitní opravy jsou vítány!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ Podrobnosti najdete v [Přehledu architektury](https://docs.claude-mem.ai/archit
 Claude-Mem poskytuje inteligentní vyhledávání prostřednictvím dovednosti mem-search, která se automaticky vyvolá, když se ptáte na minulou práci:
 
 **Jak to funguje:**
-- Stačí se zeptat přirozeně: *"Co jsme dělali minulé sezení?"* nebo *"Opravovali jsme tuto chybu dříve?"*
+
+- Stačí se zeptat přirozeně: _"Co jsme dělali minulé sezení?"_ nebo _"Opravovali jsme tuto chybu dříve?"_
 - Claude automaticky vyvolá dovednost mem-search k nalezení relevantního kontextu
 
 **Dostupné vyhledávací operace:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Podpora
 

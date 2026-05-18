@@ -1,45 +1,44 @@
-
-import type { Response } from 'express';
-import type { RestartGuard } from './worker/RestartGuard.js';
+import type { Response } from "express";
+import type { RestartGuard } from "./worker/RestartGuard.js";
 
 export interface ConversationMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
 export interface ActiveSession {
   sessionDbId: number;
-  contentSessionId: string;      
-  memorySessionId: string | null; 
+  contentSessionId: string;
+  memorySessionId: string | null;
   project: string;
   platformSource: string;
   userPrompt: string;
-  pendingMessages: PendingMessage[];  
+  pendingMessages: PendingMessage[];
   abortController: AbortController;
   generatorPromise: Promise<void> | null;
   lastPromptNumber: number;
   startTime: number;
-  cumulativeInputTokens: number;   
-  cumulativeOutputTokens: number;  
-  earliestPendingTimestamp: number | null;  
+  cumulativeInputTokens: number;
+  cumulativeOutputTokens: number;
+  earliestPendingTimestamp: number | null;
   claimedMessageIds: number[];
-  conversationHistory: ConversationMessage[];  
-  currentProvider: 'claude' | 'gemini' | 'openrouter' | null;  
-  consecutiveRestarts: number;  
+  conversationHistory: ConversationMessage[];
+  currentProvider: "claude" | "gemini" | "openrouter" | null;
+  consecutiveRestarts: number;
   restartGuard?: RestartGuard;
-  forceInit?: boolean;  
-  idleTimedOut?: boolean;  
+  forceInit?: boolean;
+  idleTimedOut?: boolean;
   lastGeneratorActivity: number;
   modelOverride?: string;
   lastSummaryStored?: boolean;
   pendingAgentId?: string | null;
   pendingAgentType?: string | null;
-  abortReason?: 'idle' | 'shutdown' | 'overflow' | 'restart-guard' | 'quota' | string | null;
+  abortReason?: "idle" | "shutdown" | "overflow" | "restart-guard" | "quota" | string | null;
   respawnTimer?: ReturnType<typeof setTimeout>;
 }
 
 export interface PendingMessage {
-  type: 'observation' | 'summarize';
+  type: "observation" | "summarize";
   tool_name?: string;
   tool_input?: any;
   tool_response?: any;
@@ -92,12 +91,12 @@ export interface PaginationParams {
 export interface ViewerSettings {
   sidebarOpen: boolean;
   selectedProject: string | null;
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
 }
 
 export interface Observation {
   id: number;
-  memory_session_id: string;  
+  memory_session_id: string;
   project: string;
   merged_into_project: string | null;
   platform_source: string;
@@ -117,7 +116,7 @@ export interface Observation {
 
 export interface Summary {
   id: number;
-  session_id: string; 
+  session_id: string;
   project: string;
   platform_source: string;
   request: string | null;
@@ -132,8 +131,8 @@ export interface Summary {
 
 export interface UserPrompt {
   id: number;
-  content_session_id: string;  
-  project: string; 
+  content_session_id: string;
+  project: string;
   platform_source: string;
   prompt_number: number;
   prompt_text: string;
@@ -143,19 +142,19 @@ export interface UserPrompt {
 
 export interface DBSession {
   id: number;
-  content_session_id: string;    
+  content_session_id: string;
   project: string;
   platform_source: string;
   user_prompt: string;
-  memory_session_id: string | null;  
-  status: 'active' | 'completed' | 'failed';
+  memory_session_id: string | null;
+  status: "active" | "completed" | "failed";
   started_at: string;
   started_at_epoch: number;
   completed_at: string | null;
   completed_at_epoch: number | null;
 }
 
-export type { SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
+export type { SDKUserMessage } from "@anthropic-ai/claude-agent-sdk";
 
 export interface ParsedObservation {
   type: string;
@@ -180,10 +179,13 @@ export interface DatabaseStats {
   totalSessions: number;
   totalPrompts: number;
   totalSummaries: number;
-  projectCounts: Record<string, {
-    observations: number;
-    sessions: number;
-    prompts: number;
-    summaries: number;
-  }>;
+  projectCounts: Record<
+    string,
+    {
+      observations: number;
+      sessions: number;
+      prompts: number;
+      summaries: number;
+    }
+  >;
 }

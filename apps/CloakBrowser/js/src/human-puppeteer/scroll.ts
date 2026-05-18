@@ -8,10 +8,10 @@
  *   - boundingBox() has no timeout param — we poll page.$() up to ``timeout`` ms
  */
 
-import type { Page } from 'puppeteer-core';
-import type { HumanConfig } from '../human/config.js';
-import { rand, randRange, randIntRange, sleep } from '../human/config.js';
-import { RawMouse, humanMove } from '../human/mouse.js';
+import type { Page } from "puppeteer-core";
+import type { HumanConfig } from "../human/config.js";
+import { rand, randRange, randIntRange, sleep } from "../human/config.js";
+import { RawMouse, humanMove } from "../human/mouse.js";
 
 interface ElementBounds {
   x: number;
@@ -20,11 +20,7 @@ interface ElementBounds {
   height: number;
 }
 
-function isInViewport(
-  bounds: ElementBounds,
-  viewportHeight: number,
-  cfg: HumanConfig,
-): boolean {
+function isInViewport(bounds: ElementBounds, viewportHeight: number, cfg: HumanConfig): boolean {
   const topEdge = bounds.y;
   const bottomEdge = bounds.y + bounds.height;
   const zoneTop = viewportHeight * cfg.scroll_target_zone[0];
@@ -36,7 +32,7 @@ export async function smoothWheel(
   raw: RawMouse,
   delta: number,
   cfg: HumanConfig,
-  axis: 'x' | 'y' = 'y',
+  axis: "x" | "y" = "y"
 ): Promise<void> {
   const absD = Math.abs(delta);
   const sign = delta > 0 ? 1 : -1;
@@ -45,7 +41,7 @@ export async function smoothWheel(
     const stepSize = rand(20, 40);
     const chunk = Math.min(stepSize, absD - sent);
     const d = Math.round(chunk) * sign;
-    if (axis === 'x') {
+    if (axis === "x") {
       await raw.wheel(d, 0);
     } else {
       await raw.wheel(0, d);
@@ -59,11 +55,7 @@ export async function smoothWheel(
  * Poll ``page.$(selector)`` for up to ``timeout`` ms, returning the element's
  * bounding box when found. ``timeout`` defaults to 30000ms when not specified.
  */
-async function getElementBox(
-  page: Page,
-  selector: string,
-  timeout: number = 30000,
-): Promise<ElementBounds | null> {
+async function getElementBox(page: Page, selector: string, timeout: number = 30000): Promise<ElementBounds | null> {
   const start = Date.now();
   const pollInterval = 100;
   while (true) {
@@ -73,7 +65,9 @@ async function getElementBox(
         const box = await el.boundingBox();
         if (box) return { x: box.x, y: box.y, width: box.width, height: box.height };
       }
-    } catch { /* keep polling */ }
+    } catch {
+      /* keep polling */
+    }
 
     if (Date.now() - start >= timeout) return null;
     await sleep(pollInterval);
@@ -91,13 +85,13 @@ export async function humanScrollIntoView(
   getBox: () => Promise<ElementBounds | null>,
   cursorX: number,
   cursorY: number,
-  cfg: HumanConfig,
+  cfg: HumanConfig
 ): Promise<{ box: ElementBounds; cursorX: number; cursorY: number }> {
   const viewport = page.viewport();
-  if (!viewport) throw new Error('Viewport size not available');
+  if (!viewport) throw new Error("Viewport size not available");
 
   let box = await getBox();
-  if (!box) throw new Error('Element not found while scrolling into view');
+  if (!box) throw new Error("Element not found while scrolling into view");
 
   if (isInViewport(box, viewport.height, cfg)) {
     return { box, cursorX, cursorY };
@@ -174,7 +168,7 @@ export async function humanScrollIntoView(
   await sleep(randRange(cfg.scroll_settle_delay));
 
   box = await getBox();
-  if (!box) throw new Error('Element lost after scrolling into view');
+  if (!box) throw new Error("Element lost after scrolling into view");
 
   return { box, cursorX, cursorY };
 }
@@ -193,11 +187,7 @@ export async function scrollToElement(
   cursorX: number,
   cursorY: number,
   cfg: HumanConfig,
-  timeout?: number,
+  timeout?: number
 ): Promise<{ box: ElementBounds; cursorX: number; cursorY: number }> {
-  return humanScrollIntoView(
-    page, raw,
-    () => getElementBox(page, selector, timeout),
-    cursorX, cursorY, cfg,
-  );
+  return humanScrollIntoView(page, raw, () => getElementBox(page, selector, timeout), cursorX, cursorY, cfg);
 }

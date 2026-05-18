@@ -23,8 +23,8 @@ const stagehand = new Stagehand({
   localBrowserLaunchOptions: {
     executablePath: binaryPath,
     args: stealthArgs,
-    headless: true,
-  },
+    headless: true
+  }
 });
 
 await stagehand.init();

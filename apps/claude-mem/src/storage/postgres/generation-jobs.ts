@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsonObject, PostgresQueryable } from './utils.js';
+import type { JsonObject, PostgresQueryable } from "./utils.js";
 import {
   assertProjectOwnership,
   assertSessionOwnership,
@@ -10,18 +10,18 @@ import {
   toDate,
   toEpoch,
   toJsonObject
-} from './utils.js';
+} from "./utils.js";
 
-export type ObservationGenerationJobSourceType = 'agent_event' | 'session_summary' | 'observation_reindex';
-export type ObservationGenerationJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type ObservationGenerationJobSourceType = "agent_event" | "session_summary" | "observation_reindex";
+export type ObservationGenerationJobStatus = "queued" | "processing" | "completed" | "failed" | "cancelled";
 export type ObservationGenerationJobEventType =
-  | 'queued'
-  | 'enqueued'
-  | 'processing'
-  | 'retry_scheduled'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+  | "queued"
+  | "enqueued"
+  | "processing"
+  | "retry_scheduled"
+  | "completed"
+  | "failed"
+  | "cancelled";
 
 export interface PostgresObservationGenerationJob {
   id: string;
@@ -138,7 +138,7 @@ export class PostgresObservationGenerationJobRepository {
         input.sourceId,
         sourceModel.serverSessionId,
         input.jobType,
-        input.status ?? 'queued',
+        input.status ?? "queued",
         idempotencyKey,
         input.bullmqJobId ?? null,
         input.maxAttempts ?? 3,
@@ -155,7 +155,7 @@ export class PostgresObservationGenerationJobRepository {
   }): Promise<PostgresObservationGenerationJob | null> {
     const row = await queryOne<JobRow>(
       this.client,
-      'SELECT * FROM observation_generation_jobs WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT * FROM observation_generation_jobs WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.id, input.projectId, input.teamId]
     );
     return row ? mapJobRow(row) : null;
@@ -213,14 +213,14 @@ export class PostgresObservationGenerationJobRepository {
 
     const current = await queryOne<JobRow>(
       this.client,
-      'SELECT * FROM observation_generation_jobs WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT * FROM observation_generation_jobs WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.id, input.projectId, input.teamId]
     );
     if (!current) {
       return null;
     }
     assertValidJobStatusTransition(mapJobRow(current), input.status);
-    throw new Error('observation generation job status transition was not applied');
+    throw new Error("observation generation job status transition was not applied");
   }
 
   async listByStatusForScope(input: {
@@ -250,41 +250,41 @@ export class PostgresObservationGenerationJobRepository {
     serverSessionId?: string | null;
   }): Promise<void> {
     await assertProjectOwnership(this.client, input.projectId, input.teamId);
-    if (input.sourceType === 'agent_event') {
+    if (input.sourceType === "agent_event") {
       const eventId = input.agentEventId ?? input.sourceId;
       const row = await queryOne<{ id: string; server_session_id: string | null }>(
         this.client,
-        'SELECT id, server_session_id FROM agent_events WHERE id = $1 AND project_id = $2 AND team_id = $3',
+        "SELECT id, server_session_id FROM agent_events WHERE id = $1 AND project_id = $2 AND team_id = $3",
         [eventId, input.projectId, input.teamId]
       );
       if (!row || input.sourceId !== eventId) {
-        throw new Error('agent_event source_id must belong to project_id and team_id');
+        throw new Error("agent_event source_id must belong to project_id and team_id");
       }
       if (input.serverSessionId) {
         await assertSessionOwnership(this.client, input.serverSessionId, input.projectId, input.teamId);
         if (row.server_session_id && row.server_session_id !== input.serverSessionId) {
-          throw new Error('server_session_id must match the agent_event server_session_id');
+          throw new Error("server_session_id must match the agent_event server_session_id");
         }
       }
       return;
     }
 
-    if (input.sourceType === 'session_summary') {
+    if (input.sourceType === "session_summary") {
       const sessionId = input.serverSessionId ?? input.sourceId;
       await assertSessionOwnership(this.client, sessionId, input.projectId, input.teamId);
       if (input.sourceId !== sessionId) {
-        throw new Error('session_summary source_id must equal server_session_id');
+        throw new Error("session_summary source_id must equal server_session_id");
       }
       return;
     }
 
     const observation = await queryOne<{ id: string }>(
       this.client,
-      'SELECT id FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT id FROM observations WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.sourceId, input.projectId, input.teamId]
     );
     if (!observation) {
-      throw new Error('observation_reindex source_id must belong to project_id and team_id');
+      throw new Error("observation_reindex source_id must belong to project_id and team_id");
     }
     if (input.serverSessionId) {
       await assertSessionOwnership(this.client, input.serverSessionId, input.projectId, input.teamId);
@@ -330,7 +330,7 @@ export class PostgresObservationGenerationJobEventsRepository {
       ]
     );
     if (!row) {
-      throw new Error('generation_job_id must belong to project_id and team_id');
+      throw new Error("generation_job_id must belong to project_id and team_id");
     }
     return mapJobEventRow(row!);
   }
@@ -376,20 +376,20 @@ function normalizeSourceModel(input: {
   agentEventId?: string | null;
   serverSessionId?: string | null;
 }): { agentEventId: string | null; serverSessionId: string | null } {
-  if (input.sourceType === 'agent_event') {
+  if (input.sourceType === "agent_event") {
     return { agentEventId: input.agentEventId ?? input.sourceId, serverSessionId: input.serverSessionId ?? null };
   }
-  if (input.sourceType === 'session_summary') {
+  if (input.sourceType === "session_summary") {
     return { agentEventId: null, serverSessionId: input.serverSessionId ?? input.sourceId };
   }
   return { agentEventId: null, serverSessionId: input.serverSessionId ?? null };
 }
 
-const TERMINAL_JOB_STATUSES = new Set<ObservationGenerationJobStatus>(['completed', 'failed', 'cancelled']);
+const TERMINAL_JOB_STATUSES = new Set<ObservationGenerationJobStatus>(["completed", "failed", "cancelled"]);
 
 const ALLOWED_JOB_TRANSITIONS: Record<ObservationGenerationJobStatus, readonly ObservationGenerationJobStatus[]> = {
-  queued: ['processing', 'failed', 'cancelled'],
-  processing: ['queued', 'completed', 'failed', 'cancelled'],
+  queued: ["processing", "failed", "cancelled"],
+  processing: ["queued", "completed", "failed", "cancelled"],
   completed: [],
   failed: [],
   cancelled: []
@@ -407,12 +407,12 @@ function assertValidJobStatusTransition(
     throw new Error(`illegal observation generation job transition from ${current.status} to ${nextStatus}`);
   }
 
-  if (nextStatus === 'processing' && current.attempts >= current.maxAttempts) {
-    throw new Error('cannot process observation generation job after max_attempts is reached');
+  if (nextStatus === "processing" && current.attempts >= current.maxAttempts) {
+    throw new Error("cannot process observation generation job after max_attempts is reached");
   }
 
-  if (nextStatus === 'queued' && current.attempts >= current.maxAttempts) {
-    throw new Error('cannot retry observation generation job after max_attempts is reached');
+  if (nextStatus === "queued" && current.attempts >= current.maxAttempts) {
+    throw new Error("cannot retry observation generation job after max_attempts is reached");
   }
 }
 

@@ -1,6 +1,7 @@
 🌐 Це автоматичний переклад. Вітаються виправлення від спільноти!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@
 Claude-Mem надає інтелектуальний пошук через навичку mem-search, яка автоматично викликається, коли ви запитуєте про минулу роботу:
 
 **Як це працює:**
-- Просто запитайте природно: *"Що ми робили в минулій сесії?"* або *"Ми виправляли цю помилку раніше?"*
+
+- Просто запитайте природно: _"Що ми робили в минулій сесії?"_ або _"Ми виправляли цю помилку раніше?"_
 - Claude автоматично викликає навичку mem-search для пошуку релевантного контексту
 
 **Доступні операції пошуку:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Підтримка
 

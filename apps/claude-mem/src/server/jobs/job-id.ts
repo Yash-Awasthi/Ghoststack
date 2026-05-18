@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { createHash } from 'crypto';
-import { SERVER_JOB_KIND_PREFIX, type ServerGenerationJobKind } from './types.js';
+import { createHash } from "crypto";
+import { SERVER_JOB_KIND_PREFIX, type ServerGenerationJobKind } from "./types.js";
 
 export interface ServerJobIdParts {
   kind: ServerGenerationJobKind;
@@ -25,6 +25,6 @@ export function buildServerJobId(parts: ServerJobIdParts): string {
     source_type: parts.source_type,
     source_id: parts.source_id
   });
-  const digest = createHash('sha256').update(canonical).digest('hex');
+  const digest = createHash("sha256").update(canonical).digest("hex");
   return `${prefix}_${digest}`;
 }

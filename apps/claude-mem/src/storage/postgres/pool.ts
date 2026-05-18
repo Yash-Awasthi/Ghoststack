@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import pg, { type Pool as PgPool, type PoolClient as PgPoolClient } from 'pg';
-import { parsePostgresConfig, type PostgresConfig } from './config.js';
+import pg, { type Pool as PgPool, type PoolClient as PgPoolClient } from "pg";
+import { parsePostgresConfig, type PostgresConfig } from "./config.js";
 
 const { Pool } = pg;
 
@@ -27,7 +27,7 @@ export function getSharedPostgresPool(options: { requireDatabaseUrl?: boolean } 
   }
   const config = parsePostgresConfig({ requireDatabaseUrl: options.requireDatabaseUrl ?? true });
   if (!config) {
-    throw new Error('Postgres requires CLAUDE_MEM_SERVER_DATABASE_URL');
+    throw new Error("Postgres requires CLAUDE_MEM_SERVER_DATABASE_URL");
   }
   sharedPool = createPostgresPool(config);
   return sharedPool;
@@ -35,7 +35,7 @@ export function getSharedPostgresPool(options: { requireDatabaseUrl?: boolean } 
 
 export async function checkPostgresHealth(pool: PostgresPool): Promise<boolean> {
   try {
-    await pool.query('SELECT 1');
+    await pool.query("SELECT 1");
     return true;
   } catch {
     return false;
@@ -48,12 +48,12 @@ export async function withPostgresTransaction<T>(
 ): Promise<T> {
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
     const result = await fn(client);
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     return result;
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw error;
   } finally {
     client.release();

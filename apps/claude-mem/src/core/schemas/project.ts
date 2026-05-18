@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ProjectSchema = z.object({
   id: z.string().min(1),

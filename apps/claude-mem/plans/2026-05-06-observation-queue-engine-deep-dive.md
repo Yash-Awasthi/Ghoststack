@@ -165,19 +165,19 @@ Conclusion: Bee-Queue is attractive if the only goal is "small Redis queue for s
 
 ## Scorecard
 
-| Area | Current SQLite | BullMQ | Bee-Queue |
-| --- | --- | --- | --- |
-| Local-first install | Strong | Weak unless Redis is bundled/optional | Weak unless Redis is bundled/optional |
-| Per-session FIFO | Strong | Medium with per-session queues; weak with one global queue | Medium with per-session queues; weak with one global queue |
-| Restart durability | Strong, SQLite-backed | Strong if Redis persistence configured | Strong if Redis persistence configured |
-| Stalled recovery | Custom/simple | Strong built-in | Built-in |
-| TypeScript fit | Strong | Strong | Medium |
-| Maintenance/activity | Internal | Strong | Medium |
-| Operational complexity | Low | High | Medium-high |
-| Queue observability | Custom/basic | Strong | Medium |
-| Dependency footprint | Low | Larger | Small |
-| Privacy/data locality | SQLite local file | Redis clear-text unless handled | Redis clear-text unless handled |
-| Best use in claude-mem | Default | Optional advanced backend | Do not use |
+| Area                   | Current SQLite        | BullMQ                                                     | Bee-Queue                                                  |
+| ---------------------- | --------------------- | ---------------------------------------------------------- | ---------------------------------------------------------- |
+| Local-first install    | Strong                | Weak unless Redis is bundled/optional                      | Weak unless Redis is bundled/optional                      |
+| Per-session FIFO       | Strong                | Medium with per-session queues; weak with one global queue | Medium with per-session queues; weak with one global queue |
+| Restart durability     | Strong, SQLite-backed | Strong if Redis persistence configured                     | Strong if Redis persistence configured                     |
+| Stalled recovery       | Custom/simple         | Strong built-in                                            | Built-in                                                   |
+| TypeScript fit         | Strong                | Strong                                                     | Medium                                                     |
+| Maintenance/activity   | Internal              | Strong                                                     | Medium                                                     |
+| Operational complexity | Low                   | High                                                       | Medium-high                                                |
+| Queue observability    | Custom/basic          | Strong                                                     | Medium                                                     |
+| Dependency footprint   | Low                   | Larger                                                     | Small                                                      |
+| Privacy/data locality  | SQLite local file     | Redis clear-text unless handled                            | Redis clear-text unless handled                            |
+| Best use in claude-mem | Default               | Optional advanced backend                                  | Do not use                                                 |
 
 ## Migration plan
 
@@ -200,7 +200,11 @@ Define a small interface around current behavior, not around BullMQ:
 ```ts
 interface ObservationQueueEngine {
   enqueue(sessionDbId: number, contentSessionId: string, message: PendingMessage): Promise<EnqueueResult>;
-  createIterator(sessionDbId: number, signal: AbortSignal, onIdleTimeout?: () => void): AsyncIterableIterator<PendingMessageWithId>;
+  createIterator(
+    sessionDbId: number,
+    signal: AbortSignal,
+    onIdleTimeout?: () => void
+  ): AsyncIterableIterator<PendingMessageWithId>;
   clearPendingForSession(sessionDbId: number): Promise<number>;
   resetProcessingToPending(sessionDbId: number): Promise<number>;
   getPendingCount(sessionDbId: number): Promise<number>;

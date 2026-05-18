@@ -50,12 +50,14 @@
 **What to implement** (COPY pattern from gemini-cli adapter metadata handling):
 
 1. Edit `src/cli/types.ts:1-15` — add two optional fields to `NormalizedHookInput`:
+
    ```ts
    agentId?: string;      // Claude Code subagent agent_id (undefined in main session)
    agentType?: string;    // Claude Code subagent agent_type (undefined in main session)
    ```
 
 2. Edit `src/cli/adapters/claude-code.ts:5-17` — in `normalizeInput`, extract `r.agent_id` and `r.agent_type`:
+
    ```ts
    return {
      sessionId: r.session_id ?? r.id ?? r.sessionId,
@@ -65,8 +67,8 @@
      toolInput: r.tool_input,
      toolResponse: r.tool_response,
      transcriptPath: r.transcript_path,
-     agentId: typeof r.agent_id === 'string' ? r.agent_id : undefined,
-     agentType: typeof r.agent_type === 'string' ? r.agent_type : undefined,
+     agentId: typeof r.agent_id === "string" ? r.agent_id : undefined,
+     agentType: typeof r.agent_type === "string" ? r.agent_type : undefined
    };
    ```
 
@@ -75,11 +77,13 @@
 **Documentation references**: Claude Code hooks docs section "Subagent Identification Fields"; gemini-cli adapter metadata pattern at `src/cli/adapters/gemini-cli.ts:77-96`.
 
 **Verification checklist**:
+
 - `grep -n "agentId" src/cli/types.ts` → finds the new field.
 - `grep -n "agent_id" src/cli/adapters/claude-code.ts` → finds the extraction.
 - `npm run build` succeeds.
 
 **Anti-pattern guards**:
+
 - Do NOT rename `agent_id` / `agent_type` snake_case raw fields. Camel-case only in `NormalizedHookInput`.
 - Do NOT default to a sentinel string like `"main"`; leave undefined when absent.
 
@@ -90,11 +94,12 @@
 **What to implement**:
 
 1. Edit `src/cli/handlers/summarize.ts:27-36`, immediately after the worker-ready check (line 34) and before any processing:
+
    ```ts
    // Skip summaries in subagent context — subagents do not own the session summary.
    // Main Stop hook owns it; SubagentStop (if ever registered) must no-op.
    if (input.agentId || input.agentType) {
-     logger.debug('HOOK', 'Skipping summary: subagent context detected', {
+     logger.debug("HOOK", "Skipping summary: subagent context detected", {
        sessionId: input.sessionId,
        agentId: input.agentId,
        agentType: input.agentType
@@ -119,11 +124,13 @@
 **Documentation references**: summarize.ts handler flow at `src/cli/handlers/summarize.ts:27-143`; summarize route at `src/services/worker/http/routes/SessionRoutes.ts:655-692`.
 
 **Verification checklist**:
+
 - Unit test or manual dispatch with a payload containing `agent_id: "agent-abc"` → summarize handler returns before calling `/api/sessions/summarize`.
 - `grep -n "subagent" src/cli/handlers/summarize.ts` → finds the new guard.
 - `grep -n "subagent_context\|agentId" src/services/worker/http/routes/SessionRoutes.ts` → finds the server-side guard.
 
 **Anti-pattern guards**:
+
 - Do NOT also short-circuit in `session-complete` or `context` handlers — the session's main Stop still cleans up.
 - Do NOT log at info level (spammy); `logger.debug` only.
 
@@ -134,21 +141,22 @@
 **What to implement** (COPY migration009 pattern from `src/services/sqlite/migrations.ts:556-573`):
 
 1. Append a new migration to `src/services/sqlite/migrations.ts` right after `migration009` (before the `migrations` array at line 578):
+
    ```ts
    export const migration010: Migration = {
      version: 27,
      up: (db: Database) => {
-       const columns = db.prepare('PRAGMA table_info(observations)').all() as any[];
-       const hasAgentType = columns.some((c: any) => c.name === 'agent_type');
-       const hasAgentId = columns.some((c: any) => c.name === 'agent_id');
+       const columns = db.prepare("PRAGMA table_info(observations)").all() as any[];
+       const hasAgentType = columns.some((c: any) => c.name === "agent_type");
+       const hasAgentId = columns.some((c: any) => c.name === "agent_id");
        if (!hasAgentType) {
-         db.run('ALTER TABLE observations ADD COLUMN agent_type TEXT');
+         db.run("ALTER TABLE observations ADD COLUMN agent_type TEXT");
        }
        if (!hasAgentId) {
-         db.run('ALTER TABLE observations ADD COLUMN agent_id TEXT');
+         db.run("ALTER TABLE observations ADD COLUMN agent_id TEXT");
        }
-       db.run('CREATE INDEX IF NOT EXISTS idx_observations_agent_type ON observations(agent_type)');
-       console.log('[migration010] Added agent_type, agent_id columns to observations');
+       db.run("CREATE INDEX IF NOT EXISTS idx_observations_agent_type ON observations(agent_type)");
+       console.log("[migration010] Added agent_type, agent_id columns to observations");
      },
      down: (_db: Database) => {
        // SQLite DROP COLUMN not fully supported; no-op
@@ -163,11 +171,13 @@
 **Documentation references**: migration007 and migration009 at `src/services/sqlite/migrations.ts:491-509` and `556-573` as copy-ready templates.
 
 **Verification checklist**:
+
 - Run worker; check logs for `[migration010]`.
 - `sqlite3 ~/.claude-mem/claude-mem.db "PRAGMA table_info(observations);"` → shows `agent_type` and `agent_id` columns.
 - `sqlite3 ~/.claude-mem/claude-mem.db ".indexes observations"` → shows `idx_observations_agent_type`.
 
 **Anti-pattern guards**:
+
 - Do NOT drop or rename existing columns.
 - Do NOT set NOT NULL constraints — main-session rows have NULL for these.
 - Do NOT pick a version number that's already used (26 is migration009; use 27).
@@ -181,10 +191,11 @@
 ### 4a — Hook PostToolUse handler sends fields
 
 Edit `src/cli/handlers/observation.ts:51-62`:
+
 ```ts
-const response = await workerHttpRequest('/api/sessions/observations', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await workerHttpRequest("/api/sessions/observations", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     contentSessionId: sessionId,
     platformSource,
@@ -193,7 +204,7 @@ const response = await workerHttpRequest('/api/sessions/observations', {
     tool_response: toolResponse,
     cwd,
     ...(input.agentId ? { agentId: input.agentId } : {}),
-    ...(input.agentType ? { agentType: input.agentType } : {}),
+    ...(input.agentType ? { agentType: input.agentType } : {})
   })
 });
 ```
@@ -201,6 +212,7 @@ const response = await workerHttpRequest('/api/sessions/observations', {
 ### 4b — Worker observations route receives and forwards
 
 Edit `src/services/worker/http/routes/SessionRoutes.ts:555-646`:
+
 - Destructure: `const { contentSessionId, tool_name, tool_input, tool_response, cwd, agentId, agentType } = req.body;`
 - Pass to `queueObservation` at line 620:
   ```ts
@@ -238,18 +250,21 @@ Investigation: find the `queueObservation` signature in the session manager (lik
 The SDK agent parses `<observation>` XML into an `ObservationInput` and calls `storeObservation`. The tool_input passed in must carry `agentId`/`agentType` through to here so the row gets labeled. Investigation step: find where `storeObservation()` is called with an `ObservationInput` built from the queued observation, and inject `agent_type`/`agent_id` from the queue item's subagent fields onto the `ObservationInput`. Location likely in `src/services/sdk/` or adjacent.
 
 **Documentation references**:
+
 - observation handler at `src/cli/handlers/observation.ts:51-62`
 - SessionRoutes observations endpoint at `src/services/worker/http/routes/SessionRoutes.ts:555-646`
 - storeObservation at `src/services/sqlite/observations/store.ts:75-98`
 - Existing observation INSERT sites at `src/services/sqlite/SessionStore.ts:1755, 1890, 2022, 2623` (audit required)
 
 **Verification checklist**:
+
 - `grep -rn "agent_type\|agentType" src/` → shows fields threaded through every layer.
 - Simulate a Task subagent PostToolUse payload → observation row has non-null `agent_type`.
 - Main-session PostToolUse → observation row has NULL `agent_type` (existing behavior preserved).
 - No existing test suite breaks: `npm test` passes.
 
 **Anti-pattern guards**:
+
 - Do NOT include `agent_type` / `agent_id` in the content-hash computation (`src/services/sqlite/observations/store.ts:19-28`). The hash identity must remain stable for dedup.
 - Do NOT add fields to the FTS5 `observations_fts` virtual table — not searchable text.
 - Do NOT backfill — leave existing rows NULL.
@@ -277,11 +292,13 @@ The SDK agent parses `<observation>` XML into an `ObservationInput` and calls `s
 4. Manual integration check: start worker, simulate a hook payload with `agent_id`/`agent_type`, observe observation row in DB.
 
 **Verification checklist**:
+
 - `npm test` passes.
 - `npm run build` succeeds.
 - Database inspection shows expected rows.
 
 **Anti-pattern guards**:
+
 - Do NOT mock the entire storeObservation — use a real in-memory Bun SQLite DB if existing tests do.
 - Do NOT add integration tests that require a running worker unless the suite already does.
 
@@ -299,6 +316,7 @@ After Phases 1-5 land and pass verification:
 6. **Version bump**: `cd ~/Scripts/claude-mem/` and run `/version-bump`.
 
 **Anti-pattern guards for this phase**:
+
 - Do NOT force-push to main.
 - Do NOT skip hooks (`--no-verify`).
 - Do NOT squash-merge if the repo uses rebase-merge; check `.github/` for branch-protection hints.

@@ -3,7 +3,12 @@
  * Mirrors Python cloakbrowser/browser.py.
  */
 
-import type { Browser, BrowserContext, BrowserContextOptions, LaunchOptions as PlaywrightLaunchOptions } from "playwright-core";
+import type {
+  Browser,
+  BrowserContext,
+  BrowserContextOptions,
+  LaunchOptions as PlaywrightLaunchOptions
+} from "playwright-core";
 import type { LaunchOptions, LaunchContextOptions, LaunchPersistentContextOptions } from "./types.js";
 import { DEFAULT_VIEWPORT, IGNORE_DEFAULT_ARGS } from "./config.js";
 import { buildArgs } from "./args.js";
@@ -32,13 +37,13 @@ function filterStealthCtxOptions(ctx?: BrowserContextOptions): Partial<BrowserCo
   if (locale !== undefined) {
     console.warn(
       "[cloakbrowser] contextOptions.locale ignored — use top-level `locale` " +
-      "instead (routes through binary flag, avoids detectable CDP emulation)."
+        "instead (routes through binary flag, avoids detectable CDP emulation)."
     );
   }
   if (timezoneId !== undefined) {
     console.warn(
       "[cloakbrowser] contextOptions.timezoneId ignored — use top-level `timezone` " +
-      "instead (routes through binary flag, avoids detectable CDP emulation)."
+        "instead (routes through binary flag, avoids detectable CDP emulation)."
     );
   }
   return rest;
@@ -50,14 +55,12 @@ function filterStealthCtxOptions(ctx?: BrowserContextOptions): Partial<BrowserCo
  * Useful when integrating CloakBrowser with a custom Playwright build or another
  * wrapper that needs to call `chromium.launch()` itself.
  */
-export async function buildLaunchOptions(
-  options: LaunchOptions = {}
-): Promise<PlaywrightLaunchOptions> {
+export async function buildLaunchOptions(options: LaunchOptions = {}): Promise<PlaywrightLaunchOptions> {
   const binaryPath = process.env.CLOAKBROWSER_BINARY_PATH || (await ensureBinary());
   const { exitIp, ...resolved } = await maybeResolveGeoip(options);
   const { proxyOption, proxyArgs } = resolveProxyConfig(options.proxy);
   let resolvedArgs = await resolveWebrtcArgs(options);
-  if (exitIp && !(resolvedArgs ?? []).some(a => a.startsWith("--fingerprint-webrtc-ip"))) {
+  if (exitIp && !(resolvedArgs ?? []).some((a) => a.startsWith("--fingerprint-webrtc-ip"))) {
     resolvedArgs = [...(resolvedArgs ?? []), `--fingerprint-webrtc-ip=${exitIp}`];
   }
   const args = buildArgs({ ...options, ...resolved, args: [...(resolvedArgs ?? []), ...proxyArgs] });
@@ -68,25 +71,19 @@ export async function buildLaunchOptions(
     args,
     ignoreDefaultArgs: IGNORE_DEFAULT_ARGS,
     ...(proxyOption ? { proxy: proxyOption } : {}),
-    ...options.launchOptions,
+    ...options.launchOptions
   } as PlaywrightLaunchOptions;
 }
 
 /**
  * Apply CloakBrowser's human-like behavioral layer to an existing Playwright browser.
  */
-export async function humanizeBrowser(
-  browser: Browser,
-  options: LaunchOptions = {}
-): Promise<void> {
+export async function humanizeBrowser(browser: Browser, options: LaunchOptions = {}): Promise<void> {
   if (!options.humanize) return;
 
-  const { patchBrowser } = await import('./human/index.js');
-  const { resolveConfig } = await import('./human/config.js');
-  const cfg = resolveConfig(
-    options.humanPreset ?? 'default',
-    options.humanConfig,
-  );
+  const { patchBrowser } = await import("./human/index.js");
+  const { resolveConfig } = await import("./human/config.js");
+  const cfg = resolveConfig(options.humanPreset ?? "default", options.humanConfig);
   patchBrowser(browser, cfg);
 }
 
@@ -126,15 +123,13 @@ export async function launch(options: LaunchOptions = {}): Promise<Browser> {
  * await context.close(); // also closes browser
  * ```
  */
-export async function launchContext(
-  options: LaunchContextOptions = {}
-): Promise<BrowserContext> {
+export async function launchContext(options: LaunchContextOptions = {}): Promise<BrowserContext> {
   options = resolveTimezone(options);
   // Resolve geoip BEFORE launch() to avoid double-resolution
   const { exitIp, ...resolved } = await maybeResolveGeoip(options);
   let launchArgs = await resolveWebrtcArgs(options);
   // Inject geoip exit IP for WebRTC spoofing (free — no extra HTTP call)
-  if (exitIp && !(launchArgs ?? []).some(a => a.startsWith("--fingerprint-webrtc-ip"))) {
+  if (exitIp && !(launchArgs ?? []).some((a) => a.startsWith("--fingerprint-webrtc-ip"))) {
     launchArgs = [...(launchArgs ?? []), `--fingerprint-webrtc-ip=${exitIp}`];
   }
   // --fingerprint-timezone is process-wide (reads CommandLine in renderer),
@@ -150,7 +145,7 @@ export async function launchContext(
       ...filterStealthCtxOptions(options.contextOptions),
       ...(options.userAgent ? { userAgent: options.userAgent } : {}),
       viewport: options.viewport === undefined ? DEFAULT_VIEWPORT : options.viewport,
-      ...(options.colorScheme ? { colorScheme: options.colorScheme } : {}),
+      ...(options.colorScheme ? { colorScheme: options.colorScheme } : {})
     });
   } catch (err) {
     await browser.close();
@@ -166,12 +161,9 @@ export async function launchContext(
 
   // Human-like behavioral patching
   if (options.humanize) {
-    const { patchContext } = await import('./human/index.js');
-    const { resolveConfig } = await import('./human/config.js');
-    const cfg = resolveConfig(
-      options.humanPreset ?? 'default',
-      options.humanConfig,
-    );
+    const { patchContext } = await import("./human/index.js");
+    const { resolveConfig } = await import("./human/config.js");
+    const cfg = resolveConfig(options.humanPreset ?? "default", options.humanConfig);
     patchContext(context, cfg);
   }
 
@@ -199,9 +191,7 @@ export async function launchContext(
  * await context.close();
  * ```
  */
-export async function launchPersistentContext(
-  options: LaunchPersistentContextOptions
-): Promise<BrowserContext> {
+export async function launchPersistentContext(options: LaunchPersistentContextOptions): Promise<BrowserContext> {
   options = resolveTimezone(options);
   const { chromium } = await import("playwright-core");
 
@@ -209,7 +199,7 @@ export async function launchPersistentContext(
   const { exitIp, ...resolved } = await maybeResolveGeoip(options);
   const { proxyOption, proxyArgs } = resolveProxyConfig(options.proxy);
   let resolvedArgs = await resolveWebrtcArgs(options);
-  if (exitIp && !(resolvedArgs ?? []).some(a => a.startsWith("--fingerprint-webrtc-ip"))) {
+  if (exitIp && !(resolvedArgs ?? []).some((a) => a.startsWith("--fingerprint-webrtc-ip"))) {
     resolvedArgs = [...(resolvedArgs ?? []), `--fingerprint-webrtc-ip=${exitIp}`];
   }
   const args = buildArgs({ ...options, ...resolved, args: [...(resolvedArgs ?? []), ...proxyArgs] });
@@ -228,17 +218,14 @@ export async function launchPersistentContext(
     ...(options.userAgent ? { userAgent: options.userAgent } : {}),
     viewport: options.viewport === undefined ? DEFAULT_VIEWPORT : options.viewport,
     ...(options.colorScheme ? { colorScheme: options.colorScheme } : {}),
-    ...options.launchOptions,
+    ...options.launchOptions
   });
 
   // Human-like behavioral patching
   if (options.humanize) {
-    const { patchContext } = await import('./human/index.js');
-    const { resolveConfig } = await import('./human/config.js');
-    const cfg = resolveConfig(
-      options.humanPreset ?? 'default',
-      options.humanConfig,
-    );
+    const { patchContext } = await import("./human/index.js");
+    const { resolveConfig } = await import("./human/config.js");
+    const cfg = resolveConfig(options.humanPreset ?? "default", options.humanConfig);
     patchContext(context, cfg);
   }
 

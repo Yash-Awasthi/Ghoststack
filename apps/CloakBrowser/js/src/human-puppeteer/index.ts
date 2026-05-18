@@ -46,19 +46,18 @@
  *   - No page.dblclick() — Puppeteer uses click({clickCount:2})
  */
 
-import type { Browser, Page, Frame, CDPSession, ElementHandle, BrowserContext } from 'puppeteer-core';
-import type { HumanConfig, HumanActionOptions } from '../human/config.js';
-import { resolveConfig, mergeConfig, rand, randRange, sleep } from '../human/config.js';
-import { RawMouse, RawKeyboard, humanMove, humanClick, clickTarget, humanIdle } from '../human/mouse.js';
-import { humanType } from './keyboard.js';
-import { scrollToElement, humanScrollIntoView, smoothWheel } from './scroll.js';
+import type { Browser, Page, Frame, CDPSession, ElementHandle, BrowserContext } from "puppeteer-core";
+import type { HumanConfig, HumanActionOptions } from "../human/config.js";
+import { resolveConfig, mergeConfig, rand, randRange, sleep } from "../human/config.js";
+import { RawMouse, RawKeyboard, humanMove, humanClick, clickTarget, humanIdle } from "../human/mouse.js";
+import { humanType } from "./keyboard.js";
+import { scrollToElement, humanScrollIntoView, smoothWheel } from "./scroll.js";
 
-export type { HumanConfig } from '../human/config.js';
-export { resolveConfig, mergeConfig } from '../human/config.js';
-export { humanMove, humanClick, clickTarget, humanIdle } from '../human/mouse.js';
-export { humanType } from './keyboard.js';
-export { scrollToElement, humanScrollIntoView } from './scroll.js';
-
+export type { HumanConfig } from "../human/config.js";
+export { resolveConfig, mergeConfig } from "../human/config.js";
+export { humanMove, humanClick, clickTarget, humanIdle } from "../human/mouse.js";
+export { humanType } from "./keyboard.js";
+export { scrollToElement, humanScrollIntoView } from "./scroll.js";
 
 // ============================================================================
 // CDP Isolated World — stealth DOM evaluation (Puppeteer version)
@@ -82,12 +81,12 @@ class StealthEval {
 
   private async createWorld(): Promise<number> {
     const cdp = await this.ensureCdp();
-    const tree = await cdp.send('Page.getFrameTree');
+    const tree = await cdp.send("Page.getFrameTree");
     const frameId = (tree as any).frameTree.frame.id;
-    const result = await cdp.send('Page.createIsolatedWorld', {
+    const result = await cdp.send("Page.createIsolatedWorld", {
       frameId,
-      worldName: '',
-      grantUniveralAccess: true,
+      worldName: "",
+      grantUniveralAccess: true
     });
     const ctxId = (result as any).executionContextId;
     this.contextId = ctxId;
@@ -102,10 +101,10 @@ class StealthEval {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const cdp = await this.ensureCdp();
-        const result = await cdp.send('Runtime.evaluate', {
+        const result = await cdp.send("Runtime.evaluate", {
           expression,
           contextId: this.contextId!,
-          returnByValue: true,
+          returnByValue: true
         });
 
         if ((result as any).exceptionDetails) {
@@ -120,7 +119,11 @@ class StealthEval {
       } catch {
         if (attempt === 0) {
           this.contextId = null;
-          try { await this.createWorld(); } catch { return undefined; }
+          try {
+            await this.createWorld();
+          } catch {
+            return undefined;
+          }
           continue;
         }
         return undefined;
@@ -138,7 +141,6 @@ class StealthEval {
   }
 }
 
-
 // ============================================================================
 // Cursor state
 // ============================================================================
@@ -149,16 +151,11 @@ class CursorState {
   initialized = false;
 }
 
-
 // ============================================================================
 // Stealth DOM queries
 // ============================================================================
 
-async function isInputElement(
-  stealth: StealthEval | null,
-  page: Page,
-  selector: string,
-): Promise<boolean> {
+async function isInputElement(stealth: StealthEval | null, page: Page, selector: string): Promise<boolean> {
   if (stealth) {
     try {
       const escaped = JSON.stringify(selector);
@@ -172,23 +169,22 @@ async function isInputElement(
         })()
       `);
       return !!result;
-    } catch { /* fallthrough */ }
+    } catch {
+      /* fallthrough */
+    }
   }
 
-  return page.evaluate((sel: string) => {
-    const el = document.querySelector(sel);
-    if (!el) return false;
-    const tag = el.tagName.toLowerCase();
-    return tag === 'input' || tag === 'textarea'
-      || el.getAttribute('contenteditable') === 'true';
-  }, selector).catch(() => false);
+  return page
+    .evaluate((sel: string) => {
+      const el = document.querySelector(sel);
+      if (!el) return false;
+      const tag = el.tagName.toLowerCase();
+      return tag === "input" || tag === "textarea" || el.getAttribute("contenteditable") === "true";
+    }, selector)
+    .catch(() => false);
 }
 
-async function isSelectorFocused(
-  stealth: StealthEval | null,
-  page: Page,
-  selector: string,
-): Promise<boolean> {
+async function isSelectorFocused(stealth: StealthEval | null, page: Page, selector: string): Promise<boolean> {
   if (stealth) {
     try {
       const escaped = JSON.stringify(selector);
@@ -199,55 +195,57 @@ async function isSelectorFocused(
         })()
       `);
       return !!result;
-    } catch { /* fallthrough */ }
+    } catch {
+      /* fallthrough */
+    }
   }
 
-  return page.evaluate((sel: string) => {
-    const el = document.querySelector(sel);
-    return el === document.activeElement;
-  }, selector).catch(() => false);
+  return page
+    .evaluate((sel: string) => {
+      const el = document.querySelector(sel);
+      return el === document.activeElement;
+    }, selector)
+    .catch(() => false);
 }
-
 
 // ============================================================================
 // Stealth ElementHandle input check — uses CDP DOM.describeNode
 // instead of el.evaluate() to avoid main-world JS execution.
 // ============================================================================
 
-async function isInputElementHandle(
-  stealth: StealthEval | null,
-  el: ElementHandle,
-): Promise<boolean> {
+async function isInputElementHandle(stealth: StealthEval | null, el: ElementHandle): Promise<boolean> {
   if (stealth) {
     try {
       const cdp = await stealth.getCdpSession();
       const remoteObject = (el as any).remoteObject?.();
       if (remoteObject?.objectId) {
-        const { node } = await cdp.send('DOM.describeNode', {
-          objectId: remoteObject.objectId,
-        }) as any;
+        const { node } = (await cdp.send("DOM.describeNode", {
+          objectId: remoteObject.objectId
+        })) as any;
 
-        const tag = (node?.nodeName || '').toLowerCase();
-        if (tag === 'input' || tag === 'textarea') return true;
+        const tag = (node?.nodeName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea") return true;
 
         const attrs: string[] = node?.attributes || [];
         for (let i = 0; i < attrs.length; i += 2) {
-          if (attrs[i] === 'contenteditable' && attrs[i + 1] === 'true') {
+          if (attrs[i] === "contenteditable" && attrs[i + 1] === "true") {
             return true;
           }
         }
         return false;
       }
-    } catch { /* fallthrough to el.evaluate */ }
+    } catch {
+      /* fallthrough to el.evaluate */
+    }
   }
 
-  return el.evaluate((node: any) => {
-    const tag = node.tagName?.toLowerCase();
-    return tag === 'input' || tag === 'textarea'
-      || node.getAttribute?.('contenteditable') === 'true';
-  }).catch(() => false);
+  return el
+    .evaluate((node: any) => {
+      const tag = node.tagName?.toLowerCase();
+      return tag === "input" || tag === "textarea" || node.getAttribute?.("contenteditable") === "true";
+    })
+    .catch(() => false);
 }
-
 
 // ============================================================================
 // Page-level patching
@@ -274,7 +272,7 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     keyboardDown: page.keyboard.down.bind(page.keyboard) as (key: string) => Promise<void>,
     keyboardUp: page.keyboard.up.bind(page.keyboard) as (key: string) => Promise<void>,
     keyboardPress: page.keyboard.press.bind(page.keyboard),
-    keyboardSendCharacter: page.keyboard.sendCharacter.bind(page.keyboard),
+    keyboardSendCharacter: page.keyboard.sendCharacter.bind(page.keyboard)
   };
 
   (page as any)._original = originals;
@@ -286,7 +284,9 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   let cdpSession: CDPSession | null = null;
   const ensureCdp = async (): Promise<CDPSession | null> => {
     if (!cdpSession) {
-      try { cdpSession = await stealth.getCdpSession(); } catch {}
+      try {
+        cdpSession = await stealth.getCdpSession();
+      } catch {}
     }
     return cdpSession;
   };
@@ -299,14 +299,14 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
       if (originals.mouseWheel) {
         await originals.mouseWheel({ deltaX, deltaY });
       }
-    },
+    }
   };
 
   const rawKb: RawKeyboard = {
     down: originals.keyboardDown,
     up: originals.keyboardUp,
     type: originals.keyboardType,
-    insertText: originals.keyboardSendCharacter,
+    insertText: originals.keyboardSendCharacter
   };
 
   async function ensureCursorInit(): Promise<void> {
@@ -319,11 +319,14 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   }
 
   // ==== goto ====
-  const humanGoto = async (url: string, options?: {
-    referer?: string;
-    timeout?: number;
-    waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
-  }) => {
+  const humanGoto = async (
+    url: string,
+    options?: {
+      referer?: string;
+      timeout?: number;
+      waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
+    }
+  ) => {
     const response = await originals.goto(url, options);
     stealth.invalidate();
     patchFrames(page, cfg, cursor, raw, rawKb, originals, stealth);
@@ -331,18 +334,29 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   };
 
   // ==== click (with clickCount support for dblclick) ====
-  const humanClickFn = async (selector: string, options?: HumanActionOptions & {
-    button?: 'left' | 'right' | 'middle' | 'back' | 'forward';
-    clickCount?: number;
-    count?: number;
-    delay?: number;
-  }) => {
+  const humanClickFn = async (
+    selector: string,
+    options?: HumanActionOptions & {
+      button?: "left" | "right" | "middle" | "back" | "forward";
+      clickCount?: number;
+      count?: number;
+      delay?: number;
+    }
+  ) => {
     await ensureCursorInit();
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     if (callCfg.idle_between_actions) {
       await humanIdle(raw, cursor.x, cursor.y, callCfg);
     }
-    const { box, cursorX, cursorY } = await scrollToElement(page, raw, selector, cursor.x, cursor.y, callCfg, options?.timeout);
+    const { box, cursorX, cursorY } = await scrollToElement(
+      page,
+      raw,
+      selector,
+      cursor.x,
+      cursor.y,
+      callCfg,
+      options?.timeout
+    );
     cursor.x = cursorX;
     cursor.y = cursorY;
     const isInput = await isInputElement(stealth, page, selector);
@@ -370,7 +384,15 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     if (callCfg.idle_between_actions) {
       await humanIdle(raw, cursor.x, cursor.y, callCfg);
     }
-    const { box, cursorX, cursorY } = await scrollToElement(page, raw, selector, cursor.x, cursor.y, callCfg, options?.timeout);
+    const { box, cursorX, cursorY } = await scrollToElement(
+      page,
+      raw,
+      selector,
+      cursor.x,
+      cursor.y,
+      callCfg,
+      options?.timeout
+    );
     cursor.x = cursorX;
     cursor.y = cursorY;
     const target = clickTarget(box, false, callCfg);
@@ -380,9 +402,13 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   };
 
   // ==== type ====
-  const humanTypeFn = async (selector: string, text: string, options?: HumanActionOptions & {
-    delay?: number;
-  }) => {
+  const humanTypeFn = async (
+    selector: string,
+    text: string,
+    options?: HumanActionOptions & {
+      delay?: number;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     await sleep(randRange(callCfg.field_switch_delay));
     await humanClickFn(selector, options);
@@ -400,7 +426,7 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
 
   // ==== focus ====
   const humanFocusFn = async (selector: string) => {
-    if (!await isSelectorFocused(stealth, page, selector)) {
+    if (!(await isSelectorFocused(stealth, page, selector))) {
       await humanClickFn(selector);
     }
   };
@@ -431,12 +457,16 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     cursor.y = y;
   };
 
-  page.mouse.click = async (x: number, y: number, options?: {
-    button?: 'left' | 'right' | 'middle' | 'back' | 'forward';
-    clickCount?: number;
-    count?: number;
-    delay?: number;
-  }) => {
+  page.mouse.click = async (
+    x: number,
+    y: number,
+    options?: {
+      button?: "left" | "right" | "middle" | "back" | "forward";
+      clickCount?: number;
+      count?: number;
+      delay?: number;
+    }
+  ) => {
     await ensureCursorInit();
     await humanMove(raw, cursor.x, cursor.y, x, y, cfg);
     cursor.x = x;
@@ -459,10 +489,10 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
       const dx = options?.deltaX ?? 0;
       const dy = options?.deltaY ?? 0;
       if (Math.abs(dy) > 0) {
-        await smoothWheel(raw, dy, cfg, 'y');
+        await smoothWheel(raw, dy, cfg, "y");
       }
       if (Math.abs(dx) > 0) {
-        await smoothWheel(raw, dx, cfg, 'x');
+        await smoothWheel(raw, dx, cfg, "x");
       }
     };
   }
@@ -471,7 +501,7 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     (page.mouse as any).dragAndDrop = async (
       start: { x: number; y: number },
       target: { x: number; y: number },
-      options?: { delay?: number },
+      options?: { delay?: number }
     ) => {
       await ensureCursorInit();
       await humanMove(raw, cursor.x, cursor.y, start.x, start.y, cfg);
@@ -524,9 +554,12 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   // Initialize cursor
   cursor.x = rand(cfg.initial_cursor_x[0], cfg.initial_cursor_x[1]);
   cursor.y = rand(cfg.initial_cursor_y[0], cfg.initial_cursor_y[1]);
-  originals.mouseMove(cursor.x, cursor.y).then(() => {
-    cursor.initialized = true;
-  }).catch(() => {});
+  originals
+    .mouseMove(cursor.x, cursor.y)
+    .then(() => {
+      cursor.initialized = true;
+    })
+    .catch(() => {});
 
   // Patch frames
   patchFrames(page, cfg, cursor, raw, rawKb, originals, stealth);
@@ -534,7 +567,6 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
   // Patch ElementHandle selectors
   patchElementHandle(page, cfg, cursor, raw, rawKb, originals, stealth);
 }
-
 
 // ============================================================================
 // ElementHandle patching — PUPPETEER-SPECIFIC
@@ -547,7 +579,7 @@ function patchElementHandle(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: StealthEval,
+  stealth: StealthEval
 ): void {
   const orig$ = page.$.bind(page);
   const orig$$ = page.$$.bind(page);
@@ -567,11 +599,14 @@ function patchElementHandle(
     return els;
   };
 
-  (page as any).waitForSelector = async (selector: string, options?: {
-    hidden?: boolean;
-    timeout?: number;
-    visible?: boolean;
-  }) => {
+  (page as any).waitForSelector = async (
+    selector: string,
+    options?: {
+      hidden?: boolean;
+      timeout?: number;
+      visible?: boolean;
+    }
+  ) => {
     const el = await origWaitForSelector(selector, options);
     if (el) patchSingleElementHandle(el, page, cfg, cursor, raw, rawKb, originals, stealth);
     return el;
@@ -586,7 +621,7 @@ function patchSingleElementHandle(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: StealthEval,
+  stealth: StealthEval
 ): void {
   if ((el as any)._humanPatched) return;
   (el as any)._humanPatched = true;
@@ -623,11 +658,14 @@ function patchSingleElementHandle(
     return children;
   };
 
-  (el as any).waitForSelector = async (selector: string, options?: {
-    hidden?: boolean;
-    timeout?: number;
-    visible?: boolean;
-  }) => {
+  (el as any).waitForSelector = async (
+    selector: string,
+    options?: {
+      hidden?: boolean;
+      timeout?: number;
+      visible?: boolean;
+    }
+  ) => {
     const child = await origElWaitForSelector(selector, options);
     if (child) patchSingleElementHandle(child, page, cfg, cursor, raw, rawKb, originals, stealth);
     return child;
@@ -642,13 +680,18 @@ function patchSingleElementHandle(
 
     try {
       const { cursorX, cursorY } = await humanScrollIntoView(
-        page, raw,
-        () => el.boundingBox().then(b => b ?? null),
-        cursor.x, cursor.y, callCfg,
+        page,
+        raw,
+        () => el.boundingBox().then((b) => b ?? null),
+        cursor.x,
+        cursor.y,
+        callCfg
       );
       cursor.x = cursorX;
       cursor.y = cursorY;
-    } catch { /* let boundingBox() decide */ }
+    } catch {
+      /* let boundingBox() decide */
+    }
 
     const box = await el.boundingBox();
     if (!box) return null;
@@ -667,12 +710,14 @@ function patchSingleElementHandle(
   };
 
   // --- el.click() ---
-  (el as any).click = async (options?: HumanActionOptions & {
-    button?: 'left' | 'right' | 'middle' | 'back' | 'forward';
-    clickCount?: number;
-    count?: number;
-    delay?: number;
-  }) => {
+  (el as any).click = async (
+    options?: HumanActionOptions & {
+      button?: "left" | "right" | "middle" | "back" | "forward";
+      clickCount?: number;
+      count?: number;
+      delay?: number;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     const info = await moveToElement(callCfg);
     if (!info) return origElClick(options);
@@ -718,9 +763,12 @@ function patchSingleElementHandle(
       await (page as any)._ensureCursorInit();
       try {
         const { cursorX, cursorY } = await humanScrollIntoView(
-          page, raw,
-          () => el.boundingBox().then(b => b ?? null),
-          cursor.x, cursor.y, callCfg,
+          page,
+          raw,
+          () => el.boundingBox().then((b) => b ?? null),
+          cursor.x,
+          cursor.y,
+          callCfg
         );
         cursor.x = cursorX;
         cursor.y = cursorY;
@@ -830,7 +878,6 @@ function patchSingleElementHandle(
   }
 }
 
-
 // ============================================================================
 // Frame-level patching — native Puppeteer Frame methods only
 // Puppeteer Frame has: click, hover, type, select, focus, tap
@@ -843,7 +890,7 @@ function patchFrames(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: StealthEval,
+  stealth: StealthEval
 ): void {
   for (const frame of iterFrames(page)) {
     patchSingleFrame(frame, page, cfg, cursor, raw, rawKb, originals, stealth);
@@ -858,19 +905,22 @@ function patchSingleFrame(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: StealthEval,
+  stealth: StealthEval
 ): void {
   if ((frame as any)._humanPatched) return;
   (frame as any)._humanPatched = true;
 
   const origFrameSelect = frame.select.bind(frame);
 
-  (frame as any).click = async (selector: string, options?: HumanActionOptions & {
-    button?: 'left' | 'right' | 'middle' | 'back' | 'forward';
-    clickCount?: number;
-    count?: number;
-    delay?: number;
-  }) => {
+  (frame as any).click = async (
+    selector: string,
+    options?: HumanActionOptions & {
+      button?: "left" | "right" | "middle" | "back" | "forward";
+      clickCount?: number;
+      count?: number;
+      delay?: number;
+    }
+  ) => {
     await (page as any).click(selector, options);
   };
 
@@ -878,9 +928,13 @@ function patchSingleFrame(
     await (page as any).hover(selector, options);
   };
 
-  (frame as any).type = async (selector: string, text: string, options?: HumanActionOptions & {
-    delay?: number;
-  }) => {
+  (frame as any).type = async (
+    selector: string,
+    text: string,
+    options?: HumanActionOptions & {
+      delay?: number;
+    }
+  ) => {
     await (page as any).type(selector, text, options);
   };
 
@@ -917,17 +971,19 @@ function patchSingleFrame(
     return els;
   };
 
-  (frame as any).waitForSelector = async (selector: string, options?: {
-    hidden?: boolean;
-    timeout?: number;
-    visible?: boolean;
-  }) => {
+  (frame as any).waitForSelector = async (
+    selector: string,
+    options?: {
+      hidden?: boolean;
+      timeout?: number;
+      visible?: boolean;
+    }
+  ) => {
     const el = await origFrameWaitForSelector(selector, options);
     if (el) patchSingleElementHandle(el, page, cfg, cursor, raw, rawKb, originals, stealth);
     return el;
   };
 }
-
 
 function* iterFrames(page: Page): Generator<Frame> {
   try {
@@ -939,19 +995,21 @@ function* iterFrames(page: Page): Generator<Frame> {
   } catch {}
 }
 
-
 // ============================================================================
 // Browser-level patching
 // ============================================================================
 
 export function patchBrowser(browser: Browser, cfg: HumanConfig): void {
-  browser.pages().then(pages => {
-    for (const page of pages) {
-      if (!(page as any)._original) {
-        patchPage(page, cfg, new CursorState());
+  browser
+    .pages()
+    .then((pages) => {
+      for (const page of pages) {
+        if (!(page as any)._original) {
+          patchPage(page, cfg, new CursorState());
+        }
       }
-    }
-  }).catch(() => {});
+    })
+    .catch(() => {});
 
   const origNewPage = browser.newPage.bind(browser);
   (browser as any).newPage = async () => {
@@ -964,8 +1022,8 @@ export function patchBrowser(browser: Browser, cfg: HumanConfig): void {
 
   // v21: createIncognitoBrowserContext
   // v22+: createBrowserContext (renamed in puppeteer/puppeteer#11834)
-  for (const methodName of ['createBrowserContext', 'createIncognitoBrowserContext'] as const) {
-    if (typeof (browser as any)[methodName] === 'function') {
+  for (const methodName of ["createBrowserContext", "createIncognitoBrowserContext"] as const) {
+    if (typeof (browser as any)[methodName] === "function") {
       const origCreateContext = (browser as any)[methodName].bind(browser);
       (browser as any)[methodName] = async (options?: Parameters<typeof origCreateContext>[0]) => {
         const context: BrowserContext = await origCreateContext(options);
@@ -984,9 +1042,9 @@ export function patchBrowser(browser: Browser, cfg: HumanConfig): void {
     }
   }
 
-  browser.on('targetcreated', async (target: any) => {
+  browser.on("targetcreated", async (target: any) => {
     try {
-      if (target.type() === 'page') {
+      if (target.type() === "page") {
         const page = await target.page();
         if (page && !(page as any)._original) {
           patchPage(page, cfg, new CursorState());

@@ -5,7 +5,7 @@ description: Execute a phased implementation plan using subagents. Use when aske
 
 # Do Plan
 
-You are an ORCHESTRATOR. Deploy subagents to execute *all* work. Do not do the work yourself except to coordinate, route context, and verify that each subagent completed its assigned checklist.
+You are an ORCHESTRATOR. Deploy subagents to execute _all_ work. Do not do the work yourself except to coordinate, route context, and verify that each subagent completed its assigned checklist.
 
 ## Execution Protocol
 
@@ -18,6 +18,7 @@ You are an ORCHESTRATOR. Deploy subagents to execute *all* work. Do not do the w
 ### During Each Phase
 
 Deploy an "Implementation" subagent to:
+
 1. Execute the implementation as specified
 2. COPY patterns from documentation, don't invent
 3. Cite documentation sources in code comments when using unfamiliar APIs
@@ -26,14 +27,16 @@ Deploy an "Implementation" subagent to:
 ### After Each Phase
 
 Deploy subagents for each post-phase responsibility:
+
 1. **Run verification checklist** — Deploy a "Verification" subagent to prove the phase worked
 2. **Anti-pattern check** — Deploy an "Anti-pattern" subagent to grep for known bad patterns from the plan
 3. **Code quality review** — Deploy a "Code Quality" subagent to review changes
-4. **Commit only if verified** — Deploy a "Commit" subagent *only after* verification passes; otherwise, do not commit
+4. **Commit only if verified** — Deploy a "Commit" subagent _only after_ verification passes; otherwise, do not commit
 
 ### Between Phases
 
 Deploy a "Branch/Sync" subagent to:
+
 - Push to working branch after each verified phase
 - Prepare the next phase handoff so the next phase's subagents start fresh but have plan context
 

@@ -7,7 +7,7 @@ import {
   getCacheDir,
   getBinaryDir,
   getDownloadUrl,
-  getFallbackDownloadUrl,
+  getFallbackDownloadUrl
 } from "../src/config.js";
 import { _buildArgsForTest, resolveTimezone } from "../src/playwright.js";
 
@@ -116,28 +116,28 @@ describe("buildArgs timezone/locale", () => {
     expect(args).toContain("--fingerprint-timezone=America/New_York");
     expect(args).toContain("--lang=en-US");
     expect(args).toContain("--fingerprint-locale=en-US");
-    expect(args.some(a => a.startsWith("--fingerprint="))).toBe(false);
+    expect(args.some((a) => a.startsWith("--fingerprint="))).toBe(false);
   });
 
   it("does not inject flags when not set", () => {
     const args = _buildArgsForTest({});
-    expect(args.some(a => a.startsWith("--fingerprint-timezone="))).toBe(false);
-    expect(args.some(a => a.startsWith("--lang="))).toBe(false);
-    expect(args.some(a => a.startsWith("--fingerprint-locale="))).toBe(false);
+    expect(args.some((a) => a.startsWith("--fingerprint-timezone="))).toBe(false);
+    expect(args.some((a) => a.startsWith("--lang="))).toBe(false);
+    expect(args.some((a) => a.startsWith("--fingerprint-locale="))).toBe(false);
   });
 });
 
 describe("buildArgs deduplication", () => {
   it("user --fingerprint overrides default seed", () => {
     const args = _buildArgsForTest({ args: ["--fingerprint=99887"] });
-    const fpArgs = args.filter(a => a.startsWith("--fingerprint="));
+    const fpArgs = args.filter((a) => a.startsWith("--fingerprint="));
     expect(fpArgs).toHaveLength(1);
     expect(fpArgs[0]).toBe("--fingerprint=99887");
   });
 
   it("user --fingerprint-platform overrides default", () => {
     const args = _buildArgsForTest({ args: ["--fingerprint-platform=linux"] });
-    const platArgs = args.filter(a => a.startsWith("--fingerprint-platform="));
+    const platArgs = args.filter((a) => a.startsWith("--fingerprint-platform="));
     expect(platArgs).toHaveLength(1);
     expect(platArgs[0]).toBe("--fingerprint-platform=linux");
   });
@@ -145,9 +145,9 @@ describe("buildArgs deduplication", () => {
   it("timezone param overrides user --fingerprint-timezone arg", () => {
     const args = _buildArgsForTest({
       args: ["--fingerprint-timezone=Europe/London"],
-      timezone: "America/New_York",
+      timezone: "America/New_York"
     });
-    const tzArgs = args.filter(a => a.startsWith("--fingerprint-timezone="));
+    const tzArgs = args.filter((a) => a.startsWith("--fingerprint-timezone="));
     expect(tzArgs).toHaveLength(1);
     expect(tzArgs[0]).toBe("--fingerprint-timezone=America/New_York");
   });
@@ -155,12 +155,12 @@ describe("buildArgs deduplication", () => {
   it("locale param overrides user --lang and --fingerprint-locale args", () => {
     const args = _buildArgsForTest({
       args: ["--lang=de-DE", "--fingerprint-locale=de-DE"],
-      locale: "en-US",
+      locale: "en-US"
     });
-    const langArgs = args.filter(a => a.startsWith("--lang="));
+    const langArgs = args.filter((a) => a.startsWith("--lang="));
     expect(langArgs).toHaveLength(1);
     expect(langArgs[0]).toBe("--lang=en-US");
-    const localeArgs = args.filter(a => a.startsWith("--fingerprint-locale="));
+    const localeArgs = args.filter((a) => a.startsWith("--fingerprint-locale="));
     expect(localeArgs).toHaveLength(1);
     expect(localeArgs[0]).toBe("--fingerprint-locale=en-US");
   });
@@ -169,9 +169,9 @@ describe("buildArgs deduplication", () => {
     const args = _buildArgsForTest({
       args: ["--fingerprint=99887", "--fingerprint-timezone=UTC", "--lang=fr-FR"],
       timezone: "Europe/Berlin",
-      locale: "de-DE",
+      locale: "de-DE"
     });
-    const keys = args.map(a => a.split("=")[0]);
+    const keys = args.map((a) => a.split("=")[0]);
     expect(new Set(keys).size).toBe(keys.length);
   });
 
@@ -191,7 +191,7 @@ describe("buildArgs webrtc IP", () => {
 
   it("does not inject when not in args", () => {
     const args = _buildArgsForTest({});
-    expect(args.some(a => a.startsWith("--fingerprint-webrtc-ip"))).toBe(false);
+    expect(args.some((a) => a.startsWith("--fingerprint-webrtc-ip"))).toBe(false);
   });
 });
 

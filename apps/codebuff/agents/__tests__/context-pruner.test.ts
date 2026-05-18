@@ -891,9 +891,7 @@ describe('context-pruner code_search with flags', () => {
     const results = runHandleSteps(messages)
     const content = results[0].input.messages[0].content[0].text
 
-    expect(content).toContain(
-      'code search for "myFunction" (-g *.ts -i)',
-    )
+    expect(content).toContain('code search for "myFunction" (-g *.ts -i)')
   })
 })
 
@@ -1855,9 +1853,7 @@ describe('context-pruner glob and list_directory tools', () => {
     const results = runHandleSteps(messages)
     const content = results[0].input.messages[0].content[0].text
 
-    expect(content).toContain(
-      'inspected subtrees: src/components, src/utils',
-    )
+    expect(content).toContain('inspected subtrees: src/components, src/utils')
   })
 })
 
@@ -2355,9 +2351,7 @@ describe('context-pruner dual-budget behavior', () => {
     expect(content).not.toContain('_LONG_ASST_MIDDLE_MARKER_') // Middle marker falls in truncated gap
 
     // === Tool call summaries present ===
-    expect(content).toContain(
-      'inspected files: src/model.ts, src/service.ts',
-    )
+    expect(content).toContain('inspected files: src/model.ts, src/service.ts')
     expect(content).toContain('edited file: src/model.ts')
     expect(content).toContain('delegated agents:')
 

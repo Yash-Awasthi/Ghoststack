@@ -179,7 +179,8 @@
 Claude-Mem מספק חיפוש חכם דרך מיומנות mem-search שמופעלת אוטומטית כשאתה שואל על עבודה קודמת:
 
 **איך זה עובד:**
-- פשוט שאל באופן טבעי: *"מה עשינו בהפעלה האחרונה?"* או *"תיקנו את הבאג הזה קודם?"*
+
+- פשוט שאל באופן טבעי: _"מה עשינו בהפעלה האחרונה?"_ או _"תיקנו את הבאג הזה קודם?"_
 - Claude מפעיל אוטומטית את מיומנות mem-search כדי למצוא הקשר רלוונטי
 
 **פעולות חיפוש זמינות:**
@@ -285,7 +286,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## תמיכה
 

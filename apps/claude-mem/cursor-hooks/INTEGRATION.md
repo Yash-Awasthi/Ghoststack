@@ -3,6 +3,7 @@
 ## Overview
 
 This integration connects claude-mem's persistent memory system to Cursor's hook system, enabling:
+
 - Automatic capture of agent actions (MCP tools, shell commands, file edits)
 - Context retrieval from past sessions
 - Session summarization for future reference
@@ -131,65 +132,76 @@ session-summary.sh
 
 ### Session ID Mapping
 
-| Cursor Field | Claude-Mem Field | Notes |
-|-------------|------------------|-------|
+| Cursor Field      | Claude-Mem Field   | Notes                                                   |
+| ----------------- | ------------------ | ------------------------------------------------------- |
 | `conversation_id` | `contentSessionId` | Stable across turns, used as primary session identifier |
-| `generation_id` | (fallback) | Used if conversation_id unavailable |
+| `generation_id`   | (fallback)         | Used if conversation_id unavailable                     |
 
 ### Tool Mapping
 
-| Cursor Event | Claude-Mem Tool Name | Input Format |
-|-------------|---------------------|--------------|
-| `afterMCPExecution` | `tool_name` from event | `tool_input` as JSON |
-| `afterShellExecution` | `"Bash"` | `{command: "..."}` |
-| `afterFileEdit` | `"write_file"` | `{file_path: "...", edits: [...]}` |
+| Cursor Event          | Claude-Mem Tool Name   | Input Format                       |
+| --------------------- | ---------------------- | ---------------------------------- |
+| `afterMCPExecution`   | `tool_name` from event | `tool_input` as JSON               |
+| `afterShellExecution` | `"Bash"`               | `{command: "..."}`                 |
+| `afterFileEdit`       | `"write_file"`         | `{file_path: "...", edits: [...]}` |
 
 ### Project Mapping
 
-| Source | Target | Notes |
-|--------|--------|-------|
+| Source               | Target       | Notes                                |
+| -------------------- | ------------ | ------------------------------------ |
 | `workspace_roots[0]` | Project name | Basename of workspace root directory |
 
 ## API Endpoints Used
 
 ### Session Management
+
 - `POST /api/sessions/init` - Initialize new session
 - `POST /api/sessions/summarize` - Generate session summary
 
 ### Observation Storage
+
 - `POST /api/sessions/observations` - Store tool usage observation
 
 ### Context Retrieval
+
 - `GET /api/context/inject?project=...` - Get relevant context for injection
 
 ### Health Checks
+
 - `GET /api/readiness` - Check if worker is ready
 
 ## Configuration
 
 ### Worker Settings
+
 Located in `~/.claude-mem/settings.json`:
+
 - `CLAUDE_MEM_WORKER_PORT` (default: 37777)
 - `CLAUDE_MEM_WORKER_HOST` (default: 127.0.0.1)
 
 ### Hook Settings
+
 Located in `hooks.json`:
+
 - Hook event names
 - Script paths (relative or absolute)
 
 ## Error Handling
 
 ### Worker Unavailable
+
 - Hooks poll `/api/readiness` with 30 retries (6 seconds)
 - If worker unavailable, hooks fail gracefully (exit 0)
 - Observations are fire-and-forget (curl errors ignored)
 
 ### Missing Data
+
 - Empty `conversation_id` → use `generation_id`
 - Empty `workspace_root` → use `pwd`
 - Missing tool data → skip observation
 
 ### Network Errors
+
 - All HTTP requests use `curl -s` (silent)
 - Errors redirected to `/dev/null`
 - Hooks always exit 0 to avoid blocking Cursor
@@ -221,12 +233,14 @@ Located in `hooks.json`:
 ### Manual Testing
 
 1. **Test session initialization**:
+
    ```bash
    echo '{"conversation_id":"test-123","workspace_roots":["/tmp/test"],"prompt":"test"}' | \
      ~/.cursor/hooks/session-init.sh
    ```
 
 2. **Test observation capture**:
+
    ```bash
    echo '{"conversation_id":"test-123","hook_event_name":"afterMCPExecution","tool_name":"test","tool_input":{},"result_json":{}}' | \
      ~/.cursor/hooks/save-observation.sh
@@ -248,4 +262,3 @@ Located in `hooks.json`:
 ## Troubleshooting
 
 See [README.md](README.md#troubleshooting) for detailed troubleshooting steps.
-

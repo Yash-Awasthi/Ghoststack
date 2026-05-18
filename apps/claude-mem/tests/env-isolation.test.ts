@@ -1,13 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, spyOn } from 'bun:test';
-import * as fs from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import {
-  envFilePath,
-  buildIsolatedEnv,
-  buildIsolatedEnvWithFreshOAuth,
-} from '../src/shared/EnvManager.js';
-import * as oauthToken from '../src/shared/oauth-token.js';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, spyOn } from "bun:test";
+import * as fs from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { envFilePath, buildIsolatedEnv, buildIsolatedEnvWithFreshOAuth } from "../src/shared/EnvManager.js";
+import * as oauthToken from "../src/shared/oauth-token.js";
 
 /**
  * Tests for issue #2375: ANTHROPIC_BASE_URL must not leak from the parent
@@ -21,8 +17,8 @@ import * as oauthToken from '../src/shared/oauth-token.js';
  * this works regardless of the order other tests imported the module.
  */
 
-const TEST_DATA_DIR = fs.mkdtempSync(join(tmpdir(), 'claude-mem-env-isolation-'));
-const TEST_ENV_FILE = join(TEST_DATA_DIR, '.env');
+const TEST_DATA_DIR = fs.mkdtempSync(join(tmpdir(), "claude-mem-env-isolation-"));
+const TEST_ENV_FILE = join(TEST_DATA_DIR, ".env");
 const ORIGINAL_ENV_FILE = process.env.CLAUDE_MEM_ENV_FILE;
 
 const ORIGINAL_BASE_URL = process.env.ANTHROPIC_BASE_URL;
@@ -66,7 +62,7 @@ function restoreOriginalEnv(): void {
   }
 }
 
-describe('Issue #2375: ANTHROPIC_BASE_URL env-var isolation', () => {
+describe("Issue #2375: ANTHROPIC_BASE_URL env-var isolation", () => {
   beforeAll(() => {
     fs.mkdirSync(TEST_DATA_DIR, { recursive: true, mode: 0o700 });
     process.env.CLAUDE_MEM_ENV_FILE = TEST_ENV_FILE;
@@ -92,34 +88,32 @@ describe('Issue #2375: ANTHROPIC_BASE_URL env-var isolation', () => {
     restoreOriginalEnv();
   });
 
-  it('leaked ANTHROPIC_BASE_URL is stripped from isolatedEnv', () => {
+  it("leaked ANTHROPIC_BASE_URL is stripped from isolatedEnv", () => {
     // No .env file exists. The parent shell sets a stray ANTHROPIC_BASE_URL —
     // this MUST NOT propagate into the subprocess isolatedEnv, because doing
     // so used to trigger the OAuth-skip path and leave the worker with no
     // credentials at all.
-    process.env.ANTHROPIC_BASE_URL = 'https://shouldnotleak.example';
+    process.env.ANTHROPIC_BASE_URL = "https://shouldnotleak.example";
 
     const result = buildIsolatedEnv();
 
     expect(result.ANTHROPIC_BASE_URL).toBeUndefined();
   });
 
-  it('~/.claude-mem/.env BASE_URL + AUTH_TOKEN reaches isolatedEnv', () => {
+  it("~/.claude-mem/.env BASE_URL + AUTH_TOKEN reaches isolatedEnv", () => {
     // User intentionally configured a gateway with a gateway-appropriate
     // auth token. Both must be re-injected into isolatedEnv.
-    fs.writeFileSync(
-      TEST_ENV_FILE,
-      'ANTHROPIC_BASE_URL=https://gateway.example\nANTHROPIC_AUTH_TOKEN=test-token\n',
-      { mode: 0o600 },
-    );
+    fs.writeFileSync(TEST_ENV_FILE, "ANTHROPIC_BASE_URL=https://gateway.example\nANTHROPIC_AUTH_TOKEN=test-token\n", {
+      mode: 0o600
+    });
 
     const result = buildIsolatedEnv();
 
-    expect(result.ANTHROPIC_BASE_URL).toBe('https://gateway.example');
-    expect(result.ANTHROPIC_AUTH_TOKEN).toBe('test-token');
+    expect(result.ANTHROPIC_BASE_URL).toBe("https://gateway.example");
+    expect(result.ANTHROPIC_AUTH_TOKEN).toBe("test-token");
   });
 
-  it('bare .env BASE_URL alone does not trigger OAuth fetch', async () => {
+  it("bare .env BASE_URL alone does not trigger OAuth fetch", async () => {
     // A user with a tokenless gateway (e.g. mTLS at the network boundary)
     // configures BASE_URL only. The three-branch predicate must hit the
     // BASE_URL-set branch BEFORE OAuth lookup, so CLAUDE_CODE_OAUTH_TOKEN
@@ -133,18 +127,14 @@ describe('Issue #2375: ANTHROPIC_BASE_URL env-var isolation', () => {
     // injected) are the load-bearing checks: in the no-OAuth-injection
     // outcome, the only execution path that produces this combination is
     // the new BASE_URL-first branch returning early.
-    fs.writeFileSync(
-      TEST_ENV_FILE,
-      'ANTHROPIC_BASE_URL=https://gateway.example\n',
-      { mode: 0o600 },
-    );
+    fs.writeFileSync(TEST_ENV_FILE, "ANTHROPIC_BASE_URL=https://gateway.example\n", { mode: 0o600 });
 
-    const oauthSpy = spyOn(oauthToken, 'readClaudeOAuthToken');
+    const oauthSpy = spyOn(oauthToken, "readClaudeOAuthToken");
 
     try {
       const result = await buildIsolatedEnvWithFreshOAuth();
 
-      expect(result.ANTHROPIC_BASE_URL).toBe('https://gateway.example');
+      expect(result.ANTHROPIC_BASE_URL).toBe("https://gateway.example");
       expect(result.CLAUDE_CODE_OAUTH_TOKEN).toBeUndefined();
       // Best-effort sanity check; see note above.
       expect(oauthSpy).not.toHaveBeenCalled();

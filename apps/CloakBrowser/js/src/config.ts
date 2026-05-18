@@ -34,7 +34,7 @@ export const PLATFORM_CHROMIUM_VERSIONS: Record<string, string> = {
   "linux-arm64": "146.0.7680.177.3",
   "darwin-arm64": "145.0.7632.109.2",
   "darwin-x64": "145.0.7632.109.2",
-  "windows-x64": "146.0.7680.177.4",
+  "windows-x64": "146.0.7680.177.4"
 };
 
 // ---------------------------------------------------------------------------
@@ -45,7 +45,7 @@ const SUPPORTED_PLATFORMS: Record<string, string> = {
   "linux-arm64": "linux-arm64",
   "darwin-arm64": "darwin-arm64",
   "darwin-x64": "darwin-x64",
-  "win32-x64": "windows-x64",
+  "win32-x64": "windows-x64"
 };
 
 // Platforms with pre-built binaries available for download (derived from version map).
@@ -69,9 +69,7 @@ export function getPlatformTag(): string {
   else if (platform === "win32" && arch === "x64") key = "win32-x64";
   else {
     const supported = Object.values(SUPPORTED_PLATFORMS).join(", ");
-    throw new Error(
-      `Unsupported platform: ${platform} ${arch}. Supported: ${supported}`
-    );
+    throw new Error(`Unsupported platform: ${platform} ${arch}. Supported: ${supported}`);
   }
 
   return SUPPORTED_PLATFORMS[key]!;
@@ -117,15 +115,11 @@ export function checkPlatformAvailable(): void {
 // ---------------------------------------------------------------------------
 // Download URL
 // ---------------------------------------------------------------------------
-export const DOWNLOAD_BASE_URL =
-  process.env.CLOAKBROWSER_DOWNLOAD_URL ||
-  "https://cloakbrowser.dev";
+export const DOWNLOAD_BASE_URL = process.env.CLOAKBROWSER_DOWNLOAD_URL || "https://cloakbrowser.dev";
 
-export const GITHUB_API_URL =
-  "https://api.github.com/repos/CloakHQ/cloakbrowser/releases";
+export const GITHUB_API_URL = "https://api.github.com/repos/CloakHQ/cloakbrowser/releases";
 
-export const GITHUB_DOWNLOAD_BASE_URL =
-  "https://github.com/CloakHQ/cloakbrowser/releases/download";
+export const GITHUB_DOWNLOAD_BASE_URL = "https://github.com/CloakHQ/cloakbrowser/releases/download";
 
 export function getArchiveExt(): string {
   return process.platform === "win32" ? ".zip" : ".tar.gz";
@@ -209,10 +203,7 @@ export function getDefaultStealthArgs(): string[] {
   const seed = Math.floor(Math.random() * 90000) + 10000; // 10000-99999
   const isMac = process.platform === "darwin";
 
-  const base = [
-    "--no-sandbox",
-    `--fingerprint=${seed}`,
-  ];
+  const base = ["--no-sandbox", `--fingerprint=${seed}`];
 
   if (isMac) {
     // macOS: run as native Mac browser — GPU/UA match natively

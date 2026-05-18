@@ -1,6 +1,7 @@
 🌐 Ito ay isang awtomatikong pagsasalin. Malugod na tinatanggap ang mga pagwawasto mula sa komunidad!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -207,15 +208,15 @@ Nagbibigay ang Claude-Mem ng intelligent memory search sa pamamagitan ng **5 MCP
 
 ```typescript
 // Step 1: Search for index
-search(query="authentication bug", type="bugfix", limit=10)
+search((query = "authentication bug"), (type = "bugfix"), (limit = 10));
 
 // Step 2: Review index, identify relevant IDs (e.g., #123, #456)
 
 // Step 3: Fetch full details
-get_observations(ids=[123, 456])
+get_observations((ids = [123, 456]));
 
 // Save important information manually
-save_memory(text="API requires auth header X-API-Key", title="API Auth")
+save_memory((text = "API requires auth header X-API-Key"), (title = "API Auth"));
 ```
 
 Tingnan ang [Search Tools Guide](https://docs.claude-mem.ai/usage/search-tools) para sa mas detalyadong mga halimbawa.
@@ -310,7 +311,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Suporta
 

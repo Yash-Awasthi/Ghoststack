@@ -1,18 +1,17 @@
-
-import { createHash } from 'crypto';
-import { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
-import { getProjectContext } from '../../../utils/project-name.js';
-import type { ObservationInput, StoreObservationResult } from './types.js';
+import { createHash } from "crypto";
+import { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
+import { getProjectContext } from "../../../utils/project-name.js";
+import type { ObservationInput, StoreObservationResult } from "./types.js";
 
 export function computeObservationContentHash(
   memorySessionId: string,
   title: string | null,
   narrative: string | null
 ): string {
-  return createHash('sha256')
-    .update([memorySessionId || '', title || '', narrative || ''].join('\x00'))
-    .digest('hex')
+  return createHash("sha256")
+    .update([memorySessionId || "", title || "", narrative || ""].join("\x00"))
+    .digest("hex")
     .slice(0, 16);
 }
 
@@ -65,9 +64,9 @@ export function storeObservation(
     return { id: inserted.id, createdAtEpoch: inserted.created_at_epoch };
   }
 
-  const existing = db.prepare(
-    'SELECT id, created_at_epoch FROM observations WHERE memory_session_id = ? AND content_hash = ?'
-  ).get(memorySessionId, contentHash) as { id: number; created_at_epoch: number } | null;
+  const existing = db
+    .prepare("SELECT id, created_at_epoch FROM observations WHERE memory_session_id = ? AND content_hash = ?")
+    .get(memorySessionId, contentHash) as { id: number; created_at_epoch: number } | null;
 
   if (!existing) {
     throw new Error(
@@ -75,6 +74,6 @@ export function storeObservation(
     );
   }
 
-  logger.debug('DEDUP', `Skipped duplicate observation | contentHash=${contentHash} | existingId=${existing.id}`);
+  logger.debug("DEDUP", `Skipped duplicate observation | contentHash=${contentHash} | existingId=${existing.id}`);
   return { id: existing.id, createdAtEpoch: existing.created_at_epoch };
 }

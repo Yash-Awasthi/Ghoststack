@@ -23,6 +23,7 @@ Claude-mem is a Claude Code plugin providing persistent memory across sessions. 
 **Viewer UI** (`src/ui/viewer/`) - React interface served by the worker on its configured port (default `http://127.0.0.1:<worker-port>`), built to `plugin/ui/viewer.html`
 
 ## Privacy Tags
+
 - `<private>content</private>` - User-level privacy control (manual, prevents storage)
 
 **Implementation**: Tag stripping happens at hook layer (edge processing) before data reaches worker/database. See `src/utils/tag-stripping.ts` for shared utilities.

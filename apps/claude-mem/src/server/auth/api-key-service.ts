@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { createHash, randomBytes } from 'crypto';
-import { Database } from 'bun:sqlite';
-import { AuthRepository, ensureServerStorageSchema } from '../../storage/sqlite/index.js';
-import type { ApiKey } from '../../core/schemas/auth.js';
+import { createHash, randomBytes } from "crypto";
+import { Database } from "bun:sqlite";
+import { AuthRepository, ensureServerStorageSchema } from "../../storage/sqlite/index.js";
+import type { ApiKey } from "../../core/schemas/auth.js";
 
 export interface CreatedServerApiKey {
   rawKey: string;
@@ -27,11 +27,11 @@ export interface CreateServerApiKeyInput {
 }
 
 export function hashServerApiKey(rawKey: string): string {
-  return createHash('sha256').update(rawKey).digest('hex');
+  return createHash("sha256").update(rawKey).digest("hex");
 }
 
 export function createRawServerApiKey(): string {
-  return `cmem_${randomBytes(32).toString('base64url')}`;
+  return `cmem_${randomBytes(32).toString("base64url")}`;
 }
 
 export function createServerApiKey(db: Database, input: CreateServerApiKeyInput): CreatedServerApiKey {
@@ -46,16 +46,16 @@ export function createServerApiKey(db: Database, input: CreateServerApiKeyInput)
     prefix: rawKey.slice(0, 10),
     scopes: input.scopes ?? [],
     expiresAtEpoch: input.expiresAtEpoch ?? null,
-    metadata: input.metadata ?? {},
+    metadata: input.metadata ?? {}
   });
 
   repo.createAuditLog({
     teamId: record.teamId,
     projectId: record.projectId,
-    actorType: 'system',
-    action: 'api_key.create',
-    targetType: 'api_key',
-    targetId: record.id,
+    actorType: "system",
+    action: "api_key.create",
+    targetType: "api_key",
+    targetId: record.id
   });
 
   return { rawKey, record };
@@ -64,12 +64,12 @@ export function createServerApiKey(db: Database, input: CreateServerApiKeyInput)
 export function verifyServerApiKey(
   db: Database,
   rawKey: string,
-  requiredScopes: string[] = [],
+  requiredScopes: string[] = []
 ): VerifiedServerApiKey | null {
   ensureServerStorageSchema(db);
   const repo = new AuthRepository(db);
   const record = repo.getApiKeyByHash(hashServerApiKey(rawKey));
-  if (!record || record.status !== 'active') {
+  if (!record || record.status !== "active") {
     return null;
   }
   if (record.expiresAtEpoch !== null && record.expiresAtEpoch <= Date.now()) {
@@ -84,7 +84,7 @@ export function verifyServerApiKey(
     record,
     teamId: record.teamId,
     projectId: record.projectId,
-    scopes: record.scopes,
+    scopes: record.scopes
   };
 }
 
@@ -101,18 +101,18 @@ export function revokeServerApiKey(db: Database, id: string): ApiKey | null {
     repo.createAuditLog({
       teamId: record.teamId,
       projectId: record.projectId,
-      actorType: 'system',
-      action: 'api_key.revoke',
-      targetType: 'api_key',
-      targetId: record.id,
+      actorType: "system",
+      action: "api_key.revoke",
+      targetType: "api_key",
+      targetId: record.id
     });
   }
   return record;
 }
 
 function hasRequiredScopes(grantedScopes: string[], requiredScopes: string[]): boolean {
-  if (requiredScopes.length === 0 || grantedScopes.includes('*')) {
+  if (requiredScopes.length === 0 || grantedScopes.includes("*")) {
     return true;
   }
-  return requiredScopes.every(scope => grantedScopes.includes(scope));
+  return requiredScopes.every((scope) => grantedScopes.includes(scope));
 }

@@ -38,8 +38,10 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
     dragAndDrop: vi.fn(async () => {}),
     locator: vi.fn(() => ({
       boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 })),
-      first: vi.fn(function (this: any) { return this; }),
-    })),
+      first: vi.fn(function (this: any) {
+        return this;
+      })
+    }))
   };
 
   const makeLocator = () => {
@@ -51,7 +53,7 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
       isVisible: vi.fn(async () => true),
       isEnabled: vi.fn(async () => true),
       isEditable: vi.fn(async () => true),
-      evaluate: vi.fn(async () => ({ hit: true })),
+      evaluate: vi.fn(async () => ({ hit: true }))
     };
     loc.first = vi.fn(() => loc);
     return loc;
@@ -66,16 +68,14 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
       up: vi.fn(async () => {}),
       click: vi.fn(async () => {}),
       dblclick: vi.fn(async () => {}),
-      wheel: vi.fn(async () => {}),
+      wheel: vi.fn(async () => {})
     },
     keyboard: {
-      press: overrides.keyboardPress
-        ? vi.fn(overrides.keyboardPress)
-        : vi.fn(async () => {}),
+      press: overrides.keyboardPress ? vi.fn(overrides.keyboardPress) : vi.fn(async () => {}),
       type: vi.fn(async () => {}),
       down: vi.fn(async () => {}),
       up: vi.fn(async () => {}),
-      insertText: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     },
     click: vi.fn(async () => {}),
     dblclick: vi.fn(async () => {}),
@@ -95,28 +95,30 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
     context: vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => buildMockCDP()),
+      newCDPSession: vi.fn(async () => buildMockCDP())
     })),
     url: vi.fn(() => "about:blank"),
-    waitForTimeout: vi.fn(async () => {}),
+    waitForTimeout: vi.fn(async () => {})
   };
   return page;
 }
 
 function buildMockCDP(overrides: Record<string, any> = {}): any {
   return {
-    send: overrides.send ?? vi.fn(async (method: string, params?: any) => {
-      if (method === "Page.getFrameTree") {
-        return { frameTree: { frame: { id: "F1" } } };
-      }
-      if (method === "Page.createIsolatedWorld") {
-        return { executionContextId: 42 };
-      }
-      if (method === "Runtime.evaluate") {
-        return { result: { value: false } };
-      }
-      return {};
-    }),
+    send:
+      overrides.send ??
+      vi.fn(async (method: string, params?: any) => {
+        if (method === "Page.getFrameTree") {
+          return { frameTree: { frame: { id: "F1" } } };
+        }
+        if (method === "Page.createIsolatedWorld") {
+          return { executionContextId: 42 };
+        }
+        if (method === "Runtime.evaluate") {
+          return { result: { value: false } };
+        }
+        return {};
+      })
   };
 }
 
@@ -125,14 +127,19 @@ function buildRawKeyboard() {
   const upKeys: string[] = [];
   const insertedChars: string[] = [];
   const raw = {
-    down: vi.fn(async (k: string) => { downKeys.push(k); }),
-    up: vi.fn(async (k: string) => { upKeys.push(k); }),
+    down: vi.fn(async (k: string) => {
+      downKeys.push(k);
+    }),
+    up: vi.fn(async (k: string) => {
+      upKeys.push(k);
+    }),
     type: vi.fn(async () => {}),
-    insertText: vi.fn(async (t: string) => { insertedChars.push(t); }),
+    insertText: vi.fn(async (t: string) => {
+      insertedChars.push(t);
+    })
   };
   return { raw, downKeys, upKeys, insertedChars };
 }
-
 
 // =========================================================================
 // SHIFT_SYMBOL_CODES / SHIFT_SYMBOL_KEYCODES completeness
@@ -142,24 +149,43 @@ describe("SHIFT_SYMBOL maps completeness", () => {
     // We access these via dynamic import to get internal constants
     // Since they're not exported directly, we test via humanType behavior
     const cfg = resolveConfig("default", { mistype_chance: 0 });
-    const SHIFT_SYMBOLS = ['@', '#', '!', '$', '%', '^', '&', '*', '(', ')',
-      '_', '+', '{', '}', '|', ':', '"', '<', '>', '?', '~'];
+    const SHIFT_SYMBOLS = [
+      "@",
+      "#",
+      "!",
+      "$",
+      "%",
+      "^",
+      "&",
+      "*",
+      "(",
+      ")",
+      "_",
+      "+",
+      "{",
+      "}",
+      "|",
+      ":",
+      '"',
+      "<",
+      ">",
+      "?",
+      "~"
+    ];
 
     // Each shift symbol should work via CDP path without error
     for (const sym of SHIFT_SYMBOLS) {
       const { raw } = buildRawKeyboard();
       const page = buildMockPage();
       const mockCdp = {
-        send: vi.fn(async () => ({})),
+        send: vi.fn(async () => ({}))
       };
 
       await humanType(page, raw, sym, cfg, mockCdp as any);
 
       // CDP path: should have called cdp.send for keyDown + keyUp
       const cdpCalls = mockCdp.send.mock.calls;
-      const keyEvents = cdpCalls.filter(
-        (c: any[]) => c[0] === "Input.dispatchKeyEvent"
-      );
+      const keyEvents = cdpCalls.filter((c: any[]) => c[0] === "Input.dispatchKeyEvent");
       expect(keyEvents.length).toBe(2);
 
       // page.evaluate should NOT have been called (stealth path)
@@ -176,14 +202,12 @@ describe("SHIFT_SYMBOL maps completeness", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!", cfg, mockCdp as any);
 
-    const keyDown = cdpCalls.find(
-      ([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown"
-    );
+    const keyDown = cdpCalls.find(([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown");
     expect(keyDown).toBeDefined();
     const params = keyDown![1];
 
@@ -206,14 +230,12 @@ describe("SHIFT_SYMBOL maps completeness", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!", cfg, mockCdp as any);
 
-    const keyUp = cdpCalls.find(
-      ([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyUp"
-    );
+    const keyUp = cdpCalls.find(([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyUp");
     expect(keyUp).toBeDefined();
     const params = keyUp![1];
 
@@ -222,7 +244,7 @@ describe("SHIFT_SYMBOL maps completeness", () => {
   });
 
   it("digit shift symbols have correct keycodes (49-57, 48)", async () => {
-    const digitSymbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'];
+    const digitSymbols = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"];
     const expectedKeycodes = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
     const cfg = resolveConfig("default", { mistype_chance: 0 });
 
@@ -234,20 +256,17 @@ describe("SHIFT_SYMBOL maps completeness", () => {
         send: vi.fn(async (method: string, params: any) => {
           cdpCalls.push([method, params]);
           return {};
-        }),
+        })
       };
 
       await humanType(page, raw, digitSymbols[i], cfg, mockCdp as any);
 
-      const keyDown = cdpCalls.find(
-        ([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown"
-      );
+      const keyDown = cdpCalls.find(([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown");
       expect(keyDown).toBeDefined();
       expect(keyDown![1].windowsVirtualKeyCode).toBe(expectedKeycodes[i]);
     }
   });
 });
-
 
 // =========================================================================
 // typeShiftSymbol — CDP path vs fallback
@@ -292,13 +311,21 @@ describe("typeShiftSymbol CDP vs fallback", () => {
     const cfg = resolveConfig("default", { mistype_chance: 0 });
     const callOrder: string[] = [];
     const raw = {
-      down: vi.fn(async () => { callOrder.push("raw.down"); }),
-      up: vi.fn(async () => { callOrder.push("raw.up"); }),
+      down: vi.fn(async () => {
+        callOrder.push("raw.down");
+      }),
+      up: vi.fn(async () => {
+        callOrder.push("raw.up");
+      }),
       type: vi.fn(async () => {}),
-      insertText: vi.fn(async () => { callOrder.push("raw.insertText"); }),
+      insertText: vi.fn(async () => {
+        callOrder.push("raw.insertText");
+      })
     };
     const page = buildMockPage({
-      evaluate: vi.fn(async () => { callOrder.push("page.evaluate"); }),
+      evaluate: vi.fn(async () => {
+        callOrder.push("page.evaluate");
+      })
     });
 
     await humanType(page, raw, "%", cfg, null);
@@ -313,17 +340,21 @@ describe("typeShiftSymbol CDP vs fallback", () => {
     const callOrder: string[] = [];
 
     const raw = {
-      down: vi.fn(async (k: string) => { callOrder.push(`raw.down(${k})`); }),
-      up: vi.fn(async (k: string) => { callOrder.push(`raw.up(${k})`); }),
+      down: vi.fn(async (k: string) => {
+        callOrder.push(`raw.down(${k})`);
+      }),
+      up: vi.fn(async (k: string) => {
+        callOrder.push(`raw.up(${k})`);
+      }),
       type: vi.fn(async () => {}),
-      insertText: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
     const page = buildMockPage();
     const mockCdp = {
       send: vi.fn(async (method: string, params: any) => {
         callOrder.push(`cdp.${params.type || method}`);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!", cfg, mockCdp as any);
@@ -340,7 +371,6 @@ describe("typeShiftSymbol CDP vs fallback", () => {
   });
 });
 
-
 // =========================================================================
 // humanType integration — mixed text with CDP
 // =========================================================================
@@ -354,7 +384,7 @@ describe("humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "a!", cfg, mockCdp as any);
@@ -363,9 +393,7 @@ describe("humanType mixed text with CDP", () => {
     expect(downKeys).toContain("a");
 
     // '!' → CDP keyDown + keyUp
-    const keyEvents = cdpCalls.filter(
-      ([m]) => m === "Input.dispatchKeyEvent"
-    );
+    const keyEvents = cdpCalls.filter(([m]) => m === "Input.dispatchKeyEvent");
     expect(keyEvents.length).toBe(2);
 
     // No page.evaluate
@@ -393,16 +421,14 @@ describe("humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!@#", cfg, mockCdp as any);
 
     expect(page.evaluate).not.toHaveBeenCalled();
     // 3 symbols × 2 events = 6
-    const keyEvents = cdpCalls.filter(
-      ([m]) => m === "Input.dispatchKeyEvent"
-    );
+    const keyEvents = cdpCalls.filter(([m]) => m === "Input.dispatchKeyEvent");
     expect(keyEvents.length).toBe(6);
   });
 
@@ -426,14 +452,12 @@ describe("humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "SecurePass!123", cfg, mockCdp as any);
 
-    const keyEvents = cdpCalls.filter(
-      ([m]) => m === "Input.dispatchKeyEvent"
-    );
+    const keyEvents = cdpCalls.filter(([m]) => m === "Input.dispatchKeyEvent");
     // Only '!' triggers CDP: 2 events (keyDown + keyUp)
     expect(keyEvents.length).toBe(2);
     expect(keyEvents[0][1].key).toBe("!");
@@ -442,14 +466,14 @@ describe("humanType mixed text with CDP", () => {
 
   it("CDP modifier flag is always 8 (Shift)", async () => {
     // Убираем задержки в 0, чтобы 21 символ не вызывал таймаут в 5 секунд
-    const cfg = resolveConfig("default", { 
+    const cfg = resolveConfig("default", {
       mistype_chance: 0,
       typing_delay: 0,
       shift_down_delay: [0, 0],
       shift_up_delay: [0, 0],
       key_hold: [0, 0]
     });
-    
+
     const allSymbols = '@#!$%^&*()_+{}|:"<>?~';
     const { raw } = buildRawKeyboard();
     const page = buildMockPage();
@@ -458,7 +482,7 @@ describe("humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, allSymbols, cfg, mockCdp as any);
@@ -532,7 +556,6 @@ describe("patchPage stealth infrastructure", () => {
   });
 });
 
-
 // =========================================================================
 // StealthEval lifecycle (via patchPage)
 // =========================================================================
@@ -578,14 +601,14 @@ describe("StealthEval lifecycle", () => {
           return { result: { value: true } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
     page.context = vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => mockCdp),
+      newCDPSession: vi.fn(async () => mockCdp)
     }));
 
     const cfg = resolveConfig("default");
@@ -617,14 +640,14 @@ describe("StealthEval lifecycle", () => {
           return { result: { value: "recovered" } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
     page.context = vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => mockCdp),
+      newCDPSession: vi.fn(async () => mockCdp)
     }));
 
     const cfg = resolveConfig("default");
@@ -651,14 +674,14 @@ describe("StealthEval lifecycle", () => {
           return { exceptionDetails: { text: "always broken" } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
     page.context = vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => mockCdp),
+      newCDPSession: vi.fn(async () => mockCdp)
     }));
 
     const cfg = resolveConfig("default");
@@ -670,7 +693,6 @@ describe("StealthEval lifecycle", () => {
     expect(result).toBeUndefined();
   });
 });
-
 
 // =========================================================================
 // isInputElement / isSelectorFocused — through patchPage click flow
@@ -698,19 +720,19 @@ describe("isInputElement stealth integration via patchPage", () => {
           return { result: { value: false } }; // not an input
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage({
       evaluate: vi.fn(async (...args: any[]) => {
         evaluateCalls.push(args);
         return { hit: true };
-      }),
+      })
     });
     page.context = vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => mockCdp),
+      newCDPSession: vi.fn(async () => mockCdp)
     }));
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
@@ -726,22 +748,19 @@ describe("isInputElement stealth integration via patchPage", () => {
     // The stealth path should have been used for isInputElement
     // (Runtime.evaluate in isolated world, NOT page.evaluate)
     const isInputCalls = stealthEvaluateCalls.filter(
-      expr => expr.includes("tagName") || expr.includes("querySelector")
+      (expr) => expr.includes("tagName") || expr.includes("querySelector")
     );
 
     // We expect at least one stealth evaluate for the isInputElement check
     // OR page.evaluate was NOT called for this purpose
     // The key assertion: page.evaluate is NOT used for querySelector-based DOM checks
-    const qsCalls = evaluateCalls.filter(
-      args => typeof args[0] === "string" && args[0].includes("querySelector")
-    );
+    const qsCalls = evaluateCalls.filter((args) => typeof args[0] === "string" && args[0].includes("querySelector"));
     // If stealth worked, no querySelector calls should go through page.evaluate
     if (isInputCalls.length > 0) {
       expect(qsCalls.length).toBe(0);
     }
   });
 });
-
 
 // =========================================================================
 // isSelectorFocused stealth integration via patchPage press flow
@@ -766,18 +785,20 @@ describe("isSelectorFocused stealth integration via patchPage", () => {
           return { result: { value: true } };
         }
         return {};
-      }),
+      })
     });
 
     const pressedKeys: string[] = [];
     const page = buildMockPage({
       evaluate: vi.fn(async () => true),
-      keyboardPress: async (key: string) => { pressedKeys.push(key); },
+      keyboardPress: async (key: string) => {
+        pressedKeys.push(key);
+      }
     });
     page.context = vi.fn(() => ({
       pages: vi.fn(() => []),
       addInitScript: vi.fn(async () => {}),
-      newCDPSession: vi.fn(async () => mockCdp),
+      newCDPSession: vi.fn(async () => mockCdp)
     }));
 
     const cfg = resolveConfig("default");
@@ -791,13 +812,10 @@ describe("isSelectorFocused stealth integration via patchPage", () => {
     }
 
     // Focus check should use isolated world (Runtime.evaluate with activeElement)
-    const focusCalls = stealthEvaluateCalls.filter(
-      expr => expr.includes("activeElement")
-    );
+    const focusCalls = stealthEvaluateCalls.filter((expr) => expr.includes("activeElement"));
     expect(focusCalls.length).toBeGreaterThan(0);
   });
 });
-
 
 // =========================================================================
 // Frame patching with stealth
@@ -819,14 +837,14 @@ describe("frame patching with stealth", () => {
       clear: vi.fn(async () => {}),
       dragAndDrop: vi.fn(async () => {}),
       locator: vi.fn(() => ({
-        boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 })),
+        boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 }))
       })),
-      childFrames: vi.fn(() => []),
+      childFrames: vi.fn(() => [])
     };
 
     const mainFrame = {
       ...childFrame,
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
 
     const page = buildMockPage({ mainFrameReturn: mainFrame });
@@ -837,7 +855,6 @@ describe("frame patching with stealth", () => {
     expect((childFrame as any)._humanPatched).toBe(true);
   });
 });
-
 
 // =========================================================================
 // Page-level: pressSequentially, tap, clear are patched
@@ -883,7 +900,6 @@ describe("page-level pressSequentially, tap, clear patches", () => {
   });
 });
 
-
 // =========================================================================
 // Frame-level: pressSequentially, tap are patched
 // =========================================================================
@@ -906,9 +922,9 @@ describe("frame-level pressSequentially, tap patches", () => {
       clear: vi.fn(async () => {}),
       dragAndDrop: vi.fn(async () => {}),
       locator: vi.fn(() => ({
-        boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 })),
+        boundingBox: vi.fn(async () => ({ x: 0, y: 0, width: 100, height: 30 }))
       })),
-      childFrames: vi.fn(() => []),
+      childFrames: vi.fn(() => [])
     };
 
     const origPressSeq = childFrame.pressSequentially;
@@ -916,7 +932,7 @@ describe("frame-level pressSequentially, tap patches", () => {
 
     const mainFrame = {
       ...childFrame,
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
 
     const page = buildMockPage({ mainFrameReturn: mainFrame });
@@ -932,7 +948,6 @@ describe("frame-level pressSequentially, tap patches", () => {
     expect(typeof childFrame.tap).toBe("function");
   });
 });
-
 
 // =========================================================================
 // Non-ASCII text does NOT go through CDP shift symbol path
@@ -960,7 +975,7 @@ describe("non-ASCII text avoids CDP shift path", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "Hi! Мир", cfg, mockCdp as any);
@@ -988,13 +1003,12 @@ describe("non-ASCII text avoids CDP shift path", () => {
   });
 });
 
-
 // =========================================================================
 // SLOW TESTS — require real browser (run with: vitest run --testTimeout=60000)
 // Only run when SLOW=1 env var is set
 // =========================================================================
 
-const SLOW = process.env.SLOW === '1';
+const SLOW = process.env.SLOW === "1";
 const describeIfSlow = SLOW ? describe : describe.skip;
 
 describeIfSlow("stealth browser: no evaluate leak on click", () => {
@@ -1005,7 +1019,7 @@ describeIfSlow("stealth browser: no evaluate leak on click", () => {
 
     const page = await browser.newPage();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     // Inject detection script
@@ -1013,8 +1027,10 @@ describeIfSlow("stealth browser: no evaluate leak on click", () => {
       (window as any).__evalLeaks = [];
       const origQS = document.querySelector.bind(document);
       document.querySelector = function (sel: string) {
-        try { throw new Error(); } catch (e: any) {
-          if (e.stack && e.stack.includes(':302:')) {
+        try {
+          throw new Error();
+        } catch (e: any) {
+          if (e.stack && e.stack.includes(":302:")) {
             (window as any).__evalLeaks.push(sel);
           }
         }
@@ -1022,7 +1038,7 @@ describeIfSlow("stealth browser: no evaluate leak on click", () => {
       } as any;
     });
 
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(500);
 
     const leaks = await page.evaluate(() => (window as any).__evalLeaks || []);
@@ -1040,34 +1056,38 @@ describeIfSlow("stealth browser: shift symbols isTrusted=true", () => {
 
     const page = await browser.newPage();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     await page.evaluate(() => {
       (window as any).__untrustedKeys = [];
       (window as any).__trustedKeys = [];
-      const input = document.querySelector('#searchInput');
+      const input = document.querySelector("#searchInput");
       if (input) {
-        input.addEventListener('keydown', (e) => {
-          if (!e.isTrusted) {
-            (window as any).__untrustedKeys.push((e as KeyboardEvent).key);
-          } else {
-            (window as any).__trustedKeys.push((e as KeyboardEvent).key);
-          }
-        }, true);
+        input.addEventListener(
+          "keydown",
+          (e) => {
+            if (!e.isTrusted) {
+              (window as any).__untrustedKeys.push((e as KeyboardEvent).key);
+            } else {
+              (window as any).__trustedKeys.push((e as KeyboardEvent).key);
+            }
+          },
+          true
+        );
       }
     });
 
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(300);
-    await page.keyboard.type('test!');
+    await page.keyboard.type("test!");
     await sleep(500);
 
     const untrusted = await page.evaluate(() => (window as any).__untrustedKeys || []);
     const trusted = await page.evaluate(() => (window as any).__trustedKeys || []);
 
-    expect(untrusted).not.toContain('!');
-    expect(trusted).toContain('!');
+    expect(untrusted).not.toContain("!");
+    expect(trusted).toContain("!");
 
     await browser.close();
   }, 30000);
@@ -1083,23 +1103,23 @@ describeIfSlow("stealth browser: navigation invalidation", () => {
 
     expect((page as any)._stealth).toBeDefined();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(300);
 
     // Second navigation — invalidates isolated world
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     // Should still work (isolated world auto re-created)
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(300);
-    await page.keyboard.type('after navigation');
+    await page.keyboard.type("after navigation");
     await sleep(500);
 
-    const val = await page.locator('#searchInput').inputValue();
-    expect(val).toContain('after navigation');
+    const val = await page.locator("#searchInput").inputValue();
+    expect(val).toContain("after navigation");
 
     await browser.close();
   }, 60000);
@@ -1113,10 +1133,7 @@ describeIfSlow("stealth browser: full form no evaluate leak", () => {
 
     const page = await browser.newPage();
 
-    await page.goto(
-      'https://deviceandbrowserinfo.com/are_you_a_bot_interactions',
-      { waitUntil: 'domcontentloaded' },
-    );
+    await page.goto("https://deviceandbrowserinfo.com/are_you_a_bot_interactions", { waitUntil: "domcontentloaded" });
     await sleep(3000);
 
     await page.evaluate(() => {
@@ -1125,28 +1142,34 @@ describeIfSlow("stealth browser: full form no evaluate leak", () => {
 
       const origQS = document.querySelector.bind(document);
       document.querySelector = function (sel: string) {
-        try { throw new Error(); } catch (e: any) {
-          if (e.stack && e.stack.includes(':302:')) {
+        try {
+          throw new Error();
+        } catch (e: any) {
+          if (e.stack && e.stack.includes(":302:")) {
             (window as any).__evalLeaks.push(sel);
           }
         }
         return origQS(sel);
       } as any;
 
-      document.addEventListener('keydown', (e) => {
-        if (!e.isTrusted) {
-          (window as any).__untrustedKeys.push((e as KeyboardEvent).key);
-        }
-      }, true);
+      document.addEventListener(
+        "keydown",
+        (e) => {
+          if (!e.isTrusted) {
+            (window as any).__untrustedKeys.push((e as KeyboardEvent).key);
+          }
+        },
+        true
+      );
     });
 
-    await page.click('#email');
+    await page.click("#email");
     await sleep(300);
-    await page.fill('#email', 'test@example.com');
+    await page.fill("#email", "test@example.com");
     await sleep(500);
-    await page.click('#password');
+    await page.click("#password");
     await sleep(300);
-    await page.fill('#password', 'SecurePass!@#123');
+    await page.fill("#password", "SecurePass!@#123");
     await sleep(500);
 
     const evalLeaks = await page.evaluate(() => (window as any).__evalLeaks || []);
@@ -1158,7 +1181,7 @@ describeIfSlow("stealth browser: full form no evaluate leak", () => {
     await page.click('button[type="submit"]');
     await sleep(5000);
 
-    const body = await page.locator('body').textContent();
+    const body = await page.locator("body").textContent();
     expect(body).not.toContain('"superHumanSpeed": true');
     expect(body).not.toContain('"suspiciousClientSideBehavior": true');
 

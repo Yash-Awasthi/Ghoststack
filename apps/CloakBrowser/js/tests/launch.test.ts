@@ -53,7 +53,7 @@ describe("composable Playwright launch helpers", () => {
       headless: false,
       proxy: "http://user:pass@proxy.example:8080",
       args: ["--custom-flag"],
-      launchOptions: { timeout: 1234 },
+      launchOptions: { timeout: 1234 }
     });
 
     expect(options.executablePath).toBe("/fake/chrome");
@@ -63,7 +63,7 @@ describe("composable Playwright launch helpers", () => {
     expect(options.proxy).toEqual({
       server: "http://proxy.example:8080",
       username: "user",
-      password: "pass",
+      password: "pass"
     });
     expect(options.timeout).toBe(1234);
   });
@@ -73,7 +73,7 @@ describe("composable Playwright launch helpers", () => {
     const browser = {
       contexts: () => [],
       newContext: vi.fn(async () => ({})),
-      newPage: vi.fn(async () => ({ context: () => ({}) })),
+      newPage: vi.fn(async () => ({ context: () => ({}) }))
     };
     const originalNewContext = browser.newContext;
 
@@ -87,26 +87,23 @@ describe("composable Playwright launch helpers", () => {
 
 // Integration tests require the binary — run with:
 //   CLOAKBROWSER_BINARY_PATH=/path/to/chrome npm test
-describe.skipIf(!process.env.CLOAKBROWSER_BINARY_PATH)(
-  "launch (integration)",
-  () => {
-    it("launches browser and checks stealth", async () => {
-      const { launch } = await import("../src/playwright.js");
+describe.skipIf(!process.env.CLOAKBROWSER_BINARY_PATH)("launch (integration)", () => {
+  it("launches browser and checks stealth", async () => {
+    const { launch } = await import("../src/playwright.js");
 
-      const browser = await launch({ headless: true });
-      const page = await browser.newPage();
-      await page.goto("about:blank");
+    const browser = await launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto("about:blank");
 
-      const webdriver = await page.evaluate(() => navigator.webdriver);
-      expect(webdriver).toBeFalsy();
+    const webdriver = await page.evaluate(() => navigator.webdriver);
+    expect(webdriver).toBeFalsy();
 
-      const plugins = await page.evaluate(() => navigator.plugins.length);
-      expect(plugins).toBeGreaterThan(0);
+    const plugins = await page.evaluate(() => navigator.plugins.length);
+    expect(plugins).toBeGreaterThan(0);
 
-      await browser.close();
-    }, 30_000);
-  }
-);
+    await browser.close();
+  }, 30_000);
+});
 
 // ---------------------------------------------------------------------------
 // launchContext / launchPersistentContext unit tests (mock playwright-core)
@@ -124,7 +121,7 @@ describe("launchContext (unit)", () => {
     mockContext = { close: origClose, _origClose: origClose };
     mockBrowser = {
       newContext: vi.fn().mockResolvedValue(mockContext),
-      close: vi.fn(),
+      close: vi.fn()
     };
     mockChromium = { launch: vi.fn().mockResolvedValue(mockBrowser) };
 
@@ -206,8 +203,8 @@ describe("launchContext (unit)", () => {
     await launchContext({
       contextOptions: {
         storageState: "state.json",
-        permissions: ["geolocation"],
-      },
+        permissions: ["geolocation"]
+      }
     });
 
     const ctxArgs = mockBrowser.newContext.mock.calls[0][0];
@@ -224,8 +221,8 @@ describe("launchContext (unit)", () => {
       contextOptions: {
         userAgent: "ShouldBeOverridden/9.9",
         viewport: { width: 9999, height: 9999 },
-        colorScheme: "light",
-      },
+        colorScheme: "light"
+      }
     });
 
     const ctxArgs = mockBrowser.newContext.mock.calls[0][0];
@@ -241,8 +238,8 @@ describe("launchContext (unit)", () => {
       contextOptions: {
         storageState: "state.json",
         locale: "de-DE",
-        timezoneId: "Europe/Berlin",
-      },
+        timezoneId: "Europe/Berlin"
+      }
     });
 
     const ctxArgs = mockBrowser.newContext.mock.calls[0][0];
@@ -265,7 +262,7 @@ describe("launchPersistentContext (unit)", () => {
     process.env.CLOAKBROWSER_BINARY_PATH = "/fake/chrome";
     mockContext = { close: vi.fn(), pages: vi.fn().mockReturnValue([]) };
     mockChromium = {
-      launchPersistentContext: vi.fn().mockResolvedValue(mockContext),
+      launchPersistentContext: vi.fn().mockResolvedValue(mockContext)
     };
 
     vi.doMock("playwright-core", () => ({ chromium: mockChromium }));
@@ -294,7 +291,7 @@ describe("launchPersistentContext (unit)", () => {
     await launchPersistentContext({
       userDataDir: "/tmp/profile",
       timezone: "Asia/Tokyo",
-      locale: "ja-JP",
+      locale: "ja-JP"
     });
 
     const args = mockChromium.launchPersistentContext.mock.calls[0][1];
@@ -310,7 +307,7 @@ describe("launchPersistentContext (unit)", () => {
     const { launchPersistentContext } = await import("../src/playwright.js");
     await launchPersistentContext({
       userDataDir: "/tmp/profile",
-      proxy: "http://user:pass@proxy:8080",
+      proxy: "http://user:pass@proxy:8080"
     });
 
     const args = mockChromium.launchPersistentContext.mock.calls[0][1];
@@ -324,7 +321,7 @@ describe("launchPersistentContext (unit)", () => {
     await launchPersistentContext({
       userDataDir: "/tmp/profile",
       userAgent: "Custom/1.0",
-      colorScheme: "dark",
+      colorScheme: "dark"
     });
 
     const args = mockChromium.launchPersistentContext.mock.calls[0][1];
@@ -338,8 +335,8 @@ describe("launchPersistentContext (unit)", () => {
       userDataDir: "/tmp/profile",
       contextOptions: {
         permissions: ["geolocation"],
-        extraHTTPHeaders: { "X-Custom": "1" },
-      },
+        extraHTTPHeaders: { "X-Custom": "1" }
+      }
     });
 
     const args = mockChromium.launchPersistentContext.mock.calls[0][1];
@@ -355,8 +352,8 @@ describe("launchPersistentContext (unit)", () => {
       viewport: { width: 1280, height: 720 },
       contextOptions: {
         userAgent: "ShouldBeOverridden/9.9",
-        viewport: { width: 9999, height: 9999 },
-      },
+        viewport: { width: 9999, height: 9999 }
+      }
     });
 
     const args = mockChromium.launchPersistentContext.mock.calls[0][1];
@@ -371,8 +368,8 @@ describe("launchPersistentContext (unit)", () => {
       userDataDir: "/tmp/profile",
       contextOptions: {
         locale: "de-DE",
-        timezoneId: "Europe/Berlin",
-      },
+        timezoneId: "Europe/Berlin"
+      }
     });
 
     const args = mockChromium.launchPersistentContext.mock.calls[0][1];

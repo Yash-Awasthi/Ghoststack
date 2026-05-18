@@ -1,12 +1,6 @@
 import { TextAttributes } from '@opentui/core'
 import { useKeyboard } from '@opentui/react'
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from './button'
 import {
@@ -235,7 +229,12 @@ export const FreebuffModelSelector: React.FC<FreebuffModelSelectorProps> = ({
       ),
       nameColumnWidth: maxNameLen,
     }
-  }, [availableModels, contentMaxWidth, deploymentAvailabilityLabel, showTagline])
+  }, [
+    availableModels,
+    contentMaxWidth,
+    deploymentAvailabilityLabel,
+    showTagline,
+  ])
 
   // Flattened vertical layout: every model's top offset + height within the
   // scroll content, plus the total. Mirrors the JSX below exactly so the

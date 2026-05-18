@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { pathToFileURL } from 'url';
+import { pathToFileURL } from "url";
 
 type GhResult = {
   stdout: string;
@@ -26,7 +26,7 @@ type RepoInfo = {
 };
 
 type CheckRun = {
-  bucket: 'pass' | 'fail' | 'pending' | 'skipping' | 'cancel' | string;
+  bucket: "pass" | "fail" | "pending" | "skipping" | "cancel" | string;
   completedAt?: string;
   description?: string;
   link?: string;
@@ -91,27 +91,27 @@ function runCommand(cmd: string[]): GhResult {
   try {
     const result = Bun.spawnSync({
       cmd,
-      stdout: 'pipe',
-      stderr: 'pipe',
+      stdout: "pipe",
+      stderr: "pipe"
     });
 
     return {
       stdout: new TextDecoder().decode(result.stdout).trim(),
       stderr: new TextDecoder().decode(result.stderr).trim(),
-      exitCode: result.exitCode,
+      exitCode: result.exitCode
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { stdout: '', stderr: message, exitCode: 127 };
+    return { stdout: "", stderr: message, exitCode: 127 };
   }
 }
 
 function runGh(args: string[], options: { allowExitCodes?: number[] } = {}): string {
-  const result = runCommand(['gh', ...args]);
+  const result = runCommand(["gh", ...args]);
   const allowed = new Set([0, ...(options.allowExitCodes ?? [])]);
   if (!allowed.has(result.exitCode)) {
     const detail = result.stderr || result.stdout || `exit code ${result.exitCode}`;
-    throw new Error(`gh ${args.join(' ')} failed: ${detail}`);
+    throw new Error(`gh ${args.join(" ")} failed: ${detail}`);
   }
   return result.stdout;
 }
@@ -126,17 +126,17 @@ function parseJson<T>(raw: string, label: string): T {
 }
 
 function checkPrerequisites() {
-  const git = runCommand(['git', 'rev-parse', '--is-inside-work-tree']);
-  if (git.exitCode !== 0 || git.stdout.trim() !== 'true') {
-    throw new Error('Not in a git repository. Run this from a checked-out repo.');
+  const git = runCommand(["git", "rev-parse", "--is-inside-work-tree"]);
+  if (git.exitCode !== 0 || git.stdout.trim() !== "true") {
+    throw new Error("Not in a git repository. Run this from a checked-out repo.");
   }
 
-  const ghVersion = runCommand(['gh', '--version']);
+  const ghVersion = runCommand(["gh", "--version"]);
   if (ghVersion.exitCode !== 0) {
-    throw new Error('GitHub CLI is not available. Install gh and try again.');
+    throw new Error("GitHub CLI is not available. Install gh and try again.");
   }
 
-  const auth = runCommand(['gh', 'auth', 'status']);
+  const auth = runCommand(["gh", "auth", "status"]);
   if (auth.exitCode !== 0) {
     throw new Error(`GitHub CLI is not authenticated. Run "gh auth login".\n${auth.stderr || auth.stdout}`.trim());
   }
@@ -148,74 +148,50 @@ function targetArgs(prArg?: string): string[] {
 
 function fetchPr(prArg?: string): PullRequest {
   const fields = [
-    'number',
-    'title',
-    'url',
-    'headRefOid',
-    'baseRefName',
-    'state',
-    'isDraft',
-    'mergeable',
-    'mergeStateStatus',
-    'reviewDecision',
-  ].join(',');
-  return parseJson<PullRequest>(
-    runGh(['pr', 'view', ...targetArgs(prArg), '--json', fields]),
-    'pull request',
-  );
+    "number",
+    "title",
+    "url",
+    "headRefOid",
+    "baseRefName",
+    "state",
+    "isDraft",
+    "mergeable",
+    "mergeStateStatus",
+    "reviewDecision"
+  ].join(",");
+  return parseJson<PullRequest>(runGh(["pr", "view", ...targetArgs(prArg), "--json", fields]), "pull request");
 }
 
 function fetchRepo(): RepoInfo {
-  return parseJson<RepoInfo>(
-    runGh(['repo', 'view', '--json', 'nameWithOwner']),
-    'repository',
-  );
+  return parseJson<RepoInfo>(runGh(["repo", "view", "--json", "nameWithOwner"]), "repository");
 }
 
 function fetchChecks(prArg?: string): CheckRun[] {
-  const fields = [
-    'bucket',
-    'completedAt',
-    'description',
-    'link',
-    'name',
-    'startedAt',
-    'state',
-    'workflow',
-  ].join(',');
-  const raw = runGh(
-    ['pr', 'checks', ...targetArgs(prArg), '--json', fields],
-    { allowExitCodes: [GH_PENDING_EXIT_CODE] },
-  );
-  return raw ? parseJson<CheckRun[]>(raw, 'checks') : [];
+  const fields = ["bucket", "completedAt", "description", "link", "name", "startedAt", "state", "workflow"].join(",");
+  const raw = runGh(["pr", "checks", ...targetArgs(prArg), "--json", fields], {
+    allowExitCodes: [GH_PENDING_EXIT_CODE]
+  });
+  return raw ? parseJson<CheckRun[]>(raw, "checks") : [];
 }
 
 function fetchBranchProtection(repo: RepoInfo, branch: string): BranchProtection | undefined {
-  const [owner, name] = repo.nameWithOwner.split('/');
+  const [owner, name] = repo.nameWithOwner.split("/");
   const endpoint = `repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}/branches/${encodeURIComponent(branch)}/protection`;
-  const result = runCommand(['gh', 'api', endpoint]);
+  const result = runCommand(["gh", "api", endpoint]);
   if (result.exitCode !== 0) {
     return undefined;
   }
-  return parseJson<BranchProtection>(result.stdout, 'branch protection');
+  return parseJson<BranchProtection>(result.stdout, "branch protection");
 }
 
 function fetchReviews(repo: RepoInfo, prNumber: number): Review[] {
-  const raw = runGh([
-    'api',
-    `repos/${repo.nameWithOwner}/pulls/${prNumber}/reviews`,
-    '--paginate',
-  ]);
-  return raw ? parseJson<Review[]>(raw, 'reviews') : [];
+  const raw = runGh(["api", `repos/${repo.nameWithOwner}/pulls/${prNumber}/reviews`, "--paginate"]);
+  return raw ? parseJson<Review[]>(raw, "reviews") : [];
 }
 
 function fetchReviewComments(repo: RepoInfo, prNumber: number): ReviewComment[] {
-  const raw = runGh([
-    'api',
-    `repos/${repo.nameWithOwner}/pulls/${prNumber}/comments`,
-    '--paginate',
-  ]);
-  return raw ? parseJson<ReviewComment[]>(raw, 'review comments') : [];
+  const raw = runGh(["api", `repos/${repo.nameWithOwner}/pulls/${prNumber}/comments`, "--paginate"]);
+  return raw ? parseJson<ReviewComment[]>(raw, "review comments") : [];
 }
 
 function shortSha(sha: string): string {
@@ -223,18 +199,18 @@ function shortSha(sha: string): string {
 }
 
 function formatBool(value: boolean | undefined): string {
-  return value ? 'yes' : 'no';
+  return value ? "yes" : "no";
 }
 
 function formatCheck(check: CheckRun): string {
-  const workflow = check.workflow ? `${check.workflow} / ` : '';
-  const suffix = check.state ? ` (${check.state})` : '';
+  const workflow = check.workflow ? `${check.workflow} / ` : "";
+  const suffix = check.state ? ` (${check.state})` : "";
   return `${workflow}${check.name}${suffix}`;
 }
 
 export function groupChecks(checks: CheckRun[]): Record<string, CheckRun[]> {
   return checks.reduce<Record<string, CheckRun[]>>((groups, check) => {
-    const bucket = check.bucket || 'unknown';
+    const bucket = check.bucket || "unknown";
     groups[bucket] ??= [];
     groups[bucket].push(check);
     return groups;
@@ -243,18 +219,18 @@ export function groupChecks(checks: CheckRun[]): Record<string, CheckRun[]> {
 
 function markdownToText(raw: string): string {
   return raw
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<details[\s\S]*?<\/details>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
-    .replace(/\[([^\]]+)]\([^)]*\)/g, '$1')
-    .replace(/[`*_>#|]/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<details[\s\S]*?<\/details>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+    .replace(/[`*_>#|]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 function withoutDetails(raw: string): string {
-  return raw.replace(/<details[\s\S]*?<\/details>/gi, ' ');
+  return raw.replace(/<details[\s\S]*?<\/details>/gi, " ");
 }
 
 function concise(text: string, maxLength = 140): string {
@@ -317,78 +293,77 @@ function isBot(login: string | undefined): boolean {
 
 function currentHeadReviews(reviews: Review[], headSha: string): Review[] {
   return reviews
-    .filter(review => review.commit_id === headSha)
+    .filter((review) => review.commit_id === headSha)
     .sort((a, b) => String(a.submitted_at).localeCompare(String(b.submitted_at)));
 }
 
 function botHints(reviews: Review[], comments: ReviewComment[], headSha: string): BotHint[] {
-  const currentBotReviews = reviews.filter(review => review.commit_id === headSha && isBot(review.user?.login));
+  const currentBotReviews = reviews.filter((review) => review.commit_id === headSha && isBot(review.user?.login));
   const earliestCurrentBotReview = currentBotReviews
-    .map(review => review.submitted_at ?? '')
+    .map((review) => review.submitted_at ?? "")
     .filter(Boolean)
     .sort()[0];
 
   const reviewHints: BotHint[] = reviews
-    .filter(review => review.commit_id === headSha && isBot(review.user?.login))
-    .map(review => ({
-      source: 'review',
-      author: review.user?.login ?? 'unknown',
-      when: review.submitted_at ?? '',
-      hints: extractActionableHints(review.body),
+    .filter((review) => review.commit_id === headSha && isBot(review.user?.login))
+    .map((review) => ({
+      source: "review",
+      author: review.user?.login ?? "unknown",
+      when: review.submitted_at ?? "",
+      hints: extractActionableHints(review.body)
     }))
-    .filter(item => item.hints.length > 0);
+    .filter((item) => item.hints.length > 0);
 
   const commentHints: BotHint[] = comments
-    .filter(comment => {
+    .filter((comment) => {
       if (comment.commit_id !== headSha || !isBot(comment.user?.login)) return false;
-      if (comment.body?.includes('Addressed in commit')) return false;
-      const when = comment.updated_at ?? comment.created_at ?? '';
+      if (comment.body?.includes("Addressed in commit")) return false;
+      const when = comment.updated_at ?? comment.created_at ?? "";
       return !earliestCurrentBotReview || when >= earliestCurrentBotReview;
     })
-    .map(comment => {
+    .map((comment) => {
       const line = comment.line ?? comment.original_line ?? undefined;
-      const location = comment.path ? `${comment.path}${line ? `:${line}` : ''}` : undefined;
+      const location = comment.path ? `${comment.path}${line ? `:${line}` : ""}` : undefined;
       return {
-        source: 'comment',
-        author: comment.user?.login ?? 'unknown',
-        when: comment.updated_at ?? comment.created_at ?? '',
+        source: "comment",
+        author: comment.user?.login ?? "unknown",
+        when: comment.updated_at ?? comment.created_at ?? "",
         location,
-        hints: extractActionableHints(comment.body),
+        hints: extractActionableHints(comment.body)
       };
     })
-    .filter(item => item.hints.length > 0);
+    .filter((item) => item.hints.length > 0);
 
-  return [...reviewHints, ...commentHints]
-    .sort((a, b) => b.when.localeCompare(a.when))
-    .slice(0, 8);
+  return [...reviewHints, ...commentHints].sort((a, b) => b.when.localeCompare(a.when)).slice(0, 8);
 }
 
 function summarizeRequiredChecks(protection: BranchProtection | undefined): string {
-  if (!protection) return 'unavailable';
+  if (!protection) return "unavailable";
   const contexts = protection.required_status_checks?.contexts ?? [];
-  const checks = protection.required_status_checks?.checks
-    ?.map(check => check.context)
-    .filter((context): context is string => Boolean(context)) ?? [];
+  const checks =
+    protection.required_status_checks?.checks
+      ?.map((check) => check.context)
+      .filter((context): context is string => Boolean(context)) ?? [];
   const required = Array.from(new Set([...contexts, ...checks]));
-  if (required.length === 0) return 'none';
-  const strict = protection.required_status_checks?.strict ? 'strict' : 'not strict';
-  return `${required.length} (${strict}): ${required.join(', ')}`;
+  if (required.length === 0) return "none";
+  const strict = protection.required_status_checks?.strict ? "strict" : "not strict";
+  return `${required.length} (${strict}): ${required.join(", ")}`;
 }
 
 export function summarizeProtection(protection: BranchProtection | undefined): string[] {
-  if (!protection) return ['Branch protection: unavailable or not accessible'];
+  if (!protection) return ["Branch protection: unavailable or not accessible"];
   const reviews = protection.required_pull_request_reviews;
   const approvalCount = reviews?.required_approving_review_count ?? 0;
   return [
     `Required checks: ${summarizeRequiredChecks(protection)}`,
-    `Required reviews: ${approvalCount || 'none'}${approvalCount ? ` approval${approvalCount === 1 ? '' : 's'}` : ''}`,
+    `Required reviews: ${approvalCount || "none"}${approvalCount ? ` approval${approvalCount === 1 ? "" : "s"}` : ""}`,
     `Dismiss stale reviews: ${formatBool(reviews?.dismiss_stale_reviews)}`,
     `Code owner reviews: ${formatBool(reviews?.require_code_owner_reviews)}`,
     `Last-push approval: ${formatBool(reviews?.require_last_push_approval)}`,
     `Conversation resolution: ${formatBool(protection.required_conversation_resolution?.enabled)}`,
     `Signed commits: ${formatBool(protection.required_signatures?.enabled)}`,
     `Enforce admins: ${formatBool(protection.enforce_admins?.enabled)}`,
-    `Allow force pushes: ${formatBool(protection.allow_force_pushes?.enabled)}`,
+    `Allow force pushes: ${formatBool(protection.allow_force_pushes?.enabled)}`
   ];
 }
 
@@ -408,17 +383,19 @@ function printList(items: string[], empty: string) {
 
 function printChecks(checks: CheckRun[]) {
   const groups = groupChecks(checks);
-  const order = ['fail', 'pending', 'pass', 'skipping', 'cancel'];
+  const order = ["fail", "pending", "pass", "skipping", "cancel"];
   for (const bucket of order) {
     const items = groups[bucket] ?? [];
-    console.log(`  ${bucket}: ${items.length || 'none'}`);
+    console.log(`  ${bucket}: ${items.length || "none"}`);
     for (const check of items) {
       console.log(`    - ${formatCheck(check)}`);
     }
   }
 
   const known = new Set(order);
-  for (const bucket of Object.keys(groups).filter(bucket => !known.has(bucket)).sort()) {
+  for (const bucket of Object.keys(groups)
+    .filter((bucket) => !known.has(bucket))
+    .sort()) {
     console.log(`  ${bucket}: ${groups[bucket].length}`);
     for (const check of groups[bucket]) {
       console.log(`    - ${formatCheck(check)}`);
@@ -438,7 +415,7 @@ Without a PR number, gh resolves the PR for the current branch.
 }
 
 export async function main(args = process.argv.slice(2)) {
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.includes("--help") || args.includes("-h")) {
     usage();
     return;
   }
@@ -452,7 +429,7 @@ export async function main(args = process.argv.slice(2)) {
     Promise.resolve(fetchChecks(prArg)),
     Promise.resolve(fetchBranchProtection(repo, pr.baseRefName)),
     Promise.resolve(fetchReviews(repo, pr.number)),
-    Promise.resolve(fetchReviewComments(repo, pr.number)),
+    Promise.resolve(fetchReviewComments(repo, pr.number))
   ]);
 
   const headReviews = currentHeadReviews(reviews, pr.headRefOid);
@@ -462,7 +439,9 @@ export async function main(args = process.argv.slice(2)) {
   console.log(`URL: ${pr.url}`);
   console.log(`Head: ${shortSha(pr.headRefOid)} (${pr.headRefOid})`);
   console.log(`Base: ${pr.baseRefName}`);
-  console.log(`State: ${pr.state}; draft=${formatBool(pr.isDraft)}; mergeable=${pr.mergeable}; mergeStateStatus=${pr.mergeStateStatus}; reviewDecision=${pr.reviewDecision}`);
+  console.log(
+    `State: ${pr.state}; draft=${formatBool(pr.isDraft)}; mergeable=${pr.mergeable}; mergeStateStatus=${pr.mergeStateStatus}; reviewDecision=${pr.reviewDecision}`
+  );
 
   printSection(`Checks (${checks.length} current-head)`);
   printChecks(checks);
@@ -472,23 +451,23 @@ export async function main(args = process.argv.slice(2)) {
     console.log(`  ${line}`);
   }
 
-  printSection('Current-Head Reviews');
+  printSection("Current-Head Reviews");
   printList(
-    headReviews.map(review => {
-      const author = review.user?.login ?? 'unknown';
-      const summary = concise(review.body ?? '', 80);
-      const suffix = summary ? ` - ${summary}` : '';
-      return `${review.submitted_at ?? 'unknown time'} ${author}: ${review.state}${suffix}`;
+    headReviews.map((review) => {
+      const author = review.user?.login ?? "unknown";
+      const summary = concise(review.body ?? "", 80);
+      const suffix = summary ? ` - ${summary}` : "";
+      return `${review.submitted_at ?? "unknown time"} ${author}: ${review.state}${suffix}`;
     }),
-    'none',
+    "none"
   );
 
-  printSection('Actionable Bot Hints');
+  printSection("Actionable Bot Hints");
   if (hints.length === 0) {
-    console.log('  none');
+    console.log("  none");
   } else {
     for (const hint of hints) {
-      const location = hint.location ? ` ${hint.location}` : '';
+      const location = hint.location ? ` ${hint.location}` : "";
       console.log(`  - ${hint.when} ${hint.author} ${hint.source}${location}`);
       for (const item of hint.hints) {
         console.log(`    ${item}`);
@@ -498,14 +477,14 @@ export async function main(args = process.argv.slice(2)) {
 }
 
 function isDirectRun(): boolean {
-  if (process.env.PR_BABYSIT_STATUS_NO_MAIN === '1') {
+  if (process.env.PR_BABYSIT_STATUS_NO_MAIN === "1") {
     return false;
   }
   return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
 }
 
 if (isDirectRun()) {
-  main().catch(error => {
+  main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);
     process.exit(1);

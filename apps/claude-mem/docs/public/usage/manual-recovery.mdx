@@ -32,6 +32,7 @@ bun scripts/check-pending-queue.ts
 ```
 
 This will:
+
 1. Check worker health
 2. Show queue summary (pending, processing, failed, stuck counts)
 3. Display sessions with pending work
@@ -78,6 +79,7 @@ bun scripts/check-pending-queue.ts
 ```
 
 **Example Output**:
+
 ```
 Checking worker health...
 Worker is healthy ✓
@@ -97,6 +99,7 @@ Would you like to process these pending queues? (y/n)
 ```
 
 **Features**:
+
 - ✅ Pre-flight health check (verifies worker is running)
 - ✅ Detailed queue breakdown by session
 - ✅ Age tracking for stuck detection
@@ -115,6 +118,7 @@ curl http://localhost:37777/api/pending-queue
 ```
 
 **Response**:
+
 ```json
 {
   "queue": {
@@ -140,6 +144,7 @@ curl http://localhost:37777/api/pending-queue
 ```
 
 **Key Fields**:
+
 - `totalPending` - Messages waiting to process
 - `totalProcessing` - Messages currently processing
 - `stuckCount` - Processing messages >5 minutes old
@@ -154,6 +159,7 @@ curl -X POST http://localhost:37777/api/pending-queue/process \
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -165,6 +171,7 @@ curl -X POST http://localhost:37777/api/pending-queue/process \
 ```
 
 **Response Fields**:
+
 - `totalPendingSessions` - Total sessions with pending messages in database
 - `sessionsStarted` - Sessions we started processing this request
 - `sessionsSkipped` - Sessions already processing (prevents duplicate agents)
@@ -200,6 +207,7 @@ npm run worker:logs
 ```
 
 Look for:
+
 - SDK agent starts: `Starting SDK agent for session...`
 - Processing completions: `Processed observation...`
 - Errors: `ERROR` or `Failed to process...`
@@ -247,16 +255,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. **Verify worker health**:
+
    ```bash
    curl http://localhost:37777/health
    ```
 
 2. **Check worker logs for errors**:
+
    ```bash
    npm run worker:logs | grep -i error
    ```
 
 3. **Restart worker**:
+
    ```bash
    npm run worker:restart
    ```
@@ -291,16 +302,19 @@ bun scripts/check-pending-queue.ts --process
 **Solutions**:
 
 1. **Check available memory**:
+
    ```bash
    npm run worker:status
    ```
 
 2. **Reduce session limit**:
+
    ```bash
    bun scripts/check-pending-queue.ts --process --limit 3
    ```
 
 3. **Check for SDK errors in logs**:
+
    ```bash
    npm run worker:logs | grep -i "sdk"
    ```
@@ -428,16 +442,19 @@ claude-mem stop
 If you're upgrading from v4.x to v5.x:
 
 **v4.x Behavior** (Automatic Recovery):
+
 - Worker automatically recovered stuck messages on startup
 - No user control over reprocessing timing
 
 **v5.x Behavior** (Manual Recovery):
+
 - Stuck messages detected but NOT automatically reprocessed
 - User must explicitly trigger recovery via CLI or API
 - Prevents unexpected duplicate observations
 - Provides explicit control over when processing happens
 
 **Migration Steps**:
+
 1. Upgrade to v5.x
 2. Check for stuck messages: `bun scripts/check-pending-queue.ts`
 3. Process if needed: `bun scripts/check-pending-queue.ts --process`

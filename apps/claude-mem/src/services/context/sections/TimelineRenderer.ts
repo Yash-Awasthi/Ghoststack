@@ -1,19 +1,19 @@
-
-import type {
-  ContextConfig,
-  Observation,
-  TimelineItem,
-  SummaryTimelineItem,
-} from '../types.js';
-import { formatTime, formatDate, formatDateTime, extractFirstFile, parseJsonArray } from '../../../shared/timeline-formatting.js';
-import * as Agent from '../formatters/AgentFormatter.js';
-import * as Human from '../formatters/HumanFormatter.js';
+import type { ContextConfig, Observation, TimelineItem, SummaryTimelineItem } from "../types.js";
+import {
+  formatTime,
+  formatDate,
+  formatDateTime,
+  extractFirstFile,
+  parseJsonArray
+} from "../../../shared/timeline-formatting.js";
+import * as Agent from "../formatters/AgentFormatter.js";
+import * as Human from "../formatters/HumanFormatter.js";
 
 export function groupTimelineByDay(timeline: TimelineItem[]): Map<string, TimelineItem[]> {
   const itemsByDay = new Map<string, TimelineItem[]>();
 
   for (const item of timeline) {
-    const itemDate = item.type === 'observation' ? item.data.created_at : item.data.displayTime;
+    const itemDate = item.type === "observation" ? item.data.created_at : item.data.displayTime;
     const day = formatDate(itemDate);
     if (!itemsByDay.has(day)) {
       itemsByDay.set(day, []);
@@ -31,26 +31,26 @@ export function groupTimelineByDay(timeline: TimelineItem[]): Map<string, Timeli
 }
 
 function getDetailField(obs: Observation, config: ContextConfig): string | null {
-  if (config.fullObservationField === 'narrative') {
+  if (config.fullObservationField === "narrative") {
     return obs.narrative;
   }
-  return obs.facts ? parseJsonArray(obs.facts).join('\n') : null;
+  return obs.facts ? parseJsonArray(obs.facts).join("\n") : null;
 }
 
 function renderDayTimelineAgent(
   day: string,
   dayItems: TimelineItem[],
   fullObservationIds: Set<number>,
-  config: ContextConfig,
+  config: ContextConfig
 ): string[] {
   const output: string[] = [];
 
   output.push(...Agent.renderAgentDayHeader(day));
 
-  let lastTime = '';
+  let lastTime = "";
 
   for (const item of dayItems) {
-    if (item.type === 'summary') {
+    if (item.type === "summary") {
       const summary = item.data as SummaryTimelineItem;
       const formattedTime = formatDateTime(summary.displayTime);
       output.push(...Agent.renderAgentSummaryItem(summary, formattedTime));
@@ -58,7 +58,7 @@ function renderDayTimelineAgent(
       const obs = item.data as Observation;
       const time = formatTime(obs.created_at);
       const showTime = time !== lastTime;
-      const timeDisplay = showTime ? time : '';
+      const timeDisplay = showTime ? time : "";
       lastTime = time;
 
       const shouldShowFull = fullObservationIds.has(obs.id);
@@ -80,19 +80,19 @@ function renderDayTimelineHuman(
   dayItems: TimelineItem[],
   fullObservationIds: Set<number>,
   config: ContextConfig,
-  cwd: string,
+  cwd: string
 ): string[] {
   const output: string[] = [];
 
   output.push(...Human.renderHumanDayHeader(day));
 
   let currentFile: string | null = null;
-  let lastTime = '';
+  let lastTime = "";
 
   for (const item of dayItems) {
-    if (item.type === 'summary') {
+    if (item.type === "summary") {
       currentFile = null;
-      lastTime = '';
+      lastTime = "";
 
       const summary = item.data as SummaryTimelineItem;
       const formattedTime = formatDateTime(summary.displayTime);
@@ -120,7 +120,7 @@ function renderDayTimelineHuman(
     }
   }
 
-  output.push('');
+  output.push("");
 
   return output;
 }

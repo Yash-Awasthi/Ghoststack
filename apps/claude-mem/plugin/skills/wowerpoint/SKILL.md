@@ -128,7 +128,7 @@ Replace `<subject>` with a one-phrase description from the source doc's H1 or th
 
 ## Subagent template (copy-paste, parameterize)
 
-```text
+````text
 You're handling NotebookLM slide-deck generation. Work in `<repo-absolute-path>`.
 
 Context:
@@ -173,11 +173,12 @@ Steps:
        echo "Share URL: $WOWERPOINT_VIEWER_BASE/d/$DECK_ID"
      fi
    fi
-   ```
+````
 
-   On warning, the PDF on disk is still a valid deliverable — do not retry the upload.
+On warning, the PDF on disk is still a valid deliverable — do not retry the upload.
 
 Report briefly (under 200 words):
+
 - Final artifact ID
 - Time per phase (source wait, generation, render wait, download)
 - Output file path + size
@@ -186,6 +187,7 @@ Report briefly (under 200 words):
 - Exact error message if any step failed
 
 Do NOT poll status manually. The `wait` commands handle backoff.
+
 ```
 
 ## Failure modes
@@ -203,3 +205,4 @@ Do NOT poll status manually. The `wait` commands handle backoff.
 
 - **Rerun cheaply** — once the notebook + source exist, regenerating with a different prompt only repeats generation + download. Reuse `NOTEBOOK_ID` and `SOURCE_ID`.
 - **Web UI fallback** — if generation is rate-limited >30 minutes, open the notebook URL, trigger generation in the UI, then `notebooklm artifact list -n <NOTEBOOK_ID>` and `download`.
+```

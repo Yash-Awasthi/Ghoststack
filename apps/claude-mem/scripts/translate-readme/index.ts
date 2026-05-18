@@ -6,11 +6,14 @@ import { createHash } from "crypto";
 interface TranslationCache {
   sourceHash: string;
   lastUpdated: string;
-  translations: Record<string, {
-    hash: string;
-    translatedAt: string;
-    costUsd: number;
-  }>;
+  translations: Record<
+    string,
+    {
+      hash: string;
+      translatedAt: string;
+      costUsd: number;
+    }
+  >;
 }
 
 function hashContent(content: string): string {
@@ -96,7 +99,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   pt: "Portuguese",
   sk: "Slovak",
   sl: "Slovenian",
-  "zh-tw": "Chinese (Traditional)",
+  "zh-tw": "Chinese (Traditional)"
 };
 
 function getLanguageName(code: string): string {
@@ -177,8 +180,8 @@ You translate README files while preserving Markdown formatting and technical ac
 Always output only the translated content without any surrounding explanation.`,
       permissionMode: "bypassPermissions",
       allowDangerouslySkipPermissions: true,
-      includePartialMessages: true, // Enable streaming events
-    },
+      includePartialMessages: true // Enable streaming events
+    }
   });
 
   const spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -240,9 +243,7 @@ Always output only the translated content without any surrounding explanation.`,
   return { translation: cleaned, costUsd };
 }
 
-export async function translateReadme(
-  options: TranslationOptions
-): Promise<TranslationJobResult> {
+export async function translateReadme(options: TranslationOptions): Promise<TranslationJobResult> {
   const {
     source,
     languages,
@@ -253,7 +254,7 @@ export async function translateReadme(
     maxBudgetUsd,
     verbose = false,
     force = false,
-    useExisting = false,
+    useExisting = false
   } = options;
 
   const parallel = Math.min(languages.length, 10);
@@ -285,7 +286,10 @@ export async function translateReadme(
     const outputPath = path.join(outDir, outputFilename);
 
     if (!force && isHashMatch && cache?.translations[lang]) {
-      const outputExists = await fs.access(outputPath).then(() => true).catch(() => false);
+      const outputExists = await fs
+        .access(outputPath)
+        .then(() => true)
+        .catch(() => false);
       if (outputExists) {
         if (verbose) {
           console.log(`   ✅ ${outputFilename} (cached, unchanged)`);
@@ -307,7 +311,7 @@ export async function translateReadme(
         model,
         verbose: verbose && parallel === 1, // Only show progress spinner for sequential
         useExisting,
-        existingTranslation,
+        existingTranslation
       });
 
       await fs.writeFile(outputPath, translation, "utf-8");
@@ -326,7 +330,11 @@ export async function translateReadme(
     }
   }
 
-  async function runWithConcurrency<T>(items: T[], limit: number, fn: (item: T) => Promise<TranslationResult>): Promise<TranslationResult[]> {
+  async function runWithConcurrency<T>(
+    items: T[],
+    limit: number,
+    fn: (item: T) => Promise<TranslationResult>
+  ): Promise<TranslationResult[]> {
     const results: TranslationResult[] = [];
     const executing = new Set<Promise<void>>();
 
@@ -336,7 +344,7 @@ export async function translateReadme(
           language: String(item),
           outputPath: "",
           success: false,
-          error: "Budget exceeded",
+          error: "Budget exceeded"
         });
         continue;
       }
@@ -372,12 +380,14 @@ export async function translateReadme(
     translations: {
       ...(isHashMatch ? cache?.translations : {}),
       ...Object.fromEntries(
-        results.filter(r => r.success && !r.cached).map(r => [
-          r.language,
-          { hash: sourceHash, translatedAt: new Date().toISOString(), costUsd: r.costUsd || 0 }
-        ])
-      ),
-    },
+        results
+          .filter((r) => r.success && !r.cached)
+          .map((r) => [
+            r.language,
+            { hash: sourceHash, translatedAt: new Date().toISOString(), costUsd: r.costUsd || 0 }
+          ])
+      )
+    }
   };
   await writeCache(cachePath, newCache);
 
@@ -394,7 +404,7 @@ export async function translateReadme(
     results,
     totalCostUsd,
     successful,
-    failed,
+    failed
   };
 }
 

@@ -2,9 +2,9 @@
  * cloakbrowser-human — Human-like scrolling via mouse wheel events.
  */
 
-import type { Page } from 'playwright-core';
-import { HumanConfig, rand, randRange, randIntRange, sleep } from './config.js';
-import { RawMouse, humanMove } from './mouse.js';
+import type { Page } from "playwright-core";
+import { HumanConfig, rand, randRange, randIntRange, sleep } from "./config.js";
+import { RawMouse, humanMove } from "./mouse.js";
 
 interface ElementBounds {
   x: number;
@@ -13,11 +13,7 @@ interface ElementBounds {
   height: number;
 }
 
-function isInViewport(
-  bounds: ElementBounds,
-  viewportHeight: number,
-  cfg: HumanConfig,
-): boolean {
+function isInViewport(bounds: ElementBounds, viewportHeight: number, cfg: HumanConfig): boolean {
   const topEdge = bounds.y;
   const bottomEdge = bounds.y + bounds.height;
   const zoneTop = viewportHeight * cfg.scroll_target_zone[0];
@@ -51,13 +47,13 @@ export async function humanScrollIntoView(
   getBox: () => Promise<ElementBounds | null>,
   cursorX: number,
   cursorY: number,
-  cfg: HumanConfig,
+  cfg: HumanConfig
 ): Promise<{ box: ElementBounds; cursorX: number; cursorY: number; didScroll: boolean }> {
   const viewport = page.viewportSize();
-  if (!viewport) throw new Error('Viewport size not available');
+  if (!viewport) throw new Error("Viewport size not available");
 
   let box = await getBox();
-  if (!box) throw new Error('Element not found while scrolling into view');
+  if (!box) throw new Error("Element not found while scrolling into view");
 
   if (isInViewport(box, viewport.height, cfg)) {
     return { box, cursorX, cursorY, didScroll: false };
@@ -137,7 +133,7 @@ export async function humanScrollIntoView(
   await sleep(randRange(cfg.scroll_settle_delay));
 
   box = await getBox();
-  if (!box) throw new Error('Element lost after scrolling into view');
+  if (!box) throw new Error("Element lost after scrolling into view");
 
   return { box, cursorX, cursorY, didScroll: true };
 }
@@ -158,20 +154,12 @@ export async function scrollToElement(
   cursorX: number,
   cursorY: number,
   cfg: HumanConfig,
-  timeout?: number,
+  timeout?: number
 ): Promise<{ box: ElementBounds; cursorX: number; cursorY: number; didScroll: boolean }> {
-  return humanScrollIntoView(
-    page, raw,
-    () => getElementBox(page, selector, timeout),
-    cursorX, cursorY, cfg,
-  );
+  return humanScrollIntoView(page, raw, () => getElementBox(page, selector, timeout), cursorX, cursorY, cfg);
 }
 
-async function getElementBox(
-  page: Page,
-  selector: string,
-  timeout: number = 30000,
-): Promise<ElementBounds | null> {
+async function getElementBox(page: Page, selector: string, timeout: number = 30000): Promise<ElementBounds | null> {
   const el = page.locator(selector).first();
   try {
     const box = await el.boundingBox({ timeout: Math.max(1, timeout) });

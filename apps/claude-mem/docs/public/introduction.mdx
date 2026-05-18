@@ -66,6 +66,7 @@ Restart Claude Code. Context from previous sessions will automatically appear in
 ```
 
 **Core Components:**
+
 1. **5 Lifecycle Hooks** - SessionStart, UserPromptSubmit, PostToolUse, Summary (Stop), SessionEnd
 2. **Worker Service** - Express HTTP API managed by Bun on a per-user port (default `37700 + (uid % 100)`)
 3. **SQLite Database** - Stores sessions, observations, summaries with FTS5 search

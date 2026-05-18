@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 
-import { writeFileSync } from 'fs';
-import { join } from 'path';
-import { pathToFileURL } from 'url';
-import { SettingsDefaultsManager } from '../src/shared/SettingsDefaultsManager.js';
-import { resolveDataDir } from '../src/shared/paths.js';
+import { writeFileSync } from "fs";
+import { join } from "path";
+import { pathToFileURL } from "url";
+import { SettingsDefaultsManager } from "../src/shared/SettingsDefaultsManager.js";
+import { resolveDataDir } from "../src/shared/paths.js";
 import type {
   ObservationRecord,
   SdkSessionRecord,
   SessionSummaryRecord,
   UserPromptRecord,
   ExportData
-} from './types/export.js';
+} from "./types/export.js";
 
 const WORKER_FETCH_TIMEOUT_MS = 30_000;
 
 function parseWorkerPort(rawPort: unknown): number {
-  if (typeof rawPort !== 'string' || rawPort.trim() === '') {
-    throw new Error('Invalid CLAUDE_MEM_WORKER_PORT in settings.json: missing');
+  if (typeof rawPort !== "string" || rawPort.trim() === "") {
+    throw new Error("Invalid CLAUDE_MEM_WORKER_PORT in settings.json: missing");
   }
 
   const normalized = rawPort.trim();
@@ -35,10 +35,10 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
   try {
     return await fetch(url, {
       ...init,
-      signal: controller.signal,
+      signal: controller.signal
     });
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof Error && error.name === "AbortError") {
       throw new Error(`Worker request timed out after ${WORKER_FETCH_TIMEOUT_MS}ms: ${url}`);
     }
     throw error;
@@ -48,20 +48,20 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
 }
 
 export async function exportMemories(query: string, outputFile: string, project?: string) {
-  const settings = SettingsDefaultsManager.loadFromFile(join(resolveDataDir(), 'settings.json'));
+  const settings = SettingsDefaultsManager.loadFromFile(join(resolveDataDir(), "settings.json"));
   const port = parseWorkerPort(settings.CLAUDE_MEM_WORKER_PORT);
   const baseUrl = `http://localhost:${port}`;
 
-  console.log(`🔍 Searching for: "${query}"${project ? ` (project: ${project})` : ' (all projects)'}`);
+  console.log(`🔍 Searching for: "${query}"${project ? ` (project: ${project})` : " (all projects)"}`);
 
   const params = new URLSearchParams({
     query,
-    format: 'json',
-    limit: '999999'
+    format: "json",
+    limit: "999999"
   });
-  if (project) params.set('project', project);
+  if (project) params.set("project", project);
 
-  console.log('📡 Fetching all memories via hybrid search...');
+  console.log("📡 Fetching all memories via hybrid search...");
   const searchResponse = await fetchWithTimeout(`${baseUrl}/api/search?${params.toString()}`);
   if (!searchResponse.ok) {
     throw new Error(`Failed to search: ${searchResponse.status} ${searchResponse.statusText}`);
@@ -84,19 +84,21 @@ export async function exportMemories(query: string, outputFile: string, project?
     if (s.memory_session_id) memorySessionIds.add(s.memory_session_id);
   });
 
-  console.log('📡 Fetching SDK sessions metadata...');
+  console.log("📡 Fetching SDK sessions metadata...");
   let sessions: SdkSessionRecord[] = [];
   if (memorySessionIds.size > 0) {
     const sessionsResponse = await fetchWithTimeout(`${baseUrl}/api/sdk-sessions/batch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ memorySessionIds: Array.from(memorySessionIds) })
     });
     if (sessionsResponse.ok) {
       sessions = await sessionsResponse.json();
     } else {
       const body = await sessionsResponse.text();
-      throw new Error(`Failed to fetch SDK sessions: ${sessionsResponse.status} ${sessionsResponse.statusText} ${body}`.trim());
+      throw new Error(
+        `Failed to fetch SDK sessions: ${sessionsResponse.status} ${sessionsResponse.statusText} ${body}`.trim()
+      );
     }
   }
   console.log(`✅ Found ${sessions.length} SDK sessions`);
@@ -128,7 +130,7 @@ export async function exportMemories(query: string, outputFile: string, project?
 }
 
 function isDirectRun(): boolean {
-  if (process.env.CLAUDE_MEM_EXPORT_MEMORIES_NO_MAIN === '1') {
+  if (process.env.CLAUDE_MEM_EXPORT_MEMORIES_NO_MAIN === "1") {
     return false;
   }
   return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -137,17 +139,17 @@ function isDirectRun(): boolean {
 if (isDirectRun()) {
   const args = process.argv.slice(2);
   if (args.length < 2) {
-    console.error('Usage: npx tsx scripts/export-memories.ts <query> <output-file> [--project=name]');
+    console.error("Usage: npx tsx scripts/export-memories.ts <query> <output-file> [--project=name]");
     console.error('Example: npx tsx scripts/export-memories.ts "windows" windows-memories.json --project=claude-mem');
     console.error('         npx tsx scripts/export-memories.ts "authentication" auth.json');
     process.exit(1);
   }
 
   const [query, outputFile, ...flags] = args;
-  const project = flags.find(f => f.startsWith('--project='))?.split('=')[1];
+  const project = flags.find((f) => f.startsWith("--project="))?.split("=")[1];
 
   exportMemories(query, outputFile, project).catch((error) => {
-    console.error('❌ Export failed:', error);
+    console.error("❌ Export failed:", error);
     process.exit(1);
   });
 }

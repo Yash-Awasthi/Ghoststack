@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JobsOptions } from 'bullmq';
-import type {
-  GenerateObservationsForEventJob,
-  GenerateSessionSummaryJob,
-} from '../jobs/types.js';
-import { buildServerJobId } from '../jobs/job-id.js';
-import type { PostgresAgentEvent } from '../../storage/postgres/agent-events.js';
-import type { PostgresObservationGenerationJob } from '../../storage/postgres/generation-jobs.js';
+import type { JobsOptions } from "bullmq";
+import type { GenerateObservationsForEventJob, GenerateSessionSummaryJob } from "../jobs/types.js";
+import { buildServerJobId } from "../jobs/job-id.js";
+import type { PostgresAgentEvent } from "../../storage/postgres/agent-events.js";
+import type { PostgresObservationGenerationJob } from "../../storage/postgres/generation-jobs.js";
 
 // SessionGenerationPolicy decides WHEN to enqueue work for the BullMQ event
 // and summary lanes. It is configurable via:
@@ -31,7 +28,7 @@ import type { PostgresObservationGenerationJob } from '../../storage/postgres/ge
 // state. Inputs are always reloaded by the caller from Postgres before this
 // fires.
 
-export type ServerSessionGenerationPolicy = 'per-event' | 'debounce' | 'end-of-session';
+export type ServerSessionGenerationPolicy = "per-event" | "debounce" | "end-of-session";
 
 const DEFAULT_DEBOUNCE_MS = 5000;
 
@@ -40,22 +37,20 @@ export interface SessionGenerationPolicyOptions {
   debounceWindowMs?: number;
 }
 
-export function resolveSessionGenerationPolicy(
-  options: SessionGenerationPolicyOptions = {},
-): { policy: ServerSessionGenerationPolicy; debounceWindowMs: number } {
-  const envPolicy = (process.env.CLAUDE_MEM_SERVER_SESSION_POLICY ?? '').trim().toLowerCase();
-  const policy: ServerSessionGenerationPolicy = options.policy
-    ?? (envPolicy === 'debounce' || envPolicy === 'end-of-session' || envPolicy === 'per-event'
-      ? envPolicy
-      : 'per-event');
-  const debounceWindowMs = options.debounceWindowMs
-    ?? (Number.parseInt(process.env.CLAUDE_MEM_SERVER_SESSION_DEBOUNCE_MS ?? '', 10)
-      || DEFAULT_DEBOUNCE_MS);
+export function resolveSessionGenerationPolicy(options: SessionGenerationPolicyOptions = {}): {
+  policy: ServerSessionGenerationPolicy;
+  debounceWindowMs: number;
+} {
+  const envPolicy = (process.env.CLAUDE_MEM_SERVER_SESSION_POLICY ?? "").trim().toLowerCase();
+  const policy: ServerSessionGenerationPolicy =
+    options.policy ??
+    (envPolicy === "debounce" || envPolicy === "end-of-session" || envPolicy === "per-event" ? envPolicy : "per-event");
+  const debounceWindowMs =
+    options.debounceWindowMs ??
+    (Number.parseInt(process.env.CLAUDE_MEM_SERVER_SESSION_DEBOUNCE_MS ?? "", 10) || DEFAULT_DEBOUNCE_MS);
   return {
     policy,
-    debounceWindowMs: Number.isFinite(debounceWindowMs) && debounceWindowMs > 0
-      ? debounceWindowMs
-      : DEFAULT_DEBOUNCE_MS,
+    debounceWindowMs: Number.isFinite(debounceWindowMs) && debounceWindowMs > 0 ? debounceWindowMs : DEFAULT_DEBOUNCE_MS
   };
 }
 
@@ -77,50 +72,52 @@ export interface EnqueueEventDecision {
   jobId: string;
   payload: GenerateObservationsForEventJob;
   jobsOptions?: JobsOptions;
-  reason: 'per-event' | 'debounce' | 'end-of-session-skip';
+  reason: "per-event" | "debounce" | "end-of-session-skip";
 }
 
 export function buildEnqueueEventDecision(
   input: EnqueueEventDecisionInput,
-  options: SessionGenerationPolicyOptions = {},
+  options: SessionGenerationPolicyOptions = {}
 ): EnqueueEventDecision {
   const resolved = resolveSessionGenerationPolicy(options);
-  const jobId = input.outbox.bullmqJobId ?? buildServerJobId({
-    kind: 'event',
-    team_id: input.event.teamId,
-    project_id: input.event.projectId,
-    source_type: 'agent_event',
-    source_id: input.event.id,
-  });
+  const jobId =
+    input.outbox.bullmqJobId ??
+    buildServerJobId({
+      kind: "event",
+      team_id: input.event.teamId,
+      project_id: input.event.projectId,
+      source_type: "agent_event",
+      source_id: input.event.id
+    });
   const payload: GenerateObservationsForEventJob = {
-    kind: 'event',
+    kind: "event",
     team_id: input.outbox.teamId,
     project_id: input.outbox.projectId,
-    source_type: 'agent_event',
+    source_type: "agent_event",
     source_id: input.event.id,
     generation_job_id: input.outbox.id,
     agent_event_id: input.event.id,
     api_key_id: input.apiKeyId ?? null,
     actor_id: input.actorId ?? null,
-    source_adapter: input.sourceAdapter ?? input.event.sourceAdapter ?? 'api',
-    request_id: input.requestId ?? null,
+    source_adapter: input.sourceAdapter ?? input.event.sourceAdapter ?? "api",
+    request_id: input.requestId ?? null
   };
 
-  if (resolved.policy === 'end-of-session') {
-    return { shouldEnqueue: false, jobId, payload, reason: 'end-of-session-skip' };
+  if (resolved.policy === "end-of-session") {
+    return { shouldEnqueue: false, jobId, payload, reason: "end-of-session-skip" };
   }
 
-  if (resolved.policy === 'debounce') {
+  if (resolved.policy === "debounce") {
     return {
       shouldEnqueue: true,
       jobId,
       payload,
       jobsOptions: { delay: resolved.debounceWindowMs },
-      reason: 'debounce',
+      reason: "debounce"
     };
   }
 
-  return { shouldEnqueue: true, jobId, payload, reason: 'per-event' };
+  return { shouldEnqueue: true, jobId, payload, reason: "per-event" };
 }
 
 // Minimal queue surface used by scheduleDebouncedEventJob. Declared as an
@@ -145,10 +142,10 @@ export interface DebounceableEventQueue {
  */
 export async function scheduleDebouncedEventJob(
   queue: DebounceableEventQueue,
-  decision: EnqueueEventDecision,
+  decision: EnqueueEventDecision
 ): Promise<void> {
   if (!decision.shouldEnqueue) return;
-  if (decision.reason === 'debounce') {
+  if (decision.reason === "debounce") {
     try {
       const existing = await queue.getJob(decision.jobId);
       if (existing) {
@@ -175,32 +172,28 @@ export interface BuildSummaryJobInput {
   requestId?: string | null;
 }
 
-export function buildSummaryJobId(input: {
-  serverSessionId: string;
-  teamId: string;
-  projectId: string;
-}): string {
+export function buildSummaryJobId(input: { serverSessionId: string; teamId: string; projectId: string }): string {
   return buildServerJobId({
-    kind: 'summary',
+    kind: "summary",
     team_id: input.teamId,
     project_id: input.projectId,
-    source_type: 'session_summary',
-    source_id: input.serverSessionId,
+    source_type: "session_summary",
+    source_id: input.serverSessionId
   });
 }
 
 export function buildSummaryJobPayload(input: BuildSummaryJobInput): GenerateSessionSummaryJob {
   return {
-    kind: 'summary',
+    kind: "summary",
     team_id: input.teamId,
     project_id: input.projectId,
-    source_type: 'session_summary',
+    source_type: "session_summary",
     source_id: input.serverSessionId,
     generation_job_id: input.generationJobId,
     server_session_id: input.serverSessionId,
     api_key_id: input.apiKeyId ?? null,
     actor_id: input.actorId ?? null,
-    source_adapter: input.sourceAdapter ?? 'api',
-    request_id: input.requestId ?? null,
+    source_adapter: input.sourceAdapter ?? "api",
+    request_id: input.requestId ?? null
   };
 }

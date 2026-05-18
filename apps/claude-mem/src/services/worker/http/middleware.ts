@@ -1,9 +1,8 @@
-
-import express, { Request, Response, NextFunction, RequestHandler } from 'express';
-import cors from 'cors';
-import path from 'path';
-import { getPackageRoot } from '../../../shared/paths.js';
-import { logger } from '../../../utils/logger.js';
+import express, { Request, Response, NextFunction, RequestHandler } from "express";
+import cors from "cors";
+import path from "path";
+import { getPackageRoot } from "../../../shared/paths.js";
+import { logger } from "../../../utils/logger.js";
 
 export function createMiddleware(
   summarizeRequestBody: (method: string, path: string, body: any) => string,
@@ -15,13 +14,26 @@ export function createMiddleware(
     middlewares.push(createCorsMiddleware());
   }
 
-  middlewares.push(express.json({ limit: '5mb' }));
+  middlewares.push(express.json({ limit: "5mb" }));
 
   middlewares.push((req: Request, res: Response, next: NextFunction) => {
-    const staticExtensions = ['.html', '.js', '.css', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.woff', '.woff2', '.ttf', '.eot'];
-    const isStaticAsset = staticExtensions.some(ext => req.path.endsWith(ext));
-    const isPollingEndpoint = req.path === '/api/logs'; 
-    if (req.path.startsWith('/health') || req.path === '/' || isStaticAsset || isPollingEndpoint) {
+    const staticExtensions = [
+      ".html",
+      ".js",
+      ".css",
+      ".svg",
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".webp",
+      ".woff",
+      ".woff2",
+      ".ttf",
+      ".eot"
+    ];
+    const isStaticAsset = staticExtensions.some((ext) => req.path.endsWith(ext));
+    const isPollingEndpoint = req.path === "/api/logs";
+    if (req.path.startsWith("/health") || req.path === "/" || isStaticAsset || isPollingEndpoint) {
       return next();
     }
 
@@ -29,12 +41,12 @@ export function createMiddleware(
     const requestId = `${req.method}-${Date.now()}`;
 
     const bodySummary = summarizeRequestBody(req.method, req.path, req.body);
-    logger.debug('HTTP', `→ ${req.method} ${req.path}`, { requestId }, bodySummary);
+    logger.debug("HTTP", `→ ${req.method} ${req.path}`, { requestId }, bodySummary);
 
     const originalSend = res.send.bind(res);
-    res.send = function(body: any) {
+    res.send = function (body: any) {
       const duration = Date.now() - start;
-      logger.debug('HTTP', `← ${res.statusCode} ${req.path}`, { requestId, duration: `${duration}ms` });
+      logger.debug("HTTP", `← ${res.statusCode} ${req.path}`, { requestId, duration: `${duration}ms` });
       return originalSend(body);
     };
 
@@ -42,7 +54,7 @@ export function createMiddleware(
   });
 
   const packageRoot = getPackageRoot();
-  const uiDir = path.join(packageRoot, 'plugin', 'ui');
+  const uiDir = path.join(packageRoot, "plugin", "ui");
   middlewares.push(express.static(uiDir));
 
   return middlewares;
@@ -51,37 +63,32 @@ export function createMiddleware(
 export function createCorsMiddleware(): RequestHandler {
   return cors({
     origin: (origin, callback) => {
-      if (!origin ||
-          origin.startsWith('http://localhost:') ||
-          origin.startsWith('http://127.0.0.1:')) {
+      if (!origin || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
         callback(null, true);
       } else {
-        callback(new Error('CORS not allowed'));
+        callback(new Error("CORS not allowed"));
       }
     },
-    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: false
   });
 }
 
 export function requireLocalhost(req: Request, res: Response, next: NextFunction): void {
-  const clientIp = req.ip || req.connection.remoteAddress || '';
+  const clientIp = req.ip || req.connection.remoteAddress || "";
   const isLocalhost =
-    clientIp === '127.0.0.1' ||
-    clientIp === '::1' ||
-    clientIp === '::ffff:127.0.0.1' ||
-    clientIp === 'localhost';
+    clientIp === "127.0.0.1" || clientIp === "::1" || clientIp === "::ffff:127.0.0.1" || clientIp === "localhost";
 
   if (!isLocalhost) {
-    logger.warn('SECURITY', 'Admin endpoint access denied - not localhost', {
+    logger.warn("SECURITY", "Admin endpoint access denied - not localhost", {
       endpoint: req.path,
       clientIp,
       method: req.method
     });
     res.status(403).json({
-      error: 'Forbidden',
-      message: 'Admin endpoints are only accessible from localhost'
+      error: "Forbidden",
+      message: "Admin endpoints are only accessible from localhost"
     });
     return;
   }
@@ -90,22 +97,22 @@ export function requireLocalhost(req: Request, res: Response, next: NextFunction
 }
 
 export function summarizeRequestBody(method: string, path: string, body: any): string {
-  if (!body || Object.keys(body).length === 0) return '';
+  if (!body || Object.keys(body).length === 0) return "";
 
-  if (path.includes('/init')) {
-    return '';
+  if (path.includes("/init")) {
+    return "";
   }
 
-  if (path.includes('/observations')) {
-    const toolName = body.tool_name || '?';
+  if (path.includes("/observations")) {
+    const toolName = body.tool_name || "?";
     const toolInput = body.tool_input;
     const toolSummary = logger.formatTool(toolName, toolInput);
     return `tool=${toolSummary}`;
   }
 
-  if (path.includes('/summarize')) {
-    return 'requesting summary';
+  if (path.includes("/summarize")) {
+    return "requesting summary";
   }
 
-  return '';
+  return "";
 }

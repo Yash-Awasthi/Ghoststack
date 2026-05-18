@@ -82,7 +82,7 @@ smart_unfold(file_path="services/worker-service.ts", symbol_name="shutdown")
 
 ## When to Use Standard Tools Instead
 
-Use these only when smart_* tools are the wrong fit:
+Use these only when smart\_\* tools are the wrong fit:
 
 - **Grep:** Exact string/regex search ("find all TODO comments", "where is `ensureWorkerStarted` defined?")
 - **Read:** Small files under ~100 lines, non-code files (JSON, markdown, config)
@@ -121,7 +121,7 @@ Total: ~3,076 tokens vs ~12,000 to Read the full file
 4. Read on small config/markdown/plan files             -- get non-code context
 ```
 
-Use smart_* tools for code exploration, Read for non-code files. Mix freely.
+Use smart\_\* tools for code exploration, Read for non-code files. Mix freely.
 
 **Exploration then precision:**
 
@@ -133,14 +133,14 @@ Use smart_* tools for code exploration, Read for non-code files. Mix freely.
 
 ## Token Economics
 
-| Approach | Tokens | Use Case |
-|----------|--------|----------|
-| smart_outline | ~1,000-2,000 | "What's in this file?" |
-| smart_unfold | ~400-2,100 | "Show me this function" |
-| smart_search | ~2,000-6,000 | "Find all X across the codebase" |
-| search + unfold | ~3,000-8,000 | End-to-end: find and read (the primary workflow) |
-| Read (full file) | ~12,000+ | When you truly need everything |
-| Explore agent | ~39,000-59,000 | Cross-file synthesis with narrative |
+| Approach         | Tokens         | Use Case                                         |
+| ---------------- | -------------- | ------------------------------------------------ |
+| smart_outline    | ~1,000-2,000   | "What's in this file?"                           |
+| smart_unfold     | ~400-2,100     | "Show me this function"                          |
+| smart_search     | ~2,000-6,000   | "Find all X across the codebase"                 |
+| search + unfold  | ~3,000-8,000   | End-to-end: find and read (the primary workflow) |
+| Read (full file) | ~12,000+       | When you truly need everything                   |
+| Explore agent    | ~39,000-59,000 | Cross-file synthesis with narrative              |
 
 **4-8x savings** on file understanding (outline + unfold vs Read). **11-18x savings** on codebase exploration vs Explore agent. The narrower the query, the wider the gap — a 27-line function costs 55x less to read via unfold than via an Explore agent, because the agent still reads the entire file.
 
@@ -150,18 +150,18 @@ Smart-explore uses **tree-sitter AST parsing** for structural analysis. Unsuppor
 
 ### Bundled Languages
 
-| Language | Extensions |
-|----------|-----------|
-| JavaScript | `.js`, `.mjs`, `.cjs` |
-| TypeScript | `.ts` |
-| TSX / JSX | `.tsx`, `.jsx` |
-| Python | `.py`, `.pyw` |
-| Go | `.go` |
-| Rust | `.rs` |
-| Ruby | `.rb` |
-| Java | `.java` |
-| C | `.c`, `.h` |
-| C++ | `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` |
+| Language   | Extensions                           |
+| ---------- | ------------------------------------ |
+| JavaScript | `.js`, `.mjs`, `.cjs`                |
+| TypeScript | `.ts`                                |
+| TSX / JSX  | `.tsx`, `.jsx`                       |
+| Python     | `.py`, `.pyw`                        |
+| Go         | `.go`                                |
+| Rust       | `.rs`                                |
+| Ruby       | `.rb`                                |
+| Java       | `.java`                              |
+| C          | `.c`, `.h`                           |
+| C++        | `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` |
 
 Files with unrecognized extensions are parsed as plain text — `smart_search` still works (grep-style), but `smart_outline` and `smart_unfold` will not extract structured symbols.
 

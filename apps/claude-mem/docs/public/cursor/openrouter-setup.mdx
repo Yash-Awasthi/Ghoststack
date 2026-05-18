@@ -7,9 +7,7 @@ description: "Use Claude-Mem in Cursor with OpenRouter's 100+ AI models"
 
 This guide walks you through setting up Claude-Mem in Cursor using OpenRouter. OpenRouter provides access to 100+ AI models from various providers, including several free options.
 
-<Info>
-**Model variety:** Access Claude, GPT-4, Gemini, Llama, Mistral, and many more through a single API key.
-</Info>
+<Info>**Model variety:** Access Claude, GPT-4, Gemini, Llama, Mistral, and many more through a single API key.</Info>
 
 ## Step 1: Get an OpenRouter API Key
 
@@ -20,7 +18,8 @@ This guide walks you through setting up Claude-Mem in Cursor using OpenRouter. O
 5. Copy your API key - you'll need it in Step 3
 
 <Tip>
-**Free models available:** OpenRouter offers free versions of several models including Gemini Flash and others. Check the [model list](https://openrouter.ai/models?show_free=true) for current free options.
+  **Free models available:** OpenRouter offers free versions of several models including Gemini Flash and others. Check
+  the [model list](https://openrouter.ai/models?show_free=true) for current free options.
 </Tip>
 
 ## Step 2: Clone and Build Claude-Mem
@@ -95,18 +94,18 @@ Open http://localhost:37777 to see the memory viewer.
 
 ### Free Models
 
-| Model | Provider | Notes |
-|-------|----------|-------|
-| `google/gemini-2.0-flash-exp:free` | Google | Fast, capable |
-| `xiaomi/mimo-v2-flash:free` | Xiaomi | Good general purpose |
+| Model                              | Provider | Notes                |
+| ---------------------------------- | -------- | -------------------- |
+| `google/gemini-2.0-flash-exp:free` | Google   | Fast, capable        |
+| `xiaomi/mimo-v2-flash:free`        | Xiaomi   | Good general purpose |
 
 ### Paid Models (Low Cost)
 
-| Model | Approx. Cost | Notes |
-|-------|--------------|-------|
-| `anthropic/claude-3-haiku` | ~$0.25/1M tokens | Fast, efficient |
-| `google/gemini-flash-1.5` | ~$0.075/1M tokens | Great value |
-| `mistralai/mistral-7b-instruct` | ~$0.07/1M tokens | Budget option |
+| Model                           | Approx. Cost      | Notes           |
+| ------------------------------- | ----------------- | --------------- |
+| `anthropic/claude-3-haiku`      | ~$0.25/1M tokens  | Fast, efficient |
+| `google/gemini-flash-1.5`       | ~$0.075/1M tokens | Great value     |
+| `mistralai/mistral-7b-instruct` | ~$0.07/1M tokens  | Budget option   |
 
 To specify a model, add to your settings:
 
@@ -127,7 +126,8 @@ OpenRouter charges per token. To manage costs:
 3. **Set spending limits:** Configure limits in OpenRouter settings
 
 <Warning>
-**Cost awareness:** Unlike Gemini's free tier, OpenRouter paid models charge per request. Monitor your usage if using paid models.
+  **Cost awareness:** Unlike Gemini's free tier, OpenRouter paid models charge per request. Monitor your usage if using
+  paid models.
 </Warning>
 
 ## Troubleshooting
@@ -141,6 +141,7 @@ cat ~/.claude-mem/settings.json
 ```
 
 Should output something like:
+
 ```json
 {
   "CLAUDE_MEM_PROVIDER": "openrouter",
@@ -157,6 +158,7 @@ Should output something like:
 ### Rate limits
 
 OpenRouter rate limits vary by model and your account tier. If you hit limits:
+
 1. Wait briefly and retry
 2. Consider upgrading your OpenRouter account tier
 3. Switch to a less popular model
@@ -170,6 +172,7 @@ bun run worker:logs
 ```
 
 Common issues:
+
 - Invalid API key (regenerate at OpenRouter)
 - Insufficient credits for paid models
 - Model temporarily unavailable

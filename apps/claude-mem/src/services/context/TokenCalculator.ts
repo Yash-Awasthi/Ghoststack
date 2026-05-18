@@ -1,13 +1,13 @@
-
-import type { Observation, TokenEconomics, ContextConfig } from './types.js';
-import { CHARS_PER_TOKEN_ESTIMATE } from './types.js';
-import { ModeManager } from '../domain/ModeManager.js';
+import type { Observation, TokenEconomics, ContextConfig } from "./types.js";
+import { CHARS_PER_TOKEN_ESTIMATE } from "./types.js";
+import { ModeManager } from "../domain/ModeManager.js";
 
 export function calculateObservationTokens(obs: Observation): number {
-  const obsSize = (obs.title?.length || 0) +
-                  (obs.subtitle?.length || 0) +
-                  (obs.narrative?.length || 0) +
-                  JSON.stringify(obs.facts || []).length;
+  const obsSize =
+    (obs.title?.length || 0) +
+    (obs.subtitle?.length || 0) +
+    (obs.narrative?.length || 0) +
+    JSON.stringify(obs.facts || []).length;
   return Math.ceil(obsSize / CHARS_PER_TOKEN_ESTIMATE);
 }
 
@@ -23,16 +23,14 @@ export function calculateTokenEconomics(observations: Observation[]): TokenEcono
   }, 0);
 
   const savings = totalDiscoveryTokens - totalReadTokens;
-  const savingsPercent = totalDiscoveryTokens > 0
-    ? Math.round((savings / totalDiscoveryTokens) * 100)
-    : 0;
+  const savingsPercent = totalDiscoveryTokens > 0 ? Math.round((savings / totalDiscoveryTokens) * 100) : 0;
 
   return {
     totalObservations,
     totalReadTokens,
     totalDiscoveryTokens,
     savings,
-    savingsPercent,
+    savingsPercent
   };
 }
 
@@ -47,12 +45,11 @@ export function formatObservationTokenDisplay(
   const readTokens = calculateObservationTokens(obs);
   const discoveryTokens = obs.discovery_tokens || 0;
   const workEmoji = getWorkEmoji(obs.type);
-  const discoveryDisplay = discoveryTokens > 0 ? `${workEmoji} ${discoveryTokens.toLocaleString()}` : '-';
+  const discoveryDisplay = discoveryTokens > 0 ? `${workEmoji} ${discoveryTokens.toLocaleString()}` : "-";
 
   return { readTokens, discoveryTokens, discoveryDisplay, workEmoji };
 }
 
 export function shouldShowContextEconomics(config: ContextConfig): boolean {
-  return config.showReadTokens || config.showWorkTokens ||
-         config.showSavingsAmount || config.showSavingsPercent;
+  return config.showReadTokens || config.showWorkTokens || config.showSavingsAmount || config.showSavingsPercent;
 }

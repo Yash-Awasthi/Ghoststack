@@ -1,9 +1,8 @@
-
-import type { SQLQueryBindings } from 'bun:sqlite';
-import { DatabaseManager } from './DatabaseManager.js';
-import { logger } from '../../utils/logger.js';
-import { OBSERVER_SESSIONS_PROJECT } from '../../shared/paths.js';
-import type { PaginatedResult, Observation, Summary, UserPrompt } from '../worker-types.js';
+import type { SQLQueryBindings } from "bun:sqlite";
+import { DatabaseManager } from "./DatabaseManager.js";
+import { logger } from "../../utils/logger.js";
+import { OBSERVER_SESSIONS_PROJECT } from "../../shared/paths.js";
+import type { PaginatedResult, Observation, Summary, UserPrompt } from "../worker-types.js";
 
 export class PaginationHelper {
   private dbManager: DatabaseManager;
@@ -13,7 +12,7 @@ export class PaginationHelper {
   }
 
   private stripProjectPath(filePath: string, projectName: string): string {
-    const leaf = projectName.includes('/') ? projectName.split('/').pop()! : projectName;
+    const leaf = projectName.includes("/") ? projectName.split("/").pop()! : projectName;
     const marker = `/${leaf}/`;
     const index = filePath.indexOf(marker);
 
@@ -30,14 +29,14 @@ export class PaginationHelper {
     try {
       const paths = JSON.parse(filePathsStr) as string[];
 
-      const strippedPaths = paths.map(p => this.stripProjectPath(p, projectName));
+      const strippedPaths = paths.map((p) => this.stripProjectPath(p, projectName));
 
       return JSON.stringify(strippedPaths);
     } catch (err) {
       if (err instanceof Error) {
-        logger.debug('WORKER', 'File paths is plain string, using as-is', {}, err);
+        logger.debug("WORKER", "File paths is plain string, using as-is", {}, err);
       } else {
-        logger.debug('WORKER', 'File paths is plain string, using as-is', { rawError: String(err) });
+        logger.debug("WORKER", "File paths is plain string, using as-is", { rawError: String(err) });
       }
       return filePathsStr;
     }
@@ -51,7 +50,12 @@ export class PaginationHelper {
     };
   }
 
-  getObservations(offset: number, limit: number, project?: string, platformSource?: string): PaginatedResult<Observation> {
+  getObservations(
+    offset: number,
+    limit: number,
+    project?: string,
+    platformSource?: string
+  ): PaginatedResult<Observation> {
     const db = this.dbManager.getSessionStore().db;
     let query = `
       SELECT
@@ -79,10 +83,10 @@ export class PaginationHelper {
     const conditions: string[] = [];
 
     if (project) {
-      conditions.push('(o.project = ? OR o.merged_into_project = ?)');
+      conditions.push("(o.project = ? OR o.merged_into_project = ?)");
       params.push(project, project);
     } else {
-      conditions.push('o.project != ?');
+      conditions.push("o.project != ?");
       params.push(OBSERVER_SESSIONS_PROJECT);
     }
     if (platformSource) {
@@ -90,10 +94,10 @@ export class PaginationHelper {
       params.push(platformSource);
     }
     if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(' AND ')}`;
+      query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    query += ' ORDER BY o.created_at_epoch DESC LIMIT ? OFFSET ?';
+    query += " ORDER BY o.created_at_epoch DESC LIMIT ? OFFSET ?";
     params.push(limit + 1, offset);
 
     const results = db.prepare(query).all(...params) as Observation[];
@@ -106,7 +110,7 @@ export class PaginationHelper {
 
     return {
       ...result,
-      items: result.items.map(obs => this.sanitizeObservation(obs))
+      items: result.items.map((obs) => this.sanitizeObservation(obs))
     };
   }
 
@@ -134,10 +138,10 @@ export class PaginationHelper {
     const conditions: string[] = [];
 
     if (project) {
-      conditions.push('(ss.project = ? OR ss.merged_into_project = ?)');
+      conditions.push("(ss.project = ? OR ss.merged_into_project = ?)");
       params.push(project, project);
     } else {
-      conditions.push('ss.project != ?');
+      conditions.push("ss.project != ?");
       params.push(OBSERVER_SESSIONS_PROJECT);
     }
 
@@ -147,10 +151,10 @@ export class PaginationHelper {
     }
 
     if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(' AND ')}`;
+      query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    query += ' ORDER BY ss.created_at_epoch DESC LIMIT ? OFFSET ?';
+    query += " ORDER BY ss.created_at_epoch DESC LIMIT ? OFFSET ?";
     params.push(limit + 1, offset);
 
     const stmt = db.prepare(query);
@@ -185,10 +189,10 @@ export class PaginationHelper {
     const conditions: string[] = [];
 
     if (project) {
-      conditions.push('s.project = ?');
+      conditions.push("s.project = ?");
       params.push(project);
     } else {
-      conditions.push('s.project != ?');
+      conditions.push("s.project != ?");
       params.push(OBSERVER_SESSIONS_PROJECT);
     }
 
@@ -198,10 +202,10 @@ export class PaginationHelper {
     }
 
     if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(' AND ')}`;
+      query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    query += ' ORDER BY up.created_at_epoch DESC LIMIT ? OFFSET ?';
+    query += " ORDER BY up.created_at_epoch DESC LIMIT ? OFFSET ?";
     params.push(limit + 1, offset);
 
     const stmt = db.prepare(query);
@@ -228,12 +232,12 @@ export class PaginationHelper {
     const params: any[] = [];
 
     if (project) {
-      query += ' WHERE project = ?';
+      query += " WHERE project = ?";
       params.push(project);
     }
 
-    query += ' ORDER BY created_at_epoch DESC LIMIT ? OFFSET ?';
-    params.push(limit + 1, offset); 
+    query += " ORDER BY created_at_epoch DESC LIMIT ? OFFSET ?";
+    params.push(limit + 1, offset);
 
     const stmt = db.prepare(query);
     const results = stmt.all(...params) as T[];

@@ -41,12 +41,15 @@ src/services/worker/
 ## Route Organization
 
 ### ViewerRoutes.ts
+
 - `GET /health` - Health check endpoint
 - `GET /` - Serve viewer UI (React app)
 - `GET /stream` - SSE stream for real-time updates
 
 ### SessionRoutes.ts
+
 Session lifecycle operations (use service layer directly):
+
 - `POST /sessions/init` - Initialize new session
 - `POST /sessions/:sessionId/observations` - Add tool usage observations
 - `POST /sessions/:sessionId/summarize` - Trigger session summary
@@ -58,7 +61,9 @@ Session lifecycle operations (use service layer directly):
 - `POST /sessions/claude-id/:claudeId/complete` - Complete by claude_id
 
 ### DataRoutes.ts
+
 Data retrieval operations (use service layer directly):
+
 - `GET /observations` - List observations (paginated)
 - `GET /summaries` - List session summaries (paginated)
 - `GET /prompts` - List user prompts (paginated)
@@ -71,7 +76,9 @@ Data retrieval operations (use service layer directly):
 - `POST /processing` - Set processing status
 
 ### SearchRoutes.ts
+
 All search operations (proxy to MCP server):
+
 - `GET /search` - Unified search (observations + sessions + prompts)
 - `GET /timeline` - Unified timeline context
 - `GET /decisions` - Decision-type observations
@@ -91,7 +98,9 @@ All search operations (proxy to MCP server):
 - `GET /search/help` - Search help
 
 ### SettingsRoutes.ts
+
 Settings and configuration (use service layer directly):
+
 - `GET /settings` - Get user settings
 - `POST /settings` - Update user settings
 - `GET /mcp/status` - Get MCP server status
@@ -103,17 +112,20 @@ Settings and configuration (use service layer directly):
 ## Current State (Phase 1)
 
 **Phase 1** is a pure code reorganization with ZERO functional changes:
+
 - Extract route handlers from WorkerService.ts monolith
 - Organize into logical route classes
 - Keep all existing behavior identical
 
 **MCP vs Direct DB Split** (inherited, not changed in Phase 1):
+
 - Search operations → MCP server (mem-search)
 - Session/data operations → Direct DB access via service layer
 
 ## Future Phase 2
 
 Phase 2 will unify the architecture:
+
 1. Expand MCP server to handle ALL operations (not just search)
 2. Convert all route handlers to proxy through MCP
 3. Move database logic from service layer into MCP tools
@@ -130,6 +142,7 @@ This separation allows the worker to be deployed anywhere (as a CLI tool, cloud 
 5. Follow the existing patterns for error handling and logging
 
 Example:
+
 ```typescript
 // In DataRoutes.ts
 private async handleGetFoo(req: Request, res: Response): Promise<void> {

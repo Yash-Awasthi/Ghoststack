@@ -1,4 +1,3 @@
-
 export interface TableColumnInfo {
   cid: number;
   name: string;
@@ -27,7 +26,7 @@ export interface ObservationRecord {
   memory_session_id: string;
   project: string;
   text: string | null;
-  type: 'decision' | 'bugfix' | 'feature' | 'refactor' | 'discovery' | 'change';
+  type: "decision" | "bugfix" | "feature" | "refactor" | "discovery" | "change";
   created_at: string;
   created_at_epoch: number;
   title?: string;
@@ -56,7 +55,7 @@ export interface UserPromptRecord {
   content_session_id: string;
   prompt_number: number;
   prompt_text: string;
-  project?: string;  
+  project?: string;
   platform_source?: string;
   created_at: string;
   created_at_epoch: number;
@@ -72,4 +71,3 @@ export interface LatestPromptResult {
   prompt_text: string;
   created_at_epoch: number;
 }
-

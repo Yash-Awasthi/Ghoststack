@@ -4,9 +4,7 @@ description: Use claude-mem memory search in Claude Desktop with MCP tools
 icon: desktop
 ---
 
-<Note>
-**Availability:** Claude-mem MCP tools work with Claude Desktop on macOS and Windows.
-</Note>
+<Note>**Availability:** Claude-mem MCP tools work with Claude Desktop on macOS and Windows.</Note>
 
 ## Overview
 
@@ -48,6 +46,7 @@ The skill requires the `mcp-search` MCP server. Add this to your Claude Desktop 
       }
     }
     ```
+
   </Tab>
   <Tab title="Windows">
     Edit `%APPDATA%\Claude\claude_desktop_config.json`:
@@ -64,11 +63,12 @@ The skill requires the `mcp-search` MCP server. Add this to your Claude Desktop 
       }
     }
     ```
+
   </Tab>
 </Tabs>
 
 <Warning>
-Replace `YOUR_USERNAME` with your actual username. Restart Claude Desktop after editing the configuration.
+  Replace `YOUR_USERNAME` with your actual username. Restart Claude Desktop after editing the configuration.
 </Warning>
 
 ### Step 2: Restart Claude Desktop
@@ -91,10 +91,10 @@ Once installed, the skill auto-activates when you ask about past work:
 
 The skill provides three core MCP tools following a 3-layer workflow pattern:
 
-| Tool | Description |
-|------|-------------|
-| `search` | Search memory index. Returns compact results with IDs for filtering |
-| `timeline` | Get chronological context around a query or observation ID |
+| Tool               | Description                                                                     |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `search`           | Search memory index. Returns compact results with IDs for filtering             |
+| `timeline`         | Get chronological context around a query or observation ID                      |
 | `get_observations` | Fetch full observation details by ID (use after filtering with search/timeline) |
 
 ### Token-Efficient Workflow
@@ -120,15 +120,8 @@ This 3-layer approach provides ~10x token savings compared to fetching full deta
 3. Look for errors in Claude Desktop logs
 
 <Tabs>
-  <Tab title="macOS">
-    ```bash
-    # View Claude Desktop logs
-    tail -f ~/Library/Logs/Claude/claude.log
-    ```
-  </Tab>
-  <Tab title="Windows">
-    Check `%APPDATA%\Claude\logs\`
-  </Tab>
+  <Tab title="macOS">```bash # View Claude Desktop logs tail -f ~/Library/Logs/Claude/claude.log ```</Tab>
+  <Tab title="Windows">Check `%APPDATA%\Claude\logs\`</Tab>
 </Tabs>
 
 ### Search Returns No Results

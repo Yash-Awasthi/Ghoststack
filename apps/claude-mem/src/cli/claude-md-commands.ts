@@ -1,20 +1,12 @@
-
-import { Database } from 'bun:sqlite';
-import path from 'path';
-import {
-  existsSync,
-  writeFileSync,
-  readFileSync,
-  renameSync,
-  unlinkSync,
-  readdirSync
-} from 'fs';
-import { execSync } from 'child_process';
-import { SettingsDefaultsManager } from '../shared/SettingsDefaultsManager.js';
-import { formatTime, groupByDate } from '../shared/timeline-formatting.js';
-import { isDirectChild } from '../shared/path-utils.js';
-import { logger } from '../utils/logger.js';
-import { paths } from '../shared/paths.js';
+import { Database } from "bun:sqlite";
+import path from "path";
+import { existsSync, writeFileSync, readFileSync, renameSync, unlinkSync, readdirSync } from "fs";
+import { execSync } from "child_process";
+import { SettingsDefaultsManager } from "../shared/SettingsDefaultsManager.js";
+import { formatTime, groupByDate } from "../shared/timeline-formatting.js";
+import { isDirectChild } from "../shared/path-utils.js";
+import { logger } from "../utils/logger.js";
+import { paths } from "../shared/paths.js";
 
 const DB_PATH = paths.database();
 const SETTINGS_PATH = paths.settings();
@@ -35,25 +27,23 @@ interface ObservationRow {
 }
 
 const TYPE_ICONS: Record<string, string> = {
-  'bugfix': '🔴',
-  'feature': '🟣',
-  'refactor': '🔄',
-  'change': '✅',
-  'discovery': '🔵',
-  'decision': '⚖️',
-  'session': '🎯',
-  'prompt': '💬'
+  bugfix: "🔴",
+  feature: "🟣",
+  refactor: "🔄",
+  change: "✅",
+  discovery: "🔵",
+  decision: "⚖️",
+  session: "🎯",
+  prompt: "💬"
 };
 
 function getTypeIcon(type: string): string {
-  return TYPE_ICONS[type] || '📝';
+  return TYPE_ICONS[type] || "📝";
 }
 
 function estimateTokens(obs: ObservationRow): number {
-  const size = (obs.title?.length || 0) +
-    (obs.subtitle?.length || 0) +
-    (obs.narrative?.length || 0) +
-    (obs.facts?.length || 0);
+  const size =
+    (obs.title?.length || 0) + (obs.subtitle?.length || 0) + (obs.narrative?.length || 0) + (obs.facts?.length || 0);
   return Math.ceil(size / 4);
 }
 
@@ -62,19 +52,22 @@ function getTrackedFolders(workingDir: string): Set<string> {
 
   let output: string;
   try {
-    output = execSync('git ls-files', {
+    output = execSync("git ls-files", {
       cwd: workingDir,
-      encoding: 'utf-8',
+      encoding: "utf-8",
       maxBuffer: 50 * 1024 * 1024
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.warn('CLAUDE_MD', 'git ls-files failed, falling back to directory walk', { error: errorMessage });
+    logger.warn("CLAUDE_MD", "git ls-files failed, falling back to directory walk", { error: errorMessage });
     walkDirectoriesWithIgnore(workingDir, folders);
     return folders;
   }
 
-  const files = output.trim().split('\n').filter(f => f);
+  const files = output
+    .trim()
+    .split("\n")
+    .filter((f) => f);
 
   for (const file of files) {
     const absPath = path.join(workingDir, file);
@@ -93,9 +86,21 @@ function walkDirectoriesWithIgnore(dir: string, folders: Set<string>, depth: num
   if (depth > 10) return;
 
   const ignorePatterns = [
-    'node_modules', '.git', '.next', 'dist', 'build', '.cache',
-    '__pycache__', '.venv', 'venv', '.idea', '.vscode', 'coverage',
-    '.claude-mem', '.open-next', '.turbo'
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    "build",
+    ".cache",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".idea",
+    ".vscode",
+    "coverage",
+    ".claude-mem",
+    ".open-next",
+    ".turbo"
   ];
 
   try {
@@ -103,7 +108,7 @@ function walkDirectoriesWithIgnore(dir: string, folders: Set<string>, depth: num
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       if (ignorePatterns.includes(entry.name)) continue;
-      if (entry.name.startsWith('.') && entry.name !== '.claude') continue;
+      if (entry.name.startsWith(".") && entry.name !== ".claude") continue;
 
       const fullPath = path.join(dir, entry.name);
       folders.add(fullPath);
@@ -120,10 +125,12 @@ function hasDirectChildFile(obs: ObservationRow, folderPath: string): boolean {
     try {
       const files = JSON.parse(filesJson);
       if (Array.isArray(files)) {
-        return files.some(f => isDirectChild(f, folderPath));
+        return files.some((f) => isDirectChild(f, folderPath));
       }
     } catch (error) {
-      logger.warn('CLAUDE_MD', 'Failed to parse files JSON in hasDirectChildFile', { error: error instanceof Error ? error.message : String(error) });
+      logger.warn("CLAUDE_MD", "Failed to parse files JSON in hasDirectChildFile", {
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
     return false;
   };
@@ -131,7 +138,12 @@ function hasDirectChildFile(obs: ObservationRow, folderPath: string): boolean {
   return checkFiles(obs.files_modified) || checkFiles(obs.files_read);
 }
 
-function findObservationsByFolder(db: Database, relativeFolderPath: string, project: string, limit: number): ObservationRow[] {
+function findObservationsByFolder(
+  db: Database,
+  relativeFolderPath: string,
+  project: string,
+  limit: number
+): ObservationRow[] {
   const queryLimit = limit * 3;
 
   const sql = `
@@ -143,11 +155,11 @@ function findObservationsByFolder(db: Database, relativeFolderPath: string, proj
     LIMIT ?
   `;
 
-  const normalizedFolderPath = relativeFolderPath.split(path.sep).join('/');
+  const normalizedFolderPath = relativeFolderPath.split(path.sep).join("/");
   const likePattern = `%"${normalizedFolderPath}/%`;
   const allMatches = db.prepare(sql).all(project, likePattern, likePattern, queryLimit) as ObservationRow[];
 
-  return allMatches.filter(obs => hasDirectChildFile(obs, relativeFolderPath)).slice(0, limit);
+  return allMatches.filter((obs) => hasDirectChildFile(obs, relativeFolderPath)).slice(0, limit);
 }
 
 function extractRelevantFile(obs: ObservationRow, relativeFolder: string): string {
@@ -162,7 +174,9 @@ function extractRelevantFile(obs: ObservationRow, relativeFolder: string): strin
         }
       }
     } catch (error) {
-      logger.warn('CLAUDE_MD', 'Failed to parse files_modified JSON', { error: error instanceof Error ? error.message : String(error) });
+      logger.warn("CLAUDE_MD", "Failed to parse files_modified JSON", {
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -177,30 +191,32 @@ function extractRelevantFile(obs: ObservationRow, relativeFolder: string): strin
         }
       }
     } catch (error) {
-      logger.warn('CLAUDE_MD', 'Failed to parse files_read JSON', { error: error instanceof Error ? error.message : String(error) });
+      logger.warn("CLAUDE_MD", "Failed to parse files_read JSON", {
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
-  return 'General';
+  return "General";
 }
 
 function formatObservationsForClaudeMd(observations: ObservationRow[], folderPath: string): string {
   const lines: string[] = [];
-  lines.push('# Recent Activity');
-  lines.push('');
-  lines.push('<!-- This section is auto-generated by claude-mem. Edit content outside the tags. -->');
-  lines.push('');
+  lines.push("# Recent Activity");
+  lines.push("");
+  lines.push("<!-- This section is auto-generated by claude-mem. Edit content outside the tags. -->");
+  lines.push("");
 
   if (observations.length === 0) {
-    lines.push('*No recent activity*');
-    return lines.join('\n');
+    lines.push("*No recent activity*");
+    return lines.join("\n");
   }
 
-  const byDate = groupByDate(observations, obs => obs.created_at);
+  const byDate = groupByDate(observations, (obs) => obs.created_at);
 
   for (const [day, dayObs] of byDate) {
     lines.push(`### ${day}`);
-    lines.push('');
+    lines.push("");
 
     const byFile = new Map<string, ObservationRow[]>();
     for (const obs of dayObs) {
@@ -211,48 +227,54 @@ function formatObservationsForClaudeMd(observations: ObservationRow[], folderPat
 
     for (const [file, fileObs] of byFile) {
       lines.push(`**${file}**`);
-      lines.push('| ID | Time | T | Title | Read |');
-      lines.push('|----|------|---|-------|------|');
+      lines.push("| ID | Time | T | Title | Read |");
+      lines.push("|----|------|---|-------|------|");
 
-      let lastTime = '';
+      let lastTime = "";
       for (const obs of fileObs) {
         const time = formatTime(obs.created_at_epoch);
         const timeDisplay = time === lastTime ? '"' : time;
         lastTime = time;
 
         const icon = getTypeIcon(obs.type);
-        const title = obs.title || 'Untitled';
+        const title = obs.title || "Untitled";
         const tokens = estimateTokens(obs);
 
         lines.push(`| #${obs.id} | ${timeDisplay} | ${icon} | ${title} | ~${tokens} |`);
       }
 
-      lines.push('');
+      lines.push("");
     }
   }
 
-  return lines.join('\n').trim();
+  return lines.join("\n").trim();
 }
 
 function writeClaudeMdToFolder(folderPath: string, newContent: string): void {
   const resolvedPath = path.resolve(folderPath);
 
-  if (resolvedPath.includes('/.git/') || resolvedPath.includes('\\.git\\') || resolvedPath.endsWith('/.git') || resolvedPath.endsWith('\\.git')) return;
+  if (
+    resolvedPath.includes("/.git/") ||
+    resolvedPath.includes("\\.git\\") ||
+    resolvedPath.endsWith("/.git") ||
+    resolvedPath.endsWith("\\.git")
+  )
+    return;
 
-  const claudeMdPath = path.join(folderPath, 'CLAUDE.md');
+  const claudeMdPath = path.join(folderPath, "CLAUDE.md");
   const tempFile = `${claudeMdPath}.tmp`;
 
   if (!existsSync(folderPath)) {
     throw new Error(`Folder does not exist: ${folderPath}`);
   }
 
-  let existingContent = '';
+  let existingContent = "";
   if (existsSync(claudeMdPath)) {
-    existingContent = readFileSync(claudeMdPath, 'utf-8');
+    existingContent = readFileSync(claudeMdPath, "utf-8");
   }
 
-  const startTag = '<claude-mem-context>';
-  const endTag = '</claude-mem-context>';
+  const startTag = "<claude-mem-context>";
+  const endTag = "</claude-mem-context>";
 
   let finalContent: string;
   if (!existingContent) {
@@ -262,7 +284,8 @@ function writeClaudeMdToFolder(folderPath: string, newContent: string): void {
     const endIdx = existingContent.indexOf(endTag);
 
     if (startIdx !== -1 && endIdx !== -1) {
-      finalContent = existingContent.substring(0, startIdx) +
+      finalContent =
+        existingContent.substring(0, startIdx) +
         `${startTag}\n${newContent}\n${endTag}` +
         existingContent.substring(endIdx + endTag.length);
     } else {
@@ -284,19 +307,19 @@ function regenerateFolder(
   observationLimit: number
 ): { success: boolean; observationCount: number; error?: string } {
   if (!existsSync(absoluteFolder)) {
-    return { success: false, observationCount: 0, error: 'Folder no longer exists' };
+    return { success: false, observationCount: 0, error: "Folder no longer exists" };
   }
 
   const resolvedFolder = path.resolve(absoluteFolder);
   const resolvedWorkingDir = path.resolve(workingDir);
   if (!resolvedFolder.startsWith(resolvedWorkingDir + path.sep)) {
-    return { success: false, observationCount: 0, error: 'Path escapes project root' };
+    return { success: false, observationCount: 0, error: "Path escapes project root" };
   }
 
   const observations = findObservationsByFolder(db, relativeFolder, project, observationLimit);
 
   if (observations.length === 0) {
-    return { success: false, observationCount: 0, error: 'No observations for folder' };
+    return { success: false, observationCount: 0, error: "No observations for folder" };
   }
 
   if (dryRun) {
@@ -309,7 +332,7 @@ function regenerateFolder(
     return { success: true, observationCount: observations.length };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.warn('CLAUDE_MD', 'Failed to regenerate folder', { folder: relativeFolder, error: errorMessage });
+    logger.warn("CLAUDE_MD", "Failed to regenerate folder", { folder: relativeFolder, error: errorMessage });
     return { success: false, observationCount: 0, error: errorMessage };
   }
 }
@@ -332,25 +355,17 @@ function processAllFoldersForGeneration(
   for (const absoluteFolder of foldersArray) {
     const relativeFolder = path.relative(workingDir, absoluteFolder);
 
-    const result = regenerateFolder(
-      db,
-      absoluteFolder,
-      relativeFolder,
-      project,
-      dryRun,
-      workingDir,
-      observationLimit
-    );
+    const result = regenerateFolder(db, absoluteFolder, relativeFolder, project, dryRun, workingDir, observationLimit);
 
     if (result.success) {
-      logger.debug('CLAUDE_MD', `Processed folder: ${relativeFolder}`, {
+      logger.debug("CLAUDE_MD", `Processed folder: ${relativeFolder}`, {
         observationCount: result.observationCount
       });
       successCount++;
-    } else if (result.error?.includes('No observations')) {
+    } else if (result.error?.includes("No observations")) {
       skipCount++;
     } else {
-      logger.warn('CLAUDE_MD', `Error processing folder: ${relativeFolder}`, {
+      logger.warn("CLAUDE_MD", `Error processing folder: ${relativeFolder}`, {
         error: result.error
       });
       errorCount++;
@@ -359,7 +374,7 @@ function processAllFoldersForGeneration(
 
   db.close();
 
-  logger.info('CLAUDE_MD', 'CLAUDE.md generation complete', {
+  logger.info("CLAUDE_MD", "CLAUDE.md generation complete", {
     totalFolders: foldersArray.length,
     withObservations: successCount,
     noObservations: skipCount,
@@ -375,7 +390,7 @@ export async function generateClaudeMd(dryRun: boolean): Promise<number> {
   const settings = SettingsDefaultsManager.loadFromFile(SETTINGS_PATH);
   const observationLimit = parseInt(settings.CLAUDE_MEM_CONTEXT_OBSERVATIONS, 10) || 50;
 
-  logger.info('CLAUDE_MD', 'Starting CLAUDE.md generation', {
+  logger.info("CLAUDE_MD", "Starting CLAUDE.md generation", {
     workingDir,
     dryRun,
     observationLimit
@@ -385,14 +400,14 @@ export async function generateClaudeMd(dryRun: boolean): Promise<number> {
   const trackedFolders = getTrackedFolders(workingDir);
 
   if (trackedFolders.size === 0) {
-    logger.info('CLAUDE_MD', 'No folders found in project');
+    logger.info("CLAUDE_MD", "No folders found in project");
     return 0;
   }
 
-  logger.info('CLAUDE_MD', `Found ${trackedFolders.size} folders in project`);
+  logger.info("CLAUDE_MD", `Found ${trackedFolders.size} folders in project`);
 
   if (!existsSync(DB_PATH)) {
-    logger.info('CLAUDE_MD', 'Database not found, no observations to process');
+    logger.info("CLAUDE_MD", "Database not found, no observations to process");
     return 0;
   }
 
@@ -400,18 +415,14 @@ export async function generateClaudeMd(dryRun: boolean): Promise<number> {
     return processAllFoldersForGeneration(trackedFolders, workingDir, project, dryRun, observationLimit);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('CLAUDE_MD', 'Fatal error during CLAUDE.md generation', {
+    logger.error("CLAUDE_MD", "Fatal error during CLAUDE.md generation", {
       error: errorMessage
     });
     return 1;
   }
 }
 
-function processFilesForCleanup(
-  filesToProcess: string[],
-  workingDir: string,
-  dryRun: boolean
-): number {
+function processFilesForCleanup(filesToProcess: string[], workingDir: string, dryRun: boolean): number {
   let deletedCount = 0;
   let cleanedCount = 0;
   let errorCount = 0;
@@ -421,16 +432,16 @@ function processFilesForCleanup(
 
     try {
       const result = cleanSingleFile(file, relativePath, dryRun);
-      if (result === 'deleted') deletedCount++;
+      if (result === "deleted") deletedCount++;
       else cleanedCount++;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn('CLAUDE_MD', `Error processing ${relativePath}`, { error: errorMessage });
+      logger.warn("CLAUDE_MD", `Error processing ${relativePath}`, { error: errorMessage });
       errorCount++;
     }
   }
 
-  logger.info('CLAUDE_MD', 'CLAUDE.md cleanup complete', {
+  logger.info("CLAUDE_MD", "CLAUDE.md cleanup complete", {
     deleted: deletedCount,
     cleaned: cleanedCount,
     errors: errorCount,
@@ -440,29 +451,29 @@ function processFilesForCleanup(
   return 0;
 }
 
-function cleanSingleFile(file: string, relativePath: string, dryRun: boolean): 'deleted' | 'cleaned' {
-  const content = readFileSync(file, 'utf-8');
-  const stripped = content.replace(/<claude-mem-context>[\s\S]*?<\/claude-mem-context>/g, '').trim();
+function cleanSingleFile(file: string, relativePath: string, dryRun: boolean): "deleted" | "cleaned" {
+  const content = readFileSync(file, "utf-8");
+  const stripped = content.replace(/<claude-mem-context>[\s\S]*?<\/claude-mem-context>/g, "").trim();
 
-  if (stripped === '') {
+  if (stripped === "") {
     if (!dryRun) {
       unlinkSync(file);
     }
-    logger.debug('CLAUDE_MD', `${dryRun ? '[DRY-RUN] Would delete' : 'Deleted'} (empty): ${relativePath}`);
-    return 'deleted';
+    logger.debug("CLAUDE_MD", `${dryRun ? "[DRY-RUN] Would delete" : "Deleted"} (empty): ${relativePath}`);
+    return "deleted";
   } else {
     if (!dryRun) {
       writeFileSync(file, stripped);
     }
-    logger.debug('CLAUDE_MD', `${dryRun ? '[DRY-RUN] Would clean' : 'Cleaned'}: ${relativePath}`);
-    return 'cleaned';
+    logger.debug("CLAUDE_MD", `${dryRun ? "[DRY-RUN] Would clean" : "Cleaned"}: ${relativePath}`);
+    return "cleaned";
   }
 }
 
 export async function cleanClaudeMd(dryRun: boolean): Promise<number> {
   const workingDir = process.cwd();
 
-  logger.info('CLAUDE_MD', 'Starting CLAUDE.md cleanup', {
+  logger.info("CLAUDE_MD", "Starting CLAUDE.md cleanup", {
     workingDir,
     dryRun
   });
@@ -471,9 +482,21 @@ export async function cleanClaudeMd(dryRun: boolean): Promise<number> {
 
   function walkForClaudeMd(dir: string): void {
     const ignorePatterns = [
-      'node_modules', '.git', '.next', 'dist', 'build', '.cache',
-      '__pycache__', '.venv', 'venv', '.idea', '.vscode', 'coverage',
-      '.claude-mem', '.open-next', '.turbo'
+      "node_modules",
+      ".git",
+      ".next",
+      "dist",
+      "build",
+      ".cache",
+      "__pycache__",
+      ".venv",
+      "venv",
+      ".idea",
+      ".vscode",
+      "coverage",
+      ".claude-mem",
+      ".open-next",
+      ".turbo"
     ];
 
     try {
@@ -485,10 +508,10 @@ export async function cleanClaudeMd(dryRun: boolean): Promise<number> {
           if (!ignorePatterns.includes(entry.name)) {
             walkForClaudeMd(fullPath);
           }
-        } else if (entry.name === 'CLAUDE.md') {
+        } else if (entry.name === "CLAUDE.md") {
           try {
-            const content = readFileSync(fullPath, 'utf-8');
-            if (content.includes('<claude-mem-context>')) {
+            const content = readFileSync(fullPath, "utf-8");
+            if (content.includes("<claude-mem-context>")) {
               filesToProcess.push(fullPath);
             }
           } catch {
@@ -504,17 +527,17 @@ export async function cleanClaudeMd(dryRun: boolean): Promise<number> {
   walkForClaudeMd(workingDir);
 
   if (filesToProcess.length === 0) {
-    logger.info('CLAUDE_MD', 'No CLAUDE.md files with auto-generated content found');
+    logger.info("CLAUDE_MD", "No CLAUDE.md files with auto-generated content found");
     return 0;
   }
 
-  logger.info('CLAUDE_MD', `Found ${filesToProcess.length} CLAUDE.md files with auto-generated content`);
+  logger.info("CLAUDE_MD", `Found ${filesToProcess.length} CLAUDE.md files with auto-generated content`);
 
   try {
     return processFilesForCleanup(filesToProcess, workingDir, dryRun);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error('CLAUDE_MD', 'Fatal error during CLAUDE.md cleanup', {
+    logger.error("CLAUDE_MD", "Fatal error during CLAUDE.md cleanup", {
       error: errorMessage
     });
     return 1;

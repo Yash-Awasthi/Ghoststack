@@ -154,9 +154,7 @@ describe('error-handling', () => {
     })
 
     test('returns null for string statusCode', () => {
-      expect(getFreebuffRateLimitErrorMessage({ statusCode: '429' })).toBe(
-        null,
-      )
+      expect(getFreebuffRateLimitErrorMessage({ statusCode: '429' })).toBe(null)
     })
 
     test('preserves normalized free mode quota messages', () => {

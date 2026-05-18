@@ -10,9 +10,9 @@ import {
   type QueueEventsOptions,
   type QueueOptions,
   type WorkerOptions
-} from 'bullmq';
-import { logger } from '../../utils/logger.js';
-import type { RedisQueueConfig } from '../queue/redis-config.js';
+} from "bullmq";
+import { logger } from "../../utils/logger.js";
+import type { RedisQueueConfig } from "../queue/redis-config.js";
 
 // BullMQ Worker docs: https://docs.bullmq.io/guide/workers
 // BullMQ Concurrency:  https://docs.bullmq.io/guide/workers/concurrency
@@ -58,15 +58,15 @@ export interface ServerJobQueueOptions<TPayload> {
   lockDurationMs?: number;
   defaultJobOptions?: JobsOptions;
   // Test seams: allow injecting fakes without touching Redis.
-  queueFactory?: (name: string, options: QueueOptions) => Pick<
-    Queue<TPayload>,
-    'add' | 'getJob' | 'getJobCounts' | 'remove' | 'close'
-  >;
+  queueFactory?: (
+    name: string,
+    options: QueueOptions
+  ) => Pick<Queue<TPayload>, "add" | "getJob" | "getJobCounts" | "remove" | "close">;
   workerFactory?: (
     name: string,
     processor: Processor<TPayload> | null,
     options: WorkerOptions
-  ) => Pick<Worker<TPayload>, 'on' | 'run' | 'close'>;
+  ) => Pick<Worker<TPayload>, "on" | "run" | "close">;
 }
 
 const DEFAULT_LOCK_DURATION_MS = 5 * 60 * 1000;
@@ -77,10 +77,12 @@ export class ServerJobQueue<TPayload extends object = object> {
   private readonly concurrency: number;
   private readonly lockDurationMs: number;
   private readonly defaultJobOptions: JobsOptions;
-  private readonly queueFactory?: ServerJobQueueOptions<TPayload>['queueFactory'];
-  private readonly workerFactory?: ServerJobQueueOptions<TPayload>['workerFactory'];
-  private queue: ReturnType<NonNullable<ServerJobQueueOptions<TPayload>['queueFactory']>> | Queue<TPayload> | null = null;
-  private worker: ReturnType<NonNullable<ServerJobQueueOptions<TPayload>['workerFactory']>> | Worker<TPayload> | null = null;
+  private readonly queueFactory?: ServerJobQueueOptions<TPayload>["queueFactory"];
+  private readonly workerFactory?: ServerJobQueueOptions<TPayload>["workerFactory"];
+  private queue: ReturnType<NonNullable<ServerJobQueueOptions<TPayload>["queueFactory"]>> | Queue<TPayload> | null =
+    null;
+  private worker: ReturnType<NonNullable<ServerJobQueueOptions<TPayload>["workerFactory"]>> | Worker<TPayload> | null =
+    null;
   private queueEvents: QueueEvents | null = null;
   private started = false;
   private readonly counters: ServerJobLifecycleCounters = { stalled: 0, errored: 0 };
@@ -101,7 +103,7 @@ export class ServerJobQueue<TPayload extends object = object> {
     this.lockDurationMs = options.lockDurationMs ?? DEFAULT_LOCK_DURATION_MS;
     this.defaultJobOptions = options.defaultJobOptions ?? {
       attempts: 3,
-      backoff: { type: 'exponential', delay: 5000 },
+      backoff: { type: "exponential", delay: 5000 },
       removeOnComplete: { age: 7 * 24 * 60 * 60, count: 1000 },
       removeOnFail: { age: 30 * 24 * 60 * 60, count: 1000 }
     };
@@ -125,19 +127,19 @@ export class ServerJobQueue<TPayload extends object = object> {
   }
 
   async add(jobId: string, payload: TPayload, options?: JobsOptions): Promise<void> {
-    if (jobId.includes(':')) {
+    if (jobId.includes(":")) {
       throw new Error(`server job ID must not contain ':' (got ${jobId})`);
     }
     try {
-      await (this.getQueue().add as (
-        name: string,
-        data: TPayload,
-        opts?: JobsOptions
-      ) => Promise<unknown>)(this.name, payload, {
-        ...this.defaultJobOptions,
-        ...options,
-        jobId
-      });
+      await (this.getQueue().add as (name: string, data: TPayload, opts?: JobsOptions) => Promise<unknown>)(
+        this.name,
+        payload,
+        {
+          ...this.defaultJobOptions,
+          ...options,
+          jobId
+        }
+      );
     } catch (error) {
       throw this.toRedisUnavailableError(error);
     }
@@ -161,13 +163,7 @@ export class ServerJobQueue<TPayload extends object = object> {
 
   async getCounts(): Promise<ServerJobCounts> {
     try {
-      const counts = await this.getQueue().getJobCounts(
-        'waiting',
-        'active',
-        'delayed',
-        'failed',
-        'completed'
-      );
+      const counts = await this.getQueue().getJobCounts("waiting", "active", "delayed", "failed", "completed");
       return {
         waiting: counts.waiting ?? 0,
         active: counts.active ?? 0,
@@ -190,43 +186,51 @@ export class ServerJobQueue<TPayload extends object = object> {
   // worker.on('stalled') listener; QueueEvents publishes from Redis.
   // Deduped stalled handler. Counts the stall once even though BullMQ may
   // surface it via both worker.on('stalled') and QueueEvents 'stalled'.
-  private notifyStalled(jobId: string, source: 'worker' | 'queue-events'): void {
+  private notifyStalled(jobId: string, source: "worker" | "queue-events"): void {
     if (this.recentlyStalled.has(jobId)) {
-      logger.debug?.('QUEUE', `[generation] job=${jobId} stalled (suppressed duplicate from ${source})`, {
+      logger.debug?.("QUEUE", `[generation] job=${jobId} stalled (suppressed duplicate from ${source})`, {
         queue: this.name,
         jobId,
-        source,
+        source
       });
       return;
     }
     const timer = setTimeout(() => {
       this.recentlyStalled.delete(jobId);
     }, ServerJobQueue.STALLED_DEDUPE_WINDOW_MS);
-    if (typeof (timer as { unref?: () => void }).unref === 'function') {
+    if (typeof (timer as { unref?: () => void }).unref === "function") {
       (timer as { unref: () => void }).unref();
     }
     this.recentlyStalled.set(jobId, timer);
     this.counters.stalled += 1;
-    logger.warn('QUEUE', `[generation] job=${jobId} stalled${source === 'queue-events' ? ' (queue-events)' : ''}`, {
+    logger.warn("QUEUE", `[generation] job=${jobId} stalled${source === "queue-events" ? " (queue-events)" : ""}`, {
       queue: this.name,
       jobId,
-      source,
+      source
     });
     for (const l of this.listeners) {
-      try { l.onStalled?.(jobId); } catch { /* listener errors must not propagate */ }
+      try {
+        l.onStalled?.(jobId);
+      } catch {
+        /* listener errors must not propagate */
+      }
     }
   }
 
   // Single source of truth for queue-side error accounting. worker errors and
   // QueueEvents errors both increment counters.errored and notify listeners,
   // so per-process metrics aren't asymmetric across the two sources.
-  private notifyQueueError(error: unknown, source: 'worker' | 'queue-events'): void {
+  private notifyQueueError(error: unknown, source: "worker" | "queue-events"): void {
     this.counters.errored += 1;
-    logger.warn('QUEUE', `${this.name} ${source} error`, {
-      error: error instanceof Error ? error.message : String(error),
+    logger.warn("QUEUE", `${this.name} ${source} error`, {
+      error: error instanceof Error ? error.message : String(error)
     });
     for (const l of this.listeners) {
-      try { l.onError?.(error); } catch { /* listener errors must not propagate */ }
+      try {
+        l.onError?.(error);
+      } catch {
+        /* listener errors must not propagate */
+      }
     }
   }
 
@@ -244,53 +248,65 @@ export class ServerJobQueue<TPayload extends object = object> {
     const worker = this.workerFactory
       ? this.workerFactory(this.name, processor, workerOptions)
       : new Worker<TPayload>(this.name, processor, workerOptions);
-    worker.on('error', (error: unknown) => this.notifyQueueError(error, 'worker'));
+    worker.on("error", (error: unknown) => this.notifyQueueError(error, "worker"));
     // BullMQ Worker exposes `active`, `completed`, `failed`, `progress`, and
     // `stalled` events. We attach to all five because the runtime relies on
     // them for observability (Phase 12).
-    if (typeof (worker as { on?: unknown }).on === 'function') {
+    if (typeof (worker as { on?: unknown }).on === "function") {
       const w = worker as Worker<TPayload>;
-      w.on('active', (job: Job<TPayload>) => {
+      w.on("active", (job: Job<TPayload>) => {
         if (job.id) this.jobStartTimes.set(job.id, Date.now());
       });
-      w.on('completed', (job: Job<TPayload>, returnvalue: unknown) => {
+      w.on("completed", (job: Job<TPayload>, returnvalue: unknown) => {
         const startedAt = job.id ? this.jobStartTimes.get(job.id) : undefined;
         const durationMs = startedAt ? Date.now() - startedAt : 0;
         if (job.id) this.jobStartTimes.delete(job.id);
-        const sourceType = (job.data as { source_type?: string } | undefined)?.source_type ?? '?';
-        logger.info('QUEUE', `[generation] job=${job.id ?? '?'} source_type=${sourceType} duration=${durationMs}ms`, {
+        const sourceType = (job.data as { source_type?: string } | undefined)?.source_type ?? "?";
+        logger.info("QUEUE", `[generation] job=${job.id ?? "?"} source_type=${sourceType} duration=${durationMs}ms`, {
           queue: this.name,
           jobId: job.id ?? null,
           sourceType,
-          durationMs,
+          durationMs
         });
         for (const l of this.listeners) {
-          try { l.onCompleted?.(job.id ?? '?', durationMs, returnvalue); } catch { /* swallow listener errors only */ }
+          try {
+            l.onCompleted?.(job.id ?? "?", durationMs, returnvalue);
+          } catch {
+            /* swallow listener errors only */
+          }
         }
       });
-      w.on('failed', (job: Job<TPayload> | undefined, error: Error) => {
+      w.on("failed", (job: Job<TPayload> | undefined, error: Error) => {
         if (job?.id) this.jobStartTimes.delete(job.id);
-        const sourceType = (job?.data as { source_type?: string } | undefined)?.source_type ?? '?';
+        const sourceType = (job?.data as { source_type?: string } | undefined)?.source_type ?? "?";
         const attemptsMade = job?.attemptsMade ?? 0;
-        logger.warn('QUEUE', `[generation] job=${job?.id ?? '?'} source_type=${sourceType} attempts=${attemptsMade} reason=${error.message}`, {
-          queue: this.name,
-          jobId: job?.id ?? null,
-          sourceType,
-          attemptsMade,
-          reason: error.message,
-        });
+        logger.warn(
+          "QUEUE",
+          `[generation] job=${job?.id ?? "?"} source_type=${sourceType} attempts=${attemptsMade} reason=${error.message}`,
+          {
+            queue: this.name,
+            jobId: job?.id ?? null,
+            sourceType,
+            attemptsMade,
+            reason: error.message
+          }
+        );
         for (const l of this.listeners) {
-          try { l.onFailed?.(job?.id, attemptsMade, error.message); } catch { /* swallow */ }
+          try {
+            l.onFailed?.(job?.id, attemptsMade, error.message);
+          } catch {
+            /* swallow */
+          }
         }
       });
-      w.on('progress', (job: Job<TPayload>, progress: unknown) => {
-        logger.debug?.('QUEUE', `[generation] job=${job.id ?? '?'} progress`, {
+      w.on("progress", (job: Job<TPayload>, progress: unknown) => {
+        logger.debug?.("QUEUE", `[generation] job=${job.id ?? "?"} progress`, {
           queue: this.name,
           jobId: job.id ?? null,
-          progress,
+          progress
         });
       });
-      w.on('stalled', (jobId: string) => this.notifyStalled(jobId, 'worker'));
+      w.on("stalled", (jobId: string) => this.notifyStalled(jobId, "worker"));
     }
     worker.run();
     this.worker = worker;
@@ -303,16 +319,16 @@ export class ServerJobQueue<TPayload extends object = object> {
       try {
         const events = new QueueEvents(this.name, {
           connection: this.config.connection,
-          prefix: this.config.prefix,
+          prefix: this.config.prefix
         } as QueueEventsOptions);
-        events.on('stalled', ({ jobId }: { jobId: string }) => this.notifyStalled(jobId, 'queue-events'));
+        events.on("stalled", ({ jobId }: { jobId: string }) => this.notifyStalled(jobId, "queue-events"));
         // QueueEvents emits its own 'error' too — surface through the same
         // counter+listener path as worker errors so observability stays symmetric.
-        events.on('error', (error: Error) => this.notifyQueueError(error, 'queue-events'));
+        events.on("error", (error: Error) => this.notifyQueueError(error, "queue-events"));
         this.queueEvents = events;
       } catch (error) {
-        logger.warn('QUEUE', `${this.name} failed to start QueueEvents listener`, {
-          error: error instanceof Error ? error.message : String(error),
+        logger.warn("QUEUE", `${this.name} failed to start QueueEvents listener`, {
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }

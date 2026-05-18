@@ -1,6 +1,5 @@
-
-import type { SearchResults, StrategySearchOptions, StrategySearchResult } from '../types.js';
-import { logger } from '../../../../utils/logger.js';
+import type { SearchResults, StrategySearchOptions, StrategySearchResult } from "../types.js";
+import { logger } from "../../../../utils/logger.js";
 
 export interface SearchStrategy {
   search(options: StrategySearchOptions): Promise<StrategySearchResult>;
@@ -16,14 +15,14 @@ export abstract class BaseSearchStrategy implements SearchStrategy {
   abstract search(options: StrategySearchOptions): Promise<StrategySearchResult>;
   abstract canHandle(options: StrategySearchOptions): boolean;
 
-  protected emptyResult(strategy: 'chroma' | 'sqlite' | 'hybrid'): StrategySearchResult {
+  protected emptyResult(strategy: "chroma" | "sqlite" | "hybrid"): StrategySearchResult {
     return {
       results: {
         observations: [],
         sessions: [],
         prompts: []
       },
-      usedChroma: strategy === 'chroma' || strategy === 'hybrid',
+      usedChroma: strategy === "chroma" || strategy === "hybrid",
       strategy
     };
   }

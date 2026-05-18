@@ -1,5 +1,10 @@
-
-import type { ObservationSearchResult, SessionSummarySearchResult, UserPromptSearchResult, SearchOptions, DateRange } from '../../sqlite/types.js';
+import type {
+  ObservationSearchResult,
+  SessionSummarySearchResult,
+  UserPromptSearchResult,
+  SearchOptions,
+  DateRange
+} from "../../sqlite/types.js";
 
 export type { ObservationSearchResult, SessionSummarySearchResult, UserPromptSearchResult, SearchOptions, DateRange };
 
@@ -10,7 +15,7 @@ export const SEARCH_CONSTANTS = {
   CHROMA_BATCH_SIZE: 100
 } as const;
 
-export type ChromaDocType = 'observation' | 'session_summary' | 'user_prompt';
+export type ChromaDocType = "observation" | "session_summary" | "user_prompt";
 
 export interface ChromaQueryResult {
   ids: number[];
@@ -43,14 +48,14 @@ export interface SearchResults {
 }
 
 export interface ExtendedSearchOptions extends SearchOptions {
-  searchType?: 'observations' | 'sessions' | 'prompts' | 'all';
+  searchType?: "observations" | "sessions" | "prompts" | "all";
   obsType?: string | string[];
   concepts?: string | string[];
   files?: string | string[];
-  format?: 'text' | 'json';
+  format?: "text" | "json";
 }
 
-export type SearchStrategyHint = 'chroma' | 'sqlite' | 'hybrid' | 'auto';
+export type SearchStrategyHint = "chroma" | "sqlite" | "hybrid" | "auto";
 
 export interface StrategySearchOptions extends ExtendedSearchOptions {
   query?: string;
@@ -64,7 +69,7 @@ export interface StrategySearchResult {
 }
 
 export interface CombinedResult {
-  type: 'observation' | 'session' | 'prompt';
+  type: "observation" | "session" | "prompt";
   data: SearchResult;
   epoch: number;
   created_at: string;

@@ -46,18 +46,10 @@
           "fields": {
             "toolId": "payload.call_id",
             "toolName": {
-              "coalesce": [
-                "payload.name",
-                "payload.type"
-              ]
+              "coalesce": ["payload.name", "payload.type"]
             },
             "toolInput": {
-              "coalesce": [
-                "payload.arguments",
-                "payload.input",
-                "payload.command",
-                "payload.action"
-              ]
+              "coalesce": ["payload.arguments", "payload.input", "payload.command", "payload.action"]
             }
           }
         },
@@ -69,18 +61,10 @@
             "toolUseId": "payload.call_id",
             "toolName": { "value": "exec_command" },
             "toolInput": {
-              "coalesce": [
-                "payload.command",
-                "payload.input"
-              ]
+              "coalesce": ["payload.command", "payload.input"]
             },
             "toolResponse": {
-              "coalesce": [
-                "payload.aggregated_output",
-                "payload.output",
-                "payload.stdout",
-                "payload.stderr"
-              ]
+              "coalesce": ["payload.aggregated_output", "payload.output", "payload.stdout", "payload.stderr"]
             }
           }
         },

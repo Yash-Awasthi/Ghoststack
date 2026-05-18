@@ -231,7 +231,11 @@ What to implement:
 ```ts
 export interface ObservationQueueEngine {
   enqueue(sessionDbId: number, contentSessionId: string, message: PendingMessage): Promise<EnqueueResult>;
-  createIterator(sessionDbId: number, signal: AbortSignal, onIdleTimeout?: () => void): AsyncIterableIterator<PendingMessageWithId>;
+  createIterator(
+    sessionDbId: number,
+    signal: AbortSignal,
+    onIdleTimeout?: () => void
+  ): AsyncIterableIterator<PendingMessageWithId>;
   clearPendingForSession(sessionDbId: number): Promise<number>;
   resetProcessingToPending(sessionDbId: number): Promise<number>;
   getPendingCount(sessionDbId: number): Promise<number>;

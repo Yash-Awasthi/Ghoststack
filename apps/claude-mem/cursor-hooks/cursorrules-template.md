@@ -9,6 +9,7 @@ The `context-inject.sh` hook **automatically creates and updates** a rules file 
 ```
 
 This file:
+
 - Has `alwaysApply: true` so it's included in every chat session
 - Contains recent context from past sessions
 - Auto-refreshes on every prompt submission
@@ -34,19 +35,25 @@ You have access to claude-mem, a persistent memory system. In addition to the au
 ## Available MCP Tools
 
 1. **search** - Find relevant past observations
-   ```
-   search(query="authentication bug", project="my-project", limit=10)
-   ```
+```
+
+search(query="authentication bug", project="my-project", limit=10)
+
+```
 
 2. **timeline** - Get context around a specific observation
-   ```
-   timeline(anchor=<observation_id>, depth_before=3, depth_after=3)
-   ```
+```
+
+timeline(anchor=<observation_id>, depth_before=3, depth_after=3)
+
+```
 
 3. **get_observations** - Fetch full details for specific IDs
-   ```
-   get_observations(ids=[123, 456])
-   ```
+```
+
+get_observations(ids=[123, 456])
+
+```
 
 ## When to Search Memory
 
@@ -67,10 +74,10 @@ Never fetch full details without filtering first.
 
 ## File Locations
 
-| File | Purpose | Created By |
-|------|---------|------------|
-| `.cursor/rules/claude-mem-context.mdc` | Auto-injected context | Hook (automatic) |
-| `.cursor/rules/claude-mem-instructions.mdc` | MCP tool instructions | You (optional) |
+| File                                        | Purpose               | Created By       |
+| ------------------------------------------- | --------------------- | ---------------- |
+| `.cursor/rules/claude-mem-context.mdc`      | Auto-injected context | Hook (automatic) |
+| `.cursor/rules/claude-mem-instructions.mdc` | MCP tool instructions | You (optional)   |
 
 ## Git Ignore
 

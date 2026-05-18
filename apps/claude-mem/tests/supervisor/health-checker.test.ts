@@ -1,25 +1,25 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test';
-import { startHealthChecker, stopHealthChecker } from '../../src/supervisor/health-checker.js';
+import { afterEach, describe, expect, it, mock } from "bun:test";
+import { startHealthChecker, stopHealthChecker } from "../../src/supervisor/health-checker.js";
 
-describe('health-checker', () => {
+describe("health-checker", () => {
   afterEach(() => {
     stopHealthChecker();
   });
 
-  it('startHealthChecker sets up an interval without throwing', () => {
+  it("startHealthChecker sets up an interval without throwing", () => {
     expect(() => startHealthChecker()).not.toThrow();
   });
 
-  it('stopHealthChecker clears the interval without throwing', () => {
+  it("stopHealthChecker clears the interval without throwing", () => {
     startHealthChecker();
     expect(() => stopHealthChecker()).not.toThrow();
   });
 
-  it('stopHealthChecker is safe to call when no checker is running', () => {
+  it("stopHealthChecker is safe to call when no checker is running", () => {
     expect(() => stopHealthChecker()).not.toThrow();
   });
 
-  it('multiple startHealthChecker calls do not create multiple intervals', () => {
+  it("multiple startHealthChecker calls do not create multiple intervals", () => {
     const originalSetInterval = globalThis.setInterval;
     let setIntervalCallCount = 0;
 
@@ -42,7 +42,7 @@ describe('health-checker', () => {
     }
   });
 
-  it('stopHealthChecker after start allows restarting', () => {
+  it("stopHealthChecker after start allows restarting", () => {
     const originalSetInterval = globalThis.setInterval;
     let setIntervalCallCount = 0;
 

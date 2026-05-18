@@ -1,9 +1,9 @@
-import { EventEmitter } from 'events';
-import { PendingMessageStore, PersistentPendingMessage } from '../sqlite/PendingMessageStore.js';
-import type { PendingMessageWithId } from '../worker-types.js';
-import { logger } from '../../utils/logger.js';
+import { EventEmitter } from "events";
+import { PendingMessageStore, PersistentPendingMessage } from "../sqlite/PendingMessageStore.js";
+import type { PendingMessageWithId } from "../worker-types.js";
+import { logger } from "../../utils/logger.js";
 
-const IDLE_TIMEOUT_MS = 3 * 60 * 1000; 
+const IDLE_TIMEOUT_MS = 3 * 60 * 1000;
 
 export interface CreateIteratorOptions {
   sessionDbId: number;
@@ -40,9 +40,19 @@ export class SessionQueueProcessor {
         if (signal.aborted) return;
         const normalizedError = error instanceof Error ? error : new Error(String(error));
         claimFailures++;
-        logger.error('QUEUE', 'Failed to claim next message', { sessionDbId, claimFailures, maxClaimFailures }, normalizedError);
+        logger.error(
+          "QUEUE",
+          "Failed to claim next message",
+          { sessionDbId, claimFailures, maxClaimFailures },
+          normalizedError
+        );
         if (claimFailures >= maxClaimFailures) {
-          logger.error('QUEUE', 'Claim failure limit reached; ending iterator', { sessionDbId, claimFailures }, normalizedError);
+          logger.error(
+            "QUEUE",
+            "Claim failure limit reached; ending iterator",
+            { sessionDbId, claimFailures },
+            normalizedError
+          );
           return;
         }
         await this.waitForDelay(signal, claimRetryDelayMs);
@@ -57,13 +67,19 @@ export class SessionQueueProcessor {
       }
 
       try {
-        const idleTimedOut = await this.handleWaitPhase(signal, lastActivityTime, sessionDbId, idleTimeoutMs, onIdleTimeout);
+        const idleTimedOut = await this.handleWaitPhase(
+          signal,
+          lastActivityTime,
+          sessionDbId,
+          idleTimeoutMs,
+          onIdleTimeout
+        );
         if (idleTimedOut) return;
         lastActivityTime = Date.now();
       } catch (error) {
         if (signal.aborted) return;
         const normalizedError = error instanceof Error ? error : new Error(String(error));
-        logger.error('QUEUE', 'Error waiting for message; ending iterator', { sessionDbId }, normalizedError);
+        logger.error("QUEUE", "Error waiting for message; ending iterator", { sessionDbId }, normalizedError);
         return;
       }
     }
@@ -90,7 +106,7 @@ export class SessionQueueProcessor {
     if (!receivedMessage && !signal.aborted) {
       const idleDuration = Date.now() - lastActivityTime;
       if (idleDuration >= idleTimeoutMs) {
-        logger.info('SESSION', 'Idle timeout reached, triggering abort to kill subprocess', {
+        logger.info("SESSION", "Idle timeout reached, triggering abort to kill subprocess", {
           sessionDbId,
           idleDurationMs: idleDuration,
           thresholdMs: idleTimeoutMs
@@ -108,29 +124,29 @@ export class SessionQueueProcessor {
 
       const onMessage = () => {
         cleanup();
-        resolve(true); 
+        resolve(true);
       };
 
       const onAbort = () => {
         cleanup();
-        resolve(false); 
+        resolve(false);
       };
 
       const onTimeout = () => {
         cleanup();
-        resolve(false); 
+        resolve(false);
       };
 
       const cleanup = () => {
         if (timeoutId !== undefined) {
           clearTimeout(timeoutId);
         }
-        this.events.off('message', onMessage);
-        signal.removeEventListener('abort', onAbort);
+        this.events.off("message", onMessage);
+        signal.removeEventListener("abort", onAbort);
       };
 
-      this.events.once('message', onMessage);
-      signal.addEventListener('abort', onAbort, { once: true });
+      this.events.once("message", onMessage);
+      signal.addEventListener("abort", onAbort, { once: true });
       timeoutId = setTimeout(onTimeout, timeoutMs);
     });
   }
@@ -142,7 +158,7 @@ export class SessionQueueProcessor {
         if (timeoutId !== undefined) {
           clearTimeout(timeoutId);
         }
-        signal.removeEventListener('abort', onAbort);
+        signal.removeEventListener("abort", onAbort);
       };
       const onAbort = () => {
         cleanup();
@@ -152,7 +168,7 @@ export class SessionQueueProcessor {
         cleanup();
         resolve();
       }, delayMs);
-      signal.addEventListener('abort', onAbort, { once: true });
+      signal.addEventListener("abort", onAbort, { once: true });
     });
   }
 }

@@ -1,15 +1,15 @@
-import { existsSync, readFileSync, rmSync } from 'fs';
-import { logger } from '../utils/logger.js';
+import { existsSync, readFileSync, rmSync } from "fs";
+import { logger } from "../utils/logger.js";
 import {
   getProcessRegistry,
   verifyPidFileOwnership,
   type ManagedProcessInfo,
   type PidInfo,
   type ProcessRegistry
-} from './process-registry.js';
-import { runShutdownCascade } from './shutdown.js';
-import { startHealthChecker, stopHealthChecker } from './health-checker.js';
-import { paths } from '../shared/paths.js';
+} from "./process-registry.js";
+import { runShutdownCascade } from "./shutdown.js";
+import { startHealthChecker, stopHealthChecker } from "./health-checker.js";
+import { paths } from "../shared/paths.js";
 
 const PID_FILE = paths.workerPid();
 
@@ -18,7 +18,7 @@ interface ValidateWorkerPidOptions {
   pidFilePath?: string;
 }
 
-export type ValidateWorkerPidStatus = 'missing' | 'alive' | 'stale' | 'invalid';
+export type ValidateWorkerPidStatus = "missing" | "alive" | "stale" | "invalid";
 
 class Supervisor {
   private readonly registry: ProcessRegistry;
@@ -37,8 +37,8 @@ class Supervisor {
 
     this.registry.initialize();
     const pidStatus = validateWorkerPidFile({ logAlive: false });
-    if (pidStatus === 'alive') {
-      throw new Error('Worker already running');
+    if (pidStatus === "alive") {
+      throw new Error("Worker already running");
     }
 
     this.started = true;
@@ -54,12 +54,12 @@ class Supervisor {
 
     const handleSignal = async (signal: string): Promise<void> => {
       if (this.shutdownInitiated) {
-        logger.warn('SYSTEM', `Received ${signal} but shutdown already in progress`);
+        logger.warn("SYSTEM", `Received ${signal} but shutdown already in progress`);
         return;
       }
       this.shutdownInitiated = true;
 
-      logger.info('SYSTEM', `Received ${signal}, shutting down...`);
+      logger.info("SYSTEM", `Received ${signal}, shutting down...`);
 
       try {
         if (this.shutdownHandler) {
@@ -69,17 +69,17 @@ class Supervisor {
         }
       } catch (error: unknown) {
         if (error instanceof Error) {
-          logger.error('SYSTEM', 'Error during shutdown', {}, error);
+          logger.error("SYSTEM", "Error during shutdown", {}, error);
         } else {
-          logger.error('SYSTEM', 'Error during shutdown (non-Error)', { error: String(error) });
+          logger.error("SYSTEM", "Error during shutdown (non-Error)", { error: String(error) });
         }
         try {
           await this.stop();
         } catch (stopError: unknown) {
           if (stopError instanceof Error) {
-            logger.debug('SYSTEM', 'Supervisor shutdown fallback failed', {}, stopError);
+            logger.debug("SYSTEM", "Supervisor shutdown fallback failed", {}, stopError);
           } else {
-            logger.debug('SYSTEM', 'Supervisor shutdown fallback failed', { error: String(stopError) });
+            logger.debug("SYSTEM", "Supervisor shutdown fallback failed", { error: String(stopError) });
           }
         }
       }
@@ -87,16 +87,16 @@ class Supervisor {
       process.exit(0);
     };
 
-    process.on('SIGTERM', () => void handleSignal('SIGTERM'));
-    process.on('SIGINT', () => void handleSignal('SIGINT'));
+    process.on("SIGTERM", () => void handleSignal("SIGTERM"));
+    process.on("SIGINT", () => void handleSignal("SIGINT"));
 
-    if (process.platform !== 'win32') {
-      if (process.argv.includes('--daemon')) {
-        process.on('SIGHUP', () => {
-          logger.debug('SYSTEM', 'Ignoring SIGHUP in daemon mode');
+    if (process.platform !== "win32") {
+      if (process.argv.includes("--daemon")) {
+        process.on("SIGHUP", () => {
+          logger.debug("SYSTEM", "Ignoring SIGHUP in daemon mode");
         });
       } else {
-        process.on('SIGHUP', () => void handleSignal('SIGHUP'));
+        process.on("SIGHUP", () => void handleSignal("SIGHUP"));
       }
     }
   }
@@ -125,7 +125,11 @@ class Supervisor {
     }
   }
 
-  registerProcess(id: string, processInfo: ManagedProcessInfo, processRef?: Parameters<ProcessRegistry['register']>[2]): void {
+  registerProcess(
+    id: string,
+    processInfo: ManagedProcessInfo,
+    processRef?: Parameters<ProcessRegistry["register"]>[2]
+  ): void {
     this.registry.register(id, processInfo, processRef);
   }
 
@@ -156,43 +160,43 @@ export function validateWorkerPidFile(options: ValidateWorkerPidOptions = {}): V
   const pidFilePath = options.pidFilePath ?? PID_FILE;
 
   if (!existsSync(pidFilePath)) {
-    return 'missing';
+    return "missing";
   }
 
   let pidInfo: PidInfo | null = null;
 
   try {
-    pidInfo = JSON.parse(readFileSync(pidFilePath, 'utf-8')) as PidInfo | null;
+    pidInfo = JSON.parse(readFileSync(pidFilePath, "utf-8")) as PidInfo | null;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      logger.warn('SYSTEM', 'Failed to parse worker PID file, removing it', { path: pidFilePath }, error);
+      logger.warn("SYSTEM", "Failed to parse worker PID file, removing it", { path: pidFilePath }, error);
     } else {
-      logger.warn('SYSTEM', 'Failed to parse worker PID file, removing it', {
+      logger.warn("SYSTEM", "Failed to parse worker PID file, removing it", {
         path: pidFilePath,
         error: String(error)
       });
     }
     rmSync(pidFilePath, { force: true });
-    return 'invalid';
+    return "invalid";
   }
 
   const isAlive = verifyPidFileOwnership(pidInfo);
   if (isAlive && pidInfo) {
     if (options.logAlive ?? true) {
-      logger.info('SYSTEM', 'Worker already running (PID alive)', {
+      logger.info("SYSTEM", "Worker already running (PID alive)", {
         existingPid: pidInfo.pid,
         existingPort: pidInfo.port,
         startedAt: pidInfo.startedAt
       });
     }
-    return 'alive';
+    return "alive";
   }
 
-  logger.info('SYSTEM', 'Removing stale PID file (worker process is dead or PID has been reused)', {
+  logger.info("SYSTEM", "Removing stale PID file (worker process is dead or PID has been reused)", {
     pid: pidInfo?.pid,
     port: pidInfo?.port,
     startedAt: pidInfo?.startedAt
   });
   rmSync(pidFilePath, { force: true });
-  return 'stale';
+  return "stale";
 }

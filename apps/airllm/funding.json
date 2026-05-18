@@ -22,17 +22,8 @@
       "repositoryUrl": {
         "url": "https://github.com/lyogavin/airllm"
       },
-      "licenses": [
-        "spdx:Apache-2.0"
-      ],
-      "tags": [
-        "llm",
-        "machine-learning",
-        "generative-ai",
-        "inference",
-        "gpu",
-        "open-source"
-      ]
+      "licenses": ["spdx:Apache-2.0"],
+      "tags": ["llm", "machine-learning", "generative-ai", "inference", "gpu", "open-source"]
     }
   ],
   "funding": {
@@ -53,9 +44,7 @@
         "amount": 0,
         "currency": "USD",
         "frequency": "one-time",
-        "channels": [
-          "github-sponsors"
-        ]
+        "channels": ["github-sponsors"]
       },
       {
         "guid": "monthly-support",
@@ -65,9 +54,7 @@
         "amount": 0,
         "currency": "USD",
         "frequency": "monthly",
-        "channels": [
-          "github-sponsors"
-        ]
+        "channels": ["github-sponsors"]
       }
     ]
   }

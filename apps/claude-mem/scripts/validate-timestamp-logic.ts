@@ -1,29 +1,31 @@
 #!/usr/bin/env bun
 
-import Database from 'bun:sqlite';
-import { resolve } from 'path';
+import Database from "bun:sqlite";
+import { resolve } from "path";
 
-const DB_PATH = resolve(process.env.HOME!, '.claude-mem/claude-mem.db');
+const DB_PATH = resolve(process.env.HOME!, ".claude-mem/claude-mem.db");
 
 function formatTimestamp(epoch: number): string {
-  return new Date(epoch).toLocaleString('en-US', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+  return new Date(epoch).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
   });
 }
 
 function main() {
-  console.log('🔍 Validating timestamp logic for backlog processing...\n');
+  console.log("🔍 Validating timestamp logic for backlog processing...\n");
 
   const db = new Database(DB_PATH);
 
   try {
-    const pendingStats = db.query(`
+    const pendingStats = db
+      .query(
+        `
       SELECT
         status,
         COUNT(*) as count,
@@ -32,9 +34,11 @@ function main() {
       FROM pending_messages
       GROUP BY status
       ORDER BY status
-    `).all();
+    `
+      )
+      .all();
 
-    console.log('Pending Messages Status:\n');
+    console.log("Pending Messages Status:\n");
     for (const stat of pendingStats) {
       console.log(`${stat.status}: ${stat.count} messages`);
       if (stat.earliest && stat.latest) {
@@ -43,7 +47,9 @@ function main() {
     }
     console.log();
 
-    const pendingWithSessions = db.query(`
+    const pendingWithSessions = db
+      .query(
+        `
       SELECT
         pm.id,
         pm.session_db_id,
@@ -58,16 +64,18 @@ function main() {
       WHERE pm.status IN ('pending', 'processing')
       ORDER BY pm.created_at_epoch
       LIMIT 10
-    `).all();
+    `
+      )
+      .all();
 
     if (pendingWithSessions.length === 0) {
-      console.log('✅ No pending messages - all caught up!\n');
+      console.log("✅ No pending messages - all caught up!\n");
       db.close();
       return;
     }
 
     console.log(`Sample of ${pendingWithSessions.length} pending messages:\n`);
-    console.log('═══════════════════════════════════════════════════════════════════════');
+    console.log("═══════════════════════════════════════════════════════════════════════");
 
     for (const msg of pendingWithSessions) {
       console.log(`\nPending Message #${msg.id}: ${msg.tool_name} (${msg.status})`);
@@ -92,21 +100,23 @@ function main() {
       }
     }
 
-    console.log('\n═══════════════════════════════════════════════════════════════════════');
-    console.log('\nTimestamp Logic Validation:\n');
-    console.log('✅ Code Flow:');
-    console.log('   1. SessionManager.yieldNextMessage() tracks earliestPendingTimestamp');
-    console.log('   2. ClaudeProvider captures originalTimestamp before processing');
-    console.log('   3. processSDKResponse passes originalTimestamp to storeObservation/storeSummary');
-    console.log('   4. SessionStore uses overrideTimestampEpoch ?? Date.now()');
-    console.log('   5. earliestPendingTimestamp reset after batch completes\n');
+    console.log("\n═══════════════════════════════════════════════════════════════════════");
+    console.log("\nTimestamp Logic Validation:\n");
+    console.log("✅ Code Flow:");
+    console.log("   1. SessionManager.yieldNextMessage() tracks earliestPendingTimestamp");
+    console.log("   2. ClaudeProvider captures originalTimestamp before processing");
+    console.log("   3. processSDKResponse passes originalTimestamp to storeObservation/storeSummary");
+    console.log("   4. SessionStore uses overrideTimestampEpoch ?? Date.now()");
+    console.log("   5. earliestPendingTimestamp reset after batch completes\n");
 
-    console.log('✅ Expected Behavior:');
-    console.log('   - New messages: get current timestamp');
-    console.log('   - Backlog messages: get original created_at_epoch');
-    console.log('   - Observations match their source message timestamps\n');
+    console.log("✅ Expected Behavior:");
+    console.log("   - New messages: get current timestamp");
+    console.log("   - Backlog messages: get original created_at_epoch");
+    console.log("   - Observations match their source message timestamps\n");
 
-    const stuckMessages = db.query(`
+    const stuckMessages = db
+      .query(
+        `
       SELECT
         session_db_id,
         COUNT(*) as count,
@@ -116,20 +126,21 @@ function main() {
       WHERE status = 'processing'
       GROUP BY session_db_id
       ORDER BY count DESC
-    `).all();
+    `
+      )
+      .all();
 
     if (stuckMessages.length > 0) {
-      console.log('⚠️  Stuck Messages (status=processing):\n');
+      console.log("⚠️  Stuck Messages (status=processing):\n");
       for (const stuck of stuckMessages) {
         const ageDays = Math.round((Date.now() - stuck.earliest) / (1000 * 60 * 60 * 24));
         console.log(`   Session ${stuck.session_db_id}: ${stuck.count} messages`);
         console.log(`     Stuck for ${ageDays} days (${formatTimestamp(stuck.earliest)})`);
       }
-      console.log('\n   💡 These will be processed with original timestamps when orphan processing is enabled\n');
+      console.log("\n   💡 These will be processed with original timestamps when orphan processing is enabled\n");
     }
-
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error("❌ Error:", error);
     process.exit(1);
   } finally {
     db.close();

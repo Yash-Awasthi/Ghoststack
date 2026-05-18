@@ -15,29 +15,29 @@
 
 ### 0.1 Read these files end-to-end before touching code
 
-| File | Why |
-| --- | --- |
-| `CLAUDE.md` (project root) | Architecture, exit-code strategy, Pro/OSS boundary, settings conventions |
-| `src/services/worker-service.ts` | `WorkerService` class, `--daemon` `main()`, signal registration, all CLI subcommands |
-| `src/services/worker-spawner.ts` | `ensureWorkerStarted` 3-state machine (`ready`/`warming`/`dead`) |
-| `src/services/infrastructure/ProcessManager.ts` | `spawnDaemon`, PID file ops, `captureProcessStartToken`, `isProcessAlive` |
-| `src/services/infrastructure/HealthMonitor.ts` | `isPortInUse`, `waitForHealth`, `waitForReadiness`, `httpShutdown` |
-| `src/services/infrastructure/GracefulShutdown.ts` | `performGracefulShutdown` ordering |
-| `src/services/infrastructure/CleanupV12_4_3.ts` | `runOneTimeV12_4_3Cleanup`, `STUCK_PENDING_THRESHOLD = 10`, observer-purge SQL |
-| `src/services/sync/ChromaMcpManager.ts` | `ensureConnected`, `connectInternal`, `stop`, `killProcessTree`, `collectDescendantPids`, `RECONNECT_BACKOFF_MS = 10_000`, `MCP_CONNECTION_TIMEOUT_MS = 30_000` |
-| `src/supervisor/index.ts` | `Supervisor` class, `validateWorkerPidFile`, signal-handler config |
-| `src/supervisor/process-registry.ts` | `ProcessRegistry`, `getSdkProcessForSession`, `ensureSdkProcessExit`, `waitForSlot`, `TOTAL_PROCESS_HARD_CAP = 10` |
-| `src/supervisor/health-checker.ts` | 30s `pruneDeadEntries` loop (already present — extend, don't replace) |
-| `src/supervisor/shutdown.ts` | `runShutdownCascade`, `signalProcess`, `loadTreeKill` |
-| `src/services/worker/SessionManager.ts` | In-memory session map, `deleteSession`, queue/pending integration |
-| `src/services/worker/RestartGuard.ts` | Per-session restart cap (10/60s window, 5 consecutive) |
-| `src/services/worker/retry.ts` | Provider-level retry (`withRetry`, classified errors) — DO NOT mutate; circuit breaker layers ABOVE this |
-| `src/shared/worker-utils.ts` | `recordWorkerUnreachable` (line 401), `executeWithWorkerFallback` (line 443), fail-loud counter file at `~/.claude-mem/state/hook-failures.json` |
-| `src/services/sqlite/Database.ts` | PRAGMA setup (lines 27-32, 69-74) — single source of truth for DB pragmas |
-| `src/services/server/Server.ts` | `/api/health` (line 161), `/api/readiness` (line 178), `/api/version` (line 192) |
-| `src/shared/SettingsDefaultsManager.ts` | Where every new setting key MUST be declared with a default |
-| `src/shared/hook-constants.ts` | `HOOK_TIMEOUTS`, `HOOK_EXIT_CODES` — extend here, don't inline |
-| `plugin/bun-runner.js`, `plugin/scripts/worker-service.cjs` | Built worker entrypoint — note the build pipeline (`scripts/build-hooks.js`) |
+| File                                                        | Why                                                                                                                                                             |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md` (project root)                                  | Architecture, exit-code strategy, Pro/OSS boundary, settings conventions                                                                                        |
+| `src/services/worker-service.ts`                            | `WorkerService` class, `--daemon` `main()`, signal registration, all CLI subcommands                                                                            |
+| `src/services/worker-spawner.ts`                            | `ensureWorkerStarted` 3-state machine (`ready`/`warming`/`dead`)                                                                                                |
+| `src/services/infrastructure/ProcessManager.ts`             | `spawnDaemon`, PID file ops, `captureProcessStartToken`, `isProcessAlive`                                                                                       |
+| `src/services/infrastructure/HealthMonitor.ts`              | `isPortInUse`, `waitForHealth`, `waitForReadiness`, `httpShutdown`                                                                                              |
+| `src/services/infrastructure/GracefulShutdown.ts`           | `performGracefulShutdown` ordering                                                                                                                              |
+| `src/services/infrastructure/CleanupV12_4_3.ts`             | `runOneTimeV12_4_3Cleanup`, `STUCK_PENDING_THRESHOLD = 10`, observer-purge SQL                                                                                  |
+| `src/services/sync/ChromaMcpManager.ts`                     | `ensureConnected`, `connectInternal`, `stop`, `killProcessTree`, `collectDescendantPids`, `RECONNECT_BACKOFF_MS = 10_000`, `MCP_CONNECTION_TIMEOUT_MS = 30_000` |
+| `src/supervisor/index.ts`                                   | `Supervisor` class, `validateWorkerPidFile`, signal-handler config                                                                                              |
+| `src/supervisor/process-registry.ts`                        | `ProcessRegistry`, `getSdkProcessForSession`, `ensureSdkProcessExit`, `waitForSlot`, `TOTAL_PROCESS_HARD_CAP = 10`                                              |
+| `src/supervisor/health-checker.ts`                          | 30s `pruneDeadEntries` loop (already present — extend, don't replace)                                                                                           |
+| `src/supervisor/shutdown.ts`                                | `runShutdownCascade`, `signalProcess`, `loadTreeKill`                                                                                                           |
+| `src/services/worker/SessionManager.ts`                     | In-memory session map, `deleteSession`, queue/pending integration                                                                                               |
+| `src/services/worker/RestartGuard.ts`                       | Per-session restart cap (10/60s window, 5 consecutive)                                                                                                          |
+| `src/services/worker/retry.ts`                              | Provider-level retry (`withRetry`, classified errors) — DO NOT mutate; circuit breaker layers ABOVE this                                                        |
+| `src/shared/worker-utils.ts`                                | `recordWorkerUnreachable` (line 401), `executeWithWorkerFallback` (line 443), fail-loud counter file at `~/.claude-mem/state/hook-failures.json`                |
+| `src/services/sqlite/Database.ts`                           | PRAGMA setup (lines 27-32, 69-74) — single source of truth for DB pragmas                                                                                       |
+| `src/services/server/Server.ts`                             | `/api/health` (line 161), `/api/readiness` (line 178), `/api/version` (line 192)                                                                                |
+| `src/shared/SettingsDefaultsManager.ts`                     | Where every new setting key MUST be declared with a default                                                                                                     |
+| `src/shared/hook-constants.ts`                              | `HOOK_TIMEOUTS`, `HOOK_EXIT_CODES` — extend here, don't inline                                                                                                  |
+| `plugin/bun-runner.js`, `plugin/scripts/worker-service.cjs` | Built worker entrypoint — note the build pipeline (`scripts/build-hooks.js`)                                                                                    |
 
 ### 0.2 Allowed APIs (use these, do NOT invent siblings)
 
@@ -123,13 +123,13 @@ Hand-off note for Phase 2-8 executors with file/line anchors; no code committed.
 
 ### 5.1 Files to modify
 
-| File | Change |
-| --- | --- |
-| `src/supervisor/process-registry.ts` | Extend `captureProcessStartToken` for macOS (already partial via `ps -o lstart`) and Windows (`wmic process where ProcessId=X get CreationDate /value`). Add unit test for each platform branch. |
-| `src/supervisor/index.ts:validateWorkerPidFile` | Add port-on-pid match check — if `pidInfo.port !== currentExpectedPort`, treat as `'stale'`. |
-| `src/services/infrastructure/ProcessManager.ts` | Add new exports: `acquireDaemonLock()` / `releaseDaemonLock()` using POSIX `flock` (via `fcntl`/`flock` syscall through `bun:ffi` or shelling to `flock(1)` on Linux only) and Windows mandatory file lock via `LockFile` (or fall back to atomic-rename sentinel on Windows). |
+| File                                                     | Change                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/supervisor/process-registry.ts`                     | Extend `captureProcessStartToken` for macOS (already partial via `ps -o lstart`) and Windows (`wmic process where ProcessId=X get CreationDate /value`). Add unit test for each platform branch.                                                                                                                                                                                                                                     |
+| `src/supervisor/index.ts:validateWorkerPidFile`          | Add port-on-pid match check — if `pidInfo.port !== currentExpectedPort`, treat as `'stale'`.                                                                                                                                                                                                                                                                                                                                         |
+| `src/services/infrastructure/ProcessManager.ts`          | Add new exports: `acquireDaemonLock()` / `releaseDaemonLock()` using POSIX `flock` (via `fcntl`/`flock` syscall through `bun:ffi` or shelling to `flock(1)` on Linux only) and Windows mandatory file lock via `LockFile` (or fall back to atomic-rename sentinel on Windows).                                                                                                                                                       |
 | `src/services/worker-service.ts:937` (`--daemon` branch) | Wrap startup in `acquireDaemonLock()`. If port is in use, perform a `/api/version` probe; if the listener returns OUR `BUILT_IN_VERSION` → exit 0 (legit duplicate); if it returns a different version → log a warning and exit 0 (stale worker, will be restarted by version-mismatch path); if the listener doesn't respond → wait `HOOK_TIMEOUTS.PORT_IN_USE_WAIT` then write a clear stderr line with diagnostic before exiting. |
-| `src/services/worker-spawner.ts` | Same lock acquisition before `spawnDaemon`. Release on success or error. |
+| `src/services/worker-spawner.ts`                         | Same lock acquisition before `spawnDaemon`. Release on success or error.                                                                                                                                                                                                                                                                                                                                                             |
 
 ### 5.2 Detailed tasks
 
@@ -147,10 +147,10 @@ Hand-off note for Phase 2-8 executors with file/line anchors; no code committed.
 
 ### 5.3 New settings
 
-| Key | Default | Range | Purpose |
-| --- | --- | --- | --- |
-| `CLAUDE_MEM_DAEMON_LOCK_TIMEOUT_MS` | `5000` | 0–60000 | Max wait for the spawn lock |
-| `CLAUDE_MEM_PID_PORT_RECHECK_MS` | `2000` | 500–30000 | Wait window before treating port-in-use without `/api/version` response as "unknown listener" |
+| Key                                 | Default | Range     | Purpose                                                                                       |
+| ----------------------------------- | ------- | --------- | --------------------------------------------------------------------------------------------- |
+| `CLAUDE_MEM_DAEMON_LOCK_TIMEOUT_MS` | `5000`  | 0–60000   | Max wait for the spawn lock                                                                   |
+| `CLAUDE_MEM_PID_PORT_RECHECK_MS`    | `2000`  | 500–30000 | Wait window before treating port-in-use without `/api/version` response as "unknown listener" |
 
 ### 5.4 Acceptance criteria
 
@@ -183,14 +183,14 @@ Hand-off note for Phase 2-8 executors with file/line anchors; no code committed.
 
 ### 6.1 Files to modify
 
-| File | Change |
-| --- | --- |
-| `src/services/sqlite/Database.ts:27-32` and `:69-74` | Add `PRAGMA auto_vacuum = INCREMENTAL` BEFORE the first table is created (only takes effect on a fresh DB; harmless on existing DBs but logs a no-op). For existing DBs, the migration path is the one-shot Phase-6 startup VACUUM. |
-| `src/services/maintenance/DbMaintenance.ts` (new) | Periodic maintenance task: on a 24h timer (configurable), call `PRAGMA incremental_vacuum`, `PRAGMA wal_checkpoint(TRUNCATE)`, then collect metrics (`page_count`, `freelist_count`, file size). Emit `MAINTENANCE` INFO log. Acquire `dbMaintenanceMutex` so other writers wait. |
-| `src/services/maintenance/DbMaintenance.ts` | Startup check: if `freelist_count / page_count > FREE_RATIO_VACUUM_THRESHOLD` (default 0.40), perform full `VACUUM` after `VACUUM INTO` backup to `<DATA_DIR>/backups/claude-mem-pre-vacuum-<ts>.db`. Pause queue processor first. |
-| `src/services/worker-service.ts:initializeBackground` | Wire the maintenance task — start after `dbManager.initialize()`. Timer must `.unref()`. |
-| `src/services/worker/SessionManager.ts` | Expose `pauseQueueProcessing(): Promise<void>` and `resumeQueueProcessing(): void`. Use the existing AbortController + emitter to drain in-flight work; don't introduce new state. Maintenance acquires; readers continue (WAL allows them). |
-| `src/services/infrastructure/CleanupV12_4_3.ts:135` | Reuse the existing `VACUUM INTO` backup pattern verbatim — copy the disk-space pre-flight check (`statfsSync`, line 115). |
+| File                                                  | Change                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/sqlite/Database.ts:27-32` and `:69-74`  | Add `PRAGMA auto_vacuum = INCREMENTAL` BEFORE the first table is created (only takes effect on a fresh DB; harmless on existing DBs but logs a no-op). For existing DBs, the migration path is the one-shot Phase-6 startup VACUUM.                                               |
+| `src/services/maintenance/DbMaintenance.ts` (new)     | Periodic maintenance task: on a 24h timer (configurable), call `PRAGMA incremental_vacuum`, `PRAGMA wal_checkpoint(TRUNCATE)`, then collect metrics (`page_count`, `freelist_count`, file size). Emit `MAINTENANCE` INFO log. Acquire `dbMaintenanceMutex` so other writers wait. |
+| `src/services/maintenance/DbMaintenance.ts`           | Startup check: if `freelist_count / page_count > FREE_RATIO_VACUUM_THRESHOLD` (default 0.40), perform full `VACUUM` after `VACUUM INTO` backup to `<DATA_DIR>/backups/claude-mem-pre-vacuum-<ts>.db`. Pause queue processor first.                                                |
+| `src/services/worker-service.ts:initializeBackground` | Wire the maintenance task — start after `dbManager.initialize()`. Timer must `.unref()`.                                                                                                                                                                                          |
+| `src/services/worker/SessionManager.ts`               | Expose `pauseQueueProcessing(): Promise<void>` and `resumeQueueProcessing(): void`. Use the existing AbortController + emitter to drain in-flight work; don't introduce new state. Maintenance acquires; readers continue (WAL allows them).                                      |
+| `src/services/infrastructure/CleanupV12_4_3.ts:135`   | Reuse the existing `VACUUM INTO` backup pattern verbatim — copy the disk-space pre-flight check (`statfsSync`, line 115).                                                                                                                                                         |
 
 ### 6.2 Detailed tasks
 
@@ -213,13 +213,13 @@ Hand-off note for Phase 2-8 executors with file/line anchors; no code committed.
 
 ### 6.3 New settings
 
-| Key | Default | Range | Purpose |
-| --- | --- | --- | --- |
-| `CLAUDE_MEM_DB_MAINTENANCE_ENABLED` | `true` | bool | Master kill-switch |
-| `CLAUDE_MEM_DB_MAINTENANCE_INTERVAL_HOURS` | `24` | 1–168 | Periodic cadence |
-| `CLAUDE_MEM_DB_VACUUM_THRESHOLD_RATIO` | `0.40` | 0.05–0.95 | Free-ratio above which we auto-VACUUM at startup |
-| `CLAUDE_MEM_DB_VACUUM_STARTUP_DELAY_MS` | `300000` (5 min) | 0–3600000 | Defer startup VACUUM so it doesn't block readiness |
-| `CLAUDE_MEM_CLEANUP_REGRESSION_CHECK` | `true` | bool | Re-scan v12.4.3-shaped pollution |
+| Key                                        | Default          | Range     | Purpose                                            |
+| ------------------------------------------ | ---------------- | --------- | -------------------------------------------------- |
+| `CLAUDE_MEM_DB_MAINTENANCE_ENABLED`        | `true`           | bool      | Master kill-switch                                 |
+| `CLAUDE_MEM_DB_MAINTENANCE_INTERVAL_HOURS` | `24`             | 1–168     | Periodic cadence                                   |
+| `CLAUDE_MEM_DB_VACUUM_THRESHOLD_RATIO`     | `0.40`           | 0.05–0.95 | Free-ratio above which we auto-VACUUM at startup   |
+| `CLAUDE_MEM_DB_VACUUM_STARTUP_DELAY_MS`    | `300000` (5 min) | 0–3600000 | Defer startup VACUUM so it doesn't block readiness |
+| `CLAUDE_MEM_CLEANUP_REGRESSION_CHECK`      | `true`           | bool      | Re-scan v12.4.3-shaped pollution                   |
 
 ### 6.4 Acceptance criteria
 
@@ -256,15 +256,15 @@ Hand-off note for Phase 2-8 executors with file/line anchors; no code committed.
 
 ### 2.1 Files to modify
 
-| File | Change |
-| --- | --- |
-| `src/services/maintenance/SessionReaper.ts` (new) | Periodic reaper. Plugs into the supervisor's existing `health-checker.ts` 30s tick (extend, do not replace). |
-| `src/supervisor/health-checker.ts:9 runHealthCheck` | Call `SessionReaper.tick()` after `pruneDeadEntries()`. |
+| File                                                  | Change                                                                                                                                                                                   |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/maintenance/SessionReaper.ts` (new)     | Periodic reaper. Plugs into the supervisor's existing `health-checker.ts` 30s tick (extend, do not replace).                                                                             |
+| `src/supervisor/health-checker.ts:9 runHealthCheck`   | Call `SessionReaper.tick()` after `pruneDeadEntries()`.                                                                                                                                  |
 | `src/services/worker/SessionManager.ts:deleteSession` | After in-memory delete, call `pendingStore.clearPendingForSession(sessionDbId)` synchronously (it already does this via `clearPendingForSession` on a separate path — verify and unify). |
-| `src/services/sqlite/PendingMessageStore.ts` | Add `reapStuckProcessing(olderThanMs: number): number` returning the count of rows reset to `pending`. |
-| `src/services/sqlite/SessionStore.ts` | Add `findInactiveSdkSessions(olderThanDays: number): Array<{id, project, contentSessionId, memorySessionId, lastActivityAt}>`. |
-| `src/services/sqlite/SessionStore.ts` | Add `markSdkSessionInactive(id: number)` — adds an `inactive_at` column or sets a sentinel. |
-| `src/services/sqlite/migrations/runner.ts` | New migration: add `inactive_at TEXT NULL` to `sdk_sessions` if absent. |
+| `src/services/sqlite/PendingMessageStore.ts`          | Add `reapStuckProcessing(olderThanMs: number): number` returning the count of rows reset to `pending`.                                                                                   |
+| `src/services/sqlite/SessionStore.ts`                 | Add `findInactiveSdkSessions(olderThanDays: number): Array<{id, project, contentSessionId, memorySessionId, lastActivityAt}>`.                                                           |
+| `src/services/sqlite/SessionStore.ts`                 | Add `markSdkSessionInactive(id: number)` — adds an `inactive_at` column or sets a sentinel.                                                                                              |
+| `src/services/sqlite/migrations/runner.ts`            | New migration: add `inactive_at TEXT NULL` to `sdk_sessions` if absent.                                                                                                                  |
 
 ### 2.2 Reaper logic
 
@@ -286,13 +286,13 @@ Per tick (default 30s, gated by `CLAUDE_MEM_REAPER_ENABLED`):
 
 ### 2.3 New settings
 
-| Key | Default | Range | Purpose |
-| --- | --- | --- | --- |
-| `CLAUDE_MEM_REAPER_ENABLED` | `true` | bool | Master switch |
-| `CLAUDE_MEM_REAPER_TICK_MS` | `30000` | 5000–600000 | Tick cadence (piggy-backs supervisor; this value gates whether the reaper runs each tick) |
-| `CLAUDE_MEM_REAPER_PROCESSING_STUCK_MS` | `300000` (5 min) | 30000–86400000 | Threshold for a `processing` row to be considered stuck |
-| `CLAUDE_MEM_REAPER_INACTIVE_DAYS` | `30` | 1–365 | When to mark a session `inactive_at` |
-| `CLAUDE_MEM_REAPER_HARD_DELETE_INACTIVE_DAYS` | `0` | 0–365 | 0 = never; otherwise, hard-delete inactive rows older than N days |
+| Key                                           | Default          | Range          | Purpose                                                                                   |
+| --------------------------------------------- | ---------------- | -------------- | ----------------------------------------------------------------------------------------- |
+| `CLAUDE_MEM_REAPER_ENABLED`                   | `true`           | bool           | Master switch                                                                             |
+| `CLAUDE_MEM_REAPER_TICK_MS`                   | `30000`          | 5000–600000    | Tick cadence (piggy-backs supervisor; this value gates whether the reaper runs each tick) |
+| `CLAUDE_MEM_REAPER_PROCESSING_STUCK_MS`       | `300000` (5 min) | 30000–86400000 | Threshold for a `processing` row to be considered stuck                                   |
+| `CLAUDE_MEM_REAPER_INACTIVE_DAYS`             | `30`             | 1–365          | When to mark a session `inactive_at`                                                      |
+| `CLAUDE_MEM_REAPER_HARD_DELETE_INACTIVE_DAYS` | `0`              | 0–365          | 0 = never; otherwise, hard-delete inactive rows older than N days                         |
 
 ### 2.4 Acceptance criteria
 
@@ -321,13 +321,13 @@ Per tick (default 30s, gated by `CLAUDE_MEM_REAPER_ENABLED`):
 
 ### 3.1 Files to modify
 
-| File | Change |
-| --- | --- |
-| `src/services/sync/ChromaMcpManager.ts` | Add idle reaper; enforce single-instance via supervisor registry; add startup orphan scan; add `lastCallAt` timestamp updated by `callTool`. |
-| `src/services/sync/ChromaMcpManager.ts:ensureConnected` (line 43) | Before connect, check `getProcessRegistry().getAll().filter(r => r.type === 'chroma')` — if non-empty AND PID alive AND PID not the current `_process.pid`, refuse to spawn (alert + reuse existing if possible; otherwise wait for backoff). |
-| `src/services/sync/ChromaMcpManager.ts:registerManagedProcess` (line 613) | Already calls `getSupervisor().registerProcess(CHROMA_SUPERVISOR_ID, ...)` — verify the supervisor enforces single-instance for this id. (Currently `register` is keyed by id so same id replaces; document this.) |
-| `src/supervisor/process-registry.ts` | Add `getActiveCountByType(type: string): number`. Add `findChromaOrphans(): Promise<number[]>` — POSIX `pgrep -af 'chroma-mcp'` filtered by PPID == 1. |
-| `src/services/worker-service.ts:initializeBackground` | After `ChromaMcpManager.getInstance()`, kick off `await ChromaMcpManager.scanAndReapOrphans()` (best-effort; never throws). |
+| File                                                                      | Change                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/sync/ChromaMcpManager.ts`                                   | Add idle reaper; enforce single-instance via supervisor registry; add startup orphan scan; add `lastCallAt` timestamp updated by `callTool`.                                                                                                  |
+| `src/services/sync/ChromaMcpManager.ts:ensureConnected` (line 43)         | Before connect, check `getProcessRegistry().getAll().filter(r => r.type === 'chroma')` — if non-empty AND PID alive AND PID not the current `_process.pid`, refuse to spawn (alert + reuse existing if possible; otherwise wait for backoff). |
+| `src/services/sync/ChromaMcpManager.ts:registerManagedProcess` (line 613) | Already calls `getSupervisor().registerProcess(CHROMA_SUPERVISOR_ID, ...)` — verify the supervisor enforces single-instance for this id. (Currently `register` is keyed by id so same id replaces; document this.)                            |
+| `src/supervisor/process-registry.ts`                                      | Add `getActiveCountByType(type: string): number`. Add `findChromaOrphans(): Promise<number[]>` — POSIX `pgrep -af 'chroma-mcp'` filtered by PPID == 1.                                                                                        |
+| `src/services/worker-service.ts:initializeBackground`                     | After `ChromaMcpManager.getInstance()`, kick off `await ChromaMcpManager.scanAndReapOrphans()` (best-effort; never throws).                                                                                                                   |
 
 ### 3.2 Detailed tasks
 
@@ -346,11 +346,11 @@ Per tick (default 30s, gated by `CLAUDE_MEM_REAPER_ENABLED`):
 
 ### 3.3 New settings
 
-| Key | Default | Range | Purpose |
-| --- | --- | --- | --- |
-| `CLAUDE_MEM_CHROMA_IDLE_SHUTDOWN_MS` | `900000` (15 min) | 60000–86400000 | Idle reaper threshold |
-| `CLAUDE_MEM_CHROMA_ORPHAN_SCAN_ON_START` | `true` | bool | Master switch for startup scan |
-| `CLAUDE_MEM_CHROMA_MAX_CONCURRENT` | `1` | 1–4 | Cap chroma-mcp instances per worker |
+| Key                                      | Default           | Range          | Purpose                             |
+| ---------------------------------------- | ----------------- | -------------- | ----------------------------------- |
+| `CLAUDE_MEM_CHROMA_IDLE_SHUTDOWN_MS`     | `900000` (15 min) | 60000–86400000 | Idle reaper threshold               |
+| `CLAUDE_MEM_CHROMA_ORPHAN_SCAN_ON_START` | `true`            | bool           | Master switch for startup scan      |
+| `CLAUDE_MEM_CHROMA_MAX_CONCURRENT`       | `1`               | 1–4            | Cap chroma-mcp instances per worker |
 
 ### 3.4 Acceptance criteria
 
@@ -387,14 +387,14 @@ Per tick (default 30s, gated by `CLAUDE_MEM_REAPER_ENABLED`):
 
 ### 4.1 Files to modify
 
-| File | Change |
-| --- | --- |
-| `src/shared/worker-circuit-breaker.ts` (new) | `CircuitBreaker` class: states `CLOSED`, `OPEN`, `HALF_OPEN`. Persist to `~/.claude-mem/state/circuit-breaker.json`. |
-| `src/shared/worker-utils.ts:executeWithWorkerFallback` (line 443) | Wrap the call in `breaker.run(...)`. On `OPEN`, return `WorkerFallback` immediately (no HTTP). |
-| `src/shared/worker-utils.ts:recordWorkerUnreachable` (line 401) | Becomes a thin shim that calls `breaker.recordFailure()`. Hard cap (`MAX_LIFETIME_FAILURES = 50`) trips the breaker permanently until manual reset. |
-| `src/shared/worker-utils.ts:resetWorkerFailureCounter` (line 419) | Becomes `breaker.recordSuccess()`. |
-| `src/cli/hook-command.ts` | Verify the swallowed-stderr fix from observation 2026-05-07 is applied (it's marked as a "no-op replacement bug"). The breaker's stderr-fail-loud path must actually write to `process.stderr.write()`, not a stub. |
-| `src/services/server/Server.ts` | Add `/api/admin/breaker/reset` POST endpoint (gated by localhost only) for manual unsticking. |
+| File                                                              | Change                                                                                                                                                                                                              |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/worker-circuit-breaker.ts` (new)                      | `CircuitBreaker` class: states `CLOSED`, `OPEN`, `HALF_OPEN`. Persist to `~/.claude-mem/state/circuit-breaker.json`.                                                                                                |
+| `src/shared/worker-utils.ts:executeWithWorkerFallback` (line 443) | Wrap the call in `breaker.run(...)`. On `OPEN`, return `WorkerFallback` immediately (no HTTP).                                                                                                                      |
+| `src/shared/worker-utils.ts:recordWorkerUnreachable` (line 401)   | Becomes a thin shim that calls `breaker.recordFailure()`. Hard cap (`MAX_LIFETIME_FAILURES = 50`) trips the breaker permanently until manual reset.                                                                 |
+| `src/shared/worker-utils.ts:resetWorkerFailureCounter` (line 419) | Becomes `breaker.recordSuccess()`.                                                                                                                                                                                  |
+| `src/cli/hook-command.ts`                                         | Verify the swallowed-stderr fix from observation 2026-05-07 is applied (it's marked as a "no-op replacement bug"). The breaker's stderr-fail-loud path must actually write to `process.stderr.write()`, not a stub. |
+| `src/services/server/Server.ts`                                   | Add `/api/admin/breaker/reset` POST endpoint (gated by localhost only) for manual unsticking.                                                                                                                       |
 
 ### 4.2 Breaker semantics
 
@@ -410,12 +410,12 @@ ANY    ──[lifetime failures > MAX_LIFETIME_FAILURES]──> OPEN_PERMANENT (
 
 Defaults:
 
-| Setting | Default | Range |
-| --- | --- | --- |
-| `CLAUDE_MEM_BREAKER_FAILURE_THRESHOLD` | `5` | 1–50 |
-| `CLAUDE_MEM_BREAKER_RESET_TIMEOUT_MS` | `30000` | 1000–600000 |
-| `CLAUDE_MEM_BREAKER_HALF_OPEN_MAX_PROBES` | `1` | 1–10 |
-| `CLAUDE_MEM_BREAKER_LIFETIME_CAP` | `50` | 0–10000 (0 = no cap) |
+| Setting                                   | Default | Range                |
+| ----------------------------------------- | ------- | -------------------- |
+| `CLAUDE_MEM_BREAKER_FAILURE_THRESHOLD`    | `5`     | 1–50                 |
+| `CLAUDE_MEM_BREAKER_RESET_TIMEOUT_MS`     | `30000` | 1000–600000          |
+| `CLAUDE_MEM_BREAKER_HALF_OPEN_MAX_PROBES` | `1`     | 1–10                 |
+| `CLAUDE_MEM_BREAKER_LIFETIME_CAP`         | `50`    | 0–10000 (0 = no cap) |
 
 Persistent state file shape:
 
@@ -436,6 +436,7 @@ Persistent state file shape:
 1. **CircuitBreaker class**: pure logic class, no I/O. Methods: `getState()`, `canAttempt()`, `recordFailure(reason)`, `recordSuccess()`, `forceReset()`. Atomic file writes (write tmp + rename) for the JSON snapshot, mirroring `writeHookFailureStateAtomic` (worker-utils.ts:372).
 
 2. **Wire into `executeWithWorkerFallback`**:
+
    ```
    if (!breaker.canAttempt()) {
      // Optional: print one-line stderr if state changed during this call
@@ -490,12 +491,12 @@ Persistent state file shape:
 
 ### 7.1 Files to modify
 
-| File | Change |
-| --- | --- |
-| `src/services/worker/http/routes/HealthzRoutes.ts` (new) | Implements `RouteHandler`. GET `/api/healthz` and `/api/healthz?format=prom`. |
-| `src/services/worker-service.ts:registerRoutes` | Register the new `HealthzRoutes(...)`. |
-| `src/services/worker/MetricsCollector.ts` (new) | Aggregates metrics; refreshed on the supervisor's existing 30s health-check tick to avoid amplifying load. |
-| `src/supervisor/health-checker.ts:runHealthCheck` | Call `MetricsCollector.refresh()` after `pruneDeadEntries`. |
+| File                                                     | Change                                                                                                     |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `src/services/worker/http/routes/HealthzRoutes.ts` (new) | Implements `RouteHandler`. GET `/api/healthz` and `/api/healthz?format=prom`.                              |
+| `src/services/worker-service.ts:registerRoutes`          | Register the new `HealthzRoutes(...)`.                                                                     |
+| `src/services/worker/MetricsCollector.ts` (new)          | Aggregates metrics; refreshed on the supervisor's existing 30s health-check tick to avoid amplifying load. |
+| `src/supervisor/health-checker.ts:runHealthCheck`        | Call `MetricsCollector.refresh()` after `pruneDeadEntries`.                                                |
 
 ### 7.2 Endpoint contract
 
@@ -568,6 +569,7 @@ Persistent state file shape:
 `GET /api/healthz?format=prom` → 200 `text/plain` with Prometheus text format. One metric per JSON leaf (e.g. `claude_mem_db_free_ratio_pct 0.16`).
 
 `status` derivation:
+
 - `unhealthy` if breaker is OPEN_PERMANENT, OR DB initialization failed, OR chroma-mcp pid count > `CLAUDE_MEM_CHROMA_MAX_CONCURRENT`.
 - `degraded` if breaker is OPEN, OR free_ratio > 0.4, OR oldest_processing_pending > 1 hour, OR worker version mismatches plugin version.
 - `ok` otherwise.
@@ -619,13 +621,13 @@ Persistent state file shape:
 
 ### 8.1 Files to modify
 
-| File | Change |
-| --- | --- |
+| File                                      | Change                                                                                                                            |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `src/cli/handlers/worker-doctor.ts` (new) | New CLI subcommand `claude-mem worker doctor` — fetches `/api/healthz`, formats it for terminals, includes recent reaper actions. |
-| `src/services/worker-service.ts:main()` | Register the `worker doctor` CLI route (alongside existing `cursor`, `gemini-cli` cases). |
-| `plugin/scripts/worker-cli.js` | Wire to the new doctor command. |
-| `CLAUDE.md` (project root) | Document new settings under a "Worker Maintenance" section. |
-| `docs/public/` (optional) | User-facing explanation of the breaker, reaper, and health endpoint. |
+| `src/services/worker-service.ts:main()`   | Register the `worker doctor` CLI route (alongside existing `cursor`, `gemini-cli` cases).                                         |
+| `plugin/scripts/worker-cli.js`            | Wire to the new doctor command.                                                                                                   |
+| `CLAUDE.md` (project root)                | Document new settings under a "Worker Maintenance" section.                                                                       |
+| `docs/public/` (optional)                 | User-facing explanation of the breaker, reaper, and health endpoint.                                                              |
 
 ### 8.2 `worker doctor` output (example)
 
@@ -661,6 +663,7 @@ Recent maintenance (last 24h):
 ```
 
 If `status != ok`, append a "Recommended actions" block:
+
 - breaker open → `claude-mem worker reset-breaker`
 - DB free ratio high → mention next vacuum window
 - chroma orphans → `claude-mem worker reap-chroma`
@@ -704,25 +707,25 @@ If `status != ok`, append a "Recommended actions" block:
 
 Run the worker for 24 hours under realistic Claude Code usage. After 24h:
 
-| Metric | Pass criterion |
-| --- | --- |
-| `ps aux \| grep chroma-mcp \| wc -l` | ≤ 1 |
-| `ps aux \| grep claude-mem \| wc -l` | ≤ a small constant (1-2) |
-| DB size growth rate | < 5 MB/hr; free_ratio < 20% |
+| Metric                                     | Pass criterion                         |
+| ------------------------------------------ | -------------------------------------- |
+| `ps aux \| grep chroma-mcp \| wc -l`       | ≤ 1                                    |
+| `ps aux \| grep claude-mem \| wc -l`       | ≤ a small constant (1-2)               |
+| DB size growth rate                        | < 5 MB/hr; free_ratio < 20%            |
 | `/api/healthz` `breaker.lifetime_failures` | < 10 (vs. the #1874 starting baseline) |
-| Stuck `processing` rows older than 10 min | 0 |
-| Worker memory RSS | < 300 MB (no leak) |
+| Stuck `processing` rows older than 10 min  | 0                                      |
+| Worker memory RSS                          | < 300 MB (no leak)                     |
 
 ### F.2 Failure-injection tests
 
-| Inject | Expected behavior |
-| --- | --- |
-| Kill worker via `kill -9` | Lazy-respawn on next hook; PID file cleaned |
-| Two parallel `claude-mem start` | Exactly one daemon survives; lock log line visible |
-| 100 stuck processing rows | Reaper resets all within `REAPER_PROCESSING_STUCK_MS + REAPER_TICK_MS` |
-| Spawn fake listener on worker port | New `--daemon` exits 0 with diagnostic stderr (no silent exit) |
-| Fork 5 chroma-mcp orphans | Worker startup reaps all 5 |
-| Pull network during 10 hooks | Breaker opens after threshold; subsequent hooks short-circuit |
+| Inject                             | Expected behavior                                                      |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| Kill worker via `kill -9`          | Lazy-respawn on next hook; PID file cleaned                            |
+| Two parallel `claude-mem start`    | Exactly one daemon survives; lock log line visible                     |
+| 100 stuck processing rows          | Reaper resets all within `REAPER_PROCESSING_STUCK_MS + REAPER_TICK_MS` |
+| Spawn fake listener on worker port | New `--daemon` exits 0 with diagnostic stderr (no silent exit)         |
+| Fork 5 chroma-mcp orphans          | Worker startup reaps all 5                                             |
+| Pull network during 10 hooks       | Breaker opens after threshold; subsequent hooks short-circuit          |
 
 ### F.3 Anti-pattern grep
 
@@ -761,56 +764,56 @@ git diff main | grep -E "[0-9]{4,}" | grep -v SettingsDefaultsManager | grep -v 
 
 All settings declared in `src/shared/SettingsDefaultsManager.ts`:
 
-| Setting | Phase | Default | Range |
-| --- | --- | --- | --- |
-| `CLAUDE_MEM_DAEMON_LOCK_TIMEOUT_MS` | 5 | `5000` | 0–60000 |
-| `CLAUDE_MEM_PID_PORT_RECHECK_MS` | 5 | `2000` | 500–30000 |
-| `CLAUDE_MEM_DB_MAINTENANCE_ENABLED` | 6 | `true` | bool |
-| `CLAUDE_MEM_DB_MAINTENANCE_INTERVAL_HOURS` | 6 | `24` | 1–168 |
-| `CLAUDE_MEM_DB_VACUUM_THRESHOLD_RATIO` | 6 | `0.40` | 0.05–0.95 |
-| `CLAUDE_MEM_DB_VACUUM_STARTUP_DELAY_MS` | 6 | `300000` | 0–3600000 |
-| `CLAUDE_MEM_CLEANUP_REGRESSION_CHECK` | 6 | `true` | bool |
-| `CLAUDE_MEM_REAPER_ENABLED` | 2 | `true` | bool |
-| `CLAUDE_MEM_REAPER_TICK_MS` | 2 | `30000` | 5000–600000 |
-| `CLAUDE_MEM_REAPER_PROCESSING_STUCK_MS` | 2 | `300000` | 30000–86400000 |
-| `CLAUDE_MEM_REAPER_INACTIVE_DAYS` | 2 | `30` | 1–365 |
-| `CLAUDE_MEM_REAPER_HARD_DELETE_INACTIVE_DAYS` | 2 | `0` | 0–365 |
-| `CLAUDE_MEM_CHROMA_IDLE_SHUTDOWN_MS` | 3 | `900000` | 60000–86400000 |
-| `CLAUDE_MEM_CHROMA_ORPHAN_SCAN_ON_START` | 3 | `true` | bool |
-| `CLAUDE_MEM_CHROMA_MAX_CONCURRENT` | 3 | `1` | 1–4 |
-| `CLAUDE_MEM_BREAKER_FAILURE_THRESHOLD` | 4 | `5` | 1–50 |
-| `CLAUDE_MEM_BREAKER_RESET_TIMEOUT_MS` | 4 | `30000` | 1000–600000 |
-| `CLAUDE_MEM_BREAKER_HALF_OPEN_MAX_PROBES` | 4 | `1` | 1–10 |
-| `CLAUDE_MEM_BREAKER_LIFETIME_CAP` | 4 | `50` | 0–10000 |
+| Setting                                       | Phase | Default  | Range          |
+| --------------------------------------------- | ----- | -------- | -------------- |
+| `CLAUDE_MEM_DAEMON_LOCK_TIMEOUT_MS`           | 5     | `5000`   | 0–60000        |
+| `CLAUDE_MEM_PID_PORT_RECHECK_MS`              | 5     | `2000`   | 500–30000      |
+| `CLAUDE_MEM_DB_MAINTENANCE_ENABLED`           | 6     | `true`   | bool           |
+| `CLAUDE_MEM_DB_MAINTENANCE_INTERVAL_HOURS`    | 6     | `24`     | 1–168          |
+| `CLAUDE_MEM_DB_VACUUM_THRESHOLD_RATIO`        | 6     | `0.40`   | 0.05–0.95      |
+| `CLAUDE_MEM_DB_VACUUM_STARTUP_DELAY_MS`       | 6     | `300000` | 0–3600000      |
+| `CLAUDE_MEM_CLEANUP_REGRESSION_CHECK`         | 6     | `true`   | bool           |
+| `CLAUDE_MEM_REAPER_ENABLED`                   | 2     | `true`   | bool           |
+| `CLAUDE_MEM_REAPER_TICK_MS`                   | 2     | `30000`  | 5000–600000    |
+| `CLAUDE_MEM_REAPER_PROCESSING_STUCK_MS`       | 2     | `300000` | 30000–86400000 |
+| `CLAUDE_MEM_REAPER_INACTIVE_DAYS`             | 2     | `30`     | 1–365          |
+| `CLAUDE_MEM_REAPER_HARD_DELETE_INACTIVE_DAYS` | 2     | `0`      | 0–365          |
+| `CLAUDE_MEM_CHROMA_IDLE_SHUTDOWN_MS`          | 3     | `900000` | 60000–86400000 |
+| `CLAUDE_MEM_CHROMA_ORPHAN_SCAN_ON_START`      | 3     | `true`   | bool           |
+| `CLAUDE_MEM_CHROMA_MAX_CONCURRENT`            | 3     | `1`      | 1–4            |
+| `CLAUDE_MEM_BREAKER_FAILURE_THRESHOLD`        | 4     | `5`      | 1–50           |
+| `CLAUDE_MEM_BREAKER_RESET_TIMEOUT_MS`         | 4     | `30000`  | 1000–600000    |
+| `CLAUDE_MEM_BREAKER_HALF_OPEN_MAX_PROBES`     | 4     | `1`      | 1–10           |
+| `CLAUDE_MEM_BREAKER_LIFETIME_CAP`             | 4     | `50`     | 0–10000        |
 
 ## Appendix B — File Change Summary
 
-| File | Phases that touch it |
-| --- | --- |
-| `src/services/worker-service.ts` | 3 (initializeBackground), 5 (--daemon), 6 (maintenance wiring), 7 (route registration), 8 (CLI) |
-| `src/services/worker-spawner.ts` | 5 |
-| `src/services/infrastructure/ProcessManager.ts` | 5 (lock + start-token) |
-| `src/services/infrastructure/HealthMonitor.ts` | 5 (port-on-pid match) |
-| `src/services/infrastructure/CleanupV12_4_3.ts` | 6 (regression detection — read only) |
-| `src/services/sync/ChromaMcpManager.ts` | 3 |
-| `src/supervisor/index.ts` | 5 (validateWorkerPidFile) |
-| `src/supervisor/process-registry.ts` | 3 (orphan scan), 5 (start-token) |
-| `src/supervisor/health-checker.ts` | 2 (reaper), 7 (metrics refresh) |
-| `src/services/worker/SessionManager.ts` | 2 (delete hook), 6 (pause/resume) |
-| `src/shared/worker-utils.ts` | 4 (breaker integration) |
-| `src/services/sqlite/Database.ts` | 6 (auto_vacuum) |
-| `src/services/sqlite/PendingMessageStore.ts` | 2 (reapStuckProcessing) |
-| `src/services/sqlite/SessionStore.ts` | 2 (findInactiveSdkSessions) |
-| `src/services/sqlite/migrations/runner.ts` | 2 (inactive_at column) |
-| `src/services/server/Server.ts` | 4 (breaker reset), 7 (healthz route) |
-| `src/shared/SettingsDefaultsManager.ts` | 2-6 (settings keys) |
-| `src/services/maintenance/DbMaintenance.ts` | 6 (NEW) |
-| `src/services/maintenance/SessionReaper.ts` | 2 (NEW) |
-| `src/shared/worker-circuit-breaker.ts` | 4 (NEW) |
-| `src/services/worker/MetricsCollector.ts` | 7 (NEW) |
-| `src/services/worker/http/routes/HealthzRoutes.ts` | 7 (NEW) |
-| `src/cli/handlers/worker-doctor.ts` | 8 (NEW) |
-| `CLAUDE.md` | 8 (Worker Maintenance section) |
+| File                                               | Phases that touch it                                                                            |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `src/services/worker-service.ts`                   | 3 (initializeBackground), 5 (--daemon), 6 (maintenance wiring), 7 (route registration), 8 (CLI) |
+| `src/services/worker-spawner.ts`                   | 5                                                                                               |
+| `src/services/infrastructure/ProcessManager.ts`    | 5 (lock + start-token)                                                                          |
+| `src/services/infrastructure/HealthMonitor.ts`     | 5 (port-on-pid match)                                                                           |
+| `src/services/infrastructure/CleanupV12_4_3.ts`    | 6 (regression detection — read only)                                                            |
+| `src/services/sync/ChromaMcpManager.ts`            | 3                                                                                               |
+| `src/supervisor/index.ts`                          | 5 (validateWorkerPidFile)                                                                       |
+| `src/supervisor/process-registry.ts`               | 3 (orphan scan), 5 (start-token)                                                                |
+| `src/supervisor/health-checker.ts`                 | 2 (reaper), 7 (metrics refresh)                                                                 |
+| `src/services/worker/SessionManager.ts`            | 2 (delete hook), 6 (pause/resume)                                                               |
+| `src/shared/worker-utils.ts`                       | 4 (breaker integration)                                                                         |
+| `src/services/sqlite/Database.ts`                  | 6 (auto_vacuum)                                                                                 |
+| `src/services/sqlite/PendingMessageStore.ts`       | 2 (reapStuckProcessing)                                                                         |
+| `src/services/sqlite/SessionStore.ts`              | 2 (findInactiveSdkSessions)                                                                     |
+| `src/services/sqlite/migrations/runner.ts`         | 2 (inactive_at column)                                                                          |
+| `src/services/server/Server.ts`                    | 4 (breaker reset), 7 (healthz route)                                                            |
+| `src/shared/SettingsDefaultsManager.ts`            | 2-6 (settings keys)                                                                             |
+| `src/services/maintenance/DbMaintenance.ts`        | 6 (NEW)                                                                                         |
+| `src/services/maintenance/SessionReaper.ts`        | 2 (NEW)                                                                                         |
+| `src/shared/worker-circuit-breaker.ts`             | 4 (NEW)                                                                                         |
+| `src/services/worker/MetricsCollector.ts`          | 7 (NEW)                                                                                         |
+| `src/services/worker/http/routes/HealthzRoutes.ts` | 7 (NEW)                                                                                         |
+| `src/cli/handlers/worker-doctor.ts`                | 8 (NEW)                                                                                         |
+| `CLAUDE.md`                                        | 8 (Worker Maintenance section)                                                                  |
 
 ## Appendix C — Open Questions for Executor
 

@@ -1,24 +1,38 @@
 {
   "name": "ghoststack",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "GhostStack v1.1 - Local-First Autonomous Cloud Engine",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "bootstrap": "ts-node runtime/bootstrap.ts",
+    "healthcheck": "ts-node runtime/healthcheck.ts",
+    "diagnose": "ts-node runtime/diagnose-export.ts",
+    "benchmark": "ts-node runtime/benchmark-runner.ts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write ."
   },
-  "keywords": [],
+  "keywords": [
+    "orchestration",
+    "local-first",
+    "mcp",
+    "workflow"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
     "jest": "^30.4.2",
     "js-yaml": "^4.1.1",
     "playwright": "^1.60.0",
+    "prettier": "^3.2.5",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

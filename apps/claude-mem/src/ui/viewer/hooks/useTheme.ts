@@ -1,29 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-export type ThemePreference = 'system' | 'light' | 'dark';
-export type ResolvedTheme = 'light' | 'dark';
+export type ThemePreference = "system" | "light" | "dark";
+export type ResolvedTheme = "light" | "dark";
 
-const STORAGE_KEY = 'claude-mem-theme';
+const STORAGE_KEY = "claude-mem-theme";
 
 function getSystemTheme(): ResolvedTheme {
-  if (typeof window === 'undefined') return 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (typeof window === "undefined") return "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function getStoredPreference(): ThemePreference {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'system' || stored === 'light' || stored === 'dark') {
+    if (stored === "system" || stored === "light" || stored === "dark") {
       return stored;
     }
   } catch (e: unknown) {
-    console.warn('Failed to read theme preference from localStorage:', e instanceof Error ? e.message : String(e));
+    console.warn("Failed to read theme preference from localStorage:", e instanceof Error ? e.message : String(e));
   }
-  return 'system';
+  return "system";
 }
 
 function resolveTheme(preference: ThemePreference): ResolvedTheme {
-  if (preference === 'system') {
+  if (preference === "system") {
     return getSystemTheme();
   }
   return preference;
@@ -31,28 +31,26 @@ function resolveTheme(preference: ThemePreference): ResolvedTheme {
 
 export function useTheme() {
   const [preference, setPreference] = useState<ThemePreference>(getStoredPreference);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-    resolveTheme(getStoredPreference())
-  );
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(getStoredPreference()));
 
   useEffect(() => {
     const newResolvedTheme = resolveTheme(preference);
     setResolvedTheme(newResolvedTheme);
-    document.documentElement.setAttribute('data-theme', newResolvedTheme);
+    document.documentElement.setAttribute("data-theme", newResolvedTheme);
   }, [preference]);
 
   useEffect(() => {
-    if (preference !== 'system') return;
+    if (preference !== "system") return;
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
-      const newTheme = e.matches ? 'dark' : 'light';
+      const newTheme = e.matches ? "dark" : "light";
       setResolvedTheme(newTheme);
-      document.documentElement.setAttribute('data-theme', newTheme);
+      document.documentElement.setAttribute("data-theme", newTheme);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [preference]);
 
   const setThemePreference = (newPreference: ThemePreference) => {
@@ -60,7 +58,7 @@ export function useTheme() {
       localStorage.setItem(STORAGE_KEY, newPreference);
       setPreference(newPreference);
     } catch (e: unknown) {
-      console.warn('Failed to save theme preference to localStorage:', e instanceof Error ? e.message : String(e));
+      console.warn("Failed to save theme preference to localStorage:", e instanceof Error ? e.message : String(e));
       setPreference(newPreference);
     }
   };

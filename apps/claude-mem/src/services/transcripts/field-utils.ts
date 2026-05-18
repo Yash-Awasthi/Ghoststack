@@ -1,5 +1,5 @@
-import { logger } from '../../utils/logger.js';
-import type { FieldSpec, MatchRule, TranscriptSchema, WatchTarget } from './types.js';
+import { logger } from "../../utils/logger.js";
+import type { FieldSpec, MatchRule, TranscriptSchema, WatchTarget } from "./types.js";
 
 interface ResolveContext {
   watch: WatchTarget;
@@ -8,11 +8,11 @@ interface ResolveContext {
 }
 
 function parsePath(path: string): Array<string | number> {
-  const cleaned = path.trim().replace(/^\$\.?/, '');
+  const cleaned = path.trim().replace(/^\$\.?/, "");
   if (!cleaned) return [];
 
   const tokens: Array<string | number> = [];
-  const parts = cleaned.split('.');
+  const parts = cleaned.split(".");
 
   for (const part of parts) {
     const regex = /([^[\]]+)|\[(\d+)\]/g;
@@ -43,35 +43,31 @@ export function getValueByPath(input: unknown, path: string): unknown {
 }
 
 function isEmptyValue(value: unknown): boolean {
-  return value === undefined || value === null || value === '';
+  return value === undefined || value === null || value === "";
 }
 
 function resolveFromContext(path: string, ctx: ResolveContext): unknown {
-  if (path.startsWith('$watch.')) {
-    const key = path.slice('$watch.'.length);
+  if (path.startsWith("$watch.")) {
+    const key = path.slice("$watch.".length);
     return (ctx.watch as any)[key];
   }
-  if (path.startsWith('$schema.')) {
-    const key = path.slice('$schema.'.length);
+  if (path.startsWith("$schema.")) {
+    const key = path.slice("$schema.".length);
     return (ctx.schema as any)[key];
   }
-  if (path.startsWith('$session.')) {
-    const key = path.slice('$session.'.length);
+  if (path.startsWith("$session.")) {
+    const key = path.slice("$session.".length);
     return ctx.session ? (ctx.session as any)[key] : undefined;
   }
-  if (path === '$cwd') return ctx.watch.workspace;
-  if (path === '$project') return ctx.watch.project;
+  if (path === "$cwd") return ctx.watch.workspace;
+  if (path === "$project") return ctx.watch.project;
   return undefined;
 }
 
-export function resolveFieldSpec(
-  spec: FieldSpec | undefined,
-  entry: unknown,
-  ctx: ResolveContext
-): unknown {
+export function resolveFieldSpec(spec: FieldSpec | undefined, entry: unknown, ctx: ResolveContext): unknown {
   if (spec === undefined) return undefined;
 
-  if (typeof spec === 'string') {
+  if (typeof spec === "string") {
     const fromContext = resolveFromContext(spec, ctx);
     if (fromContext !== undefined) return fromContext;
     return getValueByPath(entry, spec);
@@ -113,18 +109,14 @@ export function resolveFields(
   return resolved;
 }
 
-export function matchesRule(
-  entry: unknown,
-  rule: MatchRule | undefined,
-  schema: TranscriptSchema
-): boolean {
+export function matchesRule(entry: unknown, rule: MatchRule | undefined, schema: TranscriptSchema): boolean {
   if (!rule) return true;
 
-  const path = rule.path || schema.eventTypePath || 'type';
+  const path = rule.path || schema.eventTypePath || "type";
   const value = path ? getValueByPath(entry, path) : undefined;
 
   if (rule.exists) {
-    if (value === undefined || value === null || value === '') return false;
+    if (value === undefined || value === null || value === "") return false;
   }
 
   if (rule.equals !== undefined) {
@@ -136,15 +128,20 @@ export function matchesRule(
   }
 
   if (rule.contains !== undefined) {
-    return typeof value === 'string' && value.includes(rule.contains);
+    return typeof value === "string" && value.includes(rule.contains);
   }
 
   if (rule.regex) {
     try {
       const regex = new RegExp(rule.regex);
-      return regex.test(String(value ?? ''));
+      return regex.test(String(value ?? ""));
     } catch (error: unknown) {
-      logger.debug('WORKER', 'Invalid regex in match rule', { regex: rule.regex }, error instanceof Error ? error : undefined);
+      logger.debug(
+        "WORKER",
+        "Invalid regex in match rule",
+        { regex: rule.regex },
+        error instanceof Error ? error : undefined
+      );
       return false;
     }
   }

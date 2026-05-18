@@ -8,7 +8,9 @@ description: "Point claude-mem at bridged or self-hosted Anthropic-compatible AP
 When you use the `claude` provider, claude-mem talks to the Anthropic API through the Claude Agent SDK. By default, the SDK targets the official Anthropic endpoint, but it honors the standard `ANTHROPIC_BASE_URL` environment variable. That means you can route claude-mem at any Anthropic-protocol-compatible backend — for example a corporate gateway, a regional bridge, or a third-party provider that exposes an Anthropic-shaped API — without changing any claude-mem source code.
 
 <Note>
-This page documents how to **persist a custom base URL** so claude-mem's worker uses it consistently. For OpenAI-compatible upstream providers, use a gateway such as LiteLLM and follow the [LiteLLM Gateway](litellm-gateway) guide.
+  This page documents how to **persist a custom base URL** so claude-mem's worker uses it consistently. For
+  OpenAI-compatible upstream providers, use a gateway such as LiteLLM and follow the [LiteLLM Gateway](litellm-gateway)
+  guide.
 </Note>
 
 ## When to Use This

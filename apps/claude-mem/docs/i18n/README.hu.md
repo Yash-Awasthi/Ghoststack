@@ -1,6 +1,7 @@
 🌐 Ez egy automatikus fordítás. Közösségi javítások szívesen fogadottak!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ További részletekért lásd az [Architektúra áttekintést](https://docs.clau
 A Claude-Mem intelligens keresést biztosít a mem-search skillen keresztül, amely automatikusan aktiválódik, amikor múltbeli munkáról kérdez:
 
 **Hogyan működik:**
-- Csak kérdezzen természetesen: *"Mit csináltunk az előző munkamenetben?"* vagy *"Javítottuk már ezt a hibát korábban?"*
+
+- Csak kérdezzen természetesen: _"Mit csináltunk az előző munkamenetben?"_ vagy _"Javítottuk már ezt a hibát korábban?"_
 - Claude automatikusan meghívja a mem-search skillet a releváns kontextus megtalálásához
 
 **Elérhető keresési műveletek:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Támogatás
 

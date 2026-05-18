@@ -1,12 +1,6 @@
-
-import type { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
-import type {
-  SessionBasic,
-  SessionFull,
-  SessionWithStatus,
-  SessionSummaryDetail,
-} from './types.js';
+import type { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
+import type { SessionBasic, SessionFull, SessionWithStatus, SessionSummaryDetail } from "./types.js";
 
 export function getSessionById(db: Database, id: number): SessionBasic | null {
   const stmt = db.prepare(`
@@ -21,13 +15,10 @@ export function getSessionById(db: Database, id: number): SessionBasic | null {
   return (stmt.get(id) as SessionBasic | undefined) || null;
 }
 
-export function getSdkSessionsBySessionIds(
-  db: Database,
-  memorySessionIds: string[]
-): SessionFull[] {
+export function getSdkSessionsBySessionIds(db: Database, memorySessionIds: string[]): SessionFull[] {
   if (memorySessionIds.length === 0) return [];
 
-  const placeholders = memorySessionIds.map(() => '?').join(',');
+  const placeholders = memorySessionIds.map(() => "?").join(",");
   const stmt = db.prepare(`
     SELECT id, content_session_id, memory_session_id, project,
            COALESCE(platform_source, 'claude') as platform_source,
@@ -41,11 +32,7 @@ export function getSdkSessionsBySessionIds(
   return stmt.all(...memorySessionIds) as SessionFull[];
 }
 
-export function getRecentSessionsWithStatus(
-  db: Database,
-  project: string,
-  limit: number = 3
-): SessionWithStatus[] {
+export function getRecentSessionsWithStatus(db: Database, project: string, limit: number = 3): SessionWithStatus[] {
   const stmt = db.prepare(`
     SELECT * FROM (
       SELECT
@@ -68,10 +55,7 @@ export function getRecentSessionsWithStatus(
   return stmt.all(project, limit) as SessionWithStatus[];
 }
 
-export function getSessionSummaryById(
-  db: Database,
-  id: number
-): SessionSummaryDetail | null {
+export function getSessionSummaryById(db: Database, id: number): SessionSummaryDetail | null {
   const stmt = db.prepare(`
     SELECT
       id,

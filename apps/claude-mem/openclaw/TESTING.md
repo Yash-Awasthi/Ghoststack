@@ -52,6 +52,7 @@ Quick check that the plugin loads and registers its service + command correctly.
 ```
 
 This is the most comprehensive test. It:
+
 1. Uses the official `ghcr.io/openclaw/openclaw:main` Docker image
 2. Installs the plugin via `openclaw plugins install` (same as a real user)
 3. Enables the plugin via `openclaw plugins enable`
@@ -84,6 +85,7 @@ node openclaw.mjs plugins doctor
 ```
 
 **Expected:**
+
 - `claude-mem` appears in the plugins list as "enabled" or "loaded"
 - Info shows version 1.0.0, source at `/home/node/.openclaw/extensions/claude-mem/`
 - Doctor reports no issues
@@ -97,6 +99,7 @@ cat /home/node/.openclaw/extensions/claude-mem/package.json
 ```
 
 **Expected:**
+
 - `dist/index.js` exists (compiled plugin)
 - `openclaw.plugin.json` has `"id": "claude-mem"` and `"kind": "memory"`
 - `package.json` has `openclaw.extensions` field pointing to `./dist/index.js`
@@ -155,6 +158,7 @@ node openclaw.mjs gateway --allow-unconfigured --verbose --token e2e-test-token
 ```
 
 **Expected in gateway logs:**
+
 - `[claude-mem] OpenClaw plugin loaded — v1.0.0`
 - `[claude-mem] Observation feed starting — channel: telegram, target: test-chat-id-12345`
 - `[claude-mem] Connecting to SSE stream at http://localhost:37777/stream`
@@ -226,6 +230,7 @@ openclaw restart
 ```
 
 **Look for in logs:**
+
 - `[claude-mem] OpenClaw plugin loaded — v1.0.0`
 - `[claude-mem] Connected to SSE stream`
 
@@ -248,32 +253,40 @@ Optional subtitle
 ## Troubleshooting
 
 ### `api.log is not a function`
+
 The plugin was built against the wrong API. Ensure `src/index.ts` uses `api.logger.info()` not `api.log()`. Rebuild with `npm run build`.
 
 ### Worker not running
+
 - **Symptom:** `SSE stream error: fetch failed. Reconnecting in 1s`
 - **Fix:** Start the worker: `cd /path/to/claude-mem && npm run build-and-sync`
 
 ### Port mismatch
+
 - **Fix:** Ensure `workerPort` in config matches the worker's actual port (default: 37777)
 
 ### Channel not configured
+
 - **Symptom:** `Observation feed misconfigured — channel or target missing`
 - **Fix:** Add both `channel` and `to` to `observationFeed` in config
 
 ### Unknown channel type
+
 - **Fix:** Use: `telegram`, `discord`, `signal`, `slack`, `whatsapp`, or `line`
 
 ### Feed disabled
+
 - **Symptom:** `Observation feed disabled`
 - **Fix:** Set `observationFeed.enabled: true`
 
 ### Messages not arriving
+
 1. Verify the bot/integration is configured in the target channel
 2. Check the target ID (`to`) is correct
 3. Look for `Failed to send to <channel>` in logs
 4. Test the channel via OpenClaw's built-in tools
 
 ### Memory slot conflict
+
 - **Symptom:** `plugin disabled (memory slot set to "memory-core")`
 - **Fix:** Add `"slots": { "memory": "claude-mem" }` to plugins config

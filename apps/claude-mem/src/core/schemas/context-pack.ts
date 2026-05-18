@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
-import { MemoryItemSchema } from './memory-item.js';
+import { z } from "zod";
+import { MemoryItemSchema } from "./memory-item.js";
 
 export const ContextPackSchema = z.object({
   projectId: z.string().min(1),

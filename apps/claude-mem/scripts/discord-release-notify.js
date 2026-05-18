@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from "child_process";
+import { readFileSync, existsSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(__dirname, '..');
+const projectRoot = resolve(__dirname, "..");
 
 function loadEnv() {
-  const envPath = resolve(projectRoot, '.env');
+  const envPath = resolve(projectRoot, ".env");
   if (!existsSync(envPath)) {
-    console.error('❌ .env file not found');
+    console.error("❌ .env file not found");
     process.exit(1);
   }
 
-  const envContent = readFileSync(envPath, 'utf-8');
+  const envContent = readFileSync(envPath, "utf-8");
   const webhookMatch = envContent.match(/DISCORD_UPDATES_WEBHOOK=(.+)/);
 
   if (!webhookMatch) {
-    console.error('❌ DISCORD_UPDATES_WEBHOOK not found in .env');
+    console.error("❌ DISCORD_UPDATES_WEBHOOK not found in .env");
     process.exit(1);
   }
 
@@ -29,8 +29,8 @@ function loadEnv() {
 function getReleaseNotes(version) {
   try {
     const notes = execSync(`gh release view ${version} --json body --jq '.body'`, {
-      encoding: 'utf-8',
-      cwd: projectRoot,
+      encoding: "utf-8",
+      cwd: projectRoot
     }).trim();
     return notes;
   } catch {
@@ -40,19 +40,19 @@ function getReleaseNotes(version) {
 
 function cleanNotes(notes) {
   return notes
-    .replace(/🤖 Generated with \[Claude Code\].*$/s, '')
-    .replace(/---\n*$/s, '')
+    .replace(/🤖 Generated with \[Claude Code\].*$/s, "")
+    .replace(/---\n*$/s, "")
     .trim();
 }
 
 function truncate(text, maxLength) {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 3) + '...';
+  return text.slice(0, maxLength - 3) + "...";
 }
 
 async function postToDiscord(webhookUrl, version, notes) {
-  const cleanedNotes = notes ? cleanNotes(notes) : 'No release notes available.';
-  const repoUrl = 'https://github.com/thedotmack/claude-mem';
+  const cleanedNotes = notes ? cleanNotes(notes) : "No release notes available.";
+  const repoUrl = "https://github.com/thedotmack/claude-mem";
 
   const payload = {
     embeds: [
@@ -63,28 +63,28 @@ async function postToDiscord(webhookUrl, version, notes) {
         color: 0x7c3aed, // Purple
         fields: [
           {
-            name: '📦 Install',
-            value: 'Update via Claude Code plugin marketplace',
-            inline: true,
+            name: "📦 Install",
+            value: "Update via Claude Code plugin marketplace",
+            inline: true
           },
           {
-            name: '📚 Docs',
-            value: '[docs.claude-mem.ai](https://docs.claude-mem.ai)',
-            inline: true,
-          },
+            name: "📚 Docs",
+            value: "[docs.claude-mem.ai](https://docs.claude-mem.ai)",
+            inline: true
+          }
         ],
         footer: {
-          text: 'claude-mem • Persistent memory for Claude Code',
+          text: "claude-mem • Persistent memory for Claude Code"
         },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+        timestamp: new Date().toISOString()
+      }
+    ]
   };
 
   const response = await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
   });
 
   if (!response.ok) {
@@ -100,8 +100,8 @@ async function main() {
   const customNotes = process.argv[3];
 
   if (!version) {
-    console.error('Usage: node scripts/discord-release-notify.js <version> [notes]');
-    console.error('Example: node scripts/discord-release-notify.js v7.4.2');
+    console.error("Usage: node scripts/discord-release-notify.js <version> [notes]");
+    console.error("Example: node scripts/discord-release-notify.js v7.4.2");
     process.exit(1);
   }
 
@@ -111,14 +111,14 @@ async function main() {
   const notes = customNotes || getReleaseNotes(version);
 
   if (!notes && !customNotes) {
-    console.warn('⚠️  Could not fetch release notes from GitHub, proceeding without them');
+    console.warn("⚠️  Could not fetch release notes from GitHub, proceeding without them");
   }
 
   try {
     await postToDiscord(webhookUrl, version, notes);
-    console.log('✅ Discord notification sent successfully!');
+    console.log("✅ Discord notification sent successfully!");
   } catch (error) {
-    console.error('❌ Failed to send Discord notification:', error.message);
+    console.error("❌ Failed to send Discord notification:", error.message);
     process.exit(1);
   }
 }

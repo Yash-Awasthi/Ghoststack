@@ -103,13 +103,11 @@ function printLanguages(): void {
     pt: "Portuguese",
     sk: "Slovak",
     sl: "Slovenian",
-    "zh-tw": "Chinese (Traditional)",
+    "zh-tw": "Chinese (Traditional)"
   };
 
   console.log("\nSupported Language Codes:\n");
-  const sorted = Object.entries(LANGUAGE_NAMES).sort((a, b) =>
-    a[1].localeCompare(b[1])
-  );
+  const sorted = Object.entries(LANGUAGE_NAMES).sort((a, b) => a[1].localeCompare(b[1]));
   for (const [code, name] of sorted) {
     console.log(`  ${code.padEnd(8)} ${name}`);
   }
@@ -125,11 +123,11 @@ function parseArgs(argv: string[]): CliArgs {
     force: false,
     useExisting: false,
     help: false,
-    listLanguages: false,
+    listLanguages: false
   };
 
   const positional: string[] = [];
-  let i = 2; 
+  let i = 2;
 
   while (i < argv.length) {
     const arg = argv[i];
@@ -214,9 +212,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const invalidLangs = args.languages.filter(
-    (lang) => !SUPPORTED_LANGUAGES.includes(lang.toLowerCase())
-  );
+  const invalidLangs = args.languages.filter((lang) => !SUPPORTED_LANGUAGES.includes(lang.toLowerCase()));
   if (invalidLangs.length > 0) {
     console.error(`Error: Unknown language codes: ${invalidLangs.join(", ")}`);
     console.error("Run with --list-languages to see supported codes");
@@ -234,17 +230,14 @@ async function main(): Promise<void> {
       maxBudgetUsd: args.maxBudget,
       verbose: args.verbose,
       force: args.force,
-      useExisting: args.useExisting,
+      useExisting: args.useExisting
     });
 
     if (result.failed > 0) {
       process.exit(1);
     }
   } catch (error) {
-    console.error(
-      "Translation failed:",
-      error instanceof Error ? error.message : error
-    );
+    console.error("Translation failed:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

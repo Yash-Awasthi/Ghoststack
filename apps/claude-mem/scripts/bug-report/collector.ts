@@ -109,7 +109,7 @@ async function getOsVersion(): Promise<string> {
 async function checkWorkerHealth(port: number): Promise<any> {
   try {
     const response = await fetch(`http://127.0.0.1:${port}/health`, {
-      signal: AbortSignal.timeout(2000),
+      signal: AbortSignal.timeout(2000)
     });
     return await response.json();
   } catch (error) {
@@ -120,7 +120,7 @@ async function checkWorkerHealth(port: number): Promise<any> {
 async function getWorkerStats(port: number): Promise<any> {
   try {
     const response = await fetch(`http://127.0.0.1:${port}/api/stats`, {
-      signal: AbortSignal.timeout(2000),
+      signal: AbortSignal.timeout(2000)
     });
     return await response.json();
   } catch (error) {
@@ -148,9 +148,7 @@ async function readLogLines(logPath: string, lines: number): Promise<string[]> {
   }
 }
 
-async function getSettings(
-  dataDir: string
-): Promise<{ exists: boolean; settings?: Record<string, any> }> {
+async function getSettings(dataDir: string): Promise<{ exists: boolean; settings?: Record<string, any> }> {
   try {
     const settingsPath = path.join(dataDir, "settings.json");
     const content = await fs.readFile(settingsPath, "utf-8");
@@ -161,9 +159,7 @@ async function getSettings(
   }
 }
 
-async function getDatabaseInfo(
-  dataDir: string
-): Promise<{ exists: boolean; size?: number }> {
+async function getDatabaseInfo(dataDir: string): Promise<{ exists: boolean; size?: number }> {
   try {
     const dbPath = path.join(dataDir, "claude-mem.db");
     const stats = await fs.stat(dbPath);
@@ -192,7 +188,7 @@ async function getTableCounts(
       return {
         observations: parseInt(parts[0], 10) || 0,
         sessions: parseInt(parts[1], 10) || 0,
-        summaries: parseInt(parts[2], 10) || 0,
+        summaries: parseInt(parts[2], 10) || 0
       };
     }
     return undefined;
@@ -201,18 +197,10 @@ async function getTableCounts(
   }
 }
 
-export async function collectDiagnostics(
-  options: { includeLogs?: boolean } = {}
-): Promise<SystemDiagnostics> {
+export async function collectDiagnostics(options: { includeLogs?: boolean } = {}): Promise<SystemDiagnostics> {
   const homeDir = os.homedir();
   const dataDir = path.join(homeDir, ".claude-mem");
-  const pluginPath = path.join(
-    homeDir,
-    ".claude",
-    "plugins",
-    "marketplaces",
-    "thedotmack"
-  );
+  const pluginPath = path.join(homeDir, ".claude", "plugins", "marketplaces", "thedotmack");
   const cwd = process.cwd();
   const isDevMode = cwd.includes("claude-mem") && !cwd.includes(".claude");
 
@@ -220,36 +208,33 @@ export async function collectDiagnostics(
     getClaudememVersion(),
     getClaudeCodeVersion(),
     getBunVersion(),
-    getOsVersion(),
+    getOsVersion()
   ]);
 
   const versions = {
     claudeMem,
     claudeCode,
     node: process.version,
-    bun,
+    bun
   };
 
   const platform = {
     os: process.platform,
     osVersion,
-    arch: process.arch,
+    arch: process.arch
   };
 
   const paths = {
     pluginPath: sanitizePath(pluginPath),
     dataDir: sanitizePath(dataDir),
     cwd: sanitizePath(cwd),
-    isDevMode,
+    isDevMode
   };
 
   const pidInfo = await readPidFile(dataDir);
   const workerPort = pidInfo?.port || 37777;
 
-  const [health, stats] = await Promise.all([
-    checkWorkerHealth(workerPort),
-    getWorkerStats(workerPort),
-  ]);
+  const [health, stats] = await Promise.all([checkWorkerHealth(workerPort), getWorkerStats(workerPort)]);
 
   const worker = {
     running: health !== null,
@@ -258,7 +243,7 @@ export async function collectDiagnostics(
     uptime: stats?.worker?.uptime,
     version: stats?.worker?.version,
     health,
-    stats,
+    stats
   };
 
   let workerLog: string[] = [];
@@ -269,33 +254,27 @@ export async function collectDiagnostics(
     const workerLogPath = path.join(dataDir, "logs", `worker-${today}.log`);
     const silentLogPath = path.join(dataDir, "silent.log");
 
-    [workerLog, silentLog] = await Promise.all([
-      readLogLines(workerLogPath, 50),
-      readLogLines(silentLogPath, 50),
-    ]);
+    [workerLog, silentLog] = await Promise.all([readLogLines(workerLogPath, 50), readLogLines(silentLogPath, 50)]);
   }
 
   const logs = {
     workerLog: workerLog.map(sanitizePath),
-    silentLog: silentLog.map(sanitizePath),
+    silentLog: silentLog.map(sanitizePath)
   };
 
-  const [dbInfo, tableCounts] = await Promise.all([
-    getDatabaseInfo(dataDir),
-    getTableCounts(dataDir),
-  ]);
+  const [dbInfo, tableCounts] = await Promise.all([getDatabaseInfo(dataDir), getTableCounts(dataDir)]);
   const database = {
     path: sanitizePath(path.join(dataDir, "claude-mem.db")),
     exists: dbInfo.exists,
     size: dbInfo.size,
-    counts: tableCounts,
+    counts: tableCounts
   };
 
   const settingsInfo = await getSettings(dataDir);
   const config = {
     settingsPath: sanitizePath(path.join(dataDir, "settings.json")),
     settingsExist: settingsInfo.exists,
-    settings: settingsInfo.settings,
+    settings: settingsInfo.settings
   };
 
   return {
@@ -305,7 +284,7 @@ export async function collectDiagnostics(
     worker,
     logs,
     database,
-    config,
+    config
   };
 }
 
@@ -366,7 +345,7 @@ export function formatDiagnostics(diagnostics: SystemDiagnostics): string {
       "CLAUDE_MEM_WORKER_PORT",
       "CLAUDE_MEM_WORKER_HOST",
       "CLAUDE_MEM_LOG_LEVEL",
-      "CLAUDE_MEM_CONTEXT_OBSERVATIONS",
+      "CLAUDE_MEM_CONTEXT_OBSERVATIONS"
     ];
     for (const key of keySettings) {
       if (diagnostics.config.settings[key]) {

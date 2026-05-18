@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
 interface WelcomeCardProps {
   onDismiss: () => void;
 }
 
-const STORAGE_KEY = 'claude-mem-welcome-dismissed-v3';
-const EXPLAINER_URL = '/api/onboarding/explainer';
-const DOCS_URL = 'https://docs.claude-mem.ai';
+const STORAGE_KEY = "claude-mem-welcome-dismissed-v3";
+const EXPLAINER_URL = "/api/onboarding/explainer";
+const DOCS_URL = "https://docs.claude-mem.ai";
 
 export function getStoredWelcomeDismissed(): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'true';
+    return localStorage.getItem(STORAGE_KEY) === "true";
   } catch (e: unknown) {
-    console.warn('Failed to read welcome-dismissed from localStorage:', e instanceof Error ? e.message : String(e));
+    console.warn("Failed to read welcome-dismissed from localStorage:", e instanceof Error ? e.message : String(e));
     return false;
   }
 }
@@ -20,12 +20,12 @@ export function getStoredWelcomeDismissed(): boolean {
 export function setStoredWelcomeDismissed(dismissed: boolean): void {
   try {
     if (dismissed) {
-      localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.setItem(STORAGE_KEY, "true");
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
   } catch (e: unknown) {
-    console.warn('Failed to save welcome-dismissed to localStorage:', e instanceof Error ? e.message : String(e));
+    console.warn("Failed to save welcome-dismissed to localStorage:", e instanceof Error ? e.message : String(e));
   }
 }
 
@@ -38,7 +38,16 @@ function DismissButton({ onClick }: { onClick: () => void }) {
       aria-label="Close welcome"
       title="Close (Esc)"
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -140,23 +149,23 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    kind: 'stream',
+    kind: "stream",
     illustration: <StreamIllustration />,
-    title: 'Live feed',
-    description: 'Observations, summaries, and prompts stream in live.',
+    title: "Live feed",
+    description: "Observations, summaries, and prompts stream in live."
   },
   {
-    kind: 'tune',
+    kind: "tune",
     illustration: <TuneIllustration />,
-    title: 'Tune it',
-    description: 'The gear in the top-right tunes memory injection.',
+    title: "Tune it",
+    description: "The gear in the top-right tunes memory injection."
   },
   {
-    kind: 'recall',
+    kind: "recall",
     illustration: <RecallIllustration />,
-    title: 'Recall it',
-    description: 'Ask Claude or run /mem-search to find past work.',
-  },
+    title: "Recall it",
+    description: "Ask Claude or run /mem-search to find past work."
+  }
 ];
 
 export function WelcomeCard({ onDismiss }: WelcomeCardProps) {
@@ -167,10 +176,10 @@ export function WelcomeCard({ onDismiss }: WelcomeCardProps) {
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleDismiss();
+      if (e.key === "Escape") handleDismiss();
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -192,7 +201,7 @@ export function WelcomeCard({ onDismiss }: WelcomeCardProps) {
         </header>
 
         <div className="welcome-modal-grid">
-          {FEATURES.map(feature => (
+          {FEATURES.map((feature) => (
             <div key={feature.kind} className={`welcome-modal-feature welcome-modal-feature-${feature.kind}`}>
               <div className="welcome-modal-feature-inner">
                 {feature.illustration}
@@ -207,7 +216,7 @@ export function WelcomeCard({ onDismiss }: WelcomeCardProps) {
           <a href={EXPLAINER_URL} target="_blank" rel="noopener noreferrer">
             How it works
           </a>
-          <span className="welcome-modal-footer-sep">{'·'}</span>
+          <span className="welcome-modal-footer-sep">{"·"}</span>
           <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
             Read the docs
           </a>

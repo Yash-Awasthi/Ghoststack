@@ -146,10 +146,10 @@ Two commits, in order:
 
 ### What To Decide
 
-| File | Recommendation | Rationale |
-|------|---------------|-----------|
-| `PR_REORIENTATION_REPORT.md` | Use as PR body, then delete (or move to `docs/internal/`). | It's a snapshot, not durable docs. Useful for the PR reviewer; rots in-tree. |
-| `AGENTS.md` | Read first, then either commit (if generally useful guidance) or move under `.scratch/`. | Decision depends on content. |
+| File                         | Recommendation                                                                           | Rationale                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `PR_REORIENTATION_REPORT.md` | Use as PR body, then delete (or move to `docs/internal/`).                               | It's a snapshot, not durable docs. Useful for the PR reviewer; rots in-tree. |
+| `AGENTS.md`                  | Read first, then either commit (if generally useful guidance) or move under `.scratch/`. | Decision depends on content.                                                 |
 
 ### Verification
 

@@ -13,7 +13,7 @@ const PROFILE_DIR = "./my-profile";
 console.log("=== Session 1: Setting state ===");
 let ctx = await launchPersistentContext({
   userDataDir: PROFILE_DIR,
-  headless: false,
+  headless: false
 });
 let page = ctx.pages()[0] || (await ctx.newPage());
 await page.goto("https://example.com");
@@ -29,7 +29,7 @@ await ctx.close();
 console.log("\n=== Session 2: Verifying persistence ===");
 ctx = await launchPersistentContext({
   userDataDir: PROFILE_DIR,
-  headless: false,
+  headless: false
 });
 page = ctx.pages()[0] || (await ctx.newPage());
 await page.goto("https://example.com");

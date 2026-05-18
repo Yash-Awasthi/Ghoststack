@@ -1,6 +1,7 @@
 # Codebuff
 
 Codebuff is an advanced coding agent with a composable agent framework. It also includes:
+
 - freebuff, the free coding agent
 
 ## Goal

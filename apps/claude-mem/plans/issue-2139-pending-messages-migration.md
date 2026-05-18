@@ -15,9 +15,10 @@ Result: `pending_messages` is created from `createPendingMessagesTable()` (v16) 
 
 Mirror `MigrationRunner.rebuildPendingMessagesForSelfHealingClaim` into `SessionStore.ts` following the **exact mirror precedent already established** in that file at `SessionStore.ts:1003-1039` (`addObservationSubagentColumns`) and `SessionStore.ts:1041-…` (`addObservationsUniqueContentHashIndex`). Each existing mirror's docstring explicitly says: "Mirrors `MigrationRunner.<name>` so bundled artifacts that embed SessionStore (e.g. worker-service.cjs, context-generator.cjs) stay schema-consistent."
 
-We do **not** need a new schema_versions number. The existing migration is v28; we just need SessionStore to apply it. The mirror should be **column-existence driven** (not version-trust driven) per the SessionStore convention at line 952: *"Cannot trust schema_versions alone — the old MigrationRunner may have recorded version 26 without the ALTER TABLE actually succeeding. Always check column existence directly."* This matters because real-world affected DBs already have v29 recorded (per the issue) — checking version alone would skip the fix.
+We do **not** need a new schema_versions number. The existing migration is v28; we just need SessionStore to apply it. The mirror should be **column-existence driven** (not version-trust driven) per the SessionStore convention at line 952: _"Cannot trust schema_versions alone — the old MigrationRunner may have recorded version 26 without the ALTER TABLE actually succeeding. Always check column existence directly."_ This matters because real-world affected DBs already have v29 recorded (per the issue) — checking version alone would skip the fix.
 
 We should use the **simple `ALTER TABLE` approach** the issue suggests rather than the full table-rebuild from runner.ts, because:
+
 - ALTER TABLE is safe to run on DBs that already reached v29 with rows present.
 - The runner.ts rebuild's only extra work was dropping a legacy stale-reset epoch column that hasn't existed since v20 in DBs created by the SessionStore path.
 - Idempotency is achieved by `PRAGMA table_info` + column-name guards.
@@ -25,6 +26,7 @@ We should use the **simple `ALTER TABLE` approach** the issue suggests rather th
 ## Phase 0: Documentation Discovery (already done inline above)
 
 Sources consulted:
+
 - `src/services/sqlite/SessionStore.ts:30-77` (constructor migration list)
 - `src/services/sqlite/SessionStore.ts:949-1100` (existing mirror methods + docstrings)
 - `src/services/sqlite/migrations/runner.ts:22-43` (canonical migration order)
@@ -35,6 +37,7 @@ Sources consulted:
 - `plugin/scripts/worker-service.cjs` — confirmed bundled artifact has `.run(27,` and `.run(29,` but no `.run(28,` and no `rebuildPendingMessagesForSelfHealingClaim` symbol.
 
 Allowed APIs (verified to exist):
+
 - `this.db.query('PRAGMA table_info(pending_messages)').all() as TableColumnInfo[]` — used at SessionStore.ts:1024.
 - `this.db.run('ALTER TABLE pending_messages ADD COLUMN <col> <type>')` — used at SessionStore.ts:1029, 1032.
 - `this.db.run('CREATE INDEX IF NOT EXISTS …')` — used throughout.
@@ -43,6 +46,7 @@ Allowed APIs (verified to exist):
 - `TableColumnInfo` is already imported at SessionStore.ts top.
 
 Anti-patterns to avoid:
+
 - Do NOT trust `schema_versions.version = 28` alone — check `PRAGMA table_info` for column existence first (real-world DBs from issue #2139 already have v29 recorded with no v28 logic ever applied).
 - Do NOT do a full table rebuild in SessionStore — risky on populated DBs and unnecessary; use ALTER TABLE.
 - Do NOT add a new version number (e.g. v30). The migration is v28 — we are completing what was already specified, not creating new schema.
@@ -59,7 +63,7 @@ In the constructor migration list, insert one line between line 75 (`this.addObs
 
 ```ts
 this.addObservationSubagentColumns();
-this.addPendingMessagesToolUseIdAndWorkerPidColumns();   // ← new
+this.addPendingMessagesToolUseIdAndWorkerPidColumns(); // ← new
 this.addObservationsUniqueContentHashIndex();
 ```
 
@@ -137,6 +141,7 @@ private addPendingMessagesToolUseIdAndWorkerPidColumns(): void {
 ```
 
 `TableNameRow` is not currently imported in SessionStore.ts. **Check the existing imports**; if absent, either:
+
 - Add `TableNameRow` to the existing `import { TableColumnInfo, … } from '../../types/database.js';` line, or
 - Inline the cast as `as Array<{ name: string }>` (matches the inline pattern used elsewhere in the file).
 

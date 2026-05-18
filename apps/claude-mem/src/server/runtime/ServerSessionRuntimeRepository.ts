@@ -2,12 +2,12 @@
 
 import {
   PostgresServerSessionsRepository,
-  type PostgresServerSession,
-} from '../../storage/postgres/server-sessions.js';
-import type { PostgresAgentEvent } from '../../storage/postgres/agent-events.js';
-import type { JsonObject } from '../../storage/postgres/utils.js';
-import type { PostgresPool } from '../../storage/postgres/pool.js';
-import type { PostgresQueryable } from '../../storage/postgres/utils.js';
+  type PostgresServerSession
+} from "../../storage/postgres/server-sessions.js";
+import type { PostgresAgentEvent } from "../../storage/postgres/agent-events.js";
+import type { JsonObject } from "../../storage/postgres/utils.js";
+import type { PostgresPool } from "../../storage/postgres/pool.js";
+import type { PostgresQueryable } from "../../storage/postgres/utils.js";
 
 // ServerSessionRuntimeRepository is the runtime helper layer used by Server
 // beta routes and generation policies. It is intentionally thin: every method
@@ -53,7 +53,7 @@ export class ServerSessionRuntimeRepository {
     const existing = await this.repo.findByExternalIdForScope({
       externalSessionId: input.externalSessionId,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     });
     if (existing) {
       return existing;
@@ -66,7 +66,7 @@ export class ServerSessionRuntimeRepository {
       agentId: input.agentId ?? null,
       agentType: input.agentType ?? null,
       platformSource: input.platformSource ?? null,
-      metadata: input.metadata ?? {},
+      metadata: input.metadata ?? {}
     });
   }
 
@@ -74,22 +74,24 @@ export class ServerSessionRuntimeRepository {
     return this.repo.getByIdForScope({
       id: input.id,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     });
   }
 
-  async findByExternalId(input: {
-    externalSessionId: string;
-  } & ServerSessionScope): Promise<PostgresServerSession | null> {
+  async findByExternalId(
+    input: {
+      externalSessionId: string;
+    } & ServerSessionScope
+  ): Promise<PostgresServerSession | null> {
     return this.repo.findByExternalIdForScope({
       externalSessionId: input.externalSessionId,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     });
   }
 
   async listUnprocessedEvents(
-    input: { serverSessionId: string; limit?: number } & ServerSessionScope,
+    input: { serverSessionId: string; limit?: number } & ServerSessionScope
   ): Promise<PostgresAgentEvent[]> {
     const params: {
       serverSessionId: string;
@@ -99,7 +101,7 @@ export class ServerSessionRuntimeRepository {
     } = {
       serverSessionId: input.serverSessionId,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     };
     if (input.limit !== undefined) {
       params.limit = input.limit;
@@ -114,50 +116,42 @@ export class ServerSessionRuntimeRepository {
    * source_id) UNIQUE constraint on observation_generation_jobs collapses
    * duplicate enqueue attempts.
    */
-  async endSession(
-    input: { id: string } & ServerSessionScope,
-  ): Promise<PostgresServerSession | null> {
+  async endSession(input: { id: string } & ServerSessionScope): Promise<PostgresServerSession | null> {
     return this.repo.endSession({
       id: input.id,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     });
   }
 
-  async markGenerationStarted(
-    input: { id: string } & ServerSessionScope,
-  ): Promise<PostgresServerSession | null> {
+  async markGenerationStarted(input: { id: string } & ServerSessionScope): Promise<PostgresServerSession | null> {
     return this.repo.markGenerationStarted({
       id: input.id,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     });
   }
 
-  async markGenerationCompleted(
-    input: { id: string } & ServerSessionScope,
-  ): Promise<PostgresServerSession | null> {
+  async markGenerationCompleted(input: { id: string } & ServerSessionScope): Promise<PostgresServerSession | null> {
     return this.repo.markGenerationCompleted({
       id: input.id,
       projectId: input.projectId,
-      teamId: input.teamId,
+      teamId: input.teamId
     });
   }
 
   async markGenerationFailed(
-    input: { id: string; error?: string | null } & ServerSessionScope,
+    input: { id: string; error?: string | null } & ServerSessionScope
   ): Promise<PostgresServerSession | null> {
     return this.repo.markGenerationFailed({
       id: input.id,
       projectId: input.projectId,
       teamId: input.teamId,
-      error: input.error ?? null,
+      error: input.error ?? null
     });
   }
 }
 
-export function createServerSessionRuntimeRepository(
-  pool: PostgresPool,
-): ServerSessionRuntimeRepository {
+export function createServerSessionRuntimeRepository(pool: PostgresPool): ServerSessionRuntimeRepository {
   return new ServerSessionRuntimeRepository({ client: pool });
 }

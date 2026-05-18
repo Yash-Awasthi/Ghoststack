@@ -1,10 +1,10 @@
-import React, { useMemo, useRef, useEffect } from 'react';
-import { Observation, Summary, UserPrompt, FeedItem } from '../types';
-import { ObservationCard } from './ObservationCard';
-import { SummaryCard } from './SummaryCard';
-import { PromptCard } from './PromptCard';
-import { ScrollToTop } from './ScrollToTop';
-import { UI } from '../constants/ui';
+import React, { useMemo, useRef, useEffect } from "react";
+import { Observation, Summary, UserPrompt, FeedItem } from "../types";
+import { ObservationCard } from "./ObservationCard";
+import { SummaryCard } from "./SummaryCard";
+import { PromptCard } from "./PromptCard";
+import { ScrollToTop } from "./ScrollToTop";
+import { UI } from "../constants/ui";
 
 interface FeedProps {
   observations: Observation[];
@@ -50,9 +50,9 @@ export function Feed({ observations, summaries, prompts, onLoadMore, isLoading, 
 
   const items = useMemo<FeedItem[]>(() => {
     const combined = [
-      ...observations.map(o => ({ ...o, itemType: 'observation' as const })),
-      ...summaries.map(s => ({ ...s, itemType: 'summary' as const })),
-      ...prompts.map(p => ({ ...p, itemType: 'prompt' as const }))
+      ...observations.map((o) => ({ ...o, itemType: "observation" as const })),
+      ...summaries.map((s) => ({ ...s, itemType: "summary" as const })),
+      ...prompts.map((p) => ({ ...p, itemType: "prompt" as const }))
     ];
 
     return combined.sort((a, b) => b.created_at_epoch - a.created_at_epoch);
@@ -62,32 +62,30 @@ export function Feed({ observations, summaries, prompts, onLoadMore, isLoading, 
     <div className="feed" ref={feedRef}>
       <ScrollToTop targetRef={feedRef} />
       <div className="feed-content">
-        {items.map(item => {
+        {items.map((item) => {
           const key = `${item.itemType}-${item.id}`;
-          if (item.itemType === 'observation') {
+          if (item.itemType === "observation") {
             return <ObservationCard key={key} observation={item} />;
-          } else if (item.itemType === 'summary') {
+          } else if (item.itemType === "summary") {
             return <SummaryCard key={key} summary={item} />;
           } else {
             return <PromptCard key={key} prompt={item} />;
           }
         })}
         {items.length === 0 && !isLoading && (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#8b949e' }}>
-            No items to display
-          </div>
+          <div style={{ textAlign: "center", padding: "40px", color: "#8b949e" }}>No items to display</div>
         )}
         {isLoading && (
-          <div style={{ textAlign: 'center', padding: '20px', color: '#8b949e' }}>
-            <div className="spinner" style={{ display: 'inline-block', marginRight: '10px' }}></div>
+          <div style={{ textAlign: "center", padding: "20px", color: "#8b949e" }}>
+            <div className="spinner" style={{ display: "inline-block", marginRight: "10px" }}></div>
             Loading more...
           </div>
         )}
         {hasMore && !isLoading && items.length > 0 && (
-          <div ref={loadMoreRef} style={{ height: '20px', margin: '10px 0' }} />
+          <div ref={loadMoreRef} style={{ height: "20px", margin: "10px 0" }} />
         )}
         {!hasMore && items.length > 0 && (
-          <div style={{ textAlign: 'center', padding: '20px', color: '#8b949e', fontSize: '14px' }}>
+          <div style={{ textAlign: "center", padding: "20px", color: "#8b949e", fontSize: "14px" }}>
             No more items to load
           </div>
         )}

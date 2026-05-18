@@ -40,7 +40,10 @@ import { initializeAgentRegistry } from './utils/local-agent-registry'
 import { clearLogFile, logger } from './utils/logger'
 import { shouldShowProjectPicker } from './utils/project-picker'
 import { saveRecentProject } from './utils/recent-projects'
-import { installProcessCleanupHandlers, TERMINAL_RESET_SEQUENCES } from './utils/renderer-cleanup'
+import {
+  installProcessCleanupHandlers,
+  TERMINAL_RESET_SEQUENCES,
+} from './utils/renderer-cleanup'
 import { initializeSkillRegistry } from './utils/skill-registry'
 import { detectTerminalTheme } from './utils/terminal-color-detection'
 import { setOscDetectedTheme } from './utils/theme-system'
@@ -73,7 +76,7 @@ function loadPackageVersion(): string {
 // Without this, refetchInterval won't work because TanStack Query thinks the app is "unfocused"
 focusManager.setEventListener(() => {
   // No-op: no event listeners in CLI environment (no window focus/visibility events)
-  return () => { }
+  return () => {}
 })
 focusManager.setFocused(true)
 
@@ -122,7 +125,10 @@ function parseArgs(): ParsedArgs {
         '--cwd <directory>',
         'Set the working directory (default: current directory)',
       )
-      .addHelpText('after', '\nCommands:\n  login                          Log in to your account')
+      .addHelpText(
+        'after',
+        '\nCommands:\n  login                          Log in to your account',
+      )
       .helpOption('-h, --help', 'Show this help message')
       .parse(process.argv)
   } else {
@@ -135,7 +141,10 @@ function parseArgs(): ParsedArgs {
         '--agent <agent-id>',
         'Run a specific agent id (skips loading local .agents overrides)',
       )
-      .option('--clear-logs', 'Remove any existing CLI log files before starting')
+      .option(
+        '--clear-logs',
+        'Remove any existing CLI log files before starting',
+      )
       .option(
         '--continue [conversation-id]',
         'Continue from a previous conversation (optionally specify a conversation id)',
@@ -148,7 +157,10 @@ function parseArgs(): ParsedArgs {
       .option('--free', 'Start in LITE mode (deprecated alias)')
       .option('--max', 'Start in MAX mode')
       .option('--plan', 'Start in PLAN mode')
-      .addHelpText('after', '\nCommands:\n  login                          Log in to your account\n  publish                        Publish agents to the registry')
+      .addHelpText(
+        'after',
+        '\nCommands:\n  login                          Log in to your account\n  publish                        Publish agents to the registry',
+      )
       .helpOption('-h, --help', 'Show this help message')
       .argument('[prompt...]', 'Initial prompt to send to the agent')
       .allowExcessArguments(true)
@@ -210,7 +222,9 @@ async function main(): Promise<void> {
     try {
       dirListing = fs.readdirSync(execDir)
     } catch (err) {
-      dirListing = [`<readdir failed: ${err instanceof Error ? err.message : err}>`]
+      dirListing = [
+        `<readdir failed: ${err instanceof Error ? err.message : err}>`,
+      ]
     }
     console.error(
       `[smoke diag] execPath=${process.execPath}\n` +

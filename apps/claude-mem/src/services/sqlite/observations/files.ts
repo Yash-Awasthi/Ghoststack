@@ -1,7 +1,6 @@
-
-import { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
-import type { SessionFilesResult } from './types.js';
+import { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
+import type { SessionFilesResult } from "./types.js";
 
 export function parseFileList(value: string | null | undefined): string[] {
   if (!value) return [];
@@ -13,10 +12,7 @@ export function parseFileList(value: string | null | undefined): string[] {
   }
 }
 
-export function getFilesForSession(
-  db: Database,
-  memorySessionId: string
-): SessionFilesResult {
+export function getFilesForSession(db: Database, memorySessionId: string): SessionFilesResult {
   const stmt = db.prepare(`
     SELECT files_read, files_modified
     FROM observations
@@ -32,9 +28,9 @@ export function getFilesForSession(
   const filesModifiedSet = new Set<string>();
 
   for (const row of rows) {
-    parseFileList(row.files_read).forEach(f => filesReadSet.add(f));
+    parseFileList(row.files_read).forEach((f) => filesReadSet.add(f));
 
-    parseFileList(row.files_modified).forEach(f => filesModifiedSet.add(f));
+    parseFileList(row.files_modified).forEach((f) => filesModifiedSet.add(f));
   }
 
   return {

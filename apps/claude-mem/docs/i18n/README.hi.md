@@ -1,6 +1,7 @@
 🌐 यह एक स्वचालित अनुवाद है। समुदाय से सुधार का स्वागत है!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ Claude Code को पुनः आरंभ करें। पिछले स
 Claude-Mem mem-search स्किल के माध्यम से बुद्धिमान खोज प्रदान करता है जो स्वचालित रूप से सक्रिय हो जाती है जब आप पिछले काम के बारे में पूछते हैं:
 
 **यह कैसे काम करता है:**
-- बस स्वाभाविक रूप से पूछें: *"हमने पिछले सत्र में क्या किया?"* या *"क्या हमने पहले इस बग को ठीक किया था?"*
+
+- बस स्वाभाविक रूप से पूछें: _"हमने पिछले सत्र में क्या किया?"_ या _"क्या हमने पहले इस बग को ठीक किया था?"_
 - Claude स्वचालित रूप से प्रासंगिक संदर्भ खोजने के लिए mem-search स्किल को सक्रिय करता है
 
 **उपलब्ध खोज संचालन:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## समर्थन
 

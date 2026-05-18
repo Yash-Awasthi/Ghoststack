@@ -1,27 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Application } from 'express';
-import { spawn } from 'child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import net from 'net';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { Server, type RouteHandler } from '../../services/server/Server.js';
-import { paths } from '../../shared/paths.js';
-import { logger } from '../../utils/logger.js';
-import {
-  captureProcessStartToken,
-  verifyPidFileOwnership,
-  type PidInfo,
-} from '../../supervisor/process-registry.js';
-import { ServerV1PostgresRoutes } from '../routes/v1/ServerV1PostgresRoutes.js';
-import { SessionsObservationsAdapter } from '../compat/SessionsObservationsAdapter.js';
-import { SessionsSummarizeAdapter } from '../compat/SessionsSummarizeAdapter.js';
-import { ActiveServerBetaQueueManager } from './ActiveServerBetaQueueManager.js';
-import type { ServerBetaServiceGraph, ServerBetaQueueLaneMetric } from './types.js';
+import type { Application } from "express";
+import { spawn } from "child_process";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
+import net from "net";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { Server, type RouteHandler } from "../../services/server/Server.js";
+import { paths } from "../../shared/paths.js";
+import { logger } from "../../utils/logger.js";
+import { captureProcessStartToken, verifyPidFileOwnership, type PidInfo } from "../../supervisor/process-registry.js";
+import { ServerV1PostgresRoutes } from "../routes/v1/ServerV1PostgresRoutes.js";
+import { SessionsObservationsAdapter } from "../compat/SessionsObservationsAdapter.js";
+import { SessionsSummarizeAdapter } from "../compat/SessionsSummarizeAdapter.js";
+import { ActiveServerBetaQueueManager } from "./ActiveServerBetaQueueManager.js";
+import type { ServerBetaServiceGraph, ServerBetaQueueLaneMetric } from "./types.js";
 
-const SERVER_BETA_RUNTIME = 'server-beta';
-const DEFAULT_SERVER_BETA_HOST = '127.0.0.1';
+const SERVER_BETA_RUNTIME = "server-beta";
+const DEFAULT_SERVER_BETA_HOST = "127.0.0.1";
 const DEFAULT_SERVER_BETA_PORT = 37877;
 
 export interface ServerBetaServiceOptions {
@@ -37,12 +33,12 @@ export interface ServerBetaRuntimeState {
   port: number;
   host: string;
   startedAt: string;
-  bootstrap: ServerBetaServiceGraph['postgres']['bootstrap'];
+  bootstrap: ServerBetaServiceGraph["postgres"]["bootstrap"];
   boundaries: {
-    queueManager: ReturnType<ServerBetaServiceGraph['queueManager']['getHealth']>;
-    generationWorkerManager: ReturnType<ServerBetaServiceGraph['generationWorkerManager']['getHealth']>;
-    providerRegistry: ReturnType<ServerBetaServiceGraph['providerRegistry']['getHealth']>;
-    eventBroadcaster: ReturnType<ServerBetaServiceGraph['eventBroadcaster']['getHealth']>;
+    queueManager: ReturnType<ServerBetaServiceGraph["queueManager"]["getHealth"]>;
+    generationWorkerManager: ReturnType<ServerBetaServiceGraph["generationWorkerManager"]["getHealth"]>;
+    providerRegistry: ReturnType<ServerBetaServiceGraph["providerRegistry"]["getHealth"]>;
+    eventBroadcaster: ReturnType<ServerBetaServiceGraph["eventBroadcaster"]["getHealth"]>;
   };
 }
 
@@ -50,39 +46,37 @@ class ServerBetaRuntimeInfoRoutes implements RouteHandler {
   constructor(private readonly graph: ServerBetaServiceGraph) {}
 
   setupRoutes(app: Application): void {
-    app.get('/healthz', (_req, res) => {
-      res.json({ status: 'ok', runtime: SERVER_BETA_RUNTIME });
+    app.get("/healthz", (_req, res) => {
+      res.json({ status: "ok", runtime: SERVER_BETA_RUNTIME });
     });
 
     // Phase 12 — `/v1/info` includes per-lane queue metrics so deploy probes
     // can read waiting/active/completed/failed/delayed/stalled without
     // hitting `/api/health`. Sampling is best-effort: a Redis blip surfaces
     // the lane with `unavailable: true` rather than crashing the route.
-    app.get('/v1/info', async (_req, res) => {
+    app.get("/v1/info", async (_req, res) => {
       const queueLanes = await collectQueueLaneMetrics(this.graph);
       res.json({
-        name: 'claude-mem-server',
+        name: "claude-mem-server",
         runtime: SERVER_BETA_RUNTIME,
         authMode: this.graph.authMode,
         postgres: {
           initialized: this.graph.postgres.bootstrap.initialized,
-          schemaVersion: this.graph.postgres.bootstrap.schemaVersion,
+          schemaVersion: this.graph.postgres.bootstrap.schemaVersion
         },
         boundaries: {
           queueManager: this.graph.queueManager.getHealth(),
           generationWorkerManager: this.graph.generationWorkerManager.getHealth(),
           providerRegistry: this.graph.providerRegistry.getHealth(),
-          eventBroadcaster: this.graph.eventBroadcaster.getHealth(),
+          eventBroadcaster: this.graph.eventBroadcaster.getHealth()
         },
-        queueLanes,
+        queueLanes
       });
     });
   }
 }
 
-async function collectQueueLaneMetrics(
-  graph: ServerBetaServiceGraph,
-): Promise<ServerBetaQueueLaneMetric[]> {
+async function collectQueueLaneMetrics(graph: ServerBetaServiceGraph): Promise<ServerBetaQueueLaneMetric[]> {
   const manager = graph.queueManager;
   if (!(manager instanceof ActiveServerBetaQueueManager)) {
     return [];
@@ -125,12 +119,12 @@ export class ServerBetaService {
         await this.stop();
         await this.start();
       },
-      workerPath: '',
+      workerPath: "",
       runtime: SERVER_BETA_RUNTIME,
       getAiStatus: () => ({
-        provider: 'disabled',
+        provider: "disabled",
         authMethod: this.graph.authMode,
-        lastInteraction: null,
+        lastInteraction: null
       }),
       // Phase 10 — surface BullMQ/Valkey health on /api/health so deploy
       // probes (and the Docker E2E) can confirm the queue engine without
@@ -142,20 +136,20 @@ export class ServerBetaService {
       getQueueHealth: async () => {
         const health = this.graph.queueManager.getHealth();
         const details = (health.details ?? {}) as Record<string, unknown>;
-        if (health.status !== 'active' || details.engine !== 'bullmq') {
+        if (health.status !== "active" || details.engine !== "bullmq") {
           return null;
         }
         const lanes = await collectQueueLaneMetrics(this.graph);
         return {
-          engine: 'bullmq' as const,
+          engine: "bullmq" as const,
           redis: {
-            status: 'ok' as const,
-            mode: String(details.mode ?? 'unknown'),
-            host: String(details.host ?? '127.0.0.1'),
-            port: typeof details.port === 'number' ? details.port : 6379,
-            prefix: String(details.prefix ?? 'claude_mem'),
+            status: "ok" as const,
+            mode: String(details.mode ?? "unknown"),
+            host: String(details.host ?? "127.0.0.1"),
+            port: typeof details.port === "number" ? details.port : 6379,
+            prefix: String(details.prefix ?? "claude_mem")
           },
-          lanes: lanes.map(lane => ({
+          lanes: lanes.map((lane) => ({
             kind: lane.kind,
             name: lane.name,
             waiting: lane.waiting,
@@ -165,17 +159,17 @@ export class ServerBetaService {
             delayed: lane.delayed,
             stalled: lane.stalled,
             unavailable: lane.unavailable,
-            ...(lane.unavailableReason ? { unavailableReason: lane.unavailableReason } : {}),
-          })),
+            ...(lane.unavailableReason ? { unavailableReason: lane.unavailableReason } : {})
+          }))
         };
-      },
+      }
     });
     server.registerRoutes(new ServerBetaRuntimeInfoRoutes(this.graph));
     const v1Routes = new ServerV1PostgresRoutes({
       pool: this.graph.postgres.pool,
       queueManager: this.graph.queueManager,
-      authMode: this.graph.authMode === 'disabled' ? 'api-key' : this.graph.authMode,
-      runtime: SERVER_BETA_RUNTIME,
+      authMode: this.graph.authMode === "disabled" ? "api-key" : this.graph.authMode,
+      runtime: SERVER_BETA_RUNTIME
       // Session policy is read inside the routes (default 'per-event' from
       // resolveSessionGenerationPolicy(), env-overridable via
       // CLAUDE_MEM_SERVER_SESSION_POLICY). We do not duplicate it here.
@@ -187,17 +181,21 @@ export class ServerBetaService {
     // routes to the canonical Server beta event/job model. They share the
     // SAME shared services with /v1/* routes — never duplicate ingest or
     // session-end logic. New clients should hit /v1/* directly.
-    const compatAuthMode = this.graph.authMode === 'disabled' ? 'api-key' : this.graph.authMode;
-    server.registerRoutes(new SessionsObservationsAdapter({
-      pool: this.graph.postgres.pool,
-      ingestEvents: v1Routes.getIngestEventsService(),
-      authMode: compatAuthMode,
-    }));
-    server.registerRoutes(new SessionsSummarizeAdapter({
-      pool: this.graph.postgres.pool,
-      endSession: v1Routes.getEndSessionService(),
-      authMode: compatAuthMode,
-    }));
+    const compatAuthMode = this.graph.authMode === "disabled" ? "api-key" : this.graph.authMode;
+    server.registerRoutes(
+      new SessionsObservationsAdapter({
+        pool: this.graph.postgres.pool,
+        ingestEvents: v1Routes.getIngestEventsService(),
+        authMode: compatAuthMode
+      })
+    );
+    server.registerRoutes(
+      new SessionsSummarizeAdapter({
+        pool: this.graph.postgres.pool,
+        endSession: v1Routes.getEndSessionService(),
+        authMode: compatAuthMode
+      })
+    );
 
     server.finalizeRoutes();
 
@@ -207,7 +205,7 @@ export class ServerBetaService {
     if (this.persistRuntimeState) {
       writeServerBetaState(this.runtimeState());
     }
-    logger.info('SYSTEM', 'Server beta started', { host: this.host, port: this.boundPort, pid: process.pid });
+    logger.info("SYSTEM", "Server beta started", { host: this.host, port: this.boundPort, pid: process.pid });
   }
 
   async stop(): Promise<void> {
@@ -220,7 +218,7 @@ export class ServerBetaService {
         try {
           await this.server.close();
         } catch (error: unknown) {
-          if ((error as NodeJS.ErrnoException)?.code !== 'ERR_SERVER_NOT_RUNNING') {
+          if ((error as NodeJS.ErrnoException)?.code !== "ERR_SERVER_NOT_RUNNING") {
             throw error;
           }
         }
@@ -230,7 +228,7 @@ export class ServerBetaService {
         this.graph.queueManager.close(),
         this.graph.generationWorkerManager.close(),
         this.graph.providerRegistry.close(),
-        this.graph.eventBroadcaster.close(),
+        this.graph.eventBroadcaster.close()
       ]);
       await this.graph.postgres.pool.end();
     } finally {
@@ -239,7 +237,7 @@ export class ServerBetaService {
       }
       this.boundPort = null;
       this.stopping = false;
-      logger.info('SYSTEM', 'Server beta stopped');
+      logger.info("SYSTEM", "Server beta stopped");
     }
   }
 
@@ -259,32 +257,32 @@ export class ServerBetaService {
         queueManager: this.graph.queueManager.getHealth(),
         generationWorkerManager: this.graph.generationWorkerManager.getHealth(),
         providerRegistry: this.graph.providerRegistry.getHealth(),
-        eventBroadcaster: this.graph.eventBroadcaster.getHealth(),
-      },
+        eventBroadcaster: this.graph.eventBroadcaster.getHealth()
+      }
     };
   }
 }
 
 function resolveBoundPort(server: Server): number | null {
   const address = server.getHttpServer()?.address();
-  return address && typeof address !== 'string' ? address.port : null;
+  return address && typeof address !== "string" ? address.port : null;
 }
 
 export async function runServerBetaCli(argv: string[] = process.argv.slice(2)): Promise<void> {
-  const command = argv[0] ?? '--daemon';
+  const command = argv[0] ?? "--daemon";
   const port = getServerBetaPort();
   const host = process.env.CLAUDE_MEM_SERVER_HOST ?? DEFAULT_SERVER_BETA_HOST;
 
   // Phase 10: `claude-mem server worker [start|--daemon]` runs the BullMQ
   // generation worker as a foregrounded process — no HTTP server, no route
   // registration. In Compose this becomes a separately scaled service.
-  if (command === 'worker') {
-    const sub = (argv[1] ?? '--daemon').toLowerCase();
-    if (sub === 'start' || sub === '--daemon' || sub === 'run') {
+  if (command === "worker") {
+    const sub = (argv[1] ?? "--daemon").toLowerCase();
+    if (sub === "start" || sub === "--daemon" || sub === "run") {
       await runServerBetaGenerationWorker();
       return;
     }
-    console.error('Usage: server-beta-service worker start');
+    console.error("Usage: server-beta-service worker start");
     process.exit(1);
   }
 
@@ -292,81 +290,83 @@ export async function runServerBetaCli(argv: string[] = process.argv.slice(2)): 
   // but writes to the Postgres `api_keys` table the server-beta runtime
   // actually reads from. The legacy worker-service CLI talks to SQLite and
   // would be invisible to this stack.
-  if (command === 'server' && argv[1]?.toLowerCase() === 'api-key') {
+  if (command === "server" && argv[1]?.toLowerCase() === "api-key") {
     await runServerBetaApiKeyCli(argv.slice(2));
     return;
   }
 
   switch (command) {
-    case 'start': {
+    case "start": {
       const existing = readServerBetaPidFile();
       if (verifyPidFileOwnership(existing)) {
-        console.log(JSON.stringify({ status: 'ready', runtime: SERVER_BETA_RUNTIME, pid: existing.pid, port: existing.port }));
+        console.log(
+          JSON.stringify({ status: "ready", runtime: SERVER_BETA_RUNTIME, pid: existing.pid, port: existing.port })
+        );
         return;
       }
       const daemonPid = spawnServerBetaDaemon(port);
       if (daemonPid === undefined) {
-        console.error('Failed to spawn server beta daemon.');
+        console.error("Failed to spawn server beta daemon.");
         process.exit(1);
       }
-      console.log(JSON.stringify({ status: 'starting', runtime: SERVER_BETA_RUNTIME, pid: daemonPid, port }));
+      console.log(JSON.stringify({ status: "starting", runtime: SERVER_BETA_RUNTIME, pid: daemonPid, port }));
       return;
     }
 
-    case 'stop': {
+    case "stop": {
       const existing = readServerBetaPidFile();
       if (!verifyPidFileOwnership(existing)) {
         removeServerBetaState();
-        console.log('Server beta is not running');
+        console.log("Server beta is not running");
         return;
       }
-      process.kill(existing.pid, 'SIGTERM');
+      process.kill(existing.pid, "SIGTERM");
       await waitForPidExit(existing.pid, 5000);
       removeServerBetaState();
-      console.log('Server beta stopped');
+      console.log("Server beta stopped");
       return;
     }
 
-    case 'restart': {
-      await runServerBetaCli(['stop']);
-      await runServerBetaCli(['start']);
+    case "restart": {
+      await runServerBetaCli(["stop"]);
+      await runServerBetaCli(["start"]);
       return;
     }
 
-    case 'status': {
+    case "status": {
       const state = readServerBetaRuntimeState();
       const pidInfo = readServerBetaPidFile();
       if (state && verifyPidFileOwnership(pidInfo)) {
-        console.log('Server beta is running');
+        console.log("Server beta is running");
         console.log(`  PID: ${state.pid}`);
         console.log(`  Port: ${state.port}`);
         console.log(`  Runtime: ${state.runtime}`);
         console.log(`  Started: ${state.startedAt}`);
       } else {
-        console.log('Server beta is not running');
+        console.log("Server beta is not running");
       }
       return;
     }
 
-    case '--daemon': {
+    case "--daemon": {
       const existing = readServerBetaPidFile();
-      if (verifyPidFileOwnership(existing) || await isPortInUse(port, host)) {
+      if (verifyPidFileOwnership(existing) || (await isPortInUse(port, host))) {
         process.exit(0);
       }
-      const { createServerBetaService } = await import('./create-server-beta-service.js');
+      const { createServerBetaService } = await import("./create-server-beta-service.js");
       const service = await createServerBetaService();
       const shutdown = async () => {
         await service.stop();
         process.exit(0);
       };
-      process.once('SIGTERM', shutdown);
-      process.once('SIGINT', shutdown);
+      process.once("SIGTERM", shutdown);
+      process.once("SIGINT", shutdown);
       await service.start();
       return;
     }
 
     default:
-      console.error('Usage: server-beta-service start|stop|restart|status');
+      console.error("Usage: server-beta-service start|stop|restart|status");
       process.exit(1);
   }
 }
@@ -380,20 +380,20 @@ export async function runServerBetaApiKeyCli(argv: string[]): Promise<void> {
   const options = parseFlagArgs(argv.slice(1));
 
   if (!process.env.CLAUDE_MEM_SERVER_DATABASE_URL) {
-    console.error('CLAUDE_MEM_SERVER_DATABASE_URL is required for `server api-key` commands.');
+    console.error("CLAUDE_MEM_SERVER_DATABASE_URL is required for `server api-key` commands.");
     process.exit(1);
   }
 
-  const { getSharedPostgresPool } = await import('../../storage/postgres/index.js');
-  const { PostgresAuthRepository } = await import('../../storage/postgres/auth.js');
-  const { createHash, randomBytes } = await import('crypto');
+  const { getSharedPostgresPool } = await import("../../storage/postgres/index.js");
+  const { PostgresAuthRepository } = await import("../../storage/postgres/auth.js");
+  const { createHash, randomBytes } = await import("crypto");
   const pool = getSharedPostgresPool({ requireDatabaseUrl: true });
   const repo = new PostgresAuthRepository(pool);
 
   try {
-    if (sub === 'create') {
-      const scopes = (options.scope ?? options.scopes ?? 'memories:read')
-        .split(',')
+    if (sub === "create") {
+      const scopes = (options.scope ?? options.scopes ?? "memories:read")
+        .split(",")
         .map((scope: string) => scope.trim())
         .filter(Boolean);
       // Resolve team/project. If the caller passed --team/--project, honor
@@ -404,43 +404,47 @@ export async function runServerBetaApiKeyCli(argv: string[]): Promise<void> {
       let teamId = options.team ?? null;
       let projectId = options.project ?? null;
       if (!teamId || !projectId) {
-        const { bootstrapServerBetaApiKey } = await import('../../services/hooks/server-beta-bootstrap.js');
+        const { bootstrapServerBetaApiKey } = await import("../../services/hooks/server-beta-bootstrap.js");
         const result = await bootstrapServerBetaApiKey({ pool, closePool: false });
         teamId = result.teamId;
         projectId = result.projectId;
       }
-      const rawKey = `cmem_${randomBytes(24).toString('hex')}`;
-      const keyHash = createHash('sha256').update(rawKey).digest('hex');
+      const rawKey = `cmem_${randomBytes(24).toString("hex")}`;
+      const keyHash = createHash("sha256").update(rawKey).digest("hex");
       const created = await repo.createApiKey({
         keyHash,
         teamId,
         projectId,
         scopes,
-        actorId: 'system:server-beta-cli',
+        actorId: "system:server-beta-cli"
       });
-      console.log(JSON.stringify({
-        id: created.id,
-        key: rawKey,
-        name: options.name ?? 'server-api-key',
-        teamId,
-        projectId,
-        scopes,
-      }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            id: created.id,
+            key: rawKey,
+            name: options.name ?? "server-api-key",
+            teamId,
+            projectId,
+            scopes
+          },
+          null,
+          2
+        )
+      );
       return;
     }
 
-    if (sub === 'list') {
+    if (sub === "list") {
       // Bound the result set to prevent unintentional cross-tenant key
       // metadata disclosure when an admin runs `api-key list` on a shared
       // host. Default page is 100; --team filters to a single tenant.
       const teamFilter = options.team ?? null;
-      const limitArg = Number.parseInt(options.limit ?? '100', 10);
-      const offsetArg = Number.parseInt(options.offset ?? '0', 10);
-      const limit = Number.isFinite(limitArg) && limitArg > 0 && limitArg <= 500
-        ? limitArg
-        : 100;
+      const limitArg = Number.parseInt(options.limit ?? "100", 10);
+      const offsetArg = Number.parseInt(options.offset ?? "0", 10);
+      const limit = Number.isFinite(limitArg) && limitArg > 0 && limitArg <= 500 ? limitArg : 100;
       const offset = Number.isFinite(offsetArg) && offsetArg >= 0 ? offsetArg : 0;
-      const where = teamFilter ? 'WHERE team_id = $1' : '';
+      const where = teamFilter ? "WHERE team_id = $1" : "";
       const params: unknown[] = teamFilter ? [teamFilter, limit, offset] : [limit, offset];
       const limitIdx = teamFilter ? 2 : 1;
       const offsetIdx = teamFilter ? 3 : 2;
@@ -459,49 +463,55 @@ export async function runServerBetaApiKeyCli(argv: string[]): Promise<void> {
          ${where}
          ORDER BY created_at DESC
          LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
-        params,
+        params
       );
-      console.log(JSON.stringify({
-        teamId: teamFilter,
-        limit,
-        offset,
-        count: result.rows.length,
-        keys: result.rows.map(row => ({
-          id: row.id,
-          teamId: row.team_id,
-          projectId: row.project_id,
-          scopes: row.scopes,
-          status: row.revoked_at ? 'revoked' : 'active',
-          lastUsedAt: row.last_used_at?.toISOString() ?? null,
-          expiresAt: row.expires_at?.toISOString() ?? null,
-          createdAt: row.created_at.toISOString(),
-        })),
-      }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            teamId: teamFilter,
+            limit,
+            offset,
+            count: result.rows.length,
+            keys: result.rows.map((row) => ({
+              id: row.id,
+              teamId: row.team_id,
+              projectId: row.project_id,
+              scopes: row.scopes,
+              status: row.revoked_at ? "revoked" : "active",
+              lastUsedAt: row.last_used_at?.toISOString() ?? null,
+              expiresAt: row.expires_at?.toISOString() ?? null,
+              createdAt: row.created_at.toISOString()
+            }))
+          },
+          null,
+          2
+        )
+      );
       return;
     }
 
-    if (sub === 'revoke') {
+    if (sub === "revoke") {
       const id = argv[1];
       if (!id) {
-        console.error('Usage: server-beta-service server api-key revoke <id>');
+        console.error("Usage: server-beta-service server api-key revoke <id>");
         process.exit(1);
       }
       const result = await pool.query(
         `UPDATE api_keys SET revoked_at = now()
          WHERE id = $1 AND revoked_at IS NULL
          RETURNING id`,
-        [id],
+        [id]
       );
       if (result.rowCount === 0) {
         console.error(`API key not found or already revoked: ${id}`);
         process.exit(1);
       }
-      console.log(JSON.stringify({ id, status: 'revoked' }, null, 2));
+      console.log(JSON.stringify({ id, status: "revoked" }, null, 2));
       return;
     }
 
-    console.error(`Unknown server api-key subcommand: ${sub ?? '(none)'}`);
-    console.error('Usage: server-beta-service server api-key create|list|revoke');
+    console.error(`Unknown server api-key subcommand: ${sub ?? "(none)"}`);
+    console.error("Usage: server-beta-service server api-key create|list|revoke");
     process.exit(1);
   } finally {
     // Pool is shared; do not close here. The process will exit and the
@@ -514,12 +524,12 @@ function parseFlagArgs(argv: string[]): Record<string, string> {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (!arg) continue;
-    if (arg.startsWith('--')) {
-      const equalsIdx = arg.indexOf('=');
+    if (arg.startsWith("--")) {
+      const equalsIdx = arg.indexOf("=");
       if (equalsIdx > -1) {
         out[arg.slice(2, equalsIdx)] = arg.slice(equalsIdx + 1);
       } else {
-        out[arg.slice(2)] = argv[i + 1] ?? '';
+        out[arg.slice(2)] = argv[i + 1] ?? "";
         i += 1;
       }
     }
@@ -534,7 +544,7 @@ function parseFlagArgs(argv: string[]): Record<string, string> {
 // CLAUDE_MEM_GENERATION_DISABLED=true so generation only happens in this
 // process.
 export async function runServerBetaGenerationWorker(): Promise<void> {
-  const { validateServerBetaEnv, createServerBetaService } = await import('./create-server-beta-service.js');
+  const { validateServerBetaEnv, createServerBetaService } = await import("./create-server-beta-service.js");
   validateServerBetaEnv();
   // Build the service WITHOUT starting HTTP. We reuse createServerBetaService
   // for pool + bootstrap + queue + generation worker wiring, but never call
@@ -543,12 +553,12 @@ export async function runServerBetaGenerationWorker(): Promise<void> {
   delete process.env.CLAUDE_MEM_GENERATION_DISABLED;
   const service = await createServerBetaService();
   const state = service.getRuntimeState();
-  logger.info('SYSTEM', 'Server beta generation worker started (no HTTP)', {
+  logger.info("SYSTEM", "Server beta generation worker started (no HTTP)", {
     pid: process.pid,
     queue: state.boundaries.queueManager,
-    generation: state.boundaries.generationWorkerManager,
+    generation: state.boundaries.generationWorkerManager
   });
-  console.log(JSON.stringify({ status: 'worker-running', runtime: SERVER_BETA_RUNTIME, pid: process.pid }));
+  console.log(JSON.stringify({ status: "worker-running", runtime: SERVER_BETA_RUNTIME, pid: process.pid }));
 
   let stopping = false;
   const shutdown = async () => {
@@ -560,8 +570,8 @@ export async function runServerBetaGenerationWorker(): Promise<void> {
       process.exit(0);
     }
   };
-  process.once('SIGTERM', shutdown);
-  process.once('SIGINT', shutdown);
+  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
 
   // Block forever — Workers run in background via BullMQ. Without this the
   // process would exit and BullMQ jobs would never be consumed.
@@ -569,7 +579,7 @@ export async function runServerBetaGenerationWorker(): Promise<void> {
 }
 
 function getServerBetaPort(): number {
-  const parsed = Number.parseInt(process.env.CLAUDE_MEM_SERVER_PORT ?? '', 10);
+  const parsed = Number.parseInt(process.env.CLAUDE_MEM_SERVER_PORT ?? "", 10);
   if (Number.isInteger(parsed) && parsed > 0) {
     return parsed;
   }
@@ -580,14 +590,14 @@ function getServerBetaPort(): number {
 }
 
 function spawnServerBetaDaemon(port: number): number | undefined {
-  const scriptPath = typeof __filename !== 'undefined' ? __filename : fileURLToPath(import.meta.url);
-  const child = spawn(process.execPath, [scriptPath, '--daemon'], {
+  const scriptPath = typeof __filename !== "undefined" ? __filename : fileURLToPath(import.meta.url);
+  const child = spawn(process.execPath, [scriptPath, "--daemon"], {
     detached: true,
-    stdio: 'ignore',
+    stdio: "ignore",
     env: {
       ...process.env,
-      CLAUDE_MEM_SERVER_PORT: String(port),
-    },
+      CLAUDE_MEM_SERVER_PORT: String(port)
+    }
   });
   child.unref();
   return child.pid;
@@ -599,7 +609,7 @@ function writeServerBetaState(state: ServerBetaRuntimeState): void {
     pid: state.pid,
     port: state.port,
     startedAt: state.startedAt,
-    startToken: captureProcessStartToken(state.pid) ?? undefined,
+    startToken: captureProcessStartToken(state.pid) ?? undefined
   };
   writeFileSync(paths.serverBetaPid(), JSON.stringify(pidInfo, null, 2));
   writeFileSync(paths.serverBetaPort(), `${state.port}\n`);
@@ -611,7 +621,7 @@ function readServerBetaPidFile(): PidInfo | null {
     return null;
   }
   try {
-    return JSON.parse(readFileSync(paths.serverBetaPid(), 'utf-8')) as PidInfo;
+    return JSON.parse(readFileSync(paths.serverBetaPid(), "utf-8")) as PidInfo;
   } catch {
     return null;
   }
@@ -622,7 +632,7 @@ function readServerBetaRuntimeState(): ServerBetaRuntimeState | null {
     return null;
   }
   try {
-    return JSON.parse(readFileSync(paths.serverBetaRuntime(), 'utf-8')) as ServerBetaRuntimeState;
+    return JSON.parse(readFileSync(paths.serverBetaRuntime(), "utf-8")) as ServerBetaRuntimeState;
   } catch {
     return null;
   }
@@ -635,28 +645,28 @@ function removeServerBetaState(): void {
 }
 
 async function isPortInUse(port: number, host: string): Promise<boolean> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const socket = net.connect({ port, host });
-    socket.once('connect', () => {
+    socket.once("connect", () => {
       socket.destroy();
       resolve(true);
     });
-    socket.once('error', () => resolve(false));
+    socket.once("error", () => resolve(false));
   });
 }
 
 async function waitForPidExit(pid: number, timeoutMs: number): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (!verifyPidFileOwnership({ pid, port: 0, startedAt: '' })) {
+    if (!verifyPidFileOwnership({ pid, port: 0, startedAt: "" })) {
       return;
     }
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 }
 
-if (process.argv[1]?.endsWith('ServerBetaService.ts') || process.argv[1]?.endsWith('server-beta-service.cjs')) {
-  runServerBetaCli().catch(error => {
+if (process.argv[1]?.endsWith("ServerBetaService.ts") || process.argv[1]?.endsWith("server-beta-service.cjs")) {
+  runServerBetaCli().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   });

@@ -24,9 +24,17 @@ const BANNER_REGISTRY: Record<
 > = {
   default: () => <PendingAttachmentsBanner />,
   image: () => <PendingAttachmentsBanner />,
-  ...(IS_FREEBUFF ? {} : { usage: ({ showTime }: { showTime: number }) => <UsageBanner showTime={showTime} /> }),
+  ...(IS_FREEBUFF
+    ? {}
+    : {
+        usage: ({ showTime }: { showTime: number }) => (
+          <UsageBanner showTime={showTime} />
+        ),
+      }),
   help: () => <HelpBanner />,
-  ...(IS_FREEBUFF ? {} : { subscriptionLimit: () => <SubscriptionLimitBanner /> }),
+  ...(IS_FREEBUFF
+    ? {}
+    : { subscriptionLimit: () => <SubscriptionLimitBanner /> }),
   ...(CHATGPT_OAUTH_ENABLED
     ? { 'connect:chatgpt': () => <ChatGptConnectBanner /> }
     : {}),

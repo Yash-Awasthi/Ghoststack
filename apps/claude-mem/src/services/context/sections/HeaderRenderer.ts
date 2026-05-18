@@ -1,8 +1,7 @@
-
-import type { ContextConfig, TokenEconomics } from '../types.js';
-import { shouldShowContextEconomics } from '../TokenCalculator.js';
-import * as Agent from '../formatters/AgentFormatter.js';
-import * as Human from '../formatters/HumanFormatter.js';
+import type { ContextConfig, TokenEconomics } from "../types.js";
+import { shouldShowContextEconomics } from "../TokenCalculator.js";
+import * as Agent from "../formatters/AgentFormatter.js";
+import * as Human from "../formatters/HumanFormatter.js";
 
 export function renderHeader(
   project: string,

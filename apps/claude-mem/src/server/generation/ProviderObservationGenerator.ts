@@ -1,35 +1,35 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Job } from 'bullmq';
-import { logger } from '../../utils/logger.js';
-import { PostgresAgentEventsRepository } from '../../storage/postgres/agent-events.js';
-import { PostgresObservationGenerationJobRepository } from '../../storage/postgres/generation-jobs.js';
-import { PostgresProjectsRepository } from '../../storage/postgres/projects.js';
-import { PostgresAuthRepository } from '../../storage/postgres/auth.js';
-import type { PostgresPool } from '../../storage/postgres/pool.js';
-import type { PostgresObservationGenerationJob } from '../../storage/postgres/generation-jobs.js';
+import type { Job } from "bullmq";
+import { logger } from "../../utils/logger.js";
+import { PostgresAgentEventsRepository } from "../../storage/postgres/agent-events.js";
+import { PostgresObservationGenerationJobRepository } from "../../storage/postgres/generation-jobs.js";
+import { PostgresProjectsRepository } from "../../storage/postgres/projects.js";
+import { PostgresAuthRepository } from "../../storage/postgres/auth.js";
+import type { PostgresPool } from "../../storage/postgres/pool.js";
+import type { PostgresObservationGenerationJob } from "../../storage/postgres/generation-jobs.js";
 import {
   assertServerGenerationJobPayload,
   ServerGenerationJobPayloadValidationError,
-  type ServerGenerationJobPayload,
-} from '../jobs/types.js';
-import { ServerClassifiedProviderError } from './providers/shared/error-classification.js';
-import type { ServerGenerationProvider } from './providers/shared/types.js';
+  type ServerGenerationJobPayload
+} from "../jobs/types.js";
+import { ServerClassifiedProviderError } from "./providers/shared/error-classification.js";
+import type { ServerGenerationProvider } from "./providers/shared/types.js";
 import {
   markGenerationFailed,
   processGeneratedResponse,
   processSessionSummaryResponse,
-  type ProcessGeneratedResponseOutcome,
-} from './processGeneratedResponse.js';
-import { PostgresServerSessionsRepository } from '../../storage/postgres/server-sessions.js';
+  type ProcessGeneratedResponseOutcome
+} from "./processGeneratedResponse.js";
+import { PostgresServerSessionsRepository } from "../../storage/postgres/server-sessions.js";
 
 // Phase 11 — sentinel exception class so the worker can distinguish
 // scope-violation/revoked-key failures from generic processor errors and
 // audit them under the right action. Marked non-retryable: an attacker who
 // tampered with a payload should never be retried into the queue.
 export class ServerGenerationScopeViolationError extends Error {
-  readonly reason: 'scope_mismatch' | 'revoked_key';
-  constructor(reason: 'scope_mismatch' | 'revoked_key', message: string) {
+  readonly reason: "scope_mismatch" | "revoked_key";
+  constructor(reason: "scope_mismatch" | "revoked_key", message: string) {
     super(message);
     this.reason = reason;
   }
@@ -67,9 +67,9 @@ export class ProviderObservationGenerator {
    * canonical authority.
    */
   async process(
-    job: Job<ServerGenerationJobPayload>,
-  ): Promise<{ jobId: string; status: 'completed'; observationCount: number }> {
-    const correlationId = `bullmq:${job.id ?? '?'}`;
+    job: Job<ServerGenerationJobPayload>
+  ): Promise<{ jobId: string; status: "completed"; observationCount: number }> {
+    const correlationId = `bullmq:${job.id ?? "?"}`;
     // Phase 12 — pivot id captured up front so every log line in this
     // dispatch carries the same identifier whether or not we manage to
     // load the canonical row. requestId comes from payload (HTTP middleware).
@@ -85,18 +85,18 @@ export class ProviderObservationGenerator {
       payload = assertServerGenerationJobPayload(job.data);
     } catch (error) {
       if (error instanceof ServerGenerationJobPayloadValidationError) {
-        logger.error('SYSTEM', 'rejecting malformed job payload at execution', {
+        logger.error("SYSTEM", "rejecting malformed job payload at execution", {
           correlationId,
-          issues: error.issues,
+          issues: error.issues
         });
       }
       throw error;
     }
 
-    if (payload.kind !== 'event' && payload.kind !== 'event-batch' && payload.kind !== 'summary') {
-      logger.warn('SYSTEM', 'unsupported job kind for ProviderObservationGenerator', {
+    if (payload.kind !== "event" && payload.kind !== "event-batch" && payload.kind !== "summary") {
+      logger.warn("SYSTEM", "unsupported job kind for ProviderObservationGenerator", {
         correlationId,
-        kind: payload.kind,
+        kind: payload.kind
       });
       throw new Error(`unsupported job kind: ${payload.kind}`);
     }
@@ -108,16 +108,16 @@ export class ProviderObservationGenerator {
     // bug; either way we audit and refuse.
     const candidate = await this.loadCanonicalOutbox(payload.generation_job_id);
     if (!candidate) {
-      logger.info('SYSTEM', 'job row not found by id; nothing to do', {
+      logger.info("SYSTEM", "job row not found by id; nothing to do", {
         correlationId,
-        generationJobId: payload.generation_job_id,
+        generationJobId: payload.generation_job_id
       });
-      return { jobId: payload.generation_job_id, status: 'completed', observationCount: 0 };
+      return { jobId: payload.generation_job_id, status: "completed", observationCount: 0 };
     }
     if (candidate.teamId !== payload.team_id || candidate.projectId !== payload.project_id) {
       const violation = new ServerGenerationScopeViolationError(
-        'scope_mismatch',
-        `BullMQ payload team/project does not match outbox row (jobId=${payload.generation_job_id})`,
+        "scope_mismatch",
+        `BullMQ payload team/project does not match outbox row (jobId=${payload.generation_job_id})`
       );
       await this.auditScopeViolation(payload, candidate, violation, correlationId);
       // Tag the row as failed so subsequent retries do not pick it up.
@@ -125,9 +125,9 @@ export class ProviderObservationGenerator {
         pool: this.options.pool,
         job: candidate,
         reason: violation.message,
-        classification: 'scope_mismatch',
+        classification: "scope_mismatch",
         retryable: false,
-        ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {}),
+        ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {})
       });
       throw violation;
     }
@@ -139,17 +139,17 @@ export class ProviderObservationGenerator {
       const revoked = await this.isApiKeyRevoked(payload.api_key_id);
       if (revoked) {
         const violation = new ServerGenerationScopeViolationError(
-          'revoked_key',
-          `api key ${payload.api_key_id} is revoked; refusing to generate for outbox ${candidate.id}`,
+          "revoked_key",
+          `api key ${payload.api_key_id} is revoked; refusing to generate for outbox ${candidate.id}`
         );
         await this.auditRevokedKey(payload, candidate, violation, correlationId);
         await markGenerationFailed({
           pool: this.options.pool,
           job: candidate,
           reason: violation.message,
-          classification: 'revoked_key',
+          classification: "revoked_key",
           retryable: false,
-          ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {}),
+          ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {})
         });
         throw violation;
       }
@@ -157,31 +157,31 @@ export class ProviderObservationGenerator {
 
     const fresh = await this.lockOutbox(payload.generation_job_id, payload.team_id, payload.project_id);
     if (!fresh) {
-      logger.info('SYSTEM', 'job no longer exists or is in terminal status; nothing to do', {
+      logger.info("SYSTEM", "job no longer exists or is in terminal status; nothing to do", {
         correlationId,
-        generationJobId: payload.generation_job_id,
+        generationJobId: payload.generation_job_id
       });
-      return { jobId: payload.generation_job_id, status: 'completed', observationCount: 0 };
+      return { jobId: payload.generation_job_id, status: "completed", observationCount: 0 };
     }
 
     // Phase 11 — emit "processing started" audit so we have a row even if
     // the provider crashes before completion.
     // Phase 12 — log+audit carry the same job_id / request_id so support
     // can pivot from BullMQ id -> outbox id -> originating HTTP request.
-    logger.info('SYSTEM', `[generation] job locked for processing`, {
+    logger.info("SYSTEM", `[generation] job locked for processing`, {
       correlationId,
       jobId: fresh.id,
       bullmqJobId: job.id ?? null,
       requestId: payloadRequestId,
       sourceType: fresh.sourceType,
-      attempt: fresh.attempts,
+      attempt: fresh.attempts
     });
     await this.auditEvent({
       teamId: fresh.teamId,
       projectId: fresh.projectId,
       apiKeyId: payload.api_key_id,
       actorId: payload.actor_id,
-      action: 'generation_job.processing',
+      action: "generation_job.processing",
       resourceId: fresh.id,
       details: {
         sourceType: fresh.sourceType,
@@ -189,8 +189,8 @@ export class ProviderObservationGenerator {
         sourceAdapter: payload.source_adapter,
         attempt: fresh.attempts,
         correlationId,
-        requestId: payloadRequestId,
-      },
+        requestId: payloadRequestId
+      }
     });
 
     try {
@@ -204,8 +204,8 @@ export class ProviderObservationGenerator {
           projectId: fresh.projectId,
           teamId: fresh.teamId,
           serverSessionId: fresh.serverSessionId,
-          projectName: project?.name ?? null,
-        },
+          projectName: project?.name ?? null
+        }
       });
 
       const persistInput = {
@@ -220,50 +220,49 @@ export class ProviderObservationGenerator {
         apiKeyId: payload.api_key_id,
         actorId: payload.actor_id,
         sourceAdapter: payload.source_adapter,
-        ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {}),
+        ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {})
       };
-      const outcome: ProcessGeneratedResponseOutcome = fresh.sourceType === 'session_summary'
-        ? await processSessionSummaryResponse(persistInput)
-        : await processGeneratedResponse(persistInput);
+      const outcome: ProcessGeneratedResponseOutcome =
+        fresh.sourceType === "session_summary"
+          ? await processSessionSummaryResponse(persistInput)
+          : await processGeneratedResponse(persistInput);
 
-      if (outcome.kind === 'parse_error') {
+      if (outcome.kind === "parse_error") {
         await markGenerationFailed({
           pool: this.options.pool,
           job: fresh,
           reason: outcome.reason,
-          classification: 'parse_error',
+          classification: "parse_error",
           retryable: false,
-          ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {}),
+          ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {})
         });
         throw new Error(`generation parse error: ${outcome.reason}`);
       }
 
-      logger.info('SYSTEM', 'generation completed', {
+      logger.info("SYSTEM", "generation completed", {
         correlationId,
         jobId: outcome.jobId,
         bullmqJobId: job.id ?? null,
         requestId: payloadRequestId,
         observationCount: outcome.observations.length,
-        privateContentDetected: outcome.privateContentDetected,
+        privateContentDetected: outcome.privateContentDetected
       });
 
       return {
         jobId: outcome.jobId,
-        status: 'completed',
-        observationCount: outcome.observations.length,
+        status: "completed",
+        observationCount: outcome.observations.length
       };
     } catch (error) {
       const classified = error instanceof ServerClassifiedProviderError ? error : null;
-      const retryable = classified
-        ? classified.kind === 'transient' || classified.kind === 'rate_limit'
-        : false;
+      const retryable = classified ? classified.kind === "transient" || classified.kind === "rate_limit" : false;
       await markGenerationFailed({
         pool: this.options.pool,
         job: fresh,
         reason: error instanceof Error ? error.message : String(error),
-        classification: classified?.kind ?? 'unknown',
+        classification: classified?.kind ?? "unknown",
         retryable,
-        ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {}),
+        ...(this.options.workerId !== undefined ? { workerId: this.options.workerId } : {})
       });
       throw error;
     }
@@ -279,11 +278,11 @@ export class ProviderObservationGenerator {
       project_id: string;
       team_id: string;
       agent_event_id: string | null;
-      source_type: 'agent_event' | 'session_summary' | 'observation_reindex';
+      source_type: "agent_event" | "session_summary" | "observation_reindex";
       source_id: string;
       server_session_id: string | null;
       job_type: string;
-      status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+      status: "queued" | "processing" | "completed" | "failed" | "cancelled";
       idempotency_key: string;
       bullmq_job_id: string | null;
       attempts: number;
@@ -298,10 +297,7 @@ export class ProviderObservationGenerator {
       payload: unknown;
       created_at: Date;
       updated_at: Date;
-    }>(
-      'SELECT * FROM observation_generation_jobs WHERE id = $1',
-      [jobId],
-    );
+    }>("SELECT * FROM observation_generation_jobs WHERE id = $1", [jobId]);
     const row = result.rows[0];
     if (!row) return null;
     return {
@@ -324,21 +320,21 @@ export class ProviderObservationGenerator {
       completedAtEpoch: row.completed_at?.getTime() ?? null,
       failedAtEpoch: row.failed_at?.getTime() ?? null,
       cancelledAtEpoch: row.cancelled_at?.getTime() ?? null,
-      lastError: row.last_error && typeof row.last_error === 'object'
-        ? (row.last_error as Record<string, unknown>)
-        : null,
-      payload: row.payload && typeof row.payload === 'object' && !Array.isArray(row.payload)
-        ? (row.payload as Record<string, unknown>)
-        : {},
+      lastError:
+        row.last_error && typeof row.last_error === "object" ? (row.last_error as Record<string, unknown>) : null,
+      payload:
+        row.payload && typeof row.payload === "object" && !Array.isArray(row.payload)
+          ? (row.payload as Record<string, unknown>)
+          : {},
       createdAtEpoch: row.created_at.getTime(),
-      updatedAtEpoch: row.updated_at.getTime(),
+      updatedAtEpoch: row.updated_at.getTime()
     };
   }
 
   private async isApiKeyRevoked(apiKeyId: string): Promise<boolean> {
     const result = await this.options.pool.query<{ revoked_at: Date | null; expires_at: Date | null }>(
-      'SELECT revoked_at, expires_at FROM api_keys WHERE id = $1',
-      [apiKeyId],
+      "SELECT revoked_at, expires_at FROM api_keys WHERE id = $1",
+      [apiKeyId]
     );
     const row = result.rows[0];
     if (!row) {
@@ -354,33 +350,33 @@ export class ProviderObservationGenerator {
     payload: ServerGenerationJobPayload,
     canonical: PostgresObservationGenerationJob,
     error: ServerGenerationScopeViolationError,
-    correlationId: string,
+    correlationId: string
   ): Promise<void> {
-    logger.error('SYSTEM', 'BullMQ payload scope mismatch — refusing to generate', {
+    logger.error("SYSTEM", "BullMQ payload scope mismatch — refusing to generate", {
       correlationId,
       generationJobId: payload.generation_job_id,
       payloadTeamId: payload.team_id,
       payloadProjectId: payload.project_id,
       canonicalTeamId: canonical.teamId,
-      canonicalProjectId: canonical.projectId,
+      canonicalProjectId: canonical.projectId
     });
     await this.auditEvent({
       teamId: canonical.teamId,
       projectId: canonical.projectId,
       apiKeyId: payload.api_key_id,
       actorId: payload.actor_id,
-      action: 'generation_job.scope_violation',
+      action: "generation_job.scope_violation",
       resourceId: canonical.id,
       details: {
-        reason: 'scope_mismatch',
+        reason: "scope_mismatch",
         message: error.message,
         payloadTeamId: payload.team_id,
         payloadProjectId: payload.project_id,
         canonicalTeamId: canonical.teamId,
         canonicalProjectId: canonical.projectId,
         sourceAdapter: payload.source_adapter,
-        correlationId,
-      },
+        correlationId
+      }
     });
   }
 
@@ -388,26 +384,26 @@ export class ProviderObservationGenerator {
     payload: ServerGenerationJobPayload,
     canonical: PostgresObservationGenerationJob,
     error: ServerGenerationScopeViolationError,
-    correlationId: string,
+    correlationId: string
   ): Promise<void> {
-    logger.warn('SYSTEM', 'api key revoked between enqueue and execute — refusing to generate', {
+    logger.warn("SYSTEM", "api key revoked between enqueue and execute — refusing to generate", {
       correlationId,
       generationJobId: payload.generation_job_id,
-      apiKeyId: payload.api_key_id,
+      apiKeyId: payload.api_key_id
     });
     await this.auditEvent({
       teamId: canonical.teamId,
       projectId: canonical.projectId,
       apiKeyId: payload.api_key_id,
       actorId: payload.actor_id,
-      action: 'generation_job.revoked_key',
+      action: "generation_job.revoked_key",
       resourceId: canonical.id,
       details: {
-        reason: 'revoked_key',
+        reason: "revoked_key",
         message: error.message,
         sourceAdapter: payload.source_adapter,
-        correlationId,
-      },
+        correlationId
+      }
     });
   }
 
@@ -428,14 +424,14 @@ export class ProviderObservationGenerator {
         actorId: input.actorId,
         apiKeyId: input.apiKeyId,
         action: input.action,
-        resourceType: 'observation_generation_job',
+        resourceType: "observation_generation_job",
         resourceId: input.resourceId,
-        details: input.details ?? {},
+        details: input.details ?? {}
       });
     } catch (auditError) {
-      logger.warn('SYSTEM', 'audit_log insert failed in ProviderObservationGenerator', {
+      logger.warn("SYSTEM", "audit_log insert failed in ProviderObservationGenerator", {
         action: input.action,
-        error: auditError instanceof Error ? auditError.message : String(auditError),
+        error: auditError instanceof Error ? auditError.message : String(auditError)
       });
     }
   }
@@ -443,17 +439,17 @@ export class ProviderObservationGenerator {
   private async lockOutbox(
     jobId: string,
     teamId: string,
-    projectId: string,
+    projectId: string
   ): Promise<PostgresObservationGenerationJob | null> {
     const repo = new PostgresObservationGenerationJobRepository(this.options.pool);
     const current = await repo.getByIdForScope({ id: jobId, projectId, teamId });
     if (!current) {
       return null;
     }
-    if (current.status === 'completed' || current.status === 'cancelled' || current.status === 'failed') {
+    if (current.status === "completed" || current.status === "cancelled" || current.status === "failed") {
       return null;
     }
-    if (current.status === 'processing') {
+    if (current.status === "processing") {
       // Another worker holds the lock — most commonly this fires when BullMQ
       // redelivers a stalled job to a second worker while the first is still
       // mid-`provider.generate()`. Returning the row here would cause both
@@ -462,11 +458,11 @@ export class ProviderObservationGenerator {
       // duplicate after the call has already happened. Skip instead. If the
       // first worker truly died, `reconcileOnStartup` (and the next BullMQ
       // retry) will resurrect the row.
-      logger.info('SYSTEM', 'generation job already in processing; skipping duplicate worker run', {
+      logger.info("SYSTEM", "generation job already in processing; skipping duplicate worker run", {
         jobId: current.id,
         lockedBy: current.lockedBy,
         lockedAtEpoch: current.lockedAtEpoch,
-        attempts: current.attempts,
+        attempts: current.attempts
       });
       return null;
     }
@@ -474,21 +470,21 @@ export class ProviderObservationGenerator {
       id: current.id,
       projectId: current.projectId,
       teamId: current.teamId,
-      status: 'processing',
-      lockedBy: this.options.workerId ?? 'server-beta-worker',
+      status: "processing",
+      lockedBy: this.options.workerId ?? "server-beta-worker"
     });
     return transitioned;
   }
 
   private async loadEvents(
     job: PostgresObservationGenerationJob,
-    payload: ServerGenerationJobPayload,
-  ): Promise<NonNullable<Awaited<ReturnType<PostgresAgentEventsRepository['getByIdForScope']>>>[]> {
+    payload: ServerGenerationJobPayload
+  ): Promise<NonNullable<Awaited<ReturnType<PostgresAgentEventsRepository["getByIdForScope"]>>>[]> {
     const repo = new PostgresAgentEventsRepository(this.options.pool);
 
-    type Event = NonNullable<Awaited<ReturnType<PostgresAgentEventsRepository['getByIdForScope']>>>;
+    type Event = NonNullable<Awaited<ReturnType<PostgresAgentEventsRepository["getByIdForScope"]>>>;
 
-    if (job.sourceType === 'session_summary') {
+    if (job.sourceType === "session_summary") {
       // Summary jobs feed the provider every event tied to the server_session
       // that hasn't already been collapsed into a completed event-generation
       // job. The session repo enforces tenant scope inside its WHERE clause.
@@ -497,31 +493,31 @@ export class ProviderObservationGenerator {
       const events = await sessions.listUnprocessedEvents({
         serverSessionId: job.serverSessionId,
         projectId: job.projectId,
-        teamId: job.teamId,
+        teamId: job.teamId
       });
       return events;
     }
 
-    if (job.sourceType !== 'agent_event') {
+    if (job.sourceType !== "agent_event") {
       return [];
     }
 
-    if (payload.kind === 'event') {
+    if (payload.kind === "event") {
       const event = await repo.getByIdForScope({
         id: payload.agent_event_id,
         projectId: job.projectId,
-        teamId: job.teamId,
+        teamId: job.teamId
       });
       return event ? [event] : [];
     }
 
-    if (payload.kind === 'event-batch') {
+    if (payload.kind === "event-batch") {
       const out: Event[] = [];
       for (const id of payload.agent_event_ids) {
         const event = await repo.getByIdForScope({
           id,
           projectId: job.projectId,
-          teamId: job.teamId,
+          teamId: job.teamId
         });
         if (event) out.push(event);
       }

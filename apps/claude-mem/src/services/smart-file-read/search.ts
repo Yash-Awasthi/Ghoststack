@@ -1,43 +1,77 @@
-
 import { readFile, readdir, stat } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { parseFilesBatch, formatFoldedView, loadUserGrammars, type FoldedFile } from "./parser.js";
 import { logger } from "../../utils/logger.js";
 
 const CODE_EXTENSIONS = new Set([
-  ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
-  ".py", ".pyw",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".mjs",
+  ".cjs",
+  ".py",
+  ".pyw",
   ".go",
   ".rs",
   ".rb",
   ".java",
   ".cs",
-  ".cpp", ".cc", ".cxx", ".c", ".h", ".hpp", ".hh",
+  ".cpp",
+  ".cc",
+  ".cxx",
+  ".c",
+  ".h",
+  ".hpp",
+  ".hh",
   ".swift",
-  ".kt", ".kts",
+  ".kt",
+  ".kts",
   ".php",
-  ".vue", ".svelte",
-  ".ex", ".exs",
+  ".vue",
+  ".svelte",
+  ".ex",
+  ".exs",
   ".lua",
-  ".scala", ".sc",
-  ".sh", ".bash", ".zsh",
+  ".scala",
+  ".sc",
+  ".sh",
+  ".bash",
+  ".zsh",
   ".hs",
   ".zig",
-  ".css", ".scss",
+  ".css",
+  ".scss",
   ".toml",
-  ".yml", ".yaml",
+  ".yml",
+  ".yaml",
   ".sql",
-  ".md", ".mdx",
+  ".md",
+  ".mdx"
 ]);
 
 const IGNORE_DIRS = new Set([
-  "node_modules", ".git", "dist", "build", ".next", "__pycache__",
-  ".venv", "venv", "env", ".env", "target", "vendor",
-  ".cache", ".turbo", "coverage", ".nyc_output",
-  ".claude", ".smart-file-read",
+  "node_modules",
+  ".git",
+  "dist",
+  "build",
+  ".next",
+  "__pycache__",
+  ".venv",
+  "venv",
+  "env",
+  ".env",
+  "target",
+  "vendor",
+  ".cache",
+  ".turbo",
+  "coverage",
+  ".nyc_output",
+  ".claude",
+  ".smart-file-read"
 ]);
 
-const MAX_FILE_SIZE = 512 * 1024; 
+const MAX_FILE_SIZE = 512 * 1024;
 
 export interface SearchResult {
   foldedFiles: FoldedFile[];
@@ -55,18 +89,28 @@ export interface SymbolMatch {
   jsdoc?: string;
   lineStart: number;
   lineEnd: number;
-  matchReason: string; 
+  matchReason: string;
 }
 
-async function* walkDir(dir: string, rootDir: string, maxDepth: number = 20, extraExtensions?: Set<string>): AsyncGenerator<string> {
+async function* walkDir(
+  dir: string,
+  rootDir: string,
+  maxDepth: number = 20,
+  extraExtensions?: Set<string>
+): AsyncGenerator<string> {
   if (maxDepth <= 0) return;
 
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
   } catch (error) {
-    logger.debug('WORKER', `walkDir: failed to read directory ${dir}`, undefined, error instanceof Error ? error : undefined);
-    return; 
+    logger.debug(
+      "WORKER",
+      `walkDir: failed to read directory ${dir}`,
+      undefined,
+      error instanceof Error ? error : undefined
+    );
+    return;
   }
 
   for (const entry of entries) {
@@ -98,7 +142,12 @@ async function safeReadFile(filePath: string): Promise<string | null> {
 
     return content;
   } catch (error) {
-    logger.debug('WORKER', `safeReadFile: failed to read ${filePath}`, undefined, error instanceof Error ? error : undefined);
+    logger.debug(
+      "WORKER",
+      `safeReadFile: failed to read ${filePath}`,
+      undefined,
+      error instanceof Error ? error : undefined
+    );
     return null;
   }
 }
@@ -115,7 +164,7 @@ export async function searchCodebase(
 ): Promise<SearchResult> {
   const maxResults = options.maxResults || 20;
   const queryLower = query.toLowerCase();
-  const queryParts = queryLower.split(/[\s_\-./]+/).filter(p => p.length > 0);
+  const queryParts = queryLower.split(/[\s_\-./]+/).filter((p) => p.length > 0);
 
   const projectRoot = options.projectRoot || rootDir;
   const userConfig = loadUserGrammars(projectRoot);
@@ -142,7 +191,7 @@ export async function searchCodebase(
     filesToParse.push({
       absolutePath: filePath,
       relativePath: relative(rootDir, filePath),
-      content,
+      content
     });
   }
 
@@ -190,7 +239,7 @@ export async function searchCodebase(
             jsdoc: sym.jsdoc,
             lineStart: sym.lineStart,
             lineEnd: sym.lineEnd,
-            matchReason: reason,
+            matchReason: reason
           });
         }
 
@@ -215,8 +264,8 @@ export async function searchCodebase(
   });
 
   const trimmedSymbols = matchingSymbols.slice(0, maxResults);
-  const relevantFiles = new Set(trimmedSymbols.map(s => s.filePath));
-  const trimmedFiles = foldedFiles.filter(f => relevantFiles.has(f.filePath)).slice(0, maxResults);
+  const relevantFiles = new Set(trimmedSymbols.map((s) => s.filePath));
+  const trimmedFiles = foldedFiles.filter((f) => relevantFiles.has(f.filePath)).slice(0, maxResults);
 
   const tokenEstimate = trimmedFiles.reduce((sum, f) => sum + f.foldedTokenEstimate, 0);
 
@@ -225,7 +274,7 @@ export async function searchCodebase(
     matchingSymbols: trimmedSymbols,
     totalFilesScanned: filesToParse.length,
     totalSymbolsFound,
-    tokenEstimate,
+    tokenEstimate
   };
 }
 
@@ -233,9 +282,9 @@ function matchScore(text: string, queryParts: string[]): number {
   let score = 0;
   for (const part of queryParts) {
     if (text === part) {
-      score += 10; 
+      score += 10;
     } else if (text.includes(part)) {
-      score += 5; 
+      score += 5;
     } else {
       let ti = 0;
       let matched = 0;
@@ -247,7 +296,7 @@ function matchScore(text: string, queryParts: string[]): number {
         }
       }
       if (matched === part.length) {
-        score += 1; 
+        score += 1;
       }
     }
   }
@@ -267,7 +316,9 @@ export function formatSearchResults(result: SearchResult, query: string): string
 
   parts.push(`🔍 Smart Search: "${query}"`);
   parts.push(`   Scanned ${result.totalFilesScanned} files, found ${result.totalSymbolsFound} symbols`);
-  parts.push(`   ${result.matchingSymbols.length} matches across ${result.foldedFiles.length} files (~${result.tokenEstimate} tokens for folded view)`);
+  parts.push(
+    `   ${result.matchingSymbols.length} matches across ${result.foldedFiles.length} files (~${result.tokenEstimate} tokens for folded view)`
+  );
   parts.push("");
 
   if (result.matchingSymbols.length === 0) {
@@ -281,7 +332,7 @@ export function formatSearchResults(result: SearchResult, query: string): string
     parts.push(`  ${match.kind} ${match.symbolName} (${match.filePath}:${match.lineStart + 1})`);
     parts.push(`    ${match.signature}`);
     if (match.jsdoc) {
-      const firstLine = match.jsdoc.split("\n").find(l => l.replace(/^[\s*/]+/, "").trim().length > 0);
+      const firstLine = match.jsdoc.split("\n").find((l) => l.replace(/^[\s*/]+/, "").trim().length > 0);
       if (firstLine) {
         parts.push(`    💬 ${firstLine.replace(/^[\s*/]+/, "").trim()}`);
       }
@@ -297,7 +348,7 @@ export function formatSearchResults(result: SearchResult, query: string): string
   }
 
   parts.push("── Actions ──");
-  parts.push('  To see full implementation: use smart_unfold with file path and symbol name');
+  parts.push("  To see full implementation: use smart_unfold with file path and symbol name");
 
   return parts.join("\n");
 }

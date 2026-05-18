@@ -51,50 +51,50 @@ npx claude-mem transcript watch         # Start transcript watcher
 
 **Tier 1 — Native Hook/Plugin Systems** (highest fidelity, real-time capture):
 
-| Tool | Hooks | Config Location | Context Injection | Stars/Users |
-|------|-------|----------------|-------------------|-------------|
-| Claude Code | 5 lifecycle hooks | `~/.claude/settings.json` | CLAUDE.md, plugins | ~25% market |
-| Gemini CLI | 11 lifecycle hooks | `~/.gemini/settings.json` | GEMINI.md | ~95k stars |
-| OpenCode | 20+ event hooks + plugin SDK | `~/.config/opencode/opencode.json` | AGENTS.md + rules dirs | ~110k stars |
-| Windsurf | 11 Cascade hooks | `.windsurf/hooks.json` | `.windsurf/rules/*.md` | ~1M users |
-| Codex CLI | `notify` hook | `~/.codex/config.toml` | `.codex/AGENTS.md`, MCP | Growing (OpenAI) |
-| OpenClaw | 8 event hooks + plugin SDK | `~/.openclaw/openclaw.json` | MEMORY.md sync | ~196k stars |
+| Tool        | Hooks                        | Config Location                    | Context Injection       | Stars/Users      |
+| ----------- | ---------------------------- | ---------------------------------- | ----------------------- | ---------------- |
+| Claude Code | 5 lifecycle hooks            | `~/.claude/settings.json`          | CLAUDE.md, plugins      | ~25% market      |
+| Gemini CLI  | 11 lifecycle hooks           | `~/.gemini/settings.json`          | GEMINI.md               | ~95k stars       |
+| OpenCode    | 20+ event hooks + plugin SDK | `~/.config/opencode/opencode.json` | AGENTS.md + rules dirs  | ~110k stars      |
+| Windsurf    | 11 Cascade hooks             | `.windsurf/hooks.json`             | `.windsurf/rules/*.md`  | ~1M users        |
+| Codex CLI   | `notify` hook                | `~/.codex/config.toml`             | `.codex/AGENTS.md`, MCP | Growing (OpenAI) |
+| OpenClaw    | 8 event hooks + plugin SDK   | `~/.openclaw/openclaw.json`        | MEMORY.md sync          | ~196k stars      |
 
 **Tier 2 — MCP Integration** (tool-based, search + context injection):
 
-| Tool | MCP Support | Config Location | Context Injection |
-|------|------------|----------------|-------------------|
-| Cursor | First-class | `.cursor/mcp.json` | `.cursor/rules/*.mdc` |
-| Copilot CLI | First-class (default MCP) | `~/.copilot/config` | `.github/copilot-instructions.md` |
-| Antigravity | First-class + MCP Store | `~/.gemini/antigravity/mcp_config.json` | `.agent/rules/`, GEMINI.md |
-| Goose | Native MCP (co-developed protocol) | `~/.config/goose/config.yaml` | MCP context |
-| Crush | MCP + Skills | JSON config (charm.land schema) | Skills system |
-| Roo Code | First-class | `.roo/` | `.roo/rules/*.md`, `AGENTS.md` |
-| Warp | MCP + Warp Drive | `WARP.md` + Warp Drive UI | `WARP.md` |
+| Tool        | MCP Support                        | Config Location                         | Context Injection                 |
+| ----------- | ---------------------------------- | --------------------------------------- | --------------------------------- |
+| Cursor      | First-class                        | `.cursor/mcp.json`                      | `.cursor/rules/*.mdc`             |
+| Copilot CLI | First-class (default MCP)          | `~/.copilot/config`                     | `.github/copilot-instructions.md` |
+| Antigravity | First-class + MCP Store            | `~/.gemini/antigravity/mcp_config.json` | `.agent/rules/`, GEMINI.md        |
+| Goose       | Native MCP (co-developed protocol) | `~/.config/goose/config.yaml`           | MCP context                       |
+| Crush       | MCP + Skills                       | JSON config (charm.land schema)         | Skills system                     |
+| Roo Code    | First-class                        | `.roo/`                                 | `.roo/rules/*.md`, `AGENTS.md`    |
+| Warp        | MCP + Warp Drive                   | `WARP.md` + Warp Drive UI               | `WARP.md`                         |
 
 **Tier 3 — Transcript File Watching** (passive, file-based):
 
-| Tool | Transcript Location | Format |
-|------|-------------------|--------|
-| Claude Code | `~/.claude/projects/<proj>/<session>.jsonl` | JSONL |
-| Codex CLI | `~/.codex/sessions/**/*.jsonl` | JSONL |
-| Gemini CLI | `~/.gemini/tmp/<hash>/chats/` | JSON |
-| OpenCode | `.opencode/` (SQLite) | SQLite — needs export |
+| Tool        | Transcript Location                         | Format                |
+| ----------- | ------------------------------------------- | --------------------- |
+| Claude Code | `~/.claude/projects/<proj>/<session>.jsonl` | JSONL                 |
+| Codex CLI   | `~/.codex/sessions/**/*.jsonl`              | JSONL                 |
+| Gemini CLI  | `~/.gemini/tmp/<hash>/chats/`               | JSON                  |
+| OpenCode    | `.opencode/` (SQLite)                       | SQLite — needs export |
 
 ### What claude-mem Already Has
 
-| Component | Status | Location |
-|-----------|--------|----------|
-| Claude Code plugin | Complete | `plugin/hooks/hooks.json` |
-| Cursor hooks installer | Complete | `src/services/integrations/CursorHooksInstaller.ts` |
-| Platform adapters | Claude Code + Cursor + raw | `src/cli/adapters/` |
-| Transcript watcher | Complete (schema-based JSONL) | `src/services/transcripts/` |
-| Codex transcript schema | Sample exists | `src/services/transcripts/config.ts` |
-| OpenClaw plugin | Complete (1000+ lines) | `openclaw/src/index.ts` |
-| MCP server | Complete | `plugin/scripts/mcp-server.cjs` |
-| Gemini CLI support | Not started | — |
-| OpenCode support | Not started | — |
-| Windsurf support | Not started | — |
+| Component               | Status                        | Location                                            |
+| ----------------------- | ----------------------------- | --------------------------------------------------- |
+| Claude Code plugin      | Complete                      | `plugin/hooks/hooks.json`                           |
+| Cursor hooks installer  | Complete                      | `src/services/integrations/CursorHooksInstaller.ts` |
+| Platform adapters       | Claude Code + Cursor + raw    | `src/cli/adapters/`                                 |
+| Transcript watcher      | Complete (schema-based JSONL) | `src/services/transcripts/`                         |
+| Codex transcript schema | Sample exists                 | `src/services/transcripts/config.ts`                |
+| OpenClaw plugin         | Complete (1000+ lines)        | `openclaw/src/index.ts`                             |
+| MCP server              | Complete                      | `plugin/scripts/mcp-server.cjs`                     |
+| Gemini CLI support      | Not started                   | —                                                   |
+| OpenCode support        | Not started                   | —                                                   |
+| Windsurf support        | Not started                   | —                                                   |
 
 ### Patterns to Copy
 
@@ -110,6 +110,7 @@ npx claude-mem transcript watch         # Start transcript watcher
 ### What to implement
 
 1. **Add `bin` field to `package.json`**:
+
    ```json
    "bin": {
      "claude-mem": "./dist/cli/index.js"
@@ -231,25 +232,26 @@ npx claude-mem transcript watch         # Start transcript watcher
 
 ### Gemini CLI Hook Events
 
-| Event | Map to claude-mem | Use |
-|-------|-------------------|-----|
-| `SessionStart` | `session-init` | Start tracking session |
-| `BeforeAgent` | `user-prompt` | Capture user prompt |
-| `AfterAgent` | `observation` | Capture full agent response |
-| `BeforeTool` | — | Skip (pre-execution, no result yet) |
-| `AfterTool` | `observation` | Capture tool name + input + response |
-| `BeforeModel` | — | Skip (too low-level, LLM request details) |
-| `AfterModel` | — | Skip (raw LLM response, redundant with AfterAgent) |
-| `BeforeToolSelection` | — | Skip (internal planning step) |
-| `PreCompress` | `summary` | Trigger summary before context compression |
-| `Notification` | — | Skip (system alerts, not session data) |
-| `SessionEnd` | `session-end` | Finalize session |
+| Event                 | Map to claude-mem | Use                                                |
+| --------------------- | ----------------- | -------------------------------------------------- |
+| `SessionStart`        | `session-init`    | Start tracking session                             |
+| `BeforeAgent`         | `user-prompt`     | Capture user prompt                                |
+| `AfterAgent`          | `observation`     | Capture full agent response                        |
+| `BeforeTool`          | —                 | Skip (pre-execution, no result yet)                |
+| `AfterTool`           | `observation`     | Capture tool name + input + response               |
+| `BeforeModel`         | —                 | Skip (too low-level, LLM request details)          |
+| `AfterModel`          | —                 | Skip (raw LLM response, redundant with AfterAgent) |
+| `BeforeToolSelection` | —                 | Skip (internal planning step)                      |
+| `PreCompress`         | `summary`         | Trigger summary before context compression         |
+| `Notification`        | —                 | Skip (system alerts, not session data)             |
+| `SessionEnd`          | `session-end`     | Finalize session                                   |
 
 **Mapped**: 5 of 11 events. **Skipped**: 6 events that are either too low-level (BeforeModel/AfterModel), pre-execution (BeforeTool, BeforeToolSelection), or system-level (Notification).
 
 ### Verified Stdin Payload Schemas (from `packages/core/src/hooks/types.ts`)
 
 **Base input (all hooks receive):**
+
 ```typescript
 { session_id: string, transcript_path: string, cwd: string, hook_event_name: string, timestamp: string }
 ```
@@ -267,6 +269,7 @@ npx claude-mem transcript watch         # Start transcript watcher
 | `Notification` | `notification_type: "ToolPermission", message: string, details: Record<string, unknown>` |
 
 **Output (all hooks can return):**
+
 ```typescript
 { continue?: boolean, stopReason?: string, suppressOutput?: boolean, systemMessage?: string, decision?: "allow" | "deny" | "block" | "approve" | "ask", reason?: string, hookSpecificOutput?: Record<string, unknown> }
 ```
@@ -295,10 +298,12 @@ npx claude-mem transcript watch         # Start transcript watcher
      ```json
      {
        "hooks": {
-         "AfterTool": [{
-           "matcher": "*",
-           "hooks": [{ "name": "claude-mem", "type": "command", "command": "<path-to-hook-script>", "timeout": 5000 }]
-         }]
+         "AfterTool": [
+           {
+             "matcher": "*",
+             "hooks": [{ "name": "claude-mem", "type": "command", "command": "<path-to-hook-script>", "timeout": 5000 }]
+           }
+         ]
        }
      }
      ```
@@ -337,25 +342,29 @@ npx claude-mem transcript watch         # Start transcript watcher
 ### Verified Plugin API (from `packages/plugin/src/index.ts`)
 
 **Plugin signature:**
+
 ```typescript
-import { type Plugin, tool } from "@opencode-ai/plugin"
+import { type Plugin, tool } from "@opencode-ai/plugin";
 
 export const ClaudeMemPlugin: Plugin = async (ctx) => {
   // ctx: { client, project, directory, worktree, serverUrl, $ }
-  return { /* hooks object */ }
-}
+  return {
+    /* hooks object */
+  };
+};
 ```
 
 **PluginInput type (6 properties, not 4):**
+
 ```typescript
 type PluginInput = {
-  client: ReturnType<typeof createOpencodeClient>  // OpenCode SDK client
-  project: Project                                   // Current project info
-  directory: string                                  // Current working directory
-  worktree: string                                   // Git worktree path
-  serverUrl: URL                                     // Server URL
-  $: BunShell                                        // Bun shell API
-}
+  client: ReturnType<typeof createOpencodeClient>; // OpenCode SDK client
+  project: Project; // Current project info
+  directory: string; // Current working directory
+  worktree: string; // Git worktree path
+  serverUrl: URL; // Server URL
+  $: BunShell; // Bun shell API
+};
 ```
 
 **Two hook mechanisms (important distinction):**
@@ -377,6 +386,7 @@ type PluginInput = {
    - Total: **27 bus events** across **12 categories**
 
 **Custom tool registration (CORRECTED — name is the key, not positional arg):**
+
 ```typescript
 return {
   tool: {
@@ -385,12 +395,12 @@ return {
       args: { query: tool.schema.string() },
       async execute(args, context) {
         // context: { sessionID, messageID, agent, directory, worktree, abort, metadata, ask }
-        const response = await fetch(`http://localhost:37777/api/search?q=${encodeURIComponent(args.query)}`)
-        return await response.text()
-      },
-    }),
-  },
-}
+        const response = await fetch(`http://localhost:37777/api/search?q=${encodeURIComponent(args.query)}`);
+        return await response.text();
+      }
+    })
+  }
+};
 ```
 
 ### What to implement
@@ -400,15 +410,14 @@ return {
    - Use **direct interceptor** `tool.execute.after` for tool observation capture (gives `tool`, `args`, `output`)
    - Use **bus event catch-all** `event` for session lifecycle:
 
-   | Mechanism | Event | Map to claude-mem |
-   |-----------|-------|-------------------|
+   | Mechanism   | Event                | Map to claude-mem                         |
+   | ----------- | -------------------- | ----------------------------------------- |
    | interceptor | `tool.execute.after` | `observation` (tool name + args + output) |
-   | bus event | `session.created` | `session-init` |
-   | bus event | `message.updated` | `observation` (assistant messages) |
-   | bus event | `session.compacted` | `summary` |
-   | bus event | `file.edited` | `observation` (file changes) |
-   | bus event | `session.deleted` | `session-end` |
-
+   | bus event   | `session.created`    | `session-init`                            |
+   | bus event   | `message.updated`    | `observation` (assistant messages)        |
+   | bus event   | `session.compacted`  | `summary`                                 |
+   | bus event   | `file.edited`        | `observation` (file changes)              |
+   | bus event   | `session.deleted`    | `session-end`                             |
    - Register `claude_mem_search` custom tool using correct `tool({ description, args, execute })` API
    - Hit `localhost:37777` API endpoints from the plugin
 
@@ -450,47 +459,50 @@ return {
 
 **Naming pattern**: `pre_`/`post_` prefix + 5 action categories, plus 2 standalone post-only events.
 
-| Event | Can Block? | Map to claude-mem | Use |
-|-------|-----------|-------------------|-----|
-| `pre_user_prompt` | Yes | `session-init` + `context` | Start session, inject context |
-| `pre_read_code` | Yes | — | Skip (pre-execution, can block file reads) |
-| `post_read_code` | No | — | Skip (too noisy, file reads are frequent) |
-| `pre_write_code` | Yes | — | Skip (pre-execution, can block writes) |
-| `post_write_code` | No | `observation` | Code generation |
-| `pre_run_command` | Yes | — | Skip (pre-execution, can block commands) |
-| `post_run_command` | No | `observation` | Shell command execution |
-| `pre_mcp_tool_use` | Yes | — | Skip (pre-execution, can block MCP calls) |
-| `post_mcp_tool_use` | No | `observation` | MCP tool results |
-| `post_cascade_response` | No | `observation` | Full AI response |
-| `post_setup_worktree` | No | — | Skip (informational) |
+| Event                   | Can Block? | Map to claude-mem          | Use                                        |
+| ----------------------- | ---------- | -------------------------- | ------------------------------------------ |
+| `pre_user_prompt`       | Yes        | `session-init` + `context` | Start session, inject context              |
+| `pre_read_code`         | Yes        | —                          | Skip (pre-execution, can block file reads) |
+| `post_read_code`        | No         | —                          | Skip (too noisy, file reads are frequent)  |
+| `pre_write_code`        | Yes        | —                          | Skip (pre-execution, can block writes)     |
+| `post_write_code`       | No         | `observation`              | Code generation                            |
+| `pre_run_command`       | Yes        | —                          | Skip (pre-execution, can block commands)   |
+| `post_run_command`      | No         | `observation`              | Shell command execution                    |
+| `pre_mcp_tool_use`      | Yes        | —                          | Skip (pre-execution, can block MCP calls)  |
+| `post_mcp_tool_use`     | No         | `observation`              | MCP tool results                           |
+| `post_cascade_response` | No         | `observation`              | Full AI response                           |
+| `post_setup_worktree`   | No         | —                          | Skip (informational)                       |
 
 **Mapped**: 5 of 11 events (all post-action). **Skipped**: 4 pre-hooks (blocking-capable, pre-execution) + 2 low-value post-hooks.
 
 ### Verified Stdin Payload Schema
 
 **Common envelope (all hooks):**
+
 ```json
 {
   "agent_action_name": "string",
   "trajectory_id": "string",
   "execution_id": "string",
   "timestamp": "ISO 8601 string",
-  "tool_info": { /* event-specific payload */ }
+  "tool_info": {
+    /* event-specific payload */
+  }
 }
 ```
 
 **Event-specific `tool_info` payloads:**
 
-| Event | `tool_info` fields |
-|-------|-------------------|
-| `pre_user_prompt` | `{ user_prompt: string }` |
-| `pre_read_code` / `post_read_code` | `{ file_path: string }` |
-| `pre_write_code` / `post_write_code` | `{ file_path: string, edits: [{ old_string: string, new_string: string }] }` |
-| `pre_run_command` / `post_run_command` | `{ command_line: string, cwd: string }` |
-| `pre_mcp_tool_use` | `{ mcp_server_name: string, mcp_tool_name: string, mcp_tool_arguments: {} }` |
-| `post_mcp_tool_use` | `{ mcp_server_name: string, mcp_tool_name: string, mcp_tool_arguments: {}, mcp_result: string }` |
-| `post_cascade_response` | `{ response: string }` (markdown) |
-| `post_setup_worktree` | `{ worktree_path: string, root_workspace_path: string }` |
+| Event                                  | `tool_info` fields                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pre_user_prompt`                      | `{ user_prompt: string }`                                                                        |
+| `pre_read_code` / `post_read_code`     | `{ file_path: string }`                                                                          |
+| `pre_write_code` / `post_write_code`   | `{ file_path: string, edits: [{ old_string: string, new_string: string }] }`                     |
+| `pre_run_command` / `post_run_command` | `{ command_line: string, cwd: string }`                                                          |
+| `pre_mcp_tool_use`                     | `{ mcp_server_name: string, mcp_tool_name: string, mcp_tool_arguments: {} }`                     |
+| `post_mcp_tool_use`                    | `{ mcp_server_name: string, mcp_tool_name: string, mcp_tool_arguments: {}, mcp_result: string }` |
+| `post_cascade_response`                | `{ response: string }` (markdown)                                                                |
+| `post_setup_worktree`                  | `{ worktree_path: string, root_workspace_path: string }`                                         |
 
 **Exit codes:** `0` = success, `2` = block (pre-hooks only; stderr shown to agent), any other = non-blocking warning.
 
@@ -512,11 +524,13 @@ return {
      ```json
      {
        "hooks": {
-         "post_write_code": [{
-           "command": "<path-to-hook-script>",
-           "show_output": false,
-           "working_directory": "<optional>"
-         }]
+         "post_write_code": [
+           {
+             "command": "<path-to-hook-script>",
+             "show_output": false,
+             "working_directory": "<optional>"
+           }
+         ]
        }
      }
      ```
@@ -692,36 +706,36 @@ This is a **full replacement**, not a deprecation.
 
 ### Per-integration verification
 
-| Integration | Type | Captures Sessions | Search via MCP | Context Injection |
-|-------------|------|-------------------|----------------|-------------------|
-| Claude Code | Plugin | Yes (hooks) | Yes | CLAUDE.md |
-| Gemini CLI | Hooks | Yes (AfterTool, AfterAgent) | Yes (via hook) | GEMINI.md |
-| OpenCode | Plugin | Yes (tool.execute.after, message.updated) | Yes (custom tool) | AGENTS.md / rules |
-| Windsurf | Hooks | Yes (post_cascade_response, etc.) | Yes (via hook) | .windsurf/rules/ |
-| Codex CLI | Transcript | Yes (JSONL watcher) | No (passive only) | .codex/AGENTS.md |
-| OpenClaw | Plugin | Yes (event hooks) | Yes (slash commands) | MEMORY.md |
-| Copilot CLI | MCP | No | Yes | copilot-instructions.md |
-| Antigravity | MCP | No | Yes | .agent/rules/ |
-| Goose | MCP | No | Yes | MCP context |
-| Crush | MCP | No | Yes | Skills |
-| Roo Code | MCP | No | Yes | .roo/rules/ |
-| Warp | MCP | No | Yes | WARP.md |
+| Integration | Type       | Captures Sessions                         | Search via MCP       | Context Injection       |
+| ----------- | ---------- | ----------------------------------------- | -------------------- | ----------------------- |
+| Claude Code | Plugin     | Yes (hooks)                               | Yes                  | CLAUDE.md               |
+| Gemini CLI  | Hooks      | Yes (AfterTool, AfterAgent)               | Yes (via hook)       | GEMINI.md               |
+| OpenCode    | Plugin     | Yes (tool.execute.after, message.updated) | Yes (custom tool)    | AGENTS.md / rules       |
+| Windsurf    | Hooks      | Yes (post_cascade_response, etc.)         | Yes (via hook)       | .windsurf/rules/        |
+| Codex CLI   | Transcript | Yes (JSONL watcher)                       | No (passive only)    | .codex/AGENTS.md        |
+| OpenClaw    | Plugin     | Yes (event hooks)                         | Yes (slash commands) | MEMORY.md               |
+| Copilot CLI | MCP        | No                                        | Yes                  | copilot-instructions.md |
+| Antigravity | MCP        | No                                        | Yes                  | .agent/rules/           |
+| Goose       | MCP        | No                                        | Yes                  | MCP context             |
+| Crush       | MCP        | No                                        | Yes                  | Skills                  |
+| Roo Code    | MCP        | No                                        | Yes                  | .roo/rules/             |
+| Warp        | MCP        | No                                        | Yes                  | WARP.md                 |
 
 ---
 
 ## Priority Order & Impact
 
-| Phase | IDE/Tool | Integration Type | Stars/Users | Effort |
-|-------|----------|-----------------|-------------|--------|
-| 1-2 | (infrastructure) | npx CLI + build pipeline | All users | Medium |
-| 3 | Gemini CLI | Hooks (Tier 1) | ~95k stars | Medium (near-identical to Claude Code) |
-| 4 | OpenCode | Plugin (Tier 1) | ~110k stars | Medium (rich plugin SDK) |
-| 5 | Windsurf | Hooks (Tier 1) | ~1M users | Medium |
-| 6 | Codex CLI | Transcript (Tier 3) | Growing (OpenAI) | Low (schema already exists) |
-| 7 | OpenClaw | Plugin (Tier 1) — pre-built | ~196k stars | Low (wire into installer) |
-| 8 | Copilot CLI, Antigravity, Goose, Crush, Warp, Roo Code | MCP (Tier 2) | 20M+ combined | Low per IDE |
-| 9 | (remove old installer) | — | — | Low |
-| 10 | (final verification) | — | — | Low |
+| Phase | IDE/Tool                                               | Integration Type            | Stars/Users      | Effort                                 |
+| ----- | ------------------------------------------------------ | --------------------------- | ---------------- | -------------------------------------- |
+| 1-2   | (infrastructure)                                       | npx CLI + build pipeline    | All users        | Medium                                 |
+| 3     | Gemini CLI                                             | Hooks (Tier 1)              | ~95k stars       | Medium (near-identical to Claude Code) |
+| 4     | OpenCode                                               | Plugin (Tier 1)             | ~110k stars      | Medium (rich plugin SDK)               |
+| 5     | Windsurf                                               | Hooks (Tier 1)              | ~1M users        | Medium                                 |
+| 6     | Codex CLI                                              | Transcript (Tier 3)         | Growing (OpenAI) | Low (schema already exists)            |
+| 7     | OpenClaw                                               | Plugin (Tier 1) — pre-built | ~196k stars      | Low (wire into installer)              |
+| 8     | Copilot CLI, Antigravity, Goose, Crush, Warp, Roo Code | MCP (Tier 2)                | 20M+ combined    | Low per IDE                            |
+| 9     | (remove old installer)                                 | —                           | —                | Low                                    |
+| 10    | (final verification)                                   | —                           | —                | Low                                    |
 
 ## Out of Scope
 

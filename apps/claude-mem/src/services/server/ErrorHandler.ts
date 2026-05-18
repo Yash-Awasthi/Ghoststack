@@ -1,6 +1,5 @@
-
-import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
-import { logger } from '../../utils/logger.js';
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+import { logger } from "../../utils/logger.js";
 
 export interface ErrorResponse {
   error: string;
@@ -17,16 +16,11 @@ export class AppError extends Error {
     public details?: unknown
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 }
 
-export function createErrorResponse(
-  error: string,
-  message: string,
-  code?: string,
-  details?: unknown
-): ErrorResponse {
+export function createErrorResponse(error: string, message: string, code?: string, details?: unknown): ErrorResponse {
   const response: ErrorResponse = { error, message };
   if (code) response.code = code;
   if (details) response.details = details;
@@ -41,14 +35,19 @@ export const errorHandler: ErrorRequestHandler = (
 ): void => {
   const statusCode = err instanceof AppError ? err.statusCode : 500;
 
-  logger.error('HTTP', `Error handling ${req.method} ${req.path}`, {
-    statusCode,
-    error: err.message,
-    code: err instanceof AppError ? err.code : undefined
-  }, err);
+  logger.error(
+    "HTTP",
+    `Error handling ${req.method} ${req.path}`,
+    {
+      statusCode,
+      error: err.message,
+      code: err instanceof AppError ? err.code : undefined
+    },
+    err
+  );
 
   const response = createErrorResponse(
-    err.name || 'Error',
+    err.name || "Error",
     err.message,
     err instanceof AppError ? err.code : undefined,
     err instanceof AppError ? err.details : undefined
@@ -58,10 +57,7 @@ export const errorHandler: ErrorRequestHandler = (
 };
 
 export function notFoundHandler(req: Request, res: Response): void {
-  res.status(404).json(createErrorResponse(
-    'NotFound',
-    `Cannot ${req.method} ${req.path}`
-  ));
+  res.status(404).json(createErrorResponse("NotFound", `Cannot ${req.method} ${req.path}`));
 }
 
 export function asyncHandler<T>(

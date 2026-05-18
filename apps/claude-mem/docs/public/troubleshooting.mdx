@@ -10,6 +10,7 @@ description: "Common issues and solutions for Claude-Mem"
 Describe any issues you're experiencing to Claude, and the troubleshoot skill will automatically activate to provide diagnosis and fixes.
 
 The troubleshoot skill will:
+
 - ✅ Check worker status and health
 - ✅ Verify database existence and integrity
 - ✅ Test worker service connectivity
@@ -30,6 +31,7 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Find the worker port. The default is `37700 + (uid % 100)`. The configured port is the value of `CLAUDE_MEM_WORKER_PORT` in `~/.claude-mem/settings.json`; the running worker also reports it on `/api/health`:
+
    ```bash
    PORT=$(jq -r .CLAUDE_MEM_WORKER_PORT ~/.claude-mem/settings.json)
    lsof -i :$PORT
@@ -37,16 +39,19 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
    ```
 
 2. Verify worker is healthy:
+
    ```bash
    curl http://127.0.0.1:$PORT/health
    ```
 
 3. Check worker logs for errors:
+
    ```bash
    npm run worker:logs
    ```
 
 4. Restart worker service:
+
    ```bash
    npm run worker:restart
    ```
@@ -64,20 +69,23 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Check browser localStorage is enabled:
+
    ```javascript
    // In browser console
-   localStorage.getItem('claude-mem-settings')
+   localStorage.getItem("claude-mem-settings");
    ```
 
 2. Verify settings endpoint is working:
+
    ```bash
    curl http://localhost:37777/api/settings
    ```
 
 3. Clear localStorage and try again:
+
    ```javascript
    // In browser console
-   localStorage.removeItem('claude-mem-settings')
+   localStorage.removeItem("claude-mem-settings");
    ```
 
 4. Check for browser privacy mode (blocks localStorage)
@@ -89,6 +97,7 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Check SSE endpoint is accessible:
+
    ```bash
    curl -N http://localhost:37777/stream
    ```
@@ -99,6 +108,7 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
    - Check Network tab for failed /stream requests
 
 3. Verify worker is running:
+
    ```bash
    npm run worker:status
    ```
@@ -119,6 +129,7 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Verify Python 3.8+ is installed:
+
    ```bash
    python --version
    # or
@@ -126,17 +137,20 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
    ```
 
 2. Install chromadb manually:
+
    ```bash
    cd ~/.claude/plugins/marketplaces/thedotmack
    npm install chromadb
    ```
 
 3. Check chromadb health:
+
    ```bash
    npm run chroma:health
    ```
 
 4. Windows-specific: Ensure Python is in PATH:
+
    ```bash
    where python
    # Should show Python installation path
@@ -151,17 +165,20 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Clear install cache:
+
    ```bash
    rm ~/.claude/plugins/marketplaces/thedotmack/.install-version
    ```
 
 2. Force reinstall:
+
    ```bash
    cd ~/.claude/plugins/marketplaces/thedotmack
    npm install --force
    ```
 
 3. Check version marker:
+
    ```bash
    cat ~/.claude/plugins/marketplaces/thedotmack/.install-version
    cat ~/.claude/plugins/marketplaces/thedotmack/package.json | grep version
@@ -178,21 +195,25 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Check worker status:
+
    ```bash
    npm run worker:status
    ```
 
 2. Try starting manually:
+
    ```bash
    npm run worker:start
    ```
 
 3. Check worker logs for errors:
+
    ```bash
    npm run worker:logs
    ```
 
 4. Full reset:
+
    ```bash
    npm run worker:stop
    npm run worker:start
@@ -211,16 +232,19 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Check if port 37777 is in use:
+
    ```bash
    lsof -i :37777
    ```
 
 2. Kill process using the port:
+
    ```bash
    kill -9 $(lsof -t -i:37777)
    ```
 
 3. Or use a different port:
+
    ```bash
    export CLAUDE_MEM_WORKER_PORT=38000
    npm run worker:restart
@@ -238,16 +262,19 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Check error logs:
+
    ```bash
    npm run worker:logs
    ```
 
 2. Check worker status:
+
    ```bash
    npm run worker:status
    ```
 
 3. Check database for corruption:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "PRAGMA integrity_check;"
    ```
@@ -264,16 +291,19 @@ The skill includes comprehensive diagnostics, automated repair sequences, and de
 **Solutions**:
 
 1. Check worker is running:
+
    ```bash
    npm run worker:status
    ```
 
 2. Check worker logs:
+
    ```bash
    npm run worker:logs
    ```
 
 3. Verify database has observations:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "SELECT COUNT(*) FROM observations;"
    ```
@@ -307,6 +337,7 @@ bun scripts/check-pending-queue.ts --process --limit 5
 ```
 
 **What it does**:
+
 - ✅ Checks worker health before proceeding
 - ✅ Shows detailed queue summary (pending, processing, failed, stuck)
 - ✅ Groups messages by session with age and status breakdown
@@ -314,6 +345,7 @@ bun scripts/check-pending-queue.ts --process --limit 5
 - ✅ Shows recently processed messages for feedback
 
 **Interactive Example**:
+
 ```
 Worker is healthy ✓
 
@@ -336,6 +368,7 @@ Would you like to process these pending queues? (y/n)
 For automation or scripting scenarios:
 
 1. **Check queue status**:
+
    ```bash
    curl http://localhost:37777/api/pending-queue
    ```
@@ -347,6 +380,7 @@ For automation or scripting scenarios:
    - `sessionsWithPendingWork`: Session IDs needing recovery
 
 2. **Trigger manual recovery**:
+
    ```bash
    curl -X POST http://localhost:37777/api/pending-queue/process \
      -H "Content-Type: application/json" \
@@ -373,12 +407,14 @@ Messages progress through these states:
 #### Recovery Strategy
 
 **When to use manual recovery**:
+
 - After worker crashes or unexpected restarts
 - When observations appear saved but no summaries generated
 - When queue status shows stuck messages (processing >5 minutes)
 - After system crashes or forced shutdowns
 
 **Best practices**:
+
 1. Always check queue status before triggering recovery
 2. Use the CLI tool for interactive sessions (provides feedback)
 3. Use the HTTP API for automation/scripting
@@ -391,17 +427,20 @@ Messages progress through these states:
 If recovery fails or messages remain stuck:
 
 1. **Verify worker is healthy**:
+
    ```bash
    curl http://localhost:37777/health
    # Should return: {"status":"ok","uptime":12345,"port":37777}
    ```
 
 2. **Check database for corruption**:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "PRAGMA integrity_check;"
    ```
 
 3. **View stuck messages directly**:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "
      SELECT id, session_db_id, status, retry_count,
@@ -413,6 +452,7 @@ If recovery fails or messages remain stuck:
    ```
 
 4. **Force reset stuck messages** (nuclear option):
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "
      UPDATE pending_messages
@@ -422,6 +462,7 @@ If recovery fails or messages remain stuck:
    ```
 
    Then trigger recovery:
+
    ```bash
    bun scripts/check-pending-queue.ts --process
    ```
@@ -487,17 +528,20 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Verify hooks are configured:
+
    ```bash
    cat plugin/hooks/hooks.json
    ```
 
 2. Test hooks manually:
+
    ```bash
    # Test context hook
    echo '{"session_id":"test-123","cwd":"'$(pwd)'","source":"startup"}' | node plugin/scripts/context-hook.js
    ```
 
 3. Check hook permissions:
+
    ```bash
    ls -la plugin/scripts/*.js
    ```
@@ -514,16 +558,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check if summaries exist:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "SELECT COUNT(*) FROM session_summaries;"
    ```
 
 2. View recent sessions:
+
    ```bash
    npm run test:context:verbose
    ```
 
 3. Check database integrity:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "PRAGMA integrity_check;"
    ```
@@ -540,18 +587,21 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Increase timeout in `plugin/hooks/hooks.json`:
+
    ```json
    {
-     "timeout": 180  // Increase from 120
+     "timeout": 180 // Increase from 120
    }
    ```
 
 2. Check worker is running (prevents timeout waiting for worker):
+
    ```bash
    npm run worker:status
    ```
 
 3. Check database size (large database = slow queries):
+
    ```bash
    ls -lh ~/.claude-mem/claude-mem.db
    ```
@@ -568,12 +618,14 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Manually install dependencies:
+
    ```bash
    cd ~/.claude/plugins/marketplaces/thedotmack
    npm install
    ```
 
 2. Check npm is available:
+
    ```bash
    which npm
    npm --version
@@ -593,16 +645,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Close all connections:
+
    ```bash
    npm run worker:stop
    ```
 
 2. Check for stale locks:
+
    ```bash
    lsof ~/.claude-mem/claude-mem.db
    ```
 
 3. Kill processes holding locks:
+
    ```bash
    kill -9 <PID>
    ```
@@ -619,16 +674,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check database integrity:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "PRAGMA integrity_check;"
    ```
 
 2. Backup database:
+
    ```bash
    cp ~/.claude-mem/claude-mem.db ~/.claude-mem/claude-mem.db.backup
    ```
 
 3. Try to repair:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "VACUUM;"
    ```
@@ -646,11 +704,13 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check FTS5 tables exist:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%_fts';"
    ```
 
 2. Rebuild FTS5 tables:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "
      INSERT INTO observations_fts(observations_fts) VALUES('rebuild');
@@ -671,16 +731,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check database size:
+
    ```bash
    ls -lh ~/.claude-mem/claude-mem.db
    ```
 
 2. Vacuum database:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "VACUUM;"
    ```
 
 3. Delete old sessions:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "
      DELETE FROM observations WHERE created_at_epoch < $(date -v-30d +%s);
@@ -706,16 +769,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check MCP configuration:
+
    ```bash
    cat plugin/.mcp.json
    ```
 
 2. Verify search server is built:
+
    ```bash
    ls -l plugin/scripts/mcp-server.cjs
    ```
 
 3. Rebuild if needed:
+
    ```bash
    npm run build
    ```
@@ -729,22 +795,26 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check database has data:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "SELECT COUNT(*) FROM observations;"
    ```
 
 2. Verify FTS5 tables populated:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "SELECT COUNT(*) FROM observations_fts;"
    ```
 
 3. Test simple query:
+
    ```bash
    # Test MCP search tool
    search(query="test", limit=5)
    ```
 
 4. Check query syntax:
+
    ```bash
    # Bad: Special characters may cause issues
    search(query="[test]")
@@ -760,6 +830,7 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Follow 3-layer workflow (don't skip to get_observations):
+
    ```bash
    # Start with search to get index
    search(query="...", limit=10)
@@ -769,16 +840,19 @@ sqlite3 ~/.claude-mem/claude-mem.db "
    ```
 
 2. Reduce limit in search:
+
    ```bash
    search(query="...", limit=3)
    ```
 
 3. Use filters to narrow results:
+
    ```bash
    search(query="...", type="decision", limit=5)
    ```
 
 4. Paginate results:
+
    ```bash
    # First page
    search(query="...", limit=5, offset=0)
@@ -788,6 +862,7 @@ sqlite3 ~/.claude-mem/claude-mem.db "
    ```
 
 5. Batch IDs in get_observations:
+
    ```bash
    # Always batch multiple IDs in one call
    get_observations(ids=[123, 456, 789])
@@ -804,12 +879,14 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Reduce context sessions:
+
    ```typescript
    // In src/hooks/context.ts
-   const CONTEXT_SESSIONS = 5;  // Reduce from 10
+   const CONTEXT_SESSIONS = 5; // Reduce from 10
    ```
 
 2. Optimize database:
+
    ```bash
    sqlite3 ~/.claude-mem/claude-mem.db "
      ANALYZE;
@@ -843,11 +920,13 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Check current usage:
+
    ```bash
    npm run worker:status
    ```
 
 2. Restart worker:
+
    ```bash
    npm run worker:restart
    ```
@@ -863,11 +942,13 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Add marketplace first:
+
    ```bash
    /plugin marketplace add thedotmack/claude-mem
    ```
 
 2. Then install:
+
    ```bash
    /plugin install claude-mem
    ```
@@ -884,12 +965,14 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Clean and reinstall:
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
    ```
 
 2. Check Node.js version:
+
    ```bash
    node --version  # Should be >= 18.0.0
    ```
@@ -906,11 +989,13 @@ sqlite3 ~/.claude-mem/claude-mem.db "
 **Solutions**:
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Check package.json:
+
    ```bash
    cat package.json
    ```
@@ -1017,6 +1102,7 @@ SELECT created_at, tool_name FROM observations ORDER BY created_at DESC LIMIT 10
 If none of these solutions work:
 
 1. **Check logs**:
+
    ```bash
    npm run worker:logs
    ```

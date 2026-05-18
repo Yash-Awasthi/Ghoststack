@@ -1,38 +1,35 @@
-
-import { CorpusStore } from './CorpusStore.js';
-import { CorpusRenderer } from './CorpusRenderer.js';
-import type { CorpusFile, QueryResult } from './types.js';
-import { logger } from '../../../utils/logger.js';
-import { SettingsDefaultsManager } from '../../../shared/SettingsDefaultsManager.js';
-import { USER_SETTINGS_PATH, OBSERVER_SESSIONS_DIR, ensureDir } from '../../../shared/paths.js';
-import { buildIsolatedEnvWithFreshOAuth } from '../../../shared/EnvManager.js';
-import { findClaudeExecutable } from '../../../shared/find-claude-executable.js';
-import { sanitizeEnv } from '../../../supervisor/env-sanitizer.js';
+import { CorpusStore } from "./CorpusStore.js";
+import { CorpusRenderer } from "./CorpusRenderer.js";
+import type { CorpusFile, QueryResult } from "./types.js";
+import { logger } from "../../../utils/logger.js";
+import { SettingsDefaultsManager } from "../../../shared/SettingsDefaultsManager.js";
+import { USER_SETTINGS_PATH, OBSERVER_SESSIONS_DIR, ensureDir } from "../../../shared/paths.js";
+import { buildIsolatedEnvWithFreshOAuth } from "../../../shared/EnvManager.js";
+import { findClaudeExecutable } from "../../../shared/find-claude-executable.js";
+import { sanitizeEnv } from "../../../supervisor/env-sanitizer.js";
 
 // @ts-ignore - Agent SDK types may not be available
-import { query } from '@anthropic-ai/claude-agent-sdk';
+import { query } from "@anthropic-ai/claude-agent-sdk";
 
 const KNOWLEDGE_AGENT_DISALLOWED_TOOLS = [
-  'Bash',           // Prevent infinite loops
-  'Read',           // No file reading
-  'Write',          // No file writing
-  'Edit',           // No file editing
-  'Grep',           // No code searching
-  'Glob',           // No file pattern matching
-  'WebFetch',       // No web fetching
-  'WebSearch',      // No web searching
-  'Task',           // No spawning sub-agents
-  'NotebookEdit',   // No notebook editing
-  'AskUserQuestion',// No asking questions
-  'TodoWrite'       
+  "Bash", // Prevent infinite loops
+  "Read", // No file reading
+  "Write", // No file writing
+  "Edit", // No file editing
+  "Grep", // No code searching
+  "Glob", // No file pattern matching
+  "WebFetch", // No web fetching
+  "WebSearch", // No web searching
+  "Task", // No spawning sub-agents
+  "NotebookEdit", // No notebook editing
+  "AskUserQuestion", // No asking questions
+  "TodoWrite"
 ];
 
 export class KnowledgeAgent {
   private renderer: CorpusRenderer;
 
-  constructor(
-    private corpusStore: CorpusStore
-  ) {
+  constructor(private corpusStore: CorpusStore) {
     this.renderer = new CorpusRenderer();
   }
 
@@ -41,16 +38,16 @@ export class KnowledgeAgent {
 
     const primePrompt = [
       corpus.system_prompt,
-      '',
-      'Here is your complete knowledge base:',
-      '',
+      "",
+      "Here is your complete knowledge base:",
+      "",
       renderedCorpus,
-      '',
-      'Acknowledge what you\'ve received. Summarize the key themes and topics you can answer questions about.'
-    ].join('\n');
+      "",
+      "Acknowledge what you've received. Summarize the key themes and topics you can answer questions about."
+    ].join("\n");
 
     ensureDir(OBSERVER_SESSIONS_DIR);
-    const claudePath = findClaudeExecutable('WORKER');
+    const claudePath = findClaudeExecutable("WORKER");
     const isolatedEnv = sanitizeEnv(await buildIsolatedEnvWithFreshOAuth());
 
     const queryResult = query({
@@ -63,7 +60,7 @@ export class KnowledgeAgent {
         env: isolatedEnv,
         mcpServers: {},
         settingSources: [],
-        strictMcpConfig: true,
+        strictMcpConfig: true
       }
     });
 
@@ -71,16 +68,25 @@ export class KnowledgeAgent {
     try {
       for await (const msg of queryResult) {
         if (msg.session_id) sessionId = msg.session_id;
-        if (msg.type === 'result') {
-          logger.info('WORKER', `Knowledge agent primed for corpus "${corpus.name}"`);
+        if (msg.type === "result") {
+          logger.info("WORKER", `Knowledge agent primed for corpus "${corpus.name}"`);
         }
       }
     } catch (error) {
       if (sessionId) {
         if (error instanceof Error) {
-          logger.debug('WORKER', `SDK process exited after priming corpus "${corpus.name}" — session captured, continuing`, {}, error);
+          logger.debug(
+            "WORKER",
+            `SDK process exited after priming corpus "${corpus.name}" — session captured, continuing`,
+            {},
+            error
+          );
         } else {
-          logger.debug('WORKER', `SDK process exited after priming corpus "${corpus.name}" — session captured, continuing (non-Error thrown)`, { thrownValue: String(error) });
+          logger.debug(
+            "WORKER",
+            `SDK process exited after priming corpus "${corpus.name}" — session captured, continuing (non-Error thrown)`,
+            { thrownValue: String(error) }
+          );
         }
       } else {
         throw error;
@@ -112,13 +118,15 @@ export class KnowledgeAgent {
     } catch (error) {
       if (!this.isSessionResumeError(error)) {
         if (error instanceof Error) {
-          logger.error('WORKER', `Query failed for corpus "${corpus.name}"`, {}, error);
+          logger.error("WORKER", `Query failed for corpus "${corpus.name}"`, {}, error);
         } else {
-          logger.error('WORKER', `Query failed for corpus "${corpus.name}" (non-Error thrown)`, { thrownValue: String(error) });
+          logger.error("WORKER", `Query failed for corpus "${corpus.name}" (non-Error thrown)`, {
+            thrownValue: String(error)
+          });
         }
         throw error;
       }
-      logger.info('WORKER', `Session expired for corpus "${corpus.name}", auto-repriming...`);
+      logger.info("WORKER", `Session expired for corpus "${corpus.name}", auto-repriming...`);
       await this.prime(corpus);
       const refreshedCorpus = this.corpusStore.read(corpus.name);
       if (!refreshedCorpus || !refreshedCorpus.session_id) {
@@ -134,7 +142,7 @@ export class KnowledgeAgent {
   }
 
   async reprime(corpus: CorpusFile): Promise<string> {
-    corpus.session_id = null;  
+    corpus.session_id = null;
     return this.prime(corpus);
   }
 
@@ -145,7 +153,7 @@ export class KnowledgeAgent {
 
   private async executeQuery(corpus: CorpusFile, question: string): Promise<QueryResult> {
     ensureDir(OBSERVER_SESSIONS_DIR);
-    const claudePath = findClaudeExecutable('WORKER');
+    const claudePath = findClaudeExecutable("WORKER");
     const isolatedEnv = sanitizeEnv(await buildIsolatedEnvWithFreshOAuth());
 
     const queryResult = query({
@@ -159,29 +167,31 @@ export class KnowledgeAgent {
         env: isolatedEnv,
         mcpServers: {},
         settingSources: [],
-        strictMcpConfig: true,
+        strictMcpConfig: true
       }
     });
 
-    let answer = '';
+    let answer = "";
     let newSessionId = corpus.session_id!;
     try {
       for await (const msg of queryResult) {
         if (msg.session_id) newSessionId = msg.session_id;
-        if (msg.type === 'assistant') {
+        if (msg.type === "assistant") {
           const text = msg.message.content
-            .filter((b: any) => b.type === 'text')
+            .filter((b: any) => b.type === "text")
             .map((b: any) => b.text)
-            .join('');
+            .join("");
           answer = text;
         }
       }
     } catch (error) {
       if (answer) {
         if (error instanceof Error) {
-          logger.debug('WORKER', `SDK process exited after query — answer captured, continuing`, {}, error);
+          logger.debug("WORKER", `SDK process exited after query — answer captured, continuing`, {}, error);
         } else {
-          logger.debug('WORKER', `SDK process exited after query — answer captured, continuing (non-Error thrown)`, { thrownValue: String(error) });
+          logger.debug("WORKER", `SDK process exited after query — answer captured, continuing (non-Error thrown)`, {
+            thrownValue: String(error)
+          });
         }
       } else {
         throw error;
@@ -195,5 +205,4 @@ export class KnowledgeAgent {
     const settings = SettingsDefaultsManager.loadFromFile(USER_SETTINGS_PATH);
     return settings.CLAUDE_MEM_MODEL;
   }
-
 }

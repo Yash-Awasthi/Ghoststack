@@ -1,9 +1,8 @@
-
-import { Database } from 'bun:sqlite';
-import { logger } from '../../utils/logger.js';
-import type { ObservationInput } from './observations/types.js';
-import type { SummaryInput } from './summaries/types.js';
-import { computeObservationContentHash } from './observations/store.js';
+import { Database } from "bun:sqlite";
+import { logger } from "../../utils/logger.js";
+import type { ObservationInput } from "./observations/types.js";
+import type { SummaryInput } from "./summaries/types.js";
+import { computeObservationContentHash } from "./observations/store.js";
 
 export interface StoreObservationsResult {
   observationIds: number[];
@@ -39,7 +38,7 @@ export function storeObservationsAndMarkComplete(
       RETURNING id
     `);
     const lookupExistingStmt = db.prepare(
-      'SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?'
+      "SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?"
     );
 
     for (const observation of observations) {
@@ -145,7 +144,7 @@ export function storeObservations(
       RETURNING id
     `);
     const lookupExistingStmt = db.prepare(
-      'SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?'
+      "SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?"
     );
 
     for (const observation of observations) {
@@ -177,9 +176,7 @@ export function storeObservations(
 
       const existing = lookupExistingStmt.get(memorySessionId, contentHash) as { id: number } | null;
       if (!existing) {
-        throw new Error(
-          `storeObservations: ON CONFLICT without existing row for content_hash=${contentHash}`
-        );
+        throw new Error(`storeObservations: ON CONFLICT without existing row for content_hash=${contentHash}`);
       }
       observationIds.push(existing.id);
     }

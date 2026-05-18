@@ -18,7 +18,11 @@ export const CHOICE_AD_BANNER_HEIGHT = 5 // border-top + 2 lines description + s
 const MAX_DESC_LINES = 2
 const MIN_CARD_WIDTH = 60 // Minimum width per ad card to remain readable
 
-function truncateToLines(text: string, lineWidth: number, maxLines: number): string {
+function truncateToLines(
+  text: string,
+  lineWidth: number,
+  maxLines: number,
+): string {
   if (lineWidth <= 0) return text
   const maxChars = lineWidth * maxLines
   if (text.length <= maxChars) return text
@@ -40,9 +44,10 @@ export const extractDomain = (url: string): string => {
   }
 }
 
-export function getAdDisplayLabel(
-  ad: Pick<AdResponse, 'title' | 'url'>,
-): { text: string; variant: 'domain' | 'title' } {
+export function getAdDisplayLabel(ad: Pick<AdResponse, 'title' | 'url'>): {
+  text: string
+  variant: 'domain' | 'title'
+} {
   const url = ad.url.trim()
   if (url) {
     return { text: extractDomain(url), variant: 'domain' }
@@ -61,7 +66,10 @@ function columnWidths(count: number, availableWidth: number): number[] {
   return Array.from({ length: count }, (_, i) => base + (i < remainder ? 1 : 0))
 }
 
-export const ChoiceAdBanner: React.FC<ChoiceAdBannerProps> = ({ ads, onImpression }) => {
+export const ChoiceAdBanner: React.FC<ChoiceAdBannerProps> = ({
+  ads,
+  onImpression,
+}) => {
   const theme = useTheme()
   const { terminalWidth } = useTerminalDimensions()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
@@ -76,7 +84,10 @@ export const ChoiceAdBanner: React.FC<ChoiceAdBannerProps> = ({ ads, onImpressio
     [ads, maxVisible],
   )
 
-  const widths = useMemo(() => columnWidths(visibleAds.length, colAvail), [visibleAds.length, colAvail])
+  const widths = useMemo(
+    () => columnWidths(visibleAds.length, colAvail),
+    [visibleAds.length, colAvail],
+  )
 
   // Fire impressions only for visible ads
   useEffect(() => {
@@ -128,10 +139,17 @@ export const ChoiceAdBanner: React.FC<ChoiceAdBannerProps> = ({ ads, onImpressio
                 paddingLeft: 1,
                 paddingRight: 1,
                 flexDirection: 'column',
-
               }}
             >
-              <box style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height: MAX_DESC_LINES, overflow: 'hidden' }}>
+              <box
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  height: MAX_DESC_LINES,
+                  overflow: 'hidden',
+                }}
+              >
                 <text style={{ fg: theme.muted, flexShrink: 1 }}>
                   {truncateToLines(ad.adText, widths[i] - 8, MAX_DESC_LINES)}
                 </text>
@@ -139,7 +157,15 @@ export const ChoiceAdBanner: React.FC<ChoiceAdBannerProps> = ({ ads, onImpressio
               </box>
               <box style={{ flexGrow: 1 }} />
               {/* Bottom: CTA + domain */}
-              <box style={{ flexDirection: 'row', columnGap: 1, alignItems: 'center', height: 1, overflow: 'hidden' }}>
+              <box
+                style={{
+                  flexDirection: 'row',
+                  columnGap: 1,
+                  alignItems: 'center',
+                  height: 1,
+                  overflow: 'hidden',
+                }}
+              >
                 <text
                   style={{
                     fg: theme.name === 'light' ? '#ffffff' : theme.background,
@@ -161,14 +187,11 @@ export const ChoiceAdBanner: React.FC<ChoiceAdBannerProps> = ({ ads, onImpressio
                 >
                   {labelText}
                 </text>
-
               </box>
             </Button>
           )
         })}
-
       </box>
-
-    </box >
+    </box>
   )
 }

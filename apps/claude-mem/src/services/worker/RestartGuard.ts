@@ -1,8 +1,7 @@
-
-const RESTART_WINDOW_MS = 60_000;      
-const MAX_WINDOWED_RESTARTS = 10;      
-const MAX_CONSECUTIVE_FAILURES = 5;    
-const DECAY_AFTER_SUCCESS_MS = 5 * 60_000; 
+const RESTART_WINDOW_MS = 60_000;
+const MAX_WINDOWED_RESTARTS = 10;
+const MAX_CONSECUTIVE_FAILURES = 5;
+const DECAY_AFTER_SUCCESS_MS = 5 * 60_000;
 
 export class RestartGuard {
   private restartTimestamps: number[] = [];
@@ -12,15 +11,12 @@ export class RestartGuard {
   recordRestart(): boolean {
     const now = Date.now();
 
-    if (this.lastSuccessfulProcessing !== null
-        && now - this.lastSuccessfulProcessing >= DECAY_AFTER_SUCCESS_MS) {
+    if (this.lastSuccessfulProcessing !== null && now - this.lastSuccessfulProcessing >= DECAY_AFTER_SUCCESS_MS) {
       this.restartTimestamps = [];
       this.lastSuccessfulProcessing = null;
     }
 
-    this.restartTimestamps = this.restartTimestamps.filter(
-      ts => now - ts < RESTART_WINDOW_MS
-    );
+    this.restartTimestamps = this.restartTimestamps.filter((ts) => now - ts < RESTART_WINDOW_MS);
 
     this.restartTimestamps.push(now);
     this.consecutiveFailures += 1;
@@ -37,7 +33,7 @@ export class RestartGuard {
 
   get restartsInWindow(): number {
     const now = Date.now();
-    return this.restartTimestamps.filter(ts => now - ts < RESTART_WINDOW_MS).length;
+    return this.restartTimestamps.filter((ts) => now - ts < RESTART_WINDOW_MS).length;
   }
 
   get windowMs(): number {

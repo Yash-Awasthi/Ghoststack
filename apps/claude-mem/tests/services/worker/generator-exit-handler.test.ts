@@ -1,15 +1,15 @@
-import { describe, expect, it, mock } from 'bun:test';
-import type { ActiveSession } from '../../../src/services/worker-types.js';
-import { handleGeneratorExit } from '../../../src/services/worker/session/GeneratorExitHandler.js';
+import { describe, expect, it, mock } from "bun:test";
+import type { ActiveSession } from "../../../src/services/worker-types.js";
+import { handleGeneratorExit } from "../../../src/services/worker/session/GeneratorExitHandler.js";
 
 function createSession(): ActiveSession {
   return {
     sessionDbId: 42,
-    contentSessionId: 'content-42',
-    memorySessionId: 'memory-42',
-    project: 'test-project',
-    platformSource: 'claude-code',
-    userPrompt: 'test',
+    contentSessionId: "content-42",
+    memorySessionId: "memory-42",
+    project: "test-project",
+    platformSource: "claude-code",
+    userPrompt: "test",
     pendingMessages: [],
     abortController: new AbortController(),
     generatorPromise: Promise.resolve(),
@@ -19,23 +19,23 @@ function createSession(): ActiveSession {
     cumulativeOutputTokens: 0,
     earliestPendingTimestamp: null,
     conversationHistory: [],
-    currentProvider: 'claude',
+    currentProvider: "claude",
     consecutiveRestarts: 0,
-    lastGeneratorActivity: Date.now(),
+    lastGeneratorActivity: Date.now()
   };
 }
 
 function createDeps(pendingCount = 3) {
   const pendingStore = {
     clearPendingForSession: mock(() => undefined),
-    getPendingCount: mock(() => pendingCount),
+    getPendingCount: mock(() => pendingCount)
   };
   const sessionManager = {
     getPendingMessageStore: mock(() => pendingStore),
-    removeSessionImmediate: mock(() => undefined),
+    removeSessionImmediate: mock(() => undefined)
   };
   const completionHandler = {
-    finalizeSession: mock(() => undefined),
+    finalizeSession: mock(() => undefined)
   };
   const restartGenerator = mock(() => undefined);
 
@@ -47,17 +47,17 @@ function createDeps(pendingCount = 3) {
     deps: {
       sessionManager: sessionManager as any,
       completionHandler: completionHandler as any,
-      restartGenerator,
-    },
+      restartGenerator
+    }
   };
 }
 
-describe('handleGeneratorExit hard-stop reasons', () => {
-  it('does not restart pending work after context overflow', async () => {
+describe("handleGeneratorExit hard-stop reasons", () => {
+  it("does not restart pending work after context overflow", async () => {
     const session = createSession();
     const { deps, pendingStore, completionHandler, sessionManager, restartGenerator } = createDeps();
 
-    await handleGeneratorExit(session, 'overflow', deps);
+    await handleGeneratorExit(session, "overflow", deps);
 
     expect(pendingStore.clearPendingForSession).toHaveBeenCalledWith(42);
     expect(completionHandler.finalizeSession).toHaveBeenCalledWith(42);
@@ -66,11 +66,11 @@ describe('handleGeneratorExit hard-stop reasons', () => {
     expect(restartGenerator).not.toHaveBeenCalled();
   });
 
-  it('does not restart pending work while quota guard is active', async () => {
+  it("does not restart pending work while quota guard is active", async () => {
     const session = createSession();
     const { deps, pendingStore, completionHandler, sessionManager, restartGenerator } = createDeps();
 
-    await handleGeneratorExit(session, 'quota:hourly', deps);
+    await handleGeneratorExit(session, "quota:hourly", deps);
 
     expect(pendingStore.clearPendingForSession).toHaveBeenCalledWith(42);
     expect(completionHandler.finalizeSession).toHaveBeenCalledWith(42);
@@ -79,14 +79,14 @@ describe('handleGeneratorExit hard-stop reasons', () => {
     expect(restartGenerator).not.toHaveBeenCalled();
   });
 
-  it('removes hard-stopped sessions even when pending cleanup fails', async () => {
+  it("removes hard-stopped sessions even when pending cleanup fails", async () => {
     const session = createSession();
     const { deps, pendingStore, completionHandler, sessionManager, restartGenerator } = createDeps();
     pendingStore.clearPendingForSession.mockImplementation(() => {
-      throw new Error('simulated pending cleanup failure');
+      throw new Error("simulated pending cleanup failure");
     });
 
-    await handleGeneratorExit(session, 'overflow', deps);
+    await handleGeneratorExit(session, "overflow", deps);
 
     expect(pendingStore.clearPendingForSession).toHaveBeenCalledWith(42);
     expect(completionHandler.finalizeSession).toHaveBeenCalledWith(42);
@@ -95,14 +95,14 @@ describe('handleGeneratorExit hard-stop reasons', () => {
     expect(restartGenerator).not.toHaveBeenCalled();
   });
 
-  it('removes hard-stopped sessions even when finalization fails', async () => {
+  it("removes hard-stopped sessions even when finalization fails", async () => {
     const session = createSession();
     const { deps, pendingStore, completionHandler, sessionManager, restartGenerator } = createDeps();
     completionHandler.finalizeSession.mockImplementation(() => {
-      throw new Error('simulated finalization failure');
+      throw new Error("simulated finalization failure");
     });
 
-    await handleGeneratorExit(session, 'quota', deps);
+    await handleGeneratorExit(session, "quota", deps);
 
     expect(pendingStore.clearPendingForSession).toHaveBeenCalledWith(42);
     expect(completionHandler.finalizeSession).toHaveBeenCalledWith(42);
@@ -111,14 +111,14 @@ describe('handleGeneratorExit hard-stop reasons', () => {
     expect(restartGenerator).not.toHaveBeenCalled();
   });
 
-  it('removes naturally completed sessions even when finalization fails', async () => {
+  it("removes naturally completed sessions even when finalization fails", async () => {
     const session = createSession();
     const { deps, pendingStore, completionHandler, sessionManager, restartGenerator } = createDeps(0);
     completionHandler.finalizeSession.mockImplementation(() => {
-      throw new Error('simulated finalization failure');
+      throw new Error("simulated finalization failure");
     });
 
-    await handleGeneratorExit(session, 'idle', deps);
+    await handleGeneratorExit(session, "idle", deps);
 
     expect(pendingStore.clearPendingForSession).not.toHaveBeenCalled();
     expect(completionHandler.finalizeSession).toHaveBeenCalledWith(42);

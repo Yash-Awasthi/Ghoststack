@@ -1,6 +1,5 @@
-
-import type { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
+import type { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
 
 export interface RecentUserPromptResult {
   id: number;
@@ -23,7 +22,7 @@ export interface PromptWithProject {
 }
 
 export interface GetPromptsByIdsOptions {
-  orderBy?: 'date_desc' | 'date_asc';
+  orderBy?: "date_desc" | "date_asc";
   limit?: number;
   project?: string;
 }

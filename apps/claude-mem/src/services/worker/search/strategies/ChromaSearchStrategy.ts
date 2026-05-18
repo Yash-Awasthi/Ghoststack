@@ -1,5 +1,4 @@
-
-import { BaseSearchStrategy, SearchStrategy } from './SearchStrategy.js';
+import { BaseSearchStrategy, SearchStrategy } from "./SearchStrategy.js";
 import {
   StrategySearchOptions,
   StrategySearchResult,
@@ -8,13 +7,13 @@ import {
   ObservationSearchResult,
   SessionSummarySearchResult,
   UserPromptSearchResult
-} from '../types.js';
-import { ChromaSync } from '../../../sync/ChromaSync.js';
-import { SessionStore } from '../../../sqlite/SessionStore.js';
-import { logger } from '../../../../utils/logger.js';
+} from "../types.js";
+import { ChromaSync } from "../../../sync/ChromaSync.js";
+import { SessionStore } from "../../../sqlite/SessionStore.js";
+import { logger } from "../../../../utils/logger.js";
 
 export class ChromaSearchStrategy extends BaseSearchStrategy implements SearchStrategy {
-  readonly name = 'chroma';
+  readonly name = "chroma";
 
   constructor(
     private chromaSync: ChromaSync,
@@ -30,30 +29,37 @@ export class ChromaSearchStrategy extends BaseSearchStrategy implements SearchSt
   async search(options: StrategySearchOptions): Promise<StrategySearchResult> {
     const {
       query,
-      searchType = 'all',
+      searchType = "all",
       obsType,
       concepts,
       files,
       limit = SEARCH_CONSTANTS.DEFAULT_LIMIT,
       project,
-      orderBy = 'date_desc'
+      orderBy = "date_desc"
     } = options;
 
     if (!query) {
-      return this.emptyResult('chroma');
+      return this.emptyResult("chroma");
     }
 
-    const searchObservations = searchType === 'all' || searchType === 'observations';
-    const searchSessions = searchType === 'all' || searchType === 'sessions';
-    const searchPrompts = searchType === 'all' || searchType === 'prompts';
+    const searchObservations = searchType === "all" || searchType === "observations";
+    const searchSessions = searchType === "all" || searchType === "sessions";
+    const searchPrompts = searchType === "all" || searchType === "prompts";
 
     const whereFilter = this.buildWhereFilter(searchType, project);
 
-    logger.debug('SEARCH', 'ChromaSearchStrategy: Querying Chroma', { query, searchType });
+    logger.debug("SEARCH", "ChromaSearchStrategy: Querying Chroma", { query, searchType });
 
     return await this.executeChromaSearch(query, whereFilter, {
-      searchObservations, searchSessions, searchPrompts,
-      obsType, concepts, files, orderBy, limit, project
+      searchObservations,
+      searchSessions,
+      searchPrompts,
+      obsType,
+      concepts,
+      files,
+      orderBy,
+      limit,
+      project
     });
   }
 
@@ -67,22 +73,18 @@ export class ChromaSearchStrategy extends BaseSearchStrategy implements SearchSt
       obsType?: string | string[];
       concepts?: string | string[];
       files?: string | string[];
-      orderBy: 'relevance' | 'date_desc' | 'date_asc';
+      orderBy: "relevance" | "date_desc" | "date_asc";
       limit: number;
       project?: string;
     }
   ): Promise<StrategySearchResult> {
-    const chromaResults = await this.chromaSync.queryChroma(
-      query,
-      SEARCH_CONSTANTS.CHROMA_BATCH_SIZE,
-      whereFilter
-    );
+    const chromaResults = await this.chromaSync.queryChroma(query, SEARCH_CONSTANTS.CHROMA_BATCH_SIZE, whereFilter);
 
     if (chromaResults.ids.length === 0) {
       return {
         results: { observations: [], sessions: [], prompts: [] },
         usedChroma: true,
-        strategy: 'chroma'
+        strategy: "chroma"
       };
     }
 
@@ -96,40 +98,51 @@ export class ChromaSearchStrategy extends BaseSearchStrategy implements SearchSt
     const sqlOrderBy = options.orderBy;
 
     if (categorized.obsIds.length > 0) {
-      const obsOptions = { type: options.obsType, concepts: options.concepts, files: options.files, orderBy: sqlOrderBy, limit: options.limit, project: options.project };
+      const obsOptions = {
+        type: options.obsType,
+        concepts: options.concepts,
+        files: options.files,
+        orderBy: sqlOrderBy,
+        limit: options.limit,
+        project: options.project
+      };
       observations = this.sessionStore.getObservationsByIds(categorized.obsIds, obsOptions);
     }
 
     if (categorized.sessionIds.length > 0) {
       sessions = this.sessionStore.getSessionSummariesByIds(categorized.sessionIds, {
-        orderBy: sqlOrderBy, limit: options.limit, project: options.project
+        orderBy: sqlOrderBy,
+        limit: options.limit,
+        project: options.project
       });
     }
 
     if (categorized.promptIds.length > 0) {
       prompts = this.sessionStore.getUserPromptsByIds(categorized.promptIds, {
-        orderBy: sqlOrderBy, limit: options.limit, project: options.project
+        orderBy: sqlOrderBy,
+        limit: options.limit,
+        project: options.project
       });
     }
 
     return {
       results: { observations, sessions, prompts },
       usedChroma: true,
-      strategy: 'chroma'
+      strategy: "chroma"
     };
   }
 
   private buildWhereFilter(searchType: string, project?: string): Record<string, any> | undefined {
     let docTypeFilter: Record<string, any> | undefined;
     switch (searchType) {
-      case 'observations':
-        docTypeFilter = { doc_type: 'observation' };
+      case "observations":
+        docTypeFilter = { doc_type: "observation" };
         break;
-      case 'sessions':
-        docTypeFilter = { doc_type: 'session_summary' };
+      case "sessions":
+        docTypeFilter = { doc_type: "session_summary" };
         break;
-      case 'prompts':
-        docTypeFilter = { doc_type: 'user_prompt' };
+      case "prompts":
+        docTypeFilter = { doc_type: "user_prompt" };
         break;
       default:
         docTypeFilter = undefined;
@@ -160,11 +173,11 @@ export class ChromaSearchStrategy extends BaseSearchStrategy implements SearchSt
     }
 
     return chromaResults.ids
-      .map(id => ({
+      .map((id) => ({
         id,
         meta: metadataByIdMap.get(id) as ChromaMetadata
       }))
-      .filter(item => item.meta && item.meta.created_at_epoch > cutoff);
+      .filter((item) => item.meta && item.meta.created_at_epoch > cutoff);
   }
 
   private categorizeByDocType(
@@ -181,11 +194,11 @@ export class ChromaSearchStrategy extends BaseSearchStrategy implements SearchSt
 
     for (const item of items) {
       const docType = item.meta?.doc_type;
-      if (docType === 'observation' && options.searchObservations) {
+      if (docType === "observation" && options.searchObservations) {
         obsIds.push(item.id);
-      } else if (docType === 'session_summary' && options.searchSessions) {
+      } else if (docType === "session_summary" && options.searchSessions) {
         sessionIds.push(item.id);
-      } else if (docType === 'user_prompt' && options.searchPrompts) {
+      } else if (docType === "user_prompt" && options.searchPrompts) {
         promptIds.push(item.id);
       }
     }

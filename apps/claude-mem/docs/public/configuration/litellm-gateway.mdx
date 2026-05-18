@@ -51,12 +51,12 @@ At runtime:
 
 The code paths involved are:
 
-| Layer | Responsibility |
-| --- | --- |
-| `src/npx-cli/commands/install.ts` | Prompts for "LiteLLM or custom gateway", stores the gateway URL/token, and allows custom gateway model names |
-| `src/shared/EnvManager.ts` | Stores credentials in `~/.claude-mem/.env`, blocks shell-leaked auth vars, and injects only explicit claude-mem credentials |
-| `src/services/worker/ClaudeProvider.ts` | Starts the Claude Agent SDK for observation extraction with the isolated environment |
-| `src/services/worker/knowledge/KnowledgeAgent.ts` | Uses the same isolated SDK path for knowledge corpus Q&A |
+| Layer                                             | Responsibility                                                                                                              |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `src/npx-cli/commands/install.ts`                 | Prompts for "LiteLLM or custom gateway", stores the gateway URL/token, and allows custom gateway model names                |
+| `src/shared/EnvManager.ts`                        | Stores credentials in `~/.claude-mem/.env`, blocks shell-leaked auth vars, and injects only explicit claude-mem credentials |
+| `src/services/worker/ClaudeProvider.ts`           | Starts the Claude Agent SDK for observation extraction with the isolated environment                                        |
+| `src/services/worker/knowledge/KnowledgeAgent.ts` | Uses the same isolated SDK path for knowledge corpus Q&A                                                                    |
 
 ### Why `CLAUDE_MEM_PROVIDER` Stays `claude`
 
@@ -108,7 +108,8 @@ litellm --config litellm-config.yaml --host 127.0.0.1 --port 4000
 In this example, claude-mem asks the SDK for `claude-haiku-4-5-20251001`, LiteLLM accepts that model alias, and LiteLLM forwards the request to `openai/gpt-4o-mini`.
 
 <Note>
-The alias in `model_name` must match `CLAUDE_MEM_MODEL`, or `CLAUDE_MEM_MODEL` must be changed to match your LiteLLM alias. claude-mem does not translate model names.
+  The alias in `model_name` must match `CLAUDE_MEM_MODEL`, or `CLAUDE_MEM_MODEL` must be changed to match your LiteLLM
+  alias. claude-mem does not translate model names.
 </Note>
 
 ## Configure claude-mem

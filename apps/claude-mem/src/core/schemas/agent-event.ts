@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
+import { z } from "zod";
 
-export const AgentEventSourceTypeSchema = z.enum(['hook', 'worker', 'provider', 'server', 'api']);
+export const AgentEventSourceTypeSchema = z.enum(["hook", "worker", "provider", "server", "api"]);
 
 export const AgentEventSchema = z.object({
   id: z.string().min(1),

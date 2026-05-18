@@ -85,9 +85,9 @@ describe('freebuffModelNavigationDirectionForKey', () => {
     expect(
       freebuffModelNavigationDirectionForKey({ sequence: '\x1b[9u' }),
     ).toBe('forward')
-    expect(
-      freebuffModelNavigationDirectionForKey({ sequence: '\x1b[Z' }),
-    ).toBe('backward')
+    expect(freebuffModelNavigationDirectionForKey({ sequence: '\x1b[Z' })).toBe(
+      'backward',
+    )
     expect(
       freebuffModelNavigationDirectionForKey({ sequence: '\x1b[9;2u' }),
     ).toBe('backward')

@@ -1,6 +1,7 @@
 # Progressive Disclosure: Claude-Mem's Context Priming Philosophy
 
 ## Core Principle
+
 **Show what exists and its retrieval cost first. Let the agent decide what to fetch based on relevance and need.**
 
 ---
@@ -36,6 +37,7 @@ Traditional RAG (Retrieval-Augmented Generation) systems fetch everything upfron
 ```
 
 **Problems:**
+
 - Wastes 94% of attention budget on irrelevant context
 - User prompt gets buried under mountain of history
 - Agent must process everything before understanding task
@@ -63,6 +65,7 @@ Traditional RAG (Retrieval-Augmented Generation) systems fetch everything upfron
 ```
 
 **Benefits:**
+
 - Agent controls its own context consumption
 - Directly relevant to current task
 - Can fetch more if needed
@@ -95,6 +98,7 @@ Every SessionStart hook provides a compact index:
 ```
 
 **What the agent sees:**
+
 - **What exists**: Observation titles give semantic meaning
 - **When it happened**: Timestamps for temporal context
 - **What type**: Icons indicate observation category
@@ -116,6 +120,7 @@ Every SessionStart hook provides a compact index:
 ```
 
 **Purpose:**
+
 - Visual scanning (humans and AI both benefit)
 - Semantic categorization
 - Priority signaling (🔴 gotchas are more critical)
@@ -127,12 +132,14 @@ The index includes usage guidance:
 
 ```markdown
 💡 **Progressive Disclosure:** This index shows WHAT exists and retrieval COST.
+
 - Use MCP search tools to fetch full observation details on-demand
 - Prefer searching observations over re-reading code for past decisions
 - Critical types (🔴 gotcha, 🟤 decision, ⚖️ trade-off) often worth fetching immediately
 ```
 
 **What this does:**
+
 - Teaches the agent the pattern
 - Suggests when to fetch (critical types)
 - Recommends search over code re-reading (efficiency)
@@ -146,21 +153,23 @@ The index includes usage guidance:
 
 Think of context window as a bank account:
 
-| Approach | Metaphor | Outcome |
-|----------|----------|---------|
-| **Dump everything** | Spending your entire paycheck on groceries you might need someday | Waste, clutter, can't afford what you actually need |
-| **Fetch nothing** | Refusing to spend any money | Starvation, can't accomplish tasks |
-| **Progressive disclosure** | Check your pantry, make a shopping list, buy only what you need | Efficiency, room for unexpected needs |
+| Approach                   | Metaphor                                                          | Outcome                                             |
+| -------------------------- | ----------------------------------------------------------------- | --------------------------------------------------- |
+| **Dump everything**        | Spending your entire paycheck on groceries you might need someday | Waste, clutter, can't afford what you actually need |
+| **Fetch nothing**          | Refusing to spend any money                                       | Starvation, can't accomplish tasks                  |
+| **Progressive disclosure** | Check your pantry, make a shopping list, buy only what you need   | Efficiency, room for unexpected needs               |
 
 ### The Attention Budget
 
 LLMs have finite attention:
+
 - Every token attends to every other token (n² relationships)
 - 100,000 token window ≠ 100,000 tokens of useful attention
 - Context "rot" happens as window fills
 - Later tokens get less attention than earlier ones
 
 **Claude-Mem's approach:**
+
 - Start with ~1,000 tokens of index
 - Agent has 99,000 tokens free for task
 - Agent fetches ~200 tokens when needed
@@ -173,6 +182,7 @@ LLMs have finite attention:
 Progressive disclosure treats the agent as an **intelligent information forager**, not a passive recipient of pre-selected context.
 
 **Traditional RAG:**
+
 ```
 System → [Decides relevance] → Agent
         ↑
@@ -180,6 +190,7 @@ System → [Decides relevance] → Agent
 ```
 
 **Progressive Disclosure:**
+
 ```
 System → [Shows index] → Agent → [Decides relevance] → [Fetches details]
                           ↑
@@ -187,6 +198,7 @@ System → [Shows index] → Agent → [Decides relevance] → [Fetches details]
 ```
 
 The agent knows:
+
 - The current task context
 - What information would help
 - How much budget to spend
@@ -209,6 +221,7 @@ Every item in the index shows token count:
 ```
 
 **Why:**
+
 - Agent can make informed ROI decisions
 - Small observations (~50 tokens) are "cheap" to fetch
 - Large observations (~500 tokens) require stronger justification
@@ -219,16 +232,19 @@ Every item in the index shows token count:
 Titles compress full observations into ~10 words:
 
 **Bad title:**
+
 ```
 Observation about a thing
 ```
 
 **Good title:**
+
 ```
 🔴 Hook timeout issue: 60s default too short for npm install
 ```
 
 **What makes a good title:**
+
 - Specific: Identifies exact issue
 - Actionable: Clear what to do
 - Self-contained: Doesn't require reading observation
@@ -238,6 +254,7 @@ Observation about a thing
 ### 3. Group by Context
 
 Observations are grouped by:
+
 - **Date**: Temporal context
 - **File path**: Spatial context (work on specific files)
 - **Project**: Logical context
@@ -257,10 +274,11 @@ Observations are grouped by:
 The index is useless without retrieval mechanisms:
 
 ```markdown
-*Use claude-mem MCP search to access records with the given ID*
+_Use claude-mem MCP search to access records with the given ID_
 ```
 
 **Available MCP tools:**
+
 - `search` - Search memory index (Layer 1: Get IDs)
 - `timeline` - Get chronological context (Layer 2: See narrative arc)
 - `get_observations` - Fetch full details (Layer 3: Deep dive)
@@ -274,6 +292,7 @@ The 3-layer workflow ensures progressive disclosure: index → context → detai
 ### Scenario: Agent asked to fix a bug in hooks
 
 **Without progressive disclosure:**
+
 ```
 SessionStart injects 25,000 tokens of past context
 Agent reads everything
@@ -284,6 +303,7 @@ Efficiency: 0.8%
 ```
 
 **With progressive disclosure:**
+
 ```
 SessionStart shows index: ~800 tokens
 Agent sees title: "🔴 Hook timeout issue: 60s too short"
@@ -301,12 +321,14 @@ Efficiency: 100%
 ```
 
 **What the agent learns WITHOUT fetching:**
+
 - There's a known gotcha (🔴) about hook timeouts
 - It's related to npm install taking too long
 - Full details are ~155 tokens (cheap)
 - Happened at 2:14 PM (recent)
 
 **Decision tree:**
+
 ```
 Is my task related to hooks? → YES
 Is my task related to timeouts? → YES
@@ -328,10 +350,11 @@ Start by searching to get a compact index with IDs:
 search({
   query: "hook timeout",
   limit: 10
-})
+});
 ```
 
 **Returns:**
+
 ```
 Found 3 observations matching "hook timeout":
 
@@ -351,10 +374,10 @@ Get chronological context around interesting observations:
 
 ```typescript
 timeline({
-  anchor: 2543,  // Observation ID from search
+  anchor: 2543, // Observation ID from search
   depth_before: 3,
   depth_after: 3
-})
+});
 ```
 
 **Returns:** Chronological view showing what happened before/during/after observation #2543
@@ -368,11 +391,12 @@ Fetch full details only for relevant observations:
 
 ```typescript
 get_observations({
-  ids: [2543, 2102]  // Selected from search results
-})
+  ids: [2543, 2102] // Selected from search results
+});
 ```
 
 **Returns:**
+
 ```
 #2543 🔴 Hook timeout: 60s too short for npm install
 ─────────────────────────────────────────────────
@@ -407,9 +431,11 @@ Concepts: hooks, timeout, npm, configuration
 Progressive disclosure is grounded in **Cognitive Load Theory**:
 
 ### Intrinsic Load
+
 The inherent difficulty of the task itself.
 
 **Example:** "Fix authentication bug"
+
 - Must understand auth system
 - Must understand the bug
 - Must write the fix
@@ -417,23 +443,28 @@ The inherent difficulty of the task itself.
 This load is unavoidable.
 
 ### Extraneous Load
+
 The cognitive burden of poorly presented information.
 
 **Traditional RAG adds extraneous load:**
+
 - Scanning irrelevant observations
 - Filtering out noise
 - Remembering what to ignore
 - Re-contextualizing after each section
 
 **Progressive disclosure minimizes extraneous load:**
+
 - Scan titles (low effort)
 - Fetch only relevant (targeted effort)
 - Full attention on current task
 
 ### Germane Load
+
 The effort of building mental models and schemas.
 
 **Progressive disclosure supports germane load:**
+
 - Consistent structure (legend, grouping)
 - Clear categorization (types, icons)
 - Semantic compression (good titles)
@@ -446,11 +477,13 @@ The effort of building mental models and schemas.
 ### ❌ Verbose Titles
 
 **Bad:**
+
 ```
 | #2543 | 2:14 PM | 🔴 | Investigation into the issue where hooks time out | ~155 |
 ```
 
 **Good:**
+
 ```
 | #2543 | 2:14 PM | 🔴 | Hook timeout: 60s too short for npm install | ~155 |
 ```
@@ -458,11 +491,13 @@ The effort of building mental models and schemas.
 ### ❌ Hiding Costs
 
 **Bad:**
+
 ```
 | #2543 | 2:14 PM | 🔴 | Hook timeout issue |
 ```
 
 **Good:**
+
 ```
 | #2543 | 2:14 PM | 🔴 | Hook timeout issue | ~155 |
 ```
@@ -470,11 +505,13 @@ The effort of building mental models and schemas.
 ### ❌ No Retrieval Path
 
 **Bad:**
+
 ```
 Here are 10 observations. [No instructions on how to get full details]
 ```
 
 **Good:**
+
 ```
 Here are 10 observations.
 *Use MCP search tools to fetch full observation details on-demand*
@@ -483,28 +520,30 @@ Here are 10 observations.
 ### ❌ Skipping the Index Layer
 
 **Bad:**
+
 ```typescript
 // Fetching full details immediately
 get_observations({
-  ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  // Guessing which are relevant
-})
+  ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Guessing which are relevant
+});
 ```
 
 **Good:**
+
 ```typescript
 // Follow the 3-layer workflow
 // Layer 1: Search for index
 search({
   query: "hooks",
   limit: 20
-})
+});
 
 // Layer 2: Review index, identify 2-3 relevant IDs
 
 // Layer 3: Fetch only relevant observations
 get_observations({
-  ids: [2543, 2891]  // Just the most relevant
-})
+  ids: [2543, 2891] // Just the most relevant
+});
 ```
 
 ---
@@ -516,6 +555,7 @@ get_observations({
 **Decision:** Show approximate token counts (~155, ~203) rather than exact counts.
 
 **Rationale:**
+
 - Communicates scale (50 vs 500) without false precision
 - Maps to human intuition (small/medium/large)
 - Allows agent to budget attention
@@ -526,6 +566,7 @@ get_observations({
 **Decision:** Use emoji icons (🔴, 🟡, 🔵) rather than text (GOTCHA, PROBLEM, HOWTO).
 
 **Rationale:**
+
 - Visual scanning (pattern recognition)
 - Token efficient (1 char vs 10 chars)
 - Language-agnostic
@@ -537,6 +578,7 @@ get_observations({
 **Decision:** Always show index first, even if we "know" what's relevant.
 
 **Rationale:**
+
 - We can't know what's relevant better than the agent
 - Pre-fetching assumes we understand the task
 - Agent knows current context, we don't
@@ -548,6 +590,7 @@ get_observations({
 **Decision:** Group observations by file path in addition to date.
 
 **Rationale:**
+
 - Spatial locality: Work on file X likely needs context about file X
 - Reduces scanning effort
 - Matches how developers think
@@ -560,6 +603,7 @@ get_observations({
 Progressive disclosure is working when:
 
 ### ✅ Low Waste Ratio
+
 ```
 Relevant Tokens / Total Context Tokens > 80%
 ```
@@ -567,6 +611,7 @@ Relevant Tokens / Total Context Tokens > 80%
 Most of the context consumed is actually useful.
 
 ### ✅ Selective Fetching
+
 ```
 Index Shown: 50 observations
 Details Fetched: 2-3 observations
@@ -575,6 +620,7 @@ Details Fetched: 2-3 observations
 Agent is being selective, not fetching everything.
 
 ### ✅ Fast Task Completion
+
 ```
 Session with index: 30 seconds to find relevant context
 Session without: 90 seconds scanning all context
@@ -583,6 +629,7 @@ Session without: 90 seconds scanning all context
 Time-to-relevant-information is faster.
 
 ### ✅ Appropriate Depth
+
 ```
 Simple task: Only index needed
 Medium task: 1-2 observations fetched
@@ -615,14 +662,15 @@ SessionStart({ source: "compact" }):
 // Use embeddings to pre-sort index by relevance
 search({
   query: "authentication bug",
-  orderBy: "relevance"  // Based on semantic similarity (future enhancement)
-})
+  orderBy: "relevance" // Based on semantic similarity (future enhancement)
+});
 ```
 
 ### Cost Forecasting
 
 ```markdown
 💡 **Budget Estimate:**
+
 - Fetching all 🔴 gotchas: ~450 tokens
 - Fetching all file-related: ~1,200 tokens
 - Fetching everything: ~8,500 tokens
@@ -669,4 +717,4 @@ Progressive disclosure respects the agent's intelligence and autonomy. We provid
 
 ---
 
-*This philosophy emerged from real-world usage of Claude-Mem across hundreds of coding sessions. The pattern works because it aligns with both human cognition and LLM attention mechanics.*
+_This philosophy emerged from real-world usage of Claude-Mem across hundreds of coding sessions. The pattern works because it aligns with both human cognition and LLM attention mechanics._

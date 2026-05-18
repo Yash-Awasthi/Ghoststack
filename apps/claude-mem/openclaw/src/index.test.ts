@@ -22,10 +22,18 @@ function createMockApi(pluginConfigOverride: Record<string, any> = {}) {
     config: {},
     pluginConfig: pluginConfigOverride,
     logger: {
-      info: (message: string) => { logs.push(message); },
-      warn: (message: string) => { logs.push(message); },
-      error: (message: string) => { logs.push(message); },
-      debug: (message: string) => { logs.push(message); },
+      info: (message: string) => {
+        logs.push(message);
+      },
+      warn: (message: string) => {
+        logs.push(message);
+      },
+      error: (message: string) => {
+        logs.push(message);
+      },
+      debug: (message: string) => {
+        logs.push(message);
+      }
     },
     registerService: (service: any) => {
       registeredService = service;
@@ -44,35 +52,35 @@ function createMockApi(pluginConfigOverride: Record<string, any> = {}) {
         telegram: {
           sendMessageTelegram: async (to: string, text: string) => {
             sentMessages.push({ to, text, channel: "telegram" });
-          },
+          }
         },
         discord: {
           sendMessageDiscord: async (to: string, text: string) => {
             sentMessages.push({ to, text, channel: "discord" });
-          },
+          }
         },
         signal: {
           sendMessageSignal: async (to: string, text: string) => {
             sentMessages.push({ to, text, channel: "signal" });
-          },
+          }
         },
         slack: {
           sendMessageSlack: async (to: string, text: string) => {
             sentMessages.push({ to, text, channel: "slack" });
-          },
+          }
         },
         whatsapp: {
           sendMessageWhatsApp: async (to: string, text: string, opts?: { verbose: boolean }) => {
             sentMessages.push({ to, text, channel: "whatsapp", opts });
-          },
+          }
         },
         line: {
           sendMessageLine: async (to: string, text: string) => {
             sentMessages.push({ to, text, channel: "line" });
-          },
-        },
-      },
-    },
+          }
+        }
+      }
+    }
   };
 
   return {
@@ -92,7 +100,7 @@ function createMockApi(pluginConfigOverride: Record<string, any> = {}) {
         lastResult = await handler(data, ctx);
       }
       return lastResult;
-    },
+    }
   };
 }
 
@@ -126,7 +134,7 @@ describe("claudeMemPlugin", () => {
 
     it("logs disabled when enabled is false", async () => {
       const { api, logs, getService } = createMockApi({
-        observationFeed: { enabled: false },
+        observationFeed: { enabled: false }
       });
       claudeMemPlugin(api);
 
@@ -136,7 +144,7 @@ describe("claudeMemPlugin", () => {
 
     it("logs misconfigured when channel is missing", async () => {
       const { api, logs, getService } = createMockApi({
-        observationFeed: { enabled: true, to: "123" },
+        observationFeed: { enabled: true, to: "123" }
       });
       claudeMemPlugin(api);
 
@@ -146,7 +154,7 @@ describe("claudeMemPlugin", () => {
 
     it("logs misconfigured when to is missing", async () => {
       const { api, logs, getService } = createMockApi({
-        observationFeed: { enabled: true, channel: "telegram" },
+        observationFeed: { enabled: true, channel: "telegram" }
       });
       claudeMemPlugin(api);
 
@@ -170,17 +178,29 @@ describe("claudeMemPlugin", () => {
       const { api, getCommand } = createMockApi({});
       claudeMemPlugin(api);
 
-      const result = await getCommand().handler({ args: "", channel: "telegram", isAuthorizedSender: true, commandBody: "/claude_mem_feed", config: {} });
+      const result = await getCommand().handler({
+        args: "",
+        channel: "telegram",
+        isAuthorizedSender: true,
+        commandBody: "/claude_mem_feed",
+        config: {}
+      });
       assert.ok(result.text.includes("not configured"));
     });
 
     it("returns status when no args", async () => {
       const { api, getCommand } = createMockApi({
-        observationFeed: { enabled: true, channel: "telegram", to: "123" },
+        observationFeed: { enabled: true, channel: "telegram", to: "123" }
       });
       claudeMemPlugin(api);
 
-      const result = await getCommand().handler({ args: "", channel: "telegram", isAuthorizedSender: true, commandBody: "/claude_mem_feed", config: {} });
+      const result = await getCommand().handler({
+        args: "",
+        channel: "telegram",
+        isAuthorizedSender: true,
+        commandBody: "/claude_mem_feed",
+        config: {}
+      });
       assert.ok(result.text.includes("Enabled: yes"));
       assert.ok(result.text.includes("Channel: telegram"));
       assert.ok(result.text.includes("Target: 123"));
@@ -189,33 +209,51 @@ describe("claudeMemPlugin", () => {
 
     it("handles 'on' argument", async () => {
       const { api, logs, getCommand } = createMockApi({
-        observationFeed: { enabled: false },
+        observationFeed: { enabled: false }
       });
       claudeMemPlugin(api);
 
-      const result = await getCommand().handler({ args: "on", channel: "telegram", isAuthorizedSender: true, commandBody: "/claude_mem_feed on", config: {} });
+      const result = await getCommand().handler({
+        args: "on",
+        channel: "telegram",
+        isAuthorizedSender: true,
+        commandBody: "/claude_mem_feed on",
+        config: {}
+      });
       assert.ok(result.text.includes("enable requested"));
       assert.ok(logs.some((l) => l.includes("enable requested")));
     });
 
     it("handles 'off' argument", async () => {
       const { api, logs, getCommand } = createMockApi({
-        observationFeed: { enabled: true },
+        observationFeed: { enabled: true }
       });
       claudeMemPlugin(api);
 
-      const result = await getCommand().handler({ args: "off", channel: "telegram", isAuthorizedSender: true, commandBody: "/claude_mem_feed off", config: {} });
+      const result = await getCommand().handler({
+        args: "off",
+        channel: "telegram",
+        isAuthorizedSender: true,
+        commandBody: "/claude_mem_feed off",
+        config: {}
+      });
       assert.ok(result.text.includes("disable requested"));
       assert.ok(logs.some((l) => l.includes("disable requested")));
     });
 
     it("shows connection state in status output", async () => {
       const { api, getCommand } = createMockApi({
-        observationFeed: { enabled: false, channel: "slack", to: "#general" },
+        observationFeed: { enabled: false, channel: "slack", to: "#general" }
       });
       claudeMemPlugin(api);
 
-      const result = await getCommand().handler({ args: "", channel: "slack", isAuthorizedSender: true, commandBody: "/claude_mem_feed", config: {} });
+      const result = await getCommand().handler({
+        args: "",
+        channel: "slack",
+        isAuthorizedSender: true,
+        commandBody: "/claude_mem_feed",
+        config: {}
+      });
       assert.ok(result.text.includes("Connection: disconnected"));
     });
   });
@@ -230,15 +268,19 @@ describe("Observation I/O event handlers", () => {
     return new Promise((resolve) => {
       workerServer = createServer((req: IncomingMessage, res: ServerResponse) => {
         let body = "";
-        req.on("data", (chunk) => { body += chunk.toString(); });
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
         req.on("end", () => {
           let parsedBody: any = null;
-          try { parsedBody = JSON.parse(body); } catch {}
+          try {
+            parsedBody = JSON.parse(body);
+          } catch {}
 
           receivedRequests.push({
             method: req.method || "GET",
             url: req.url || "/",
-            body: parsedBody,
+            body: parsedBody
           });
 
           if (req.url === "/api/health") {
@@ -275,7 +317,7 @@ describe("Observation I/O event handlers", () => {
             res.writeHead(200, {
               "Content-Type": "text/event-stream",
               "Cache-Control": "no-cache",
-              Connection: "keep-alive",
+              Connection: "keep-alive"
             });
             return;
           }
@@ -306,9 +348,13 @@ describe("Observation I/O event handlers", () => {
     const { api, logs, fireEvent } = createMockApi({ workerPort });
     claudeMemPlugin(api);
 
-    await fireEvent("session_start", {
-      sessionId: "test-session-1",
-    }, { sessionKey: "agent-1" });
+    await fireEvent(
+      "session_start",
+      {
+        sessionId: "test-session-1"
+      },
+      { sessionKey: "agent-1" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -359,13 +405,17 @@ describe("Observation I/O event handlers", () => {
     await fireEvent("session_start", { sessionId: "s1" }, { sessionKey: "test-agent" });
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await fireEvent("tool_result_persist", {
-      toolName: "Read",
-      params: { file_path: "/src/index.ts" },
-      message: {
-        content: [{ type: "text", text: "file contents here..." }],
+    await fireEvent(
+      "tool_result_persist",
+      {
+        toolName: "Read",
+        params: { file_path: "/src/index.ts" },
+        message: {
+          content: [{ type: "text", text: "file contents here..." }]
+        }
       },
-    }, { sessionKey: "test-agent" });
+      { sessionKey: "test-agent" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -381,10 +431,14 @@ describe("Observation I/O event handlers", () => {
     const { api, fireEvent } = createMockApi({ workerPort });
     claudeMemPlugin(api);
 
-    await fireEvent("tool_result_persist", {
-      toolName: "memory_search",
-      params: {},
-    }, {});
+    await fireEvent(
+      "tool_result_persist",
+      {
+        toolName: "memory_search",
+        params: {}
+      },
+      {}
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -397,13 +451,17 @@ describe("Observation I/O event handlers", () => {
     claudeMemPlugin(api);
 
     const longText = "x".repeat(2000);
-    await fireEvent("tool_result_persist", {
-      toolName: "Bash",
-      params: { command: "ls" },
-      message: {
-        content: [{ type: "text", text: longText }],
+    await fireEvent(
+      "tool_result_persist",
+      {
+        toolName: "Bash",
+        params: { command: "ls" },
+        message: {
+          content: [{ type: "text", text: longText }]
+        }
       },
-    }, {});
+      {}
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -419,12 +477,16 @@ describe("Observation I/O event handlers", () => {
     await fireEvent("session_start", { sessionId: "s1" }, { sessionKey: "summarize-test" });
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await fireEvent("agent_end", {
-      messages: [
-        { role: "user", content: "help me" },
-        { role: "assistant", content: "Here is the solution..." },
-      ],
-    }, { sessionKey: "summarize-test" });
+    await fireEvent(
+      "agent_end",
+      {
+        messages: [
+          { role: "user", content: "help me" },
+          { role: "assistant", content: "Here is the solution..." }
+        ]
+      },
+      { sessionKey: "summarize-test" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -444,17 +506,21 @@ describe("Observation I/O event handlers", () => {
     await fireEvent("session_start", { sessionId: "s1" }, { sessionKey: "array-content" });
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await fireEvent("agent_end", {
-      messages: [
-        {
-          role: "assistant",
-          content: [
-            { type: "text", text: "First part" },
-            { type: "text", text: "Second part" },
-          ],
-        },
-      ],
-    }, { sessionKey: "array-content" });
+    await fireEvent(
+      "agent_end",
+      {
+        messages: [
+          {
+            role: "assistant",
+            content: [
+              { type: "text", text: "First part" },
+              { type: "text", text: "Second part" }
+            ]
+          }
+        ]
+      },
+      { sessionKey: "array-content" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -482,7 +548,13 @@ describe("Observation I/O event handlers", () => {
     const statusCmd = getCommand("claude_mem_status");
     assert.ok(statusCmd, "status command should exist");
 
-    const result = await statusCmd.handler({ args: "", channel: "telegram", isAuthorizedSender: true, commandBody: "/claude_mem_status", config: {} });
+    const result = await statusCmd.handler({
+      args: "",
+      channel: "telegram",
+      isAuthorizedSender: true,
+      commandBody: "/claude_mem_status",
+      config: {}
+    });
     assert.ok(result.text.includes("Status: ok"));
     assert.ok(result.text.includes(`Port: ${workerPort}`));
   });
@@ -495,7 +567,13 @@ describe("Observation I/O event handlers", () => {
     claudeMemPlugin(api);
 
     const statusCmd = getCommand("claude_mem_status");
-    const result = await statusCmd.handler({ args: "", channel: "telegram", isAuthorizedSender: true, commandBody: "/claude_mem_status", config: {} });
+    const result = await statusCmd.handler({
+      args: "",
+      channel: "telegram",
+      isAuthorizedSender: true,
+      commandBody: "/claude_mem_status",
+      config: {}
+    });
     assert.ok(result.text.includes("unreachable"));
   });
 
@@ -506,11 +584,15 @@ describe("Observation I/O event handlers", () => {
     await fireEvent("session_start", { sessionId: "s1" }, { sessionKey: "reuse-test" });
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await fireEvent("tool_result_persist", {
-      toolName: "Read",
-      params: { file_path: "/src/index.ts" },
-      message: { content: [{ type: "text", text: "contents" }] },
-    }, { sessionKey: "reuse-test" });
+    await fireEvent(
+      "tool_result_persist",
+      {
+        toolName: "Read",
+        params: { file_path: "/src/index.ts" },
+        message: { content: [{ type: "text", text: "contents" }] }
+      },
+      { sessionKey: "reuse-test" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -535,15 +617,19 @@ describe("before_prompt_build context injection", () => {
     return new Promise((resolve) => {
       workerServer = createServer((req: IncomingMessage, res: ServerResponse) => {
         let body = "";
-        req.on("data", (chunk) => { body += chunk.toString(); });
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
         req.on("end", () => {
           let parsedBody: any = null;
-          try { parsedBody = JSON.parse(body); } catch {}
+          try {
+            parsedBody = JSON.parse(body);
+          } catch {}
 
           receivedRequests.push({
             method: req.method || "GET",
             url: req.url || "/",
-            body: parsedBody,
+            body: parsedBody
           });
 
           if (req.url?.startsWith("/api/context/inject")) {
@@ -585,10 +671,14 @@ describe("before_prompt_build context injection", () => {
     const { api, logs, fireEvent } = createMockApi({ workerPort });
     claudeMemPlugin(api);
 
-    const result = await fireEvent("before_prompt_build", {
-      prompt: "Help me write a function",
-      messages: [],
-    }, { agentId: "main" });
+    const result = await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me write a function",
+        messages: []
+      },
+      { agentId: "main" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -609,9 +699,13 @@ describe("before_prompt_build context injection", () => {
       const { api, fireEvent } = createMockApi({ workerPort });
       claudeMemPlugin(api);
 
-      await fireEvent("before_agent_start", {
-        prompt: "Help me write a function",
-      }, { sessionKey: "sync-test", workspaceDir: tmpDir });
+      await fireEvent(
+        "before_agent_start",
+        {
+          prompt: "Help me write a function"
+        },
+        { sessionKey: "sync-test", workspaceDir: tmpDir }
+      );
 
       await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -633,17 +727,25 @@ describe("before_prompt_build context injection", () => {
       const { api, fireEvent } = createMockApi({ workerPort });
       claudeMemPlugin(api);
 
-      await fireEvent("before_agent_start", {
-        prompt: "Help me write a function",
-      }, { sessionKey: "tool-sync", workspaceDir: tmpDir });
+      await fireEvent(
+        "before_agent_start",
+        {
+          prompt: "Help me write a function"
+        },
+        { sessionKey: "tool-sync", workspaceDir: tmpDir }
+      );
 
       await new Promise((resolve) => setTimeout(resolve, 200));
 
-      await fireEvent("tool_result_persist", {
-        toolName: "Read",
-        params: { file_path: "/src/app.ts" },
-        message: { content: [{ type: "text", text: "file contents" }] },
-      }, { sessionKey: "tool-sync" });
+      await fireEvent(
+        "tool_result_persist",
+        {
+          toolName: "Read",
+          params: { file_path: "/src/app.ts" },
+          message: { content: [{ type: "text", text: "file contents" }] }
+        },
+        { sessionKey: "tool-sync" }
+      );
 
       await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -666,10 +768,14 @@ describe("before_prompt_build context injection", () => {
     const { api, fireEvent } = createMockApi({ workerPort, syncMemoryFile: false });
     claudeMemPlugin(api);
 
-    const result = await fireEvent("before_prompt_build", {
-      prompt: "Help me write a function",
-      messages: [],
-    }, { agentId: "main" });
+    const result = await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me write a function",
+        messages: []
+      },
+      { agentId: "main" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -682,10 +788,14 @@ describe("before_prompt_build context injection", () => {
     const { api, fireEvent } = createMockApi({ workerPort, syncMemoryFileExclude: ["snarf"] });
     claudeMemPlugin(api);
 
-    const result = await fireEvent("before_prompt_build", {
-      prompt: "Help me",
-      messages: [],
-    }, { agentId: "snarf" });
+    const result = await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me",
+        messages: []
+      },
+      { agentId: "snarf" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -698,10 +808,14 @@ describe("before_prompt_build context injection", () => {
     const { api, fireEvent } = createMockApi({ workerPort, syncMemoryFileExclude: ["snarf"] });
     claudeMemPlugin(api);
 
-    const result = await fireEvent("before_prompt_build", {
-      prompt: "Help me",
-      messages: [],
-    }, { agentId: "main" });
+    const result = await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me",
+        messages: []
+      },
+      { agentId: "main" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -714,10 +828,14 @@ describe("before_prompt_build context injection", () => {
     const { api, logs, fireEvent } = createMockApi({ workerPort });
     claudeMemPlugin(api);
 
-    const result = await fireEvent("before_prompt_build", {
-      prompt: "Help me write a function",
-      messages: [],
-    }, { agentId: "main" });
+    const result = await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me write a function",
+        messages: []
+      },
+      { agentId: "main" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -729,10 +847,14 @@ describe("before_prompt_build context injection", () => {
     const { api, fireEvent } = createMockApi({ workerPort, project: "my-bot" });
     claudeMemPlugin(api);
 
-    await fireEvent("before_prompt_build", {
-      prompt: "Help me write a function",
-      messages: [],
-    }, { agentId: "main" });
+    await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me write a function",
+        messages: []
+      },
+      { agentId: "main" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -745,10 +867,14 @@ describe("before_prompt_build context injection", () => {
     const { api, fireEvent } = createMockApi({ workerPort });
     claudeMemPlugin(api);
 
-    await fireEvent("before_prompt_build", {
-      prompt: "Help me",
-      messages: [],
-    }, { agentId: "debugger" });
+    await fireEvent(
+      "before_prompt_build",
+      {
+        prompt: "Help me",
+        messages: []
+      },
+      { agentId: "debugger" }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -775,7 +901,7 @@ describe("SSE stream integration", () => {
         res.writeHead(200, {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
-          Connection: "keep-alive",
+          Connection: "keep-alive"
         });
         serverResponses.push(res);
       });
@@ -805,7 +931,7 @@ describe("SSE stream integration", () => {
   it("connects to SSE stream and receives new_observation events", async () => {
     const { api, logs, sentMessages, getService } = createMockApi({
       workerPort: serverPort,
-      observationFeed: { enabled: true, channel: "telegram", to: "12345" },
+      observationFeed: { enabled: true, channel: "telegram", to: "12345" }
     });
     claudeMemPlugin(api);
 
@@ -824,9 +950,9 @@ describe("SSE stream integration", () => {
         type: "discovery",
         project: "test",
         prompt_number: 1,
-        created_at_epoch: Date.now(),
+        created_at_epoch: Date.now()
       },
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
 
     for (const res of serverResponses) {
@@ -847,7 +973,7 @@ describe("SSE stream integration", () => {
   it("filters out non-observation events", async () => {
     const { api, sentMessages, getService } = createMockApi({
       workerPort: serverPort,
-      observationFeed: { enabled: true, channel: "discord", to: "channel-id" },
+      observationFeed: { enabled: true, channel: "discord", to: "channel-id" }
     });
     claudeMemPlugin(api);
 
@@ -868,7 +994,7 @@ describe("SSE stream integration", () => {
   it("handles observation with null subtitle", async () => {
     const { api, sentMessages, getService } = createMockApi({
       workerPort: serverPort,
-      observationFeed: { enabled: true, channel: "telegram", to: "999" },
+      observationFeed: { enabled: true, channel: "telegram", to: "999" }
     });
     claudeMemPlugin(api);
 
@@ -880,7 +1006,7 @@ describe("SSE stream integration", () => {
         `data: ${JSON.stringify({
           type: "new_observation",
           observation: { id: 2, title: "No Subtitle", subtitle: null },
-          timestamp: Date.now(),
+          timestamp: Date.now()
         })}\n\n`
       );
     }
@@ -896,7 +1022,7 @@ describe("SSE stream integration", () => {
   it("handles observation with null title", async () => {
     const { api, sentMessages, getService } = createMockApi({
       workerPort: serverPort,
-      observationFeed: { enabled: true, channel: "telegram", to: "999" },
+      observationFeed: { enabled: true, channel: "telegram", to: "999" }
     });
     claudeMemPlugin(api);
 
@@ -908,7 +1034,7 @@ describe("SSE stream integration", () => {
         `data: ${JSON.stringify({
           type: "new_observation",
           observation: { id: 3, title: null, subtitle: "Has subtitle" },
-          timestamp: Date.now(),
+          timestamp: Date.now()
         })}\n\n`
       );
     }
@@ -923,7 +1049,7 @@ describe("SSE stream integration", () => {
   it("uses custom workerPort from config", async () => {
     const { api, logs, getService } = createMockApi({
       workerPort: serverPort,
-      observationFeed: { enabled: true, channel: "telegram", to: "12345" },
+      observationFeed: { enabled: true, channel: "telegram", to: "12345" }
     });
     claudeMemPlugin(api);
 
@@ -938,7 +1064,7 @@ describe("SSE stream integration", () => {
   it("logs unknown channel type", async () => {
     const { api, logs, sentMessages, getService } = createMockApi({
       workerPort: serverPort,
-      observationFeed: { enabled: true, channel: "matrix", to: "room-id" },
+      observationFeed: { enabled: true, channel: "matrix", to: "room-id" }
     });
     claudeMemPlugin(api);
 
@@ -950,7 +1076,7 @@ describe("SSE stream integration", () => {
         `data: ${JSON.stringify({
           type: "new_observation",
           observation: { id: 4, title: "Test", subtitle: null },
-          timestamp: Date.now(),
+          timestamp: Date.now()
         })}\n\n`
       );
     }
@@ -981,9 +1107,7 @@ describe("circuit breaker", () => {
 
     const logCountBeforeDrop = logs.length;
     await fireEvent("before_agent_start", { prompt: "hello" }, { sessionKey: "cb-drop" });
-    const noisyDropLogs = logs.slice(logCountBeforeDrop).filter(
-      (l) => l.includes("failed") || l.includes("disabling")
-    );
+    const noisyDropLogs = logs.slice(logCountBeforeDrop).filter((l) => l.includes("failed") || l.includes("disabling"));
     assert.equal(noisyDropLogs.length, 0, "calls when circuit is open should be silently dropped");
   });
 
@@ -1074,10 +1198,14 @@ describe("circuit breaker", () => {
       const logCountAfterFailedProbe = mockA.logs.length;
       await mockA.fireEvent("before_agent_start", { prompt: "probe" }, { sessionKey: "probe-concurrent" });
       await new Promise((resolve) => setTimeout(resolve, 100));
-      const droppedLogs = mockA.logs.slice(logCountAfterFailedProbe).filter(
-        (l) => l.includes("failed") || l.includes("disabling")
+      const droppedLogs = mockA.logs
+        .slice(logCountAfterFailedProbe)
+        .filter((l) => l.includes("failed") || l.includes("disabling"));
+      assert.equal(
+        droppedLogs.length,
+        0,
+        "call should be silently dropped while circuit is OPEN again after failed probe"
       );
-      assert.equal(droppedLogs.length, 0, "call should be silently dropped while circuit is OPEN again after failed probe");
 
       serverA!.close();
 

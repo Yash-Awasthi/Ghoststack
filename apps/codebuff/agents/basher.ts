@@ -19,7 +19,8 @@ const basher: AgentDefinition = {
       properties: {
         command: {
           type: 'string',
-          description: 'The terminal command to run in bash shell. Don\'t forget this field!',
+          description:
+            "The terminal command to run in bash shell. Don't forget this field!",
         },
         what_to_summarize: {
           type: 'string',
@@ -83,7 +84,10 @@ Do not use any tools! Only analyze the output of the command.`,
       // Return the raw command output without summarization
       const result = toolResult?.[0]
       // Only return object values (command output objects), not plain strings
-      const output = result?.type === 'json' && typeof result.value === 'object' ? result.value : ''
+      const output =
+        result?.type === 'json' && typeof result.value === 'object'
+          ? result.value
+          : ''
       yield {
         toolName: 'set_output',
         input: { output },

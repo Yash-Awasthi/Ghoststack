@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-05-18T17:10:43.538Z",
+  "engine": {
+    "platform": "GhostStack",
+    "version": "1.1-hardened",
+    "status": "operational"
+  },
+  "queues": {
+    "activeLength": 0,
+    "deadLetterLength": 0
+  },
+  "workflows": {
+    "registeredTemplates": [
+      {
+        "id": "browser-research-template",
+        "name": "Governed Browser Research Workflow"
+      },
+      {
+        "id": "cloud-provisioning-template",
+        "name": "Local Cloud Provisioning Workflow"
+      }
+    ],
+    "telemetryHistory": [
+      {
+        "id": "exec-safe-demo",
+        "workflowId": "showcase-safe-research",
+        "status": "succeeded",
+        "taskResults": {
+          "showcase-safe-research-nav-task": {
+            "status": "completed"
+          },
+          "showcase-safe-research-scrape-task": {
+            "status": "completed"
+          }
+        },
+        "startedAt": "2026-05-18T17:10:16.630Z",
+        "approved": true,
+        "completedAt": "2026-05-18T17:10:16.682Z"
+      },
+      {
+        "id": "exec-illegal-demo",
+        "workflowId": "showcase-illegal-research",
+        "status": "failed",
+        "taskResults": {},
+        "startedAt": "2026-05-18T17:10:16.705Z",
+        "error": "Illegal system file path protocol blocked",
+        "completedAt": "2026-05-18T17:10:16.729Z"
+      },
+      {
+        "id": "exec-approval-demo",
+        "workflowId": "showcase-approval-research",
+        "status": "succeeded",
+        "taskResults": {
+          "showcase-approval-research-nav-task": {
+            "status": "completed"
+          },
+          "showcase-approval-research-scrape-task": {
+            "status": "completed"
+          }
+        },
+        "startedAt": "2026-05-18T17:10:16.750Z",
+        "approved": true,
+        "completedAt": "2026-05-18T17:10:16.868Z"
+      }
+    ]
+  },
+  "services": [],
+  "systemMetrics": {
+    "telemetryEventsCount": 6,
+    "governanceApprovalsCount": 1
+  }
+}

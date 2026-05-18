@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger.js';
+import { logger } from "../../../utils/logger.js";
 
 import {
   ObservationSearchResult,
@@ -6,27 +6,21 @@ import {
   UserPromptSearchResult,
   CombinedResult,
   SearchResults
-} from './types.js';
-import { ModeManager } from '../../domain/ModeManager.js';
-import { formatTime, extractFirstFile, groupByDate, estimateTokens } from '../../../shared/timeline-formatting.js';
+} from "./types.js";
+import { ModeManager } from "../../domain/ModeManager.js";
+import { formatTime, extractFirstFile, groupByDate, estimateTokens } from "../../../shared/timeline-formatting.js";
 
 const CHARS_PER_TOKEN_ESTIMATE = 4;
 
 export class ResultFormatter {
-  formatSearchResults(
-    results: SearchResults,
-    query: string,
-    chromaFailed: boolean = false
-  ): string {
-    const totalResults = results.observations.length +
-      results.sessions.length +
-      results.prompts.length;
+  formatSearchResults(results: SearchResults, query: string, chromaFailed: boolean = false): string {
+    const totalResults = results.observations.length + results.sessions.length + results.prompts.length;
 
     if (totalResults === 0) {
       if (chromaFailed) {
         return ResultFormatter.formatChromaFailureMessage({
-          message: 'unknown error (no reason captured by caller)',
-          isConnectionError: false,
+          message: "unknown error (no reason captured by caller)",
+          isConnectionError: false
         });
       }
       return `No results found matching "${query}"`;
@@ -37,20 +31,22 @@ export class ResultFormatter {
     combined.sort((a, b) => b.epoch - a.epoch);
 
     const cwd = process.cwd();
-    const resultsByDate = groupByDate(combined, item => item.created_at);
+    const resultsByDate = groupByDate(combined, (item) => item.created_at);
 
     const lines: string[] = [];
-    lines.push(`Found ${totalResults} result(s) matching "${query}" (${results.observations.length} obs, ${results.sessions.length} sessions, ${results.prompts.length} prompts)`);
-    lines.push('');
+    lines.push(
+      `Found ${totalResults} result(s) matching "${query}" (${results.observations.length} obs, ${results.sessions.length} sessions, ${results.prompts.length} prompts)`
+    );
+    lines.push("");
 
     for (const [day, dayResults] of resultsByDate) {
       lines.push(`### ${day}`);
-      lines.push('');
+      lines.push("");
 
       const resultsByFile = new Map<string, CombinedResult[]>();
       for (const result of dayResults) {
-        let file = 'General';
-        if (result.type === 'observation') {
+        let file = "General";
+        if (result.type === "observation") {
           const obs = result.data as ObservationSearchResult;
           file = extractFirstFile(obs.files_modified, cwd, obs.files_read);
         }
@@ -64,55 +60,46 @@ export class ResultFormatter {
         lines.push(`**${file}**`);
         lines.push(this.formatSearchTableHeader());
 
-        let lastTime = '';
+        let lastTime = "";
         for (const result of fileResults) {
-          if (result.type === 'observation') {
-            const formatted = this.formatObservationSearchRow(
-              result.data as ObservationSearchResult,
-              lastTime
-            );
+          if (result.type === "observation") {
+            const formatted = this.formatObservationSearchRow(result.data as ObservationSearchResult, lastTime);
             lines.push(formatted.row);
             lastTime = formatted.time;
-          } else if (result.type === 'session') {
-            const formatted = this.formatSessionSearchRow(
-              result.data as SessionSummarySearchResult,
-              lastTime
-            );
+          } else if (result.type === "session") {
+            const formatted = this.formatSessionSearchRow(result.data as SessionSummarySearchResult, lastTime);
             lines.push(formatted.row);
             lastTime = formatted.time;
           } else {
-            const formatted = this.formatPromptSearchRow(
-              result.data as UserPromptSearchResult,
-              lastTime
-            );
+            const formatted = this.formatPromptSearchRow(result.data as UserPromptSearchResult, lastTime);
             lines.push(formatted.row);
             lastTime = formatted.time;
           }
         }
 
-        lines.push('');
+        lines.push("");
       }
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   combineResults(results: SearchResults): CombinedResult[] {
     return [
-      ...results.observations.map(obs => ({
-        type: 'observation' as const,
+      ...results.observations.map((obs) => ({
+        type: "observation" as const,
         data: obs,
         epoch: obs.created_at_epoch,
         created_at: obs.created_at
       })),
-      ...results.sessions.map(sess => ({
-        type: 'session' as const,
+      ...results.sessions.map((sess) => ({
+        type: "session" as const,
         data: sess,
         epoch: sess.created_at_epoch,
         created_at: sess.created_at
       })),
-      ...results.prompts.map(prompt => ({
-        type: 'prompt' as const,
+      ...results.prompts.map((prompt) => ({
+        type: "prompt" as const,
         data: prompt,
         epoch: prompt.created_at_epoch,
         created_at: prompt.created_at
@@ -130,14 +117,11 @@ export class ResultFormatter {
 |-----|------|---|-------|------|------|`;
   }
 
-  formatObservationSearchRow(
-    obs: ObservationSearchResult,
-    lastTime: string
-  ): { row: string; time: string } {
+  formatObservationSearchRow(obs: ObservationSearchResult, lastTime: string): { row: string; time: string } {
     const id = `#${obs.id}`;
     const time = formatTime(obs.created_at_epoch);
     const icon = ModeManager.getInstance().getTypeIcon(obs.type);
-    const title = obs.title || 'Untitled';
+    const title = obs.title || "Untitled";
     const readTokens = this.estimateReadTokens(obs);
 
     const timeDisplay = time === lastTime ? '"' : time;
@@ -148,15 +132,11 @@ export class ResultFormatter {
     };
   }
 
-  formatSessionSearchRow(
-    session: SessionSummarySearchResult,
-    lastTime: string
-  ): { row: string; time: string } {
+  formatSessionSearchRow(session: SessionSummarySearchResult, lastTime: string): { row: string; time: string } {
     const id = `#S${session.id}`;
     const time = formatTime(session.created_at_epoch);
-    const icon = '\uD83C\uDFAF'; 
-    const title = session.request ||
-      `Session ${session.memory_session_id?.substring(0, 8) || 'unknown'}`;
+    const icon = "\uD83C\uDFAF";
+    const title = session.request || `Session ${session.memory_session_id?.substring(0, 8) || "unknown"}`;
 
     const timeDisplay = time === lastTime ? '"' : time;
 
@@ -166,16 +146,11 @@ export class ResultFormatter {
     };
   }
 
-  formatPromptSearchRow(
-    prompt: UserPromptSearchResult,
-    lastTime: string
-  ): { row: string; time: string } {
+  formatPromptSearchRow(prompt: UserPromptSearchResult, lastTime: string): { row: string; time: string } {
     const id = `#P${prompt.id}`;
     const time = formatTime(prompt.created_at_epoch);
-    const icon = '\uD83D\uDCAC'; 
-    const title = prompt.prompt_text.length > 60
-      ? prompt.prompt_text.substring(0, 57) + '...'
-      : prompt.prompt_text;
+    const icon = "\uD83D\uDCAC";
+    const title = prompt.prompt_text.length > 60 ? prompt.prompt_text.substring(0, 57) + "..." : prompt.prompt_text;
 
     const timeDisplay = time === lastTime ? '"' : time;
 
@@ -189,11 +164,11 @@ export class ResultFormatter {
     const id = `#${obs.id}`;
     const time = formatTime(obs.created_at_epoch);
     const icon = ModeManager.getInstance().getTypeIcon(obs.type);
-    const title = obs.title || 'Untitled';
+    const title = obs.title || "Untitled";
     const readTokens = this.estimateReadTokens(obs);
     const workEmoji = ModeManager.getInstance().getWorkEmoji(obs.type);
     const workTokens = obs.discovery_tokens || 0;
-    const workDisplay = workTokens > 0 ? `${workEmoji} ${workTokens}` : '-';
+    const workDisplay = workTokens > 0 ? `${workEmoji} ${workTokens}` : "-";
 
     return `| ${id} | ${time} | ${icon} | ${title} | ~${readTokens} | ${workDisplay} |`;
   }
@@ -201,9 +176,8 @@ export class ResultFormatter {
   formatSessionIndex(session: SessionSummarySearchResult, _index: number): string {
     const id = `#S${session.id}`;
     const time = formatTime(session.created_at_epoch);
-    const icon = '\uD83C\uDFAF';
-    const title = session.request ||
-      `Session ${session.memory_session_id?.substring(0, 8) || 'unknown'}`;
+    const icon = "\uD83C\uDFAF";
+    const title = session.request || `Session ${session.memory_session_id?.substring(0, 8) || "unknown"}`;
 
     return `| ${id} | ${time} | ${icon} | ${title} | - | - |`;
   }
@@ -211,19 +185,15 @@ export class ResultFormatter {
   formatPromptIndex(prompt: UserPromptSearchResult, _index: number): string {
     const id = `#P${prompt.id}`;
     const time = formatTime(prompt.created_at_epoch);
-    const icon = '\uD83D\uDCAC';
-    const title = prompt.prompt_text.length > 60
-      ? prompt.prompt_text.substring(0, 57) + '...'
-      : prompt.prompt_text;
+    const icon = "\uD83D\uDCAC";
+    const title = prompt.prompt_text.length > 60 ? prompt.prompt_text.substring(0, 57) + "..." : prompt.prompt_text;
 
     return `| ${id} | ${time} | ${icon} | ${title} | - | - |`;
   }
 
   private estimateReadTokens(obs: ObservationSearchResult): number {
-    const size = (obs.title?.length || 0) +
-      (obs.subtitle?.length || 0) +
-      (obs.narrative?.length || 0) +
-      (obs.facts?.length || 0);
+    const size =
+      (obs.title?.length || 0) + (obs.subtitle?.length || 0) + (obs.narrative?.length || 0) + (obs.facts?.length || 0);
     return Math.ceil(size / CHARS_PER_TOKEN_ESTIMATE);
   }
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env bun
-import ts from 'typescript';
-import postcss from 'postcss';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkMdx from 'remark-mdx';
-import { visit } from 'unist-util-visit';
-import { parse as parse5Parse, parseFragment as parse5ParseFragment } from 'parse5';
-import { readFileSync, writeFileSync, statSync } from 'node:fs';
-import { execSync } from 'node:child_process';
-import { extname, basename, join } from 'node:path';
+import ts from "typescript";
+import postcss from "postcss";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkMdx from "remark-mdx";
+import { visit } from "unist-util-visit";
+import { parse as parse5Parse, parseFragment as parse5ParseFragment } from "parse5";
+import { readFileSync, writeFileSync, statSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { extname, basename, join } from "node:path";
 
 interface CliOptions {
   root: string;
@@ -23,13 +23,13 @@ function parseArgs(argv: string[]): CliOptions {
   let dryRun = false;
   let verbose = false;
   for (const arg of argv.slice(2)) {
-    if (arg === '--check') check = true;
-    else if (arg === '--dry-run') dryRun = true;
-    else if (arg === '--verbose' || arg === '-v') verbose = true;
-    else if (arg === '--help' || arg === '-h') {
+    if (arg === "--check") check = true;
+    else if (arg === "--dry-run") dryRun = true;
+    else if (arg === "--verbose" || arg === "-v") verbose = true;
+    else if (arg === "--help" || arg === "-h") {
       printHelp();
       process.exit(0);
-    } else if (!arg.startsWith('-')) {
+    } else if (!arg.startsWith("-")) {
       root = arg;
     } else {
       console.error(`Unknown flag: ${arg}`);
@@ -65,55 +65,67 @@ After running, review the diff with \`git diff\`, then run
 `);
 }
 
-const SKIP_PATHS = new Set<string>([
-  'package-lock.json',
-  'bun.lock',
-  'bun.lockb',
-  'plugin/scripts/claude-mem',
-]);
+const SKIP_PATHS = new Set<string>(["package-lock.json", "bun.lock", "bun.lockb", "plugin/scripts/claude-mem"]);
 
-const SKIP_BASENAMES = new Set<string>([
-  'LICENSE',
-  'COPYING',
-  'NOTICE',
-]);
+const SKIP_BASENAMES = new Set<string>(["LICENSE", "COPYING", "NOTICE"]);
 
 const BINARY_EXT = new Set<string>([
-  '.svg', '.webp', '.woff', '.woff2', '.gif', '.png', '.jpg', '.jpeg', '.ico', '.pdf', '.zip',
+  ".svg",
+  ".webp",
+  ".woff",
+  ".woff2",
+  ".gif",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".ico",
+  ".pdf",
+  ".zip"
 ]);
 
-const JS_LIKE_EXT = new Set<string>(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs']);
-const MD_EXT = new Set<string>(['.md', '.mdx']);
-const HTML_EXT = new Set<string>(['.html', '.htm']);
-const CSS_LIKE_EXT = new Set<string>(['.css', '.scss', '.less']);
-const HASH_LIKE_EXT = new Set<string>(['.sh', '.bash', '.zsh', '.py']);
+const JS_LIKE_EXT = new Set<string>([".ts", ".tsx", ".js", ".jsx", ".cjs", ".mjs"]);
+const MD_EXT = new Set<string>([".md", ".mdx"]);
+const HTML_EXT = new Set<string>([".html", ".htm"]);
+const CSS_LIKE_EXT = new Set<string>([".css", ".scss", ".less"]);
+const HASH_LIKE_EXT = new Set<string>([".sh", ".bash", ".zsh", ".py"]);
 const HASH_LIKE_BASE = new Set<string>([
-  '.gitignore', '.npmignore', '.dockerignore', '.gitattributes', '.npmrc', '.editorconfig',
+  ".gitignore",
+  ".npmignore",
+  ".dockerignore",
+  ".gitattributes",
+  ".npmrc",
+  ".editorconfig"
 ]);
 
 const KEEP_MARKER = /@strip-comments-keep/;
 const NUL_BYTE = 0;
 
 function isDirectiveJs(text: string): boolean {
-  if (text.startsWith('///')) return true;
-  if (text.startsWith('/*!')) return true;
+  if (text.startsWith("///")) return true;
+  if (text.startsWith("/*!")) return true;
   if (KEEP_MARKER.test(text)) return true;
   const inner = text
-    .replace(/^\/\/\s*/, '')
-    .replace(/^\/\*+\s*/, '')
-    .replace(/\s*\*+\/$/, '')
+    .replace(/^\/\/\s*/, "")
+    .replace(/^\/\*+\s*/, "")
+    .replace(/\s*\*+\/$/, "")
     .trim();
-  return /^(@ts-(?:ignore|expect-error|nocheck|check)\b|eslint-(?:disable|enable)|biome-ignore|prettier-ignore|@vitest-|c8\s+ignore|istanbul\s+ignore|@__PURE__|#__PURE__|webpack(?:ChunkName|Prefetch|Preload|Include|Exclude|Mode|Ignore))/.test(inner);
+  return /^(@ts-(?:ignore|expect-error|nocheck|check)\b|eslint-(?:disable|enable)|biome-ignore|prettier-ignore|@vitest-|c8\s+ignore|istanbul\s+ignore|@__PURE__|#__PURE__|webpack(?:ChunkName|Prefetch|Preload|Include|Exclude|Mode|Ignore))/.test(
+    inner
+  );
 }
 
 function scriptKindFor(ext: string): ts.ScriptKind {
   switch (ext) {
-    case '.tsx': return ts.ScriptKind.TSX;
-    case '.jsx': return ts.ScriptKind.JSX;
-    case '.js':
-    case '.cjs':
-    case '.mjs': return ts.ScriptKind.JS;
-    default: return ts.ScriptKind.TS;
+    case ".tsx":
+      return ts.ScriptKind.TSX;
+    case ".jsx":
+      return ts.ScriptKind.JSX;
+    case ".js":
+    case ".cjs":
+    case ".mjs":
+      return ts.ScriptKind.JS;
+    default:
+      return ts.ScriptKind.TS;
   }
 }
 
@@ -123,7 +135,7 @@ function parseDiagnosticsCount(sf: ts.SourceFile): number {
 
 function stripJsLike(source: string, ext: string): string {
   const kind = scriptKindFor(ext);
-  const sf = ts.createSourceFile('input', source, ts.ScriptTarget.Latest, true, kind);
+  const sf = ts.createSourceFile("input", source, ts.ScriptTarget.Latest, true, kind);
   const beforeErrs = parseDiagnosticsCount(sf);
 
   const seen = new Set<string>();
@@ -148,7 +160,7 @@ function stripJsLike(source: string, ext: string): string {
   visitNode(sf);
   const out = spliceRanges(source, ranges);
 
-  const after = ts.createSourceFile('check', out, ts.ScriptTarget.Latest, true, kind);
+  const after = ts.createSourceFile("check", out, ts.ScriptTarget.Latest, true, kind);
   const afterErrs = parseDiagnosticsCount(after);
   if (afterErrs > beforeErrs) {
     throw new Error(`strip introduced ${afterErrs - beforeErrs} new parse error(s); refusing to write`);
@@ -157,7 +169,7 @@ function stripJsLike(source: string, ext: string): string {
 }
 
 function collapseBlankLines(s: string): string {
-  return s.replace(/(?:[ \t]*\n){3,}/g, '\n\n');
+  return s.replace(/(?:[ \t]*\n){3,}/g, "\n\n");
 }
 
 function spliceRanges(source: string, ranges: Array<[number, number]>): string {
@@ -168,12 +180,12 @@ function spliceRanges(source: string, ranges: Array<[number, number]>): string {
     let removeStart = s;
     let removeEnd = e;
     let lineStart = s;
-    while (lineStart > 0 && (out[lineStart - 1] === ' ' || out[lineStart - 1] === '\t')) {
+    while (lineStart > 0 && (out[lineStart - 1] === " " || out[lineStart - 1] === "\t")) {
       lineStart--;
     }
-    if (lineStart === 0 || out[lineStart - 1] === '\n') {
+    if (lineStart === 0 || out[lineStart - 1] === "\n") {
       removeStart = lineStart;
-      if (out[removeEnd] === '\n') removeEnd++;
+      if (out[removeEnd] === "\n") removeEnd++;
     }
     out = out.slice(0, removeStart) + out.slice(removeEnd);
   }
@@ -186,9 +198,9 @@ function stripCss(source: string): string {
   root.walkComments((node) => {
     const start = node.source?.start?.offset;
     const end = node.source?.end?.offset;
-    if (typeof start !== 'number' || typeof end !== 'number') return;
+    if (typeof start !== "number" || typeof end !== "number") return;
     const raw = source.slice(start, end);
-    if (raw.startsWith('/*!')) return;
+    if (raw.startsWith("/*!")) return;
     if (KEEP_MARKER.test(raw)) return;
     if (/\/\*\s*prettier-ignore/.test(raw)) return;
     ranges.push([start, end]);
@@ -220,14 +232,14 @@ function stripMarkdown(source: string, isMdx: boolean): string {
     const n = node as MdNode;
     const start = n.position?.start?.offset;
     const end = n.position?.end?.offset;
-    if (typeof start !== 'number' || typeof end !== 'number') return;
-    if (n.type === 'html' && typeof n.value === 'string' && HTML_COMMENT_RE.test(n.value.trim())) {
+    if (typeof start !== "number" || typeof end !== "number") return;
+    if (n.type === "html" && typeof n.value === "string" && HTML_COMMENT_RE.test(n.value.trim())) {
       if (KEEP_MARKER.test(n.value)) return;
       ranges.push([start, end]);
       return;
     }
-    if (isMdx && (n.type === 'mdxFlowExpression' || n.type === 'mdxTextExpression')) {
-      const v = n.value ?? '';
+    if (isMdx && (n.type === "mdxFlowExpression" || n.type === "mdxTextExpression")) {
+      const v = n.value ?? "";
       if (isMdxNarrativeComment(v) && !KEEP_MARKER.test(v)) {
         ranges.push([start, end]);
       }
@@ -253,10 +265,10 @@ function stripHtml(source: string, isFragment: boolean): string {
 }
 
 function collectHtmlCommentRanges(node: Parse5Node, source: string, ranges: Array<[number, number]>): void {
-  if (node.nodeName === '#comment') {
+  if (node.nodeName === "#comment") {
     const start = node.sourceCodeLocation?.startOffset;
     const end = node.sourceCodeLocation?.endOffset;
-    if (typeof start === 'number' && typeof end === 'number') {
+    if (typeof start === "number" && typeof end === "number") {
       const raw = source.slice(start, end);
       if (!KEEP_MARKER.test(raw)) {
         ranges.push([start, end]);
@@ -271,21 +283,21 @@ function collectHtmlCommentRanges(node: Parse5Node, source: string, ranges: Arra
 }
 
 function stripHashComments(source: string, preserveShebang: boolean): string {
-  const lines = source.split('\n');
+  const lines = source.split("\n");
   const out: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (i === 0 && preserveShebang && line.startsWith('#!')) {
+    if (i === 0 && preserveShebang && line.startsWith("#!")) {
       out.push(line);
       continue;
     }
     const stripped = stripHashFromLine(line);
-    if (stripped === '' && line.trim().startsWith('#')) {
+    if (stripped === "" && line.trim().startsWith("#")) {
       continue;
     }
     out.push(stripped);
   }
-  return collapseBlankLines(out.join('\n'));
+  return collapseBlankLines(out.join("\n"));
 }
 
 function stripHashFromLine(line: string): string {
@@ -294,16 +306,16 @@ function stripHashFromLine(line: string): string {
   let inBacktick = false;
   for (let i = 0; i < line.length; i++) {
     const c = line[i];
-    if (c === '\\' && i + 1 < line.length) {
+    if (c === "\\" && i + 1 < line.length) {
       i++;
       continue;
     }
     if (!inDouble && !inBacktick && c === "'") inSingle = !inSingle;
     else if (!inSingle && !inBacktick && c === '"') inDouble = !inDouble;
-    else if (!inSingle && !inDouble && c === '`') inBacktick = !inBacktick;
-    else if (!inSingle && !inDouble && !inBacktick && c === '#') {
+    else if (!inSingle && !inDouble && c === "`") inBacktick = !inBacktick;
+    else if (!inSingle && !inDouble && !inBacktick && c === "#") {
       if (i === 0 || /\s/.test(line[i - 1])) {
-        return line.slice(0, i).replace(/[ \t]+$/, '');
+        return line.slice(0, i).replace(/[ \t]+$/, "");
       }
     }
   }
@@ -362,7 +374,7 @@ function processFile(absPath: string, relPath: string, stats: Stats, opts: CliOp
     return;
   }
 
-  const original = raw.toString('utf-8');
+  const original = raw.toString("utf-8");
   if (KEEP_MARKER.test(original.slice(0, 4096))) {
     stats.skipped++;
     return;
@@ -375,14 +387,14 @@ function processFile(absPath: string, relPath: string, stats: Stats, opts: CliOp
     } else if (CSS_LIKE_EXT.has(ext)) {
       stripped = stripCss(original);
     } else if (MD_EXT.has(ext)) {
-      stripped = stripMarkdown(original, ext === '.mdx');
+      stripped = stripMarkdown(original, ext === ".mdx");
     } else if (HTML_EXT.has(ext)) {
       stripped = stripHtml(original, false);
     } else if (
       HASH_LIKE_EXT.has(ext) ||
       HASH_LIKE_BASE.has(base) ||
-      base === 'Dockerfile' ||
-      base.startsWith('Dockerfile.')
+      base === "Dockerfile" ||
+      base.startsWith("Dockerfile.")
     ) {
       stripped = stripHashComments(original, true);
     } else {
@@ -401,7 +413,7 @@ function processFile(absPath: string, relPath: string, stats: Stats, opts: CliOp
 
   const removedBytes = original.length - stripped.length;
   if (removedBytes > 0) {
-    const lineDiff = Math.abs(original.split('\n').length - stripped.split('\n').length);
+    const lineDiff = Math.abs(original.split("\n").length - stripped.split("\n").length);
     const removedFraction = removedBytes / Math.max(original.length, 1);
     if (lineDiff > 20 && removedFraction < 0.005) {
       stats.reformatRatioFlags.push(relPath);
@@ -414,7 +426,7 @@ function processFile(absPath: string, relPath: string, stats: Stats, opts: CliOp
   stats.changedFiles.push(relPath);
 
   if (!opts.check && !opts.dryRun) {
-    writeFileSync(absPath, stripped, 'utf-8');
+    writeFileSync(absPath, stripped, "utf-8");
   }
   if (opts.verbose || opts.dryRun) {
     console.log(`would change: ${relPath}`);
@@ -432,13 +444,13 @@ function main(): void {
     bytesAfter: 0,
     errors: [],
     changedFiles: [],
-    reformatRatioFlags: [],
+    reformatRatioFlags: []
   };
 
   let files: string[];
   try {
-    files = execSync('git ls-files', { cwd: opts.root, encoding: 'utf-8' })
-      .split('\n')
+    files = execSync("git ls-files", { cwd: opts.root, encoding: "utf-8" })
+      .split("\n")
       .map((l) => l.trim())
       .filter((l) => l.length > 0);
   } catch (e) {
@@ -450,7 +462,7 @@ function main(): void {
     processFile(join(opts.root, rel), rel, stats, opts);
   }
 
-  const suffix = opts.check ? ' (check mode, no writes)' : opts.dryRun ? ' (dry-run, no writes)' : '';
+  const suffix = opts.check ? " (check mode, no writes)" : opts.dryRun ? " (dry-run, no writes)" : "";
   console.log(`Changed:   ${stats.changed}${suffix}`);
   console.log(`Unchanged: ${stats.unchanged}`);
   console.log(`Skipped:   ${stats.skipped}`);
@@ -460,7 +472,9 @@ function main(): void {
     console.log(`Bytes:     ${stats.bytesBefore} -> ${stats.bytesAfter} (-${saved}, -${pct}%)`);
   }
   if (stats.reformatRatioFlags.length > 0) {
-    console.log(`Reformat-suspect (${stats.reformatRatioFlags.length}): library may be reformatting more than stripping`);
+    console.log(
+      `Reformat-suspect (${stats.reformatRatioFlags.length}): library may be reformatting more than stripping`
+    );
     for (const f of stats.reformatRatioFlags.slice(0, 10)) console.log(`  ${f}`);
   }
   if (stats.errors.length > 0) {

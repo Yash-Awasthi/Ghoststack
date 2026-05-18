@@ -11,7 +11,7 @@ interface OpenCodePluginContext {
   directory: string;
   worktree: string;
   serverUrl: URL;
-  $: unknown; 
+  $: unknown;
 }
 
 interface ToolExecuteAfterInput {
@@ -86,14 +86,11 @@ const MAX_TOOL_RESPONSE_LENGTH = 1000;
 
 const JSON_HEADERS: Record<string, string> = { "Content-Type": "application/json" };
 
-function workerPostFireAndForget(
-  path: string,
-  body: Record<string, unknown>,
-): void {
+function workerPostFireAndForget(path: string, body: Record<string, unknown>): void {
   fetch(`${WORKER_BASE_URL}${path}`, {
     method: "POST",
     headers: JSON_HEADERS,
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   }).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
     if (!message.includes("ECONNREFUSED")) {
@@ -133,10 +130,7 @@ function getOrCreateContentSessionId(openCodeSessionId: string): string {
         break;
       }
     }
-    contentSessionIdsByOpenCodeSessionId.set(
-      openCodeSessionId,
-      `opencode-${openCodeSessionId}-${Date.now()}`,
-    );
+    contentSessionIdsByOpenCodeSessionId.set(openCodeSessionId, `opencode-${openCodeSessionId}-${Date.now()}`);
   }
   return contentSessionIdsByOpenCodeSessionId.get(openCodeSessionId)!;
 }
@@ -150,10 +144,7 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
     hooks: {
       tool: {
         execute: {
-          after: (
-            input: ToolExecuteAfterInput,
-            output: ToolExecuteAfterOutput,
-          ) => {
+          after: (input: ToolExecuteAfterInput, output: ToolExecuteAfterOutput) => {
             const contentSessionId = getOrCreateContentSessionId(input.sessionID);
 
             let toolResponseText = output.output || "";
@@ -166,11 +157,11 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
               tool_name: input.tool,
               tool_input: input.args || {},
               tool_response: toolResponseText,
-              cwd: ctx.directory,
+              cwd: ctx.directory
             });
-          },
-        },
-      },
+          }
+        }
+      }
     },
 
     event: (eventName: string, payload: unknown) => {
@@ -182,7 +173,7 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
           workerPostFireAndForget("/api/sessions/init", {
             contentSessionId,
             project: projectName,
-            prompt: "",
+            prompt: ""
           });
           break;
         }
@@ -204,7 +195,7 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
             tool_name: "assistant_message",
             tool_input: {},
             tool_response: messageText,
-            cwd: ctx.directory,
+            cwd: ctx.directory
           });
           break;
         }
@@ -215,7 +206,7 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
 
           workerPostFireAndForget("/api/sessions/summarize", {
             contentSessionId,
-            last_assistant_message: event.summary || "",
+            last_assistant_message: event.summary || ""
           });
           break;
         }
@@ -228,10 +219,8 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
             contentSessionId,
             tool_name: "file_edit",
             tool_input: { path: event.path },
-            tool_response: event.diff
-              ? event.diff.slice(0, MAX_TOOL_RESPONSE_LENGTH)
-              : `File edited: ${event.path}`,
-            cwd: ctx.directory,
+            tool_response: event.diff ? event.diff.slice(0, MAX_TOOL_RESPONSE_LENGTH) : `File edited: ${event.path}`,
+            cwd: ctx.directory
           });
           break;
         }
@@ -246,22 +235,17 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
 
     tool: {
       claude_mem_search: {
-        description:
-          "Search claude-mem memory database for past observations, sessions, and context",
+        description: "Search claude-mem memory database for past observations, sessions, and context",
         args: {
-          query: z.string().describe("Search query for memory observations"),
+          query: z.string().describe("Search query for memory observations")
         },
-        async execute(
-          args: Record<string, unknown>,
-        ): Promise<string> {
+        async execute(args: Record<string, unknown>): Promise<string> {
           const query = String(args.query || "");
           if (!query) {
             return "Please provide a search query.";
           }
 
-          const text = await workerGetText(
-            `/api/search/observations?query=${encodeURIComponent(query)}&limit=10`,
-          );
+          const text = await workerGetText(`/api/search/observations?query=${encodeURIComponent(query)}&limit=10`);
 
           if (!text) {
             return "claude-mem worker is not running. Start it with: npx claude-mem start";
@@ -271,7 +255,10 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
           try {
             data = JSON.parse(text);
           } catch (error: unknown) {
-            console.warn('[claude-mem] Failed to parse search results:', error instanceof Error ? error.message : String(error));
+            console.warn(
+              "[claude-mem] Failed to parse search results:",
+              error instanceof Error ? error.message : String(error)
+            );
             return "Failed to parse search results.";
           }
 
@@ -288,9 +275,9 @@ export const ClaudeMemPlugin = async (ctx: OpenCodePluginContext) => {
               return `${index + 1}. ${title}${project}`;
             })
             .join("\n");
-        },
-      } satisfies ToolDefinition,
-    },
+        }
+      } satisfies ToolDefinition
+    }
   };
 };
 

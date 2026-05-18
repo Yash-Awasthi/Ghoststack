@@ -1,9 +1,5 @@
-
-import {
-  SettingsDefaultsManager,
-  type SettingsDefaults,
-} from './SettingsDefaultsManager.js';
-import { USER_SETTINGS_PATH } from './paths.js';
+import { SettingsDefaultsManager, type SettingsDefaults } from "./SettingsDefaultsManager.js";
+import { USER_SETTINGS_PATH } from "./paths.js";
 
 let cachedSettings: SettingsDefaults | null = null;
 

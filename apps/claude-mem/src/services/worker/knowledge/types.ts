@@ -1,12 +1,11 @@
-
 export interface CorpusFilter {
   project?: string;
-  types?: Array<'decision' | 'bugfix' | 'feature' | 'refactor' | 'discovery' | 'change'>;
+  types?: Array<"decision" | "bugfix" | "feature" | "refactor" | "discovery" | "change">;
   concepts?: string[];
   files?: string[];
   query?: string;
-  date_start?: string;  
-  date_end?: string;    
+  date_start?: string;
+  date_end?: string;
   limit?: number;
 }
 

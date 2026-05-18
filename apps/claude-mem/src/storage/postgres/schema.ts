@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { PostgresQueryable } from './utils.js';
+import type { PostgresQueryable } from "./utils.js";
 
 export const SERVER_BETA_POSTGRES_SCHEMA_VERSION = 1;
 
 export const SERVER_BETA_POSTGRES_TABLES = [
-  'server_beta_schema_migrations',
-  'teams',
-  'projects',
-  'team_members',
-  'api_keys',
-  'audit_log',
-  'server_sessions',
-  'agent_events',
-  'observation_generation_jobs',
-  'observations',
-  'observation_sources',
-  'observation_generation_job_events'
+  "server_beta_schema_migrations",
+  "teams",
+  "projects",
+  "team_members",
+  "api_keys",
+  "audit_log",
+  "server_sessions",
+  "agent_events",
+  "observation_generation_jobs",
+  "observations",
+  "observation_sources",
+  "observation_generation_job_events"
 ] as const;
 
 export async function bootstrapServerBetaPostgresSchema(client: PostgresQueryable): Promise<void> {
@@ -30,7 +30,7 @@ export async function bootstrapServerBetaPostgresSchema(client: PostgresQueryabl
     return;
   }
 
-  await client.query('BEGIN');
+  await client.query("BEGIN");
   try {
     await client.query(PHASE_1_SCHEMA_SQL);
     await client.query(
@@ -39,11 +39,11 @@ export async function bootstrapServerBetaPostgresSchema(client: PostgresQueryabl
         VALUES ($1, $2)
         ON CONFLICT (version) DO NOTHING
       `,
-      [SERVER_BETA_POSTGRES_SCHEMA_VERSION, 'phase 1 postgres observation storage foundation']
+      [SERVER_BETA_POSTGRES_SCHEMA_VERSION, "phase 1 postgres observation storage foundation"]
     );
-    await client.query('COMMIT');
+    await client.query("COMMIT");
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw error;
   }
 }
@@ -61,11 +61,11 @@ function isPostgresPool(client: PostgresQueryable): client is PostgresPoolLike {
     waitingCount?: unknown;
   };
   return (
-    typeof candidate.connect === 'function'
-    && typeof candidate.release !== 'function'
-    && typeof candidate.totalCount === 'number'
-    && typeof candidate.idleCount === 'number'
-    && typeof candidate.waitingCount === 'number'
+    typeof candidate.connect === "function" &&
+    typeof candidate.release !== "function" &&
+    typeof candidate.totalCount === "number" &&
+    typeof candidate.idleCount === "number" &&
+    typeof candidate.waitingCount === "number"
   );
 }
 

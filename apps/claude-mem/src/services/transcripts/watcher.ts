@@ -1,11 +1,11 @@
-import { existsSync, statSync, watch as fsWatch, createReadStream } from 'fs';
-import { basename, join, resolve as resolvePath, sep as pathSep } from 'path';
-import { globSync } from 'glob';
-import { logger } from '../../utils/logger.js';
-import { expandHomePath } from './config.js';
-import { loadWatchState, saveWatchState, type TranscriptWatchState } from './state.js';
-import type { TranscriptWatchConfig, TranscriptSchema, WatchTarget } from './types.js';
-import { TranscriptEventProcessor } from './processor.js';
+import { existsSync, statSync, watch as fsWatch, createReadStream } from "fs";
+import { basename, join, resolve as resolvePath, sep as pathSep } from "path";
+import { globSync } from "glob";
+import { logger } from "../../utils/logger.js";
+import { expandHomePath } from "./config.js";
+import { loadWatchState, saveWatchState, type TranscriptWatchState } from "./state.js";
+import type { TranscriptWatchConfig, TranscriptSchema, WatchTarget } from "./types.js";
+import { TranscriptEventProcessor } from "./processor.js";
 
 interface TailState {
   offset: number;
@@ -22,7 +22,7 @@ class FileTailer {
     private onLine: (line: string) => Promise<void>,
     private onOffset: (offset: number) => void
   ) {
-    this.tailState = { offset: initialOffset, partial: '' };
+    this.tailState = { offset: initialOffset, partial: "" };
   }
 
   start(): void {
@@ -48,7 +48,12 @@ class FileTailer {
     try {
       size = statSync(this.filePath).size;
     } catch (error: unknown) {
-      logger.debug('WORKER', 'Failed to stat transcript file', { file: this.filePath }, error instanceof Error ? error : undefined);
+      logger.debug(
+        "WORKER",
+        "Failed to stat transcript file",
+        { file: this.filePath },
+        error instanceof Error ? error : undefined
+      );
       return;
     }
 
@@ -61,10 +66,10 @@ class FileTailer {
     const stream = createReadStream(this.filePath, {
       start: this.tailState.offset,
       end: size - 1,
-      encoding: 'utf8'
+      encoding: "utf8"
     });
 
-    let data = '';
+    let data = "";
     for await (const chunk of stream) {
       data += chunk as string;
     }
@@ -73,8 +78,8 @@ class FileTailer {
     this.onOffset(this.tailState.offset);
 
     const combined = this.tailState.partial + data;
-    const lines = combined.split('\n');
-    this.tailState.partial = lines.pop() ?? '';
+    const lines = combined.split("\n");
+    this.tailState.partial = lines.pop() ?? "";
 
     for (const line of lines) {
       const trimmed = line.trim();
@@ -90,7 +95,10 @@ export class TranscriptWatcher {
   private state: TranscriptWatchState;
   private rootWatchers: Array<ReturnType<typeof fsWatch>> = [];
 
-  constructor(private config: TranscriptWatchConfig, private statePath: string) {
+  constructor(
+    private config: TranscriptWatchConfig,
+    private statePath: string
+  ) {
     this.state = loadWatchState(statePath);
   }
 
@@ -114,7 +122,7 @@ export class TranscriptWatcher {
   private async setupWatch(watch: WatchTarget): Promise<void> {
     const schema = this.resolveSchema(watch);
     if (!schema) {
-      logger.warn('TRANSCRIPT', 'Missing schema for watch', { watch: watch.name });
+      logger.warn("TRANSCRIPT", "Missing schema for watch", { watch: watch.name });
       return;
     }
 
@@ -127,14 +135,14 @@ export class TranscriptWatcher {
 
     const watchRoot = this.deepestNonGlobAncestor(resolvedPath);
     if (!watchRoot || !existsSync(watchRoot)) {
-      logger.debug('TRANSCRIPT', 'Watch root does not exist, skipping fs.watch', { watch: watch.name, watchRoot });
+      logger.debug("TRANSCRIPT", "Watch root does not exist, skipping fs.watch", { watch: watch.name, watchRoot });
       return;
     }
 
     try {
       const watcher = fsWatch(watchRoot, { recursive: true, persistent: true }, (event, name) => {
         if (!name) return;
-        const changed = resolvePath(watchRoot, name).replace(/\\/g, '/');
+        const changed = resolvePath(watchRoot, name).replace(/\\/g, "/");
         const existingTailer = this.tailers.get(changed);
         if (existingTailer) {
           existingTailer.poke();
@@ -148,12 +156,17 @@ export class TranscriptWatcher {
         }
       });
       this.rootWatchers.push(watcher);
-      logger.info('TRANSCRIPT', 'Watching transcript root recursively', { watch: watch.name, watchRoot });
+      logger.info("TRANSCRIPT", "Watching transcript root recursively", { watch: watch.name, watchRoot });
     } catch (error) {
-      logger.warn('TRANSCRIPT', 'Failed to start recursive fs.watch on transcript root', {
-        watch: watch.name,
-        watchRoot,
-      }, error instanceof Error ? error : undefined);
+      logger.warn(
+        "TRANSCRIPT",
+        "Failed to start recursive fs.watch on transcript root",
+        {
+          watch: watch.name,
+          watchRoot
+        },
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
@@ -162,9 +175,9 @@ export class TranscriptWatcher {
       if (existsSync(inputPath)) {
         try {
           const stat = statSync(inputPath);
-          return stat.isDirectory() ? inputPath : resolvePath(inputPath, '..');
+          return stat.isDirectory() ? inputPath : resolvePath(inputPath, "..");
         } catch {
-          return resolvePath(inputPath, '..');
+          return resolvePath(inputPath, "..");
         }
       }
       return inputPath;
@@ -176,15 +189,15 @@ export class TranscriptWatcher {
       if (/[*?[\]{}()]/.test(segment)) break;
       literalSegments.push(segment);
     }
-    if (literalSegments.length === 0) return '';
-    if (literalSegments.length === 1 && literalSegments[0] === '') {
-      return '';
+    if (literalSegments.length === 0) return "";
+    if (literalSegments.length === 1 && literalSegments[0] === "") {
+      return "";
     }
     return literalSegments.join(pathSep);
   }
 
   private resolveSchema(watch: WatchTarget): TranscriptSchema | null {
-    if (typeof watch.schema === 'string') {
+    if (typeof watch.schema === "string") {
       return this.config.schemas?.[watch.schema] ?? null;
     }
     return watch.schema;
@@ -199,12 +212,17 @@ export class TranscriptWatcher {
       try {
         const stat = statSync(inputPath);
         if (stat.isDirectory()) {
-          const pattern = join(inputPath, '**', '*.jsonl');
+          const pattern = join(inputPath, "**", "*.jsonl");
           return globSync(this.normalizeGlobPattern(pattern), { nodir: true, absolute: true });
         }
         return [inputPath];
       } catch (error: unknown) {
-        logger.debug('WORKER', 'Failed to stat watch path', { path: inputPath }, error instanceof Error ? error : undefined);
+        logger.debug(
+          "WORKER",
+          "Failed to stat watch path",
+          { path: inputPath },
+          error instanceof Error ? error : undefined
+        );
         return [];
       }
     }
@@ -213,7 +231,7 @@ export class TranscriptWatcher {
   }
 
   private normalizeGlobPattern(inputPath: string): string {
-    return inputPath.replace(/\\/g, '/');
+    return inputPath.replace(/\\/g, "/");
   }
 
   private hasGlob(inputPath: string): boolean {
@@ -235,7 +253,12 @@ export class TranscriptWatcher {
       try {
         offset = statSync(filePath).size;
       } catch (error: unknown) {
-        logger.debug('WORKER', 'Failed to stat file for startAtEnd offset', { file: filePath }, error instanceof Error ? error : undefined);
+        logger.debug(
+          "WORKER",
+          "Failed to stat file for startAtEnd offset",
+          { file: filePath },
+          error instanceof Error ? error : undefined
+        );
         offset = 0;
       }
     }
@@ -254,7 +277,7 @@ export class TranscriptWatcher {
 
     tailer.start();
     this.tailers.set(filePath, tailer);
-    logger.info('TRANSCRIPT', 'Watching transcript file', {
+    logger.info("TRANSCRIPT", "Watching transcript file", {
       file: filePath,
       watch: watch.name,
       schema: schema.name
@@ -273,12 +296,17 @@ export class TranscriptWatcher {
       await this.processor.processEntry(entry, watch, schema, sessionIdOverride ?? undefined);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        logger.debug('TRANSCRIPT', 'Failed to parse transcript line', {
-          watch: watch.name,
-          file: basename(filePath)
-        }, error);
+        logger.debug(
+          "TRANSCRIPT",
+          "Failed to parse transcript line",
+          {
+            watch: watch.name,
+            file: basename(filePath)
+          },
+          error
+        );
       } else {
-        logger.warn('TRANSCRIPT', 'Failed to parse transcript line (non-Error thrown)', {
+        logger.warn("TRANSCRIPT", "Failed to parse transcript line (non-Error thrown)", {
           watch: watch.name,
           file: basename(filePath),
           error: String(error)

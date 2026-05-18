@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export function useSpinningFavicon(isProcessing: boolean) {
   const animationRef = useRef<number | null>(null);
@@ -9,14 +9,14 @@ export function useSpinningFavicon(isProcessing: boolean) {
 
   useEffect(() => {
     if (!canvasRef.current) {
-      canvasRef.current = document.createElement('canvas');
+      canvasRef.current = document.createElement("canvas");
       canvasRef.current.width = 32;
       canvasRef.current.height = 32;
     }
 
     if (!imageRef.current) {
       imageRef.current = new Image();
-      imageRef.current.src = 'claude-mem-logomark.webp';
+      imageRef.current.src = "claude-mem-logomark.webp";
     }
 
     if (!originalFaviconRef.current) {
@@ -27,7 +27,7 @@ export function useSpinningFavicon(isProcessing: boolean) {
     }
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     const image = imageRef.current;
 
     if (!ctx) return;
@@ -35,8 +35,8 @@ export function useSpinningFavicon(isProcessing: boolean) {
     const updateFavicon = (dataUrl: string) => {
       let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
       if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
+        link = document.createElement("link");
+        link.rel = "icon";
         document.head.appendChild(link);
       }
       link.href = dataUrl;
@@ -57,7 +57,7 @@ export function useSpinningFavicon(isProcessing: boolean) {
       ctx.drawImage(image, -16, -16, 32, 32);
       ctx.restore();
 
-      updateFavicon(canvas.toDataURL('image/png'));
+      updateFavicon(canvas.toDataURL("image/png"));
       animationRef.current = requestAnimationFrame(animate);
     };
 

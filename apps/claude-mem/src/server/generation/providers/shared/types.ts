@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { PostgresAgentEvent } from '../../../../storage/postgres/agent-events.js';
-import type { PostgresObservationGenerationJob } from '../../../../storage/postgres/generation-jobs.js';
+import type { PostgresAgentEvent } from "../../../../storage/postgres/agent-events.js";
+import type { PostgresObservationGenerationJob } from "../../../../storage/postgres/generation-jobs.js";
 
 // ServerGenerationContext is the input handed to a server provider adapter.
 // It is reloaded from Postgres on every retry; BullMQ payload is advisory.
@@ -28,6 +28,6 @@ export interface ServerGenerationResult {
 }
 
 export interface ServerGenerationProvider {
-  readonly providerLabel: 'claude' | 'gemini' | 'openrouter';
+  readonly providerLabel: "claude" | "gemini" | "openrouter";
   generate(context: ServerGenerationContext, signal?: AbortSignal): Promise<ServerGenerationResult>;
 }

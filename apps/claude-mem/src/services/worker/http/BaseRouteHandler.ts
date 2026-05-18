@@ -1,7 +1,6 @@
-
-import { Request, Response } from 'express';
-import { logger } from '../../../utils/logger.js';
-import { AppError } from '../../server/ErrorHandler.js';
+import { Request, Response } from "express";
+import { logger } from "../../../utils/logger.js";
+import { AppError } from "../../server/ErrorHandler.js";
 
 export abstract class BaseRouteHandler {
   protected wrapHandler(
@@ -11,11 +10,11 @@ export abstract class BaseRouteHandler {
       try {
         const result = handler(req, res);
         if (result instanceof Promise) {
-          result.catch(error => this.handleError(res, error as Error));
+          result.catch((error) => this.handleError(res, error as Error));
         }
       } catch (error) {
         const normalizedError = error instanceof Error ? error : new Error(String(error));
-        logger.error('HTTP', 'Route handler error', { path: req.path }, normalizedError);
+        logger.error("HTTP", "Route handler error", { path: req.path }, normalizedError);
         this.handleError(res, normalizedError);
       }
     };
@@ -39,7 +38,7 @@ export abstract class BaseRouteHandler {
   }
 
   protected handleError(res: Response, error: Error, context?: string): void {
-    logger.failure('WORKER', context || 'Request failed', {}, error);
+    logger.failure("WORKER", context || "Request failed", {}, error);
     if (!res.headersSent) {
       const statusCode = error instanceof AppError ? error.statusCode : 500;
       const response: Record<string, unknown> = { error: error.message };

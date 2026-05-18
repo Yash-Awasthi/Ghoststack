@@ -6,7 +6,9 @@ description: "Try experimental features like Endless Mode before they're release
 # Beta Features
 
 <Warning>
-**Endless Mode is experimental and not included in the stable release.** You must manually switch to the beta branch to try it. The efficiency projections below are based on theoretical modeling, not production measurements. Expect slower performance than standard mode and potential bugs.
+  **Endless Mode is experimental and not included in the stable release.** You must manually switch to the beta branch
+  to try it. The efficiency projections below are based on theoretical modeling, not production measurements. Expect
+  slower performance than standard mode and potential bugs.
 </Warning>
 
 Claude-Mem offers a beta channel for users who want to try experimental features before they're released to the stable channel.
@@ -74,6 +76,7 @@ Archive Memory (Transcript File):
 ```
 
 **The Key Innovation**: After each tool use, Endless Mode:
+
 1. Waits for the worker to generate a compressed observation (blocking)
 2. Transforms the transcript file on disk
 3. Replaces the full tool output with the compressed observation

@@ -64,6 +64,7 @@ curl -s "http://localhost:${WORKER_PORT}/api/context/inject?project=PROJECT_NAME
 This returns the entire compressed timeline -- every observation, session boundary, and summary across the project's full history. The response is pre-formatted markdown optimized for LLM consumption.
 
 **Token estimates:** The full timeline size depends on the project's history:
+
 - Small project (< 1,000 observations): ~20-50K tokens
 - Medium project (1,000-10,000 observations): ~50-300K tokens
 - Large project (10,000-35,000 observations): ~300-750K tokens
@@ -88,7 +89,7 @@ Deploy an Agent (using the Task tool) with the full timeline and the following a
 
 **Agent prompt:**
 
-```
+````
 You are a technical historian analyzing a software project's complete development timeline from claude-mem's persistent memory system. The timeline below contains every observation, session boundary, and summary recorded across the project's entire history.
 
 You also have access to the claude-mem SQLite database at ~/.claude-mem/claude-mem.db. Use it to run queries for the Token Economics & Memory ROI section. The database has an "observations" table with columns: id, memory_session_id, project, text, type, title, subtitle, facts, narrative, concepts, files_read, files_modified, prompt_number, discovery_tokens, created_at, created_at_epoch, source_tool, source_input_summary.
@@ -143,7 +144,7 @@ Write a comprehensive narrative report titled "Journey Into [PROJECT_NAME]" that
 
    -- Explicit recall events
    SELECT COUNT(*) FROM observations WHERE project = 'PROJECT_NAME' AND (source_tool LIKE '%search%' OR source_tool LIKE '%timeline%' OR source_tool LIKE '%get_observations%' OR narrative LIKE '%recalled%' OR narrative LIKE '%from memory%' OR narrative LIKE '%previous session%');
-   ```
+````
 
 9. **Timeline Statistics** -- Quantitative summary:
    - Date range (first observation to last)
@@ -173,6 +174,7 @@ Write a comprehensive narrative report titled "Journey Into [PROJECT_NAME]" that
 Here is the complete project timeline:
 
 [TIMELINE CONTENT GOES HERE]
+
 ```
 
 ### Step 5: Save the Report
@@ -180,7 +182,9 @@ Here is the complete project timeline:
 Save the agent's output as a markdown file. Default location:
 
 ```
+
 ./journey-into-PROJECT_NAME.md
+
 ```
 
 Or if the user specified a different output path, use that instead.
@@ -209,3 +213,4 @@ User: "Write a journey report for the tokyo project"
 4. Deploy analysis agent with full timeline
 5. Save to `./journey-into-tokyo.md`
 6. Report: "Report saved. Analyzed 34,722 observations spanning Oct 2025 - Mar 2026 (~718K input tokens, ~8K output tokens)."
+```

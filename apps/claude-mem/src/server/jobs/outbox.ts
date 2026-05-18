@@ -4,18 +4,18 @@ import type {
   PostgresObservationGenerationJob,
   PostgresObservationGenerationJobEventsRepository,
   PostgresObservationGenerationJobRepository
-} from '../../storage/postgres/generation-jobs.js';
-import type { JsonObject } from '../../storage/postgres/utils.js';
-import { logger } from '../../utils/logger.js';
-import { buildServerJobId } from './job-id.js';
-import type { ServerJobQueue } from './ServerJobQueue.js';
+} from "../../storage/postgres/generation-jobs.js";
+import type { JsonObject } from "../../storage/postgres/utils.js";
+import { logger } from "../../utils/logger.js";
+import { buildServerJobId } from "./job-id.js";
+import type { ServerJobQueue } from "./ServerJobQueue.js";
 import {
   assertServerGenerationJobPayload,
   type GenerateObservationsForEventJob,
   type GenerateSessionSummaryJob,
   type ReindexObservationJob,
-  type ServerGenerationJobKind,
-} from './types.js';
+  type ServerGenerationJobKind
+} from "./types.js";
 
 // Postgres outbox is canonical history; BullMQ is the execution transport.
 // Each outbox row corresponds to one observation_generation_jobs row, keyed
@@ -27,10 +27,10 @@ export type SingleSourceJobPayload =
   | GenerateSessionSummaryJob
   | ReindexObservationJob;
 
-const KIND_TO_JOB_TYPE: Record<SingleSourceJobPayload['kind'], string> = {
-  event: 'observation_generate_for_event',
-  summary: 'observation_generate_session_summary',
-  reindex: 'observation_reindex'
+const KIND_TO_JOB_TYPE: Record<SingleSourceJobPayload["kind"], string> = {
+  event: "observation_generate_for_event",
+  summary: "observation_generate_session_summary",
+  reindex: "observation_reindex"
 };
 
 export interface OutboxScope {
@@ -81,7 +81,7 @@ export async function enqueueOutbox(
     generationJobId: row.id,
     projectId: row.projectId,
     teamId: row.teamId,
-    eventType: 'queued',
+    eventType: "queued",
     statusAfter: row.status,
     attempt: row.attempts
   });
@@ -96,28 +96,28 @@ export async function enqueueOutbox(
       generationJobId: row.id,
       projectId: row.projectId,
       teamId: row.teamId,
-      eventType: 'enqueued',
+      eventType: "enqueued",
       statusAfter: row.status,
       attempt: row.attempts
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logger.warn('QUEUE', `failed to publish to BullMQ for job ${row.id}: ${message}`);
+    logger.warn("QUEUE", `failed to publish to BullMQ for job ${row.id}: ${message}`);
     await jobRepo.transitionStatus({
       id: row.id,
       projectId: row.projectId,
       teamId: row.teamId,
-      status: 'failed',
-      lastError: { message, source: 'bullmq_publish' }
+      status: "failed",
+      lastError: { message, source: "bullmq_publish" }
     });
     await eventsRepo.append({
       generationJobId: row.id,
       projectId: row.projectId,
       teamId: row.teamId,
-      eventType: 'failed',
-      statusAfter: 'failed',
+      eventType: "failed",
+      statusAfter: "failed",
       attempt: row.attempts,
-      details: { source: 'bullmq_publish', message }
+      details: { source: "bullmq_publish", message }
     });
     throw error;
   }
@@ -139,13 +139,13 @@ export async function reconcileOnStartup(
 ): Promise<{ requeued: number; skipped: number }> {
   const limit = options?.limit ?? 500;
   const queued = await jobRepo.listByStatusForScope({
-    status: 'queued',
+    status: "queued",
     projectId: scope.projectId,
     teamId: scope.teamId,
     limit
   });
   const processing = await jobRepo.listByStatusForScope({
-    status: 'processing',
+    status: "processing",
     projectId: scope.projectId,
     teamId: scope.teamId,
     limit
@@ -165,26 +165,26 @@ export async function reconcileOnStartup(
     try {
       await queue.remove(bullmqJobId);
     } catch (error) {
-      logger.debug?.('QUEUE', `remove before re-add ignored for ${bullmqJobId}`, {
+      logger.debug?.("QUEUE", `remove before re-add ignored for ${bullmqJobId}`, {
         error: error instanceof Error ? error.message : String(error)
       });
     }
 
-    if (row.status === 'processing') {
+    if (row.status === "processing") {
       await jobRepo.transitionStatus({
         id: row.id,
         projectId: row.projectId,
         teamId: row.teamId,
-        status: 'queued'
+        status: "queued"
       });
       await eventsRepo.append({
         generationJobId: row.id,
         projectId: row.projectId,
         teamId: row.teamId,
-        eventType: 'queued',
-        statusAfter: 'queued',
+        eventType: "queued",
+        statusAfter: "queued",
         attempt: row.attempts,
-        details: { source: 'reconcile_on_startup' }
+        details: { source: "reconcile_on_startup" }
       });
     }
 
@@ -193,10 +193,10 @@ export async function reconcileOnStartup(
       generationJobId: row.id,
       projectId: row.projectId,
       teamId: row.teamId,
-      eventType: 'enqueued',
-      statusAfter: 'queued',
+      eventType: "enqueued",
+      statusAfter: "queued",
       attempt: row.attempts,
-      details: { source: 'reconcile_on_startup' }
+      details: { source: "reconcile_on_startup" }
     });
     requeued += 1;
   }
@@ -213,7 +213,7 @@ export async function markCompleted(
     id: input.id,
     projectId: input.projectId,
     teamId: input.teamId,
-    status: 'completed'
+    status: "completed"
   });
   if (!updated) {
     throw new Error(`generation job ${input.id} not found for scope`);
@@ -222,8 +222,8 @@ export async function markCompleted(
     generationJobId: updated.id,
     projectId: updated.projectId,
     teamId: updated.teamId,
-    eventType: 'completed',
-    statusAfter: 'completed',
+    eventType: "completed",
+    statusAfter: "completed",
     attempt: updated.attempts,
     details: input.details ?? {}
   });
@@ -240,14 +240,14 @@ export async function markFailed(
     nextAttemptAt?: Date | null;
   }
 ): Promise<void> {
-  const status = input.nextAttemptAt ? 'queued' : 'failed';
+  const status = input.nextAttemptAt ? "queued" : "failed";
   const updated = await jobRepo.transitionStatus({
     id: input.id,
     projectId: input.projectId,
     teamId: input.teamId,
     status,
     nextAttemptAt: input.nextAttemptAt ?? null,
-    lastError: { message: input.error.message, source: input.error.source ?? 'processor' }
+    lastError: { message: input.error.message, source: input.error.source ?? "processor" }
   });
   if (!updated) {
     throw new Error(`generation job ${input.id} not found for scope`);
@@ -256,19 +256,19 @@ export async function markFailed(
     generationJobId: updated.id,
     projectId: updated.projectId,
     teamId: updated.teamId,
-    eventType: status === 'queued' ? 'retry_scheduled' : 'failed',
+    eventType: status === "queued" ? "retry_scheduled" : "failed",
     statusAfter: status,
     attempt: updated.attempts,
-    details: { message: input.error.message, source: input.error.source ?? 'processor' }
+    details: { message: input.error.message, source: input.error.source ?? "processor" }
   });
 }
 
 function extractAgentEventId(payload: SingleSourceJobPayload): string | null {
-  return payload.kind === 'event' ? payload.agent_event_id : null;
+  return payload.kind === "event" ? payload.agent_event_id : null;
 }
 
 function extractServerSessionId(payload: SingleSourceJobPayload): string | null {
-  return payload.kind === 'summary' ? payload.server_session_id : null;
+  return payload.kind === "summary" ? payload.server_session_id : null;
 }
 
 function extractIdParts(row: PostgresObservationGenerationJob): {
@@ -289,9 +289,7 @@ function extractIdParts(row: PostgresObservationGenerationJob): {
 }
 
 function jobTypeToKind(jobType: string): ServerGenerationJobKind {
-  for (const [kind, type] of Object.entries(KIND_TO_JOB_TYPE) as Array<
-    [SingleSourceJobPayload['kind'], string]
-  >) {
+  for (const [kind, type] of Object.entries(KIND_TO_JOB_TYPE) as Array<[SingleSourceJobPayload["kind"], string]>) {
     if (type === jobType) {
       return kind;
     }

@@ -1,6 +1,6 @@
-import { Database, type SQLQueryBindings } from 'bun:sqlite';
-import { DATA_DIR, DB_PATH, ensureDir, OBSERVER_SESSIONS_PROJECT } from '../../shared/paths.js';
-import { logger } from '../../utils/logger.js';
+import { Database, type SQLQueryBindings } from "bun:sqlite";
+import { DATA_DIR, DB_PATH, ensureDir, OBSERVER_SESSIONS_PROJECT } from "../../shared/paths.js";
+import { logger } from "../../utils/logger.js";
 import {
   TableColumnInfo,
   IndexInfo,
@@ -11,12 +11,12 @@ import {
   SessionSummaryRecord,
   UserPromptRecord,
   LatestPromptResult
-} from '../../types/database.js';
-import type { PendingMessageStore } from './PendingMessageStore.js';
-import type { ObservationSearchResult, SessionSummarySearchResult } from './types.js';
-import { computeObservationContentHash } from './observations/store.js';
-import { parseFileList } from './observations/files.js';
-import { DEFAULT_PLATFORM_SOURCE, normalizePlatformSource, sortPlatformSources } from '../../shared/platform-source.js';
+} from "../../types/database.js";
+import type { PendingMessageStore } from "./PendingMessageStore.js";
+import type { ObservationSearchResult, SessionSummarySearchResult } from "./types.js";
+import { computeObservationContentHash } from "./observations/store.js";
+import { parseFileList } from "./observations/files.js";
+import { DEFAULT_PLATFORM_SOURCE, normalizePlatformSource, sortPlatformSources } from "../../shared/platform-source.js";
 
 function resolveCreateSessionArgs(
   customTitle?: string,
@@ -35,15 +35,15 @@ export class SessionStore {
     if (dbPathOrDb instanceof Database) {
       this.db = dbPathOrDb;
     } else {
-      if (dbPathOrDb !== ':memory:') {
+      if (dbPathOrDb !== ":memory:") {
         ensureDir(DATA_DIR);
       }
       this.db = new Database(dbPathOrDb);
 
-      this.db.run('PRAGMA journal_mode = WAL');
-      this.db.run('PRAGMA synchronous = NORMAL');
-      this.db.run('PRAGMA foreign_keys = ON');
-      this.db.run('PRAGMA journal_size_limit = 4194304'); 
+      this.db.run("PRAGMA journal_mode = WAL");
+      this.db.run("PRAGMA synchronous = NORMAL");
+      this.db.run("PRAGMA foreign_keys = ON");
+      this.db.run("PRAGMA journal_size_limit = 4194304");
     }
 
     this.initializeSchema();
@@ -74,59 +74,79 @@ export class SessionStore {
   }
 
   private dropWorkerPidColumn(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(32) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(32) as
+      | SchemaVersion
+      | undefined;
 
-    const cols = this.db.query('PRAGMA table_info(pending_messages)').all() as TableColumnInfo[];
-    const hasColumn = cols.some(c => c.name === 'worker_pid');
+    const cols = this.db.query("PRAGMA table_info(pending_messages)").all() as TableColumnInfo[];
+    const hasColumn = cols.some((c) => c.name === "worker_pid");
     if (applied && !hasColumn) return;
 
     if (hasColumn) {
       try {
-        this.db.run('DROP INDEX IF EXISTS idx_pending_messages_worker_pid');
-        this.db.run('ALTER TABLE pending_messages DROP COLUMN worker_pid');
-        logger.debug('DB', 'Dropped worker_pid column and its index from pending_messages');
+        this.db.run("DROP INDEX IF EXISTS idx_pending_messages_worker_pid");
+        this.db.run("ALTER TABLE pending_messages DROP COLUMN worker_pid");
+        logger.debug("DB", "Dropped worker_pid column and its index from pending_messages");
       } catch (error) {
-        logger.warn('DB', 'Failed to drop worker_pid column from pending_messages', {}, error instanceof Error ? error : new Error(String(error)));
+        logger.warn(
+          "DB",
+          "Failed to drop worker_pid column from pending_messages",
+          {},
+          error instanceof Error ? error : new Error(String(error))
+        );
         return;
       }
     }
 
     if (!applied) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(32, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(32, new Date().toISOString());
     }
   }
 
   private dropDeadPendingMessagesColumns(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(31) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(31) as
+      | SchemaVersion
+      | undefined;
 
-    const cols = this.db.query('PRAGMA table_info(pending_messages)').all() as TableColumnInfo[];
-    const colNames = new Set(cols.map(c => c.name));
-    const deadColumns = ['retry_count', 'failed_at_epoch', 'completed_at_epoch'];
-    const toDrop = deadColumns.filter(name => colNames.has(name));
+    const cols = this.db.query("PRAGMA table_info(pending_messages)").all() as TableColumnInfo[];
+    const colNames = new Set(cols.map((c) => c.name));
+    const deadColumns = ["retry_count", "failed_at_epoch", "completed_at_epoch"];
+    const toDrop = deadColumns.filter((name) => colNames.has(name));
     if (applied && toDrop.length === 0) return;
 
     if (toDrop.length > 0) {
-      this.db.run('BEGIN TRANSACTION');
+      this.db.run("BEGIN TRANSACTION");
       try {
         this.db.run(`DELETE FROM pending_messages WHERE status NOT IN ('pending', 'processing')`);
         for (const colName of toDrop) {
           this.db.run(`ALTER TABLE pending_messages DROP COLUMN ${colName}`);
-          logger.debug('DB', `Dropped dead column ${colName} from pending_messages`);
+          logger.debug("DB", `Dropped dead column ${colName} from pending_messages`);
         }
         if (!applied) {
-          this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(31, new Date().toISOString());
+          this.db
+            .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+            .run(31, new Date().toISOString());
         }
-        this.db.run('COMMIT');
+        this.db.run("COMMIT");
       } catch (error) {
-        this.db.run('ROLLBACK');
-        logger.warn('DB', 'Failed to drop dead columns from pending_messages', {}, error instanceof Error ? error : new Error(String(error)));
+        this.db.run("ROLLBACK");
+        logger.warn(
+          "DB",
+          "Failed to drop dead columns from pending_messages",
+          {},
+          error instanceof Error ? error : new Error(String(error))
+        );
         return;
       }
       return;
     }
 
     if (!applied) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(31, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(31, new Date().toISOString());
     }
   }
 
@@ -198,63 +218,71 @@ export class SessionStore {
       CREATE INDEX IF NOT EXISTS idx_session_summaries_created ON session_summaries(created_at_epoch DESC);
     `);
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(4, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(4, new Date().toISOString());
   }
 
   private ensureWorkerPortColumn(): void {
-    const tableInfo = this.db.query('PRAGMA table_info(sdk_sessions)').all() as TableColumnInfo[];
-    const hasWorkerPort = tableInfo.some(col => col.name === 'worker_port');
+    const tableInfo = this.db.query("PRAGMA table_info(sdk_sessions)").all() as TableColumnInfo[];
+    const hasWorkerPort = tableInfo.some((col) => col.name === "worker_port");
 
     if (!hasWorkerPort) {
-      this.db.run('ALTER TABLE sdk_sessions ADD COLUMN worker_port INTEGER');
-      logger.debug('DB', 'Added worker_port column to sdk_sessions table');
+      this.db.run("ALTER TABLE sdk_sessions ADD COLUMN worker_port INTEGER");
+      logger.debug("DB", "Added worker_port column to sdk_sessions table");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(5, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(5, new Date().toISOString());
   }
 
   private ensurePromptTrackingColumns(): void {
-    const sessionsInfo = this.db.query('PRAGMA table_info(sdk_sessions)').all() as TableColumnInfo[];
-    const hasPromptCounter = sessionsInfo.some(col => col.name === 'prompt_counter');
+    const sessionsInfo = this.db.query("PRAGMA table_info(sdk_sessions)").all() as TableColumnInfo[];
+    const hasPromptCounter = sessionsInfo.some((col) => col.name === "prompt_counter");
 
     if (!hasPromptCounter) {
-      this.db.run('ALTER TABLE sdk_sessions ADD COLUMN prompt_counter INTEGER DEFAULT 0');
-      logger.debug('DB', 'Added prompt_counter column to sdk_sessions table');
+      this.db.run("ALTER TABLE sdk_sessions ADD COLUMN prompt_counter INTEGER DEFAULT 0");
+      logger.debug("DB", "Added prompt_counter column to sdk_sessions table");
     }
 
-    const observationsInfo = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const obsHasPromptNumber = observationsInfo.some(col => col.name === 'prompt_number');
+    const observationsInfo = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const obsHasPromptNumber = observationsInfo.some((col) => col.name === "prompt_number");
 
     if (!obsHasPromptNumber) {
-      this.db.run('ALTER TABLE observations ADD COLUMN prompt_number INTEGER');
-      logger.debug('DB', 'Added prompt_number column to observations table');
+      this.db.run("ALTER TABLE observations ADD COLUMN prompt_number INTEGER");
+      logger.debug("DB", "Added prompt_number column to observations table");
     }
 
-    const summariesInfo = this.db.query('PRAGMA table_info(session_summaries)').all() as TableColumnInfo[];
-    const sumHasPromptNumber = summariesInfo.some(col => col.name === 'prompt_number');
+    const summariesInfo = this.db.query("PRAGMA table_info(session_summaries)").all() as TableColumnInfo[];
+    const sumHasPromptNumber = summariesInfo.some((col) => col.name === "prompt_number");
 
     if (!sumHasPromptNumber) {
-      this.db.run('ALTER TABLE session_summaries ADD COLUMN prompt_number INTEGER');
-      logger.debug('DB', 'Added prompt_number column to session_summaries table');
+      this.db.run("ALTER TABLE session_summaries ADD COLUMN prompt_number INTEGER");
+      logger.debug("DB", "Added prompt_number column to session_summaries table");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(6, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(6, new Date().toISOString());
   }
 
   private removeSessionSummariesUniqueConstraint(): void {
-    const summariesIndexes = this.db.query('PRAGMA index_list(session_summaries)').all() as IndexInfo[];
-    const hasUniqueConstraint = summariesIndexes.some(idx => idx.unique === 1 && idx.origin !== 'pk');
+    const summariesIndexes = this.db.query("PRAGMA index_list(session_summaries)").all() as IndexInfo[];
+    const hasUniqueConstraint = summariesIndexes.some((idx) => idx.unique === 1 && idx.origin !== "pk");
 
     if (!hasUniqueConstraint) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(7, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(7, new Date().toISOString());
       return;
     }
 
-    logger.debug('DB', 'Removing UNIQUE constraint from session_summaries.memory_session_id');
+    logger.debug("DB", "Removing UNIQUE constraint from session_summaries.memory_session_id");
 
-    this.db.run('BEGIN TRANSACTION');
+    this.db.run("BEGIN TRANSACTION");
 
-    this.db.run('DROP TABLE IF EXISTS session_summaries_new');
+    this.db.run("DROP TABLE IF EXISTS session_summaries_new");
 
     this.db.run(`
       CREATE TABLE session_summaries_new (
@@ -284,9 +312,9 @@ export class SessionStore {
       FROM session_summaries
     `);
 
-    this.db.run('DROP TABLE session_summaries');
+    this.db.run("DROP TABLE session_summaries");
 
-    this.db.run('ALTER TABLE session_summaries_new RENAME TO session_summaries');
+    this.db.run("ALTER TABLE session_summaries_new RENAME TO session_summaries");
 
     this.db.run(`
       CREATE INDEX idx_session_summaries_sdk_session ON session_summaries(memory_session_id);
@@ -294,26 +322,32 @@ export class SessionStore {
       CREATE INDEX idx_session_summaries_created ON session_summaries(created_at_epoch DESC);
     `);
 
-    this.db.run('COMMIT');
+    this.db.run("COMMIT");
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(7, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(7, new Date().toISOString());
 
-    logger.debug('DB', 'Successfully removed UNIQUE constraint from session_summaries.memory_session_id');
+    logger.debug("DB", "Successfully removed UNIQUE constraint from session_summaries.memory_session_id");
   }
 
   private addObservationHierarchicalFields(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(8) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(8) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const tableInfo = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const hasTitle = tableInfo.some(col => col.name === 'title');
+    const tableInfo = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const hasTitle = tableInfo.some((col) => col.name === "title");
 
     if (hasTitle) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(8, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(8, new Date().toISOString());
       return;
     }
 
-    logger.debug('DB', 'Adding hierarchical fields to observations table');
+    logger.debug("DB", "Adding hierarchical fields to observations table");
 
     this.db.run(`
       ALTER TABLE observations ADD COLUMN title TEXT;
@@ -325,28 +359,34 @@ export class SessionStore {
       ALTER TABLE observations ADD COLUMN files_modified TEXT;
     `);
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(8, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(8, new Date().toISOString());
 
-    logger.debug('DB', 'Successfully added hierarchical fields to observations table');
+    logger.debug("DB", "Successfully added hierarchical fields to observations table");
   }
 
   private makeObservationsTextNullable(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(9) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(9) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const tableInfo = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const textColumn = tableInfo.find(col => col.name === 'text');
+    const tableInfo = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const textColumn = tableInfo.find((col) => col.name === "text");
 
     if (!textColumn || textColumn.notnull === 0) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(9, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(9, new Date().toISOString());
       return;
     }
 
-    logger.debug('DB', 'Making observations.text nullable');
+    logger.debug("DB", "Making observations.text nullable");
 
-    this.db.run('BEGIN TRANSACTION');
+    this.db.run("BEGIN TRANSACTION");
 
-    this.db.run('DROP TABLE IF EXISTS observations_new');
+    this.db.run("DROP TABLE IF EXISTS observations_new");
 
     this.db.run(`
       CREATE TABLE observations_new (
@@ -377,9 +417,9 @@ export class SessionStore {
       FROM observations
     `);
 
-    this.db.run('DROP TABLE observations');
+    this.db.run("DROP TABLE observations");
 
-    this.db.run('ALTER TABLE observations_new RENAME TO observations');
+    this.db.run("ALTER TABLE observations_new RENAME TO observations");
 
     this.db.run(`
       CREATE INDEX idx_observations_sdk_session ON observations(memory_session_id);
@@ -388,26 +428,32 @@ export class SessionStore {
       CREATE INDEX idx_observations_created ON observations(created_at_epoch DESC);
     `);
 
-    this.db.run('COMMIT');
+    this.db.run("COMMIT");
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(9, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(9, new Date().toISOString());
 
-    logger.debug('DB', 'Successfully made observations.text nullable');
+    logger.debug("DB", "Successfully made observations.text nullable");
   }
 
   private createUserPromptsTable(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(10) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(10) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const tableInfo = this.db.query('PRAGMA table_info(user_prompts)').all() as TableColumnInfo[];
+    const tableInfo = this.db.query("PRAGMA table_info(user_prompts)").all() as TableColumnInfo[];
     if (tableInfo.length > 0) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(10, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(10, new Date().toISOString());
       return;
     }
 
-    logger.debug('DB', 'Creating user_prompts table with FTS5 support');
+    logger.debug("DB", "Creating user_prompts table with FTS5 support");
 
-    this.db.run('BEGIN TRANSACTION');
+    this.db.run("BEGIN TRANSACTION");
 
     this.db.run(`
       CREATE TABLE user_prompts (
@@ -457,57 +503,76 @@ export class SessionStore {
       this.db.run(ftsTriggersSQL);
     } catch (ftsError) {
       if (ftsError instanceof Error) {
-        logger.warn('DB', 'FTS5 not available — user_prompts_fts skipped (search uses ChromaDB)', {}, ftsError);
+        logger.warn("DB", "FTS5 not available — user_prompts_fts skipped (search uses ChromaDB)", {}, ftsError);
       } else {
-        logger.warn('DB', 'FTS5 not available — user_prompts_fts skipped (search uses ChromaDB)', {}, new Error(String(ftsError)));
+        logger.warn(
+          "DB",
+          "FTS5 not available — user_prompts_fts skipped (search uses ChromaDB)",
+          {},
+          new Error(String(ftsError))
+        );
       }
-      this.db.run('COMMIT');
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(10, new Date().toISOString());
-      logger.debug('DB', 'Created user_prompts table (without FTS5)');
+      this.db.run("COMMIT");
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(10, new Date().toISOString());
+      logger.debug("DB", "Created user_prompts table (without FTS5)");
       return;
     }
 
-    this.db.run('COMMIT');
+    this.db.run("COMMIT");
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(10, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(10, new Date().toISOString());
 
-    logger.debug('DB', 'Successfully created user_prompts table');
+    logger.debug("DB", "Successfully created user_prompts table");
   }
 
   private ensureDiscoveryTokensColumn(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(11) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(11) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const observationsInfo = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const obsHasDiscoveryTokens = observationsInfo.some(col => col.name === 'discovery_tokens');
+    const observationsInfo = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const obsHasDiscoveryTokens = observationsInfo.some((col) => col.name === "discovery_tokens");
 
     if (!obsHasDiscoveryTokens) {
-      this.db.run('ALTER TABLE observations ADD COLUMN discovery_tokens INTEGER DEFAULT 0');
-      logger.debug('DB', 'Added discovery_tokens column to observations table');
+      this.db.run("ALTER TABLE observations ADD COLUMN discovery_tokens INTEGER DEFAULT 0");
+      logger.debug("DB", "Added discovery_tokens column to observations table");
     }
 
-    const summariesInfo = this.db.query('PRAGMA table_info(session_summaries)').all() as TableColumnInfo[];
-    const sumHasDiscoveryTokens = summariesInfo.some(col => col.name === 'discovery_tokens');
+    const summariesInfo = this.db.query("PRAGMA table_info(session_summaries)").all() as TableColumnInfo[];
+    const sumHasDiscoveryTokens = summariesInfo.some((col) => col.name === "discovery_tokens");
 
     if (!sumHasDiscoveryTokens) {
-      this.db.run('ALTER TABLE session_summaries ADD COLUMN discovery_tokens INTEGER DEFAULT 0');
-      logger.debug('DB', 'Added discovery_tokens column to session_summaries table');
+      this.db.run("ALTER TABLE session_summaries ADD COLUMN discovery_tokens INTEGER DEFAULT 0");
+      logger.debug("DB", "Added discovery_tokens column to session_summaries table");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(11, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(11, new Date().toISOString());
   }
 
   private createPendingMessagesTable(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(16) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(16) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const tables = this.db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='pending_messages'").all() as TableNameRow[];
+    const tables = this.db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='pending_messages'")
+      .all() as TableNameRow[];
     if (tables.length > 0) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(16, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(16, new Date().toISOString());
       return;
     }
 
-    logger.debug('DB', 'Creating pending_messages table');
+    logger.debug("DB", "Creating pending_messages table");
 
     this.db.run(`
       CREATE TABLE pending_messages (
@@ -528,27 +593,33 @@ export class SessionStore {
       )
     `);
 
-    this.db.run('CREATE INDEX IF NOT EXISTS idx_pending_messages_session ON pending_messages(session_db_id)');
-    this.db.run('CREATE INDEX IF NOT EXISTS idx_pending_messages_status ON pending_messages(status)');
-    this.db.run('CREATE INDEX IF NOT EXISTS idx_pending_messages_claude_session ON pending_messages(content_session_id)');
+    this.db.run("CREATE INDEX IF NOT EXISTS idx_pending_messages_session ON pending_messages(session_db_id)");
+    this.db.run("CREATE INDEX IF NOT EXISTS idx_pending_messages_status ON pending_messages(status)");
+    this.db.run(
+      "CREATE INDEX IF NOT EXISTS idx_pending_messages_claude_session ON pending_messages(content_session_id)"
+    );
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(16, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(16, new Date().toISOString());
 
-    logger.debug('DB', 'pending_messages table created successfully');
+    logger.debug("DB", "pending_messages table created successfully");
   }
 
   private renameSessionIdColumns(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(17) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(17) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    logger.debug('DB', 'Checking session ID columns for semantic clarity rename');
+    logger.debug("DB", "Checking session ID columns for semantic clarity rename");
 
     let renamesPerformed = 0;
 
     const safeRenameColumn = (table: string, oldCol: string, newCol: string): boolean => {
       const tableInfo = this.db.query(`PRAGMA table_info(${table})`).all() as TableColumnInfo[];
-      const hasOldCol = tableInfo.some(col => col.name === oldCol);
-      const hasNewCol = tableInfo.some(col => col.name === newCol);
+      const hasOldCol = tableInfo.some((col) => col.name === oldCol);
+      const hasNewCol = tableInfo.some((col) => col.name === newCol);
 
       if (hasNewCol) {
         return false;
@@ -556,75 +627,87 @@ export class SessionStore {
 
       if (hasOldCol) {
         this.db.run(`ALTER TABLE ${table} RENAME COLUMN ${oldCol} TO ${newCol}`);
-        logger.debug('DB', `Renamed ${table}.${oldCol} to ${newCol}`);
+        logger.debug("DB", `Renamed ${table}.${oldCol} to ${newCol}`);
         return true;
       }
 
-      logger.warn('DB', `Column ${oldCol} not found in ${table}, skipping rename`);
+      logger.warn("DB", `Column ${oldCol} not found in ${table}, skipping rename`);
       return false;
     };
 
-    if (safeRenameColumn('sdk_sessions', 'claude_session_id', 'content_session_id')) renamesPerformed++;
-    if (safeRenameColumn('sdk_sessions', 'sdk_session_id', 'memory_session_id')) renamesPerformed++;
+    if (safeRenameColumn("sdk_sessions", "claude_session_id", "content_session_id")) renamesPerformed++;
+    if (safeRenameColumn("sdk_sessions", "sdk_session_id", "memory_session_id")) renamesPerformed++;
 
-    if (safeRenameColumn('pending_messages', 'claude_session_id', 'content_session_id')) renamesPerformed++;
+    if (safeRenameColumn("pending_messages", "claude_session_id", "content_session_id")) renamesPerformed++;
 
-    if (safeRenameColumn('observations', 'sdk_session_id', 'memory_session_id')) renamesPerformed++;
+    if (safeRenameColumn("observations", "sdk_session_id", "memory_session_id")) renamesPerformed++;
 
-    if (safeRenameColumn('session_summaries', 'sdk_session_id', 'memory_session_id')) renamesPerformed++;
+    if (safeRenameColumn("session_summaries", "sdk_session_id", "memory_session_id")) renamesPerformed++;
 
-    if (safeRenameColumn('user_prompts', 'claude_session_id', 'content_session_id')) renamesPerformed++;
+    if (safeRenameColumn("user_prompts", "claude_session_id", "content_session_id")) renamesPerformed++;
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(17, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(17, new Date().toISOString());
 
     if (renamesPerformed > 0) {
-      logger.debug('DB', `Successfully renamed ${renamesPerformed} session ID columns`);
+      logger.debug("DB", `Successfully renamed ${renamesPerformed} session ID columns`);
     } else {
-      logger.debug('DB', 'No session ID column renames needed (already up to date)');
+      logger.debug("DB", "No session ID column renames needed (already up to date)");
     }
   }
 
   private repairSessionIdColumnRename(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(19) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(19) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(19, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(19, new Date().toISOString());
   }
 
   private addFailedAtEpochColumn(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(20) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(20) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const tableInfo = this.db.query('PRAGMA table_info(pending_messages)').all() as TableColumnInfo[];
-    const hasColumn = tableInfo.some(col => col.name === 'failed_at_epoch');
+    const tableInfo = this.db.query("PRAGMA table_info(pending_messages)").all() as TableColumnInfo[];
+    const hasColumn = tableInfo.some((col) => col.name === "failed_at_epoch");
 
     if (!hasColumn) {
-      this.db.run('ALTER TABLE pending_messages ADD COLUMN failed_at_epoch INTEGER');
-      logger.debug('DB', 'Added failed_at_epoch column to pending_messages table');
+      this.db.run("ALTER TABLE pending_messages ADD COLUMN failed_at_epoch INTEGER");
+      logger.debug("DB", "Added failed_at_epoch column to pending_messages table");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(20, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(20, new Date().toISOString());
   }
 
   private addOnUpdateCascadeToForeignKeys(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(21) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(21) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    logger.debug('DB', 'Adding ON UPDATE CASCADE to FK constraints on observations and session_summaries');
+    logger.debug("DB", "Adding ON UPDATE CASCADE to FK constraints on observations and session_summaries");
 
-    this.db.run('PRAGMA foreign_keys = OFF');
-    this.db.run('BEGIN TRANSACTION');
+    this.db.run("PRAGMA foreign_keys = OFF");
+    this.db.run("BEGIN TRANSACTION");
 
-    this.db.run('DROP TRIGGER IF EXISTS observations_ai');
-    this.db.run('DROP TRIGGER IF EXISTS observations_ad');
-    this.db.run('DROP TRIGGER IF EXISTS observations_au');
+    this.db.run("DROP TRIGGER IF EXISTS observations_ai");
+    this.db.run("DROP TRIGGER IF EXISTS observations_ad");
+    this.db.run("DROP TRIGGER IF EXISTS observations_au");
 
-    this.db.run('DROP TABLE IF EXISTS observations_new');
+    this.db.run("DROP TABLE IF EXISTS observations_new");
 
-    const observationsCols = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const observationsHasMetadata = observationsCols.some(c => c.name === 'metadata');
-    const metadataColumnSQL = observationsHasMetadata ? ',\n        metadata TEXT' : '';
-    const metadataSelectSQL = observationsHasMetadata ? ', metadata' : '';
+    const observationsCols = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const observationsHasMetadata = observationsCols.some((c) => c.name === "metadata");
+    const metadataColumnSQL = observationsHasMetadata ? ",\n        metadata TEXT" : "";
+    const metadataSelectSQL = observationsHasMetadata ? ", metadata" : "";
 
     const observationsNewSQL = `
       CREATE TABLE observations_new (
@@ -679,11 +762,11 @@ export class SessionStore {
       END;
     `;
 
-    this.db.run('DROP TRIGGER IF EXISTS session_summaries_ai');
-    this.db.run('DROP TRIGGER IF EXISTS session_summaries_ad');
-    this.db.run('DROP TRIGGER IF EXISTS session_summaries_au');
+    this.db.run("DROP TRIGGER IF EXISTS session_summaries_ai");
+    this.db.run("DROP TRIGGER IF EXISTS session_summaries_ad");
+    this.db.run("DROP TRIGGER IF EXISTS session_summaries_au");
 
-    this.db.run('DROP TABLE IF EXISTS session_summaries_new');
+    this.db.run("DROP TABLE IF EXISTS session_summaries_new");
 
     const summariesNewSQL = `
       CREATE TABLE session_summaries_new (
@@ -737,16 +820,28 @@ export class SessionStore {
     `;
 
     try {
-      this.recreateObservationsWithCascade(observationsNewSQL, observationsCopySQL, observationsIndexesSQL, observationsFTSTriggersSQL);
-      this.recreateSessionSummariesWithCascade(summariesNewSQL, summariesCopySQL, summariesIndexesSQL, summariesFTSTriggersSQL);
+      this.recreateObservationsWithCascade(
+        observationsNewSQL,
+        observationsCopySQL,
+        observationsIndexesSQL,
+        observationsFTSTriggersSQL
+      );
+      this.recreateSessionSummariesWithCascade(
+        summariesNewSQL,
+        summariesCopySQL,
+        summariesIndexesSQL,
+        summariesFTSTriggersSQL
+      );
 
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(21, new Date().toISOString());
-      this.db.run('COMMIT');
-      this.db.run('PRAGMA foreign_keys = ON');
-      logger.debug('DB', 'Successfully added ON UPDATE CASCADE to FK constraints');
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(21, new Date().toISOString());
+      this.db.run("COMMIT");
+      this.db.run("PRAGMA foreign_keys = ON");
+      logger.debug("DB", "Successfully added ON UPDATE CASCADE to FK constraints");
     } catch (error) {
-      this.db.run('ROLLBACK');
-      this.db.run('PRAGMA foreign_keys = ON');
+      this.db.run("ROLLBACK");
+      this.db.run("PRAGMA foreign_keys = ON");
       if (error instanceof Error) {
         throw error;
       }
@@ -754,76 +849,110 @@ export class SessionStore {
     }
   }
 
-  private recreateObservationsWithCascade(createSQL: string, copySQL: string, indexesSQL: string, ftsTriggersSQL: string): void {
+  private recreateObservationsWithCascade(
+    createSQL: string,
+    copySQL: string,
+    indexesSQL: string,
+    ftsTriggersSQL: string
+  ): void {
     this.db.run(createSQL);
     this.db.run(copySQL);
-    this.db.run('DROP TABLE observations');
-    this.db.run('ALTER TABLE observations_new RENAME TO observations');
+    this.db.run("DROP TABLE observations");
+    this.db.run("ALTER TABLE observations_new RENAME TO observations");
     this.db.run(indexesSQL);
 
-    const hasFTS = (this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='observations_fts'").all() as { name: string }[]).length > 0;
+    const hasFTS =
+      (
+        this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='observations_fts'").all() as {
+          name: string;
+        }[]
+      ).length > 0;
     if (hasFTS) {
       this.db.run(ftsTriggersSQL);
     }
   }
 
-  private recreateSessionSummariesWithCascade(createSQL: string, copySQL: string, indexesSQL: string, ftsTriggersSQL: string): void {
+  private recreateSessionSummariesWithCascade(
+    createSQL: string,
+    copySQL: string,
+    indexesSQL: string,
+    ftsTriggersSQL: string
+  ): void {
     this.db.run(createSQL);
     this.db.run(copySQL);
-    this.db.run('DROP TABLE session_summaries');
-    this.db.run('ALTER TABLE session_summaries_new RENAME TO session_summaries');
+    this.db.run("DROP TABLE session_summaries");
+    this.db.run("ALTER TABLE session_summaries_new RENAME TO session_summaries");
     this.db.run(indexesSQL);
 
-    const hasSummariesFTS = (this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='session_summaries_fts'").all() as { name: string }[]).length > 0;
+    const hasSummariesFTS =
+      (
+        this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='session_summaries_fts'").all() as {
+          name: string;
+        }[]
+      ).length > 0;
     if (hasSummariesFTS) {
       this.db.run(ftsTriggersSQL);
     }
   }
 
   private addObservationContentHashColumn(): void {
-    const tableInfo = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const hasColumn = tableInfo.some(col => col.name === 'content_hash');
+    const tableInfo = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const hasColumn = tableInfo.some((col) => col.name === "content_hash");
 
     if (hasColumn) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(22, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(22, new Date().toISOString());
       return;
     }
 
-    this.db.run('ALTER TABLE observations ADD COLUMN content_hash TEXT');
+    this.db.run("ALTER TABLE observations ADD COLUMN content_hash TEXT");
     this.db.run("UPDATE observations SET content_hash = substr(hex(randomblob(8)), 1, 16) WHERE content_hash IS NULL");
-    this.db.run('CREATE INDEX IF NOT EXISTS idx_observations_content_hash ON observations(content_hash, created_at_epoch)');
-    logger.debug('DB', 'Added content_hash column to observations table with backfill and index');
+    this.db.run(
+      "CREATE INDEX IF NOT EXISTS idx_observations_content_hash ON observations(content_hash, created_at_epoch)"
+    );
+    logger.debug("DB", "Added content_hash column to observations table with backfill and index");
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(22, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(22, new Date().toISOString());
   }
 
   private addSessionCustomTitleColumn(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(23) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(23) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const tableInfo = this.db.query('PRAGMA table_info(sdk_sessions)').all() as TableColumnInfo[];
-    const hasColumn = tableInfo.some(col => col.name === 'custom_title');
+    const tableInfo = this.db.query("PRAGMA table_info(sdk_sessions)").all() as TableColumnInfo[];
+    const hasColumn = tableInfo.some((col) => col.name === "custom_title");
 
     if (!hasColumn) {
-      this.db.run('ALTER TABLE sdk_sessions ADD COLUMN custom_title TEXT');
-      logger.debug('DB', 'Added custom_title column to sdk_sessions table');
+      this.db.run("ALTER TABLE sdk_sessions ADD COLUMN custom_title TEXT");
+      logger.debug("DB", "Added custom_title column to sdk_sessions table");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(23, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(23, new Date().toISOString());
   }
 
   private addSessionPlatformSourceColumn(): void {
-    const tableInfo = this.db.query('PRAGMA table_info(sdk_sessions)').all() as TableColumnInfo[];
-    const hasColumn = tableInfo.some(col => col.name === 'platform_source');
-    const indexInfo = this.db.query('PRAGMA index_list(sdk_sessions)').all() as IndexInfo[];
-    const hasIndex = indexInfo.some(index => index.name === 'idx_sdk_sessions_platform_source');
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(24) as SchemaVersion | undefined;
+    const tableInfo = this.db.query("PRAGMA table_info(sdk_sessions)").all() as TableColumnInfo[];
+    const hasColumn = tableInfo.some((col) => col.name === "platform_source");
+    const indexInfo = this.db.query("PRAGMA index_list(sdk_sessions)").all() as IndexInfo[];
+    const hasIndex = indexInfo.some((index) => index.name === "idx_sdk_sessions_platform_source");
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(24) as
+      | SchemaVersion
+      | undefined;
 
     if (applied && hasColumn && hasIndex) return;
 
     if (!hasColumn) {
-      this.db.run(`ALTER TABLE sdk_sessions ADD COLUMN platform_source TEXT NOT NULL DEFAULT '${DEFAULT_PLATFORM_SOURCE}'`);
-      logger.debug('DB', 'Added platform_source column to sdk_sessions table');
+      this.db.run(
+        `ALTER TABLE sdk_sessions ADD COLUMN platform_source TEXT NOT NULL DEFAULT '${DEFAULT_PLATFORM_SOURCE}'`
+      );
+      logger.debug("DB", "Added platform_source column to sdk_sessions table");
     }
 
     this.db.run(`
@@ -833,101 +962,103 @@ export class SessionStore {
     `);
 
     if (!hasIndex) {
-      this.db.run('CREATE INDEX IF NOT EXISTS idx_sdk_sessions_platform_source ON sdk_sessions(platform_source)');
+      this.db.run("CREATE INDEX IF NOT EXISTS idx_sdk_sessions_platform_source ON sdk_sessions(platform_source)");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(24, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(24, new Date().toISOString());
   }
 
   private addObservationModelColumns(): void {
-    const columns = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const hasGeneratedByModel = columns.some(col => col.name === 'generated_by_model');
-    const hasRelevanceCount = columns.some(col => col.name === 'relevance_count');
+    const columns = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const hasGeneratedByModel = columns.some((col) => col.name === "generated_by_model");
+    const hasRelevanceCount = columns.some((col) => col.name === "relevance_count");
 
     if (hasGeneratedByModel && hasRelevanceCount) return;
 
     if (!hasGeneratedByModel) {
-      this.db.run('ALTER TABLE observations ADD COLUMN generated_by_model TEXT');
+      this.db.run("ALTER TABLE observations ADD COLUMN generated_by_model TEXT");
     }
     if (!hasRelevanceCount) {
-      this.db.run('ALTER TABLE observations ADD COLUMN relevance_count INTEGER DEFAULT 0');
+      this.db.run("ALTER TABLE observations ADD COLUMN relevance_count INTEGER DEFAULT 0");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(26, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(26, new Date().toISOString());
   }
 
   private ensureMergedIntoProjectColumns(): void {
-    const obsCols = this.db
-      .query('PRAGMA table_info(observations)')
-      .all() as TableColumnInfo[];
-    if (!obsCols.some(c => c.name === 'merged_into_project')) {
-      this.db.run('ALTER TABLE observations ADD COLUMN merged_into_project TEXT');
+    const obsCols = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    if (!obsCols.some((c) => c.name === "merged_into_project")) {
+      this.db.run("ALTER TABLE observations ADD COLUMN merged_into_project TEXT");
     }
-    this.db.run(
-      'CREATE INDEX IF NOT EXISTS idx_observations_merged_into ON observations(merged_into_project)'
-    );
+    this.db.run("CREATE INDEX IF NOT EXISTS idx_observations_merged_into ON observations(merged_into_project)");
 
-    const sumCols = this.db
-      .query('PRAGMA table_info(session_summaries)')
-      .all() as TableColumnInfo[];
-    if (!sumCols.some(c => c.name === 'merged_into_project')) {
-      this.db.run('ALTER TABLE session_summaries ADD COLUMN merged_into_project TEXT');
+    const sumCols = this.db.query("PRAGMA table_info(session_summaries)").all() as TableColumnInfo[];
+    if (!sumCols.some((c) => c.name === "merged_into_project")) {
+      this.db.run("ALTER TABLE session_summaries ADD COLUMN merged_into_project TEXT");
     }
-    this.db.run(
-      'CREATE INDEX IF NOT EXISTS idx_summaries_merged_into ON session_summaries(merged_into_project)'
-    );
+    this.db.run("CREATE INDEX IF NOT EXISTS idx_summaries_merged_into ON session_summaries(merged_into_project)");
   }
 
   private addObservationSubagentColumns(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(27) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(27) as
+      | SchemaVersion
+      | undefined;
 
-    const obsCols = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const obsHasAgentType = obsCols.some(col => col.name === 'agent_type');
-    const obsHasAgentId = obsCols.some(col => col.name === 'agent_id');
+    const obsCols = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const obsHasAgentType = obsCols.some((col) => col.name === "agent_type");
+    const obsHasAgentId = obsCols.some((col) => col.name === "agent_id");
 
     if (!obsHasAgentType) {
-      this.db.run('ALTER TABLE observations ADD COLUMN agent_type TEXT');
+      this.db.run("ALTER TABLE observations ADD COLUMN agent_type TEXT");
     }
     if (!obsHasAgentId) {
-      this.db.run('ALTER TABLE observations ADD COLUMN agent_id TEXT');
+      this.db.run("ALTER TABLE observations ADD COLUMN agent_id TEXT");
     }
-    this.db.run('CREATE INDEX IF NOT EXISTS idx_observations_agent_type ON observations(agent_type)');
-    this.db.run('CREATE INDEX IF NOT EXISTS idx_observations_agent_id ON observations(agent_id)');
+    this.db.run("CREATE INDEX IF NOT EXISTS idx_observations_agent_type ON observations(agent_type)");
+    this.db.run("CREATE INDEX IF NOT EXISTS idx_observations_agent_id ON observations(agent_id)");
 
-    const pendingCols = this.db.query('PRAGMA table_info(pending_messages)').all() as TableColumnInfo[];
+    const pendingCols = this.db.query("PRAGMA table_info(pending_messages)").all() as TableColumnInfo[];
     if (pendingCols.length > 0) {
-      const pendingHasAgentType = pendingCols.some(col => col.name === 'agent_type');
-      const pendingHasAgentId = pendingCols.some(col => col.name === 'agent_id');
+      const pendingHasAgentType = pendingCols.some((col) => col.name === "agent_type");
+      const pendingHasAgentId = pendingCols.some((col) => col.name === "agent_id");
       if (!pendingHasAgentType) {
-        this.db.run('ALTER TABLE pending_messages ADD COLUMN agent_type TEXT');
+        this.db.run("ALTER TABLE pending_messages ADD COLUMN agent_type TEXT");
       }
       if (!pendingHasAgentId) {
-        this.db.run('ALTER TABLE pending_messages ADD COLUMN agent_id TEXT');
+        this.db.run("ALTER TABLE pending_messages ADD COLUMN agent_id TEXT");
       }
     }
 
     if (!applied) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(27, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(27, new Date().toISOString());
     }
   }
 
   private ensurePendingMessagesToolUseIdColumn(): void {
-    const tables = this.db.query(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='pending_messages'"
-    ).all() as TableNameRow[];
+    const tables = this.db
+      .query("SELECT name FROM sqlite_master WHERE type='table' AND name='pending_messages'")
+      .all() as TableNameRow[];
     if (tables.length === 0) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(28, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(28, new Date().toISOString());
       return;
     }
 
-    const cols = this.db.query('PRAGMA table_info(pending_messages)').all() as TableColumnInfo[];
-    const hasToolUseId = cols.some(c => c.name === 'tool_use_id');
+    const cols = this.db.query("PRAGMA table_info(pending_messages)").all() as TableColumnInfo[];
+    const hasToolUseId = cols.some((c) => c.name === "tool_use_id");
 
     if (!hasToolUseId) {
-      this.db.run('ALTER TABLE pending_messages ADD COLUMN tool_use_id TEXT');
+      this.db.run("ALTER TABLE pending_messages ADD COLUMN tool_use_id TEXT");
     }
 
-    this.db.run('BEGIN TRANSACTION');
+    this.db.run("BEGIN TRANSACTION");
     try {
       this.db.run(`
         DELETE FROM pending_messages
@@ -957,27 +1088,33 @@ export class SessionStore {
         WHERE tool_use_id IS NOT NULL
       `);
 
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(28, new Date().toISOString());
-      this.db.run('COMMIT');
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(28, new Date().toISOString());
+      this.db.run("COMMIT");
     } catch (error) {
-      this.db.run('ROLLBACK');
+      this.db.run("ROLLBACK");
       throw error;
     }
   }
 
   private addObservationsUniqueContentHashIndex(): void {
-    const applied = this.db.prepare('SELECT version FROM schema_versions WHERE version = ?').get(29) as SchemaVersion | undefined;
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(29) as
+      | SchemaVersion
+      | undefined;
     if (applied) return;
 
-    const obsCols = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const hasMem = obsCols.some(c => c.name === 'memory_session_id');
-    const hasHash = obsCols.some(c => c.name === 'content_hash');
+    const obsCols = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const hasMem = obsCols.some((c) => c.name === "memory_session_id");
+    const hasHash = obsCols.some((c) => c.name === "content_hash");
     if (!hasMem || !hasHash) {
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(29, new Date().toISOString());
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(29, new Date().toISOString());
       return;
     }
 
-    this.db.run('BEGIN TRANSACTION');
+    this.db.run("BEGIN TRANSACTION");
     try {
       this.db.run(`
         DELETE FROM observations
@@ -990,59 +1127,79 @@ export class SessionStore {
         CREATE UNIQUE INDEX IF NOT EXISTS ux_observations_session_hash
         ON observations(memory_session_id, content_hash)
       `);
-      this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(29, new Date().toISOString());
-      this.db.run('COMMIT');
+      this.db
+        .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+        .run(29, new Date().toISOString());
+      this.db.run("COMMIT");
     } catch (error) {
-      this.db.run('ROLLBACK');
+      this.db.run("ROLLBACK");
       throw error;
     }
   }
 
   private addObservationsMetadataColumn(): void {
-    const cols = this.db.query('PRAGMA table_info(observations)').all() as TableColumnInfo[];
-    const hasColumn = cols.some(c => c.name === 'metadata');
+    const cols = this.db.query("PRAGMA table_info(observations)").all() as TableColumnInfo[];
+    const hasColumn = cols.some((c) => c.name === "metadata");
 
     if (!hasColumn) {
-      this.db.run('ALTER TABLE observations ADD COLUMN metadata TEXT');
-      logger.debug('DB', 'Added metadata column to observations table (#2116)');
+      this.db.run("ALTER TABLE observations ADD COLUMN metadata TEXT");
+      logger.debug("DB", "Added metadata column to observations table (#2116)");
     }
 
-    this.db.prepare('INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)').run(30, new Date().toISOString());
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(30, new Date().toISOString());
   }
 
   updateMemorySessionId(sessionDbId: number, memorySessionId: string | null): void {
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE sdk_sessions
       SET memory_session_id = ?
       WHERE id = ?
-    `).run(memorySessionId, sessionDbId);
+    `
+      )
+      .run(memorySessionId, sessionDbId);
   }
 
   markSessionCompleted(sessionDbId: number): void {
     const nowEpoch = Date.now();
     const nowIso = new Date(nowEpoch).toISOString();
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE sdk_sessions
       SET status = 'completed', completed_at = ?, completed_at_epoch = ?
       WHERE id = ?
-    `).run(nowIso, nowEpoch, sessionDbId);
+    `
+      )
+      .run(nowIso, nowEpoch, sessionDbId);
   }
 
   ensureMemorySessionIdRegistered(sessionDbId: number, memorySessionId: string): void {
-    const session = this.db.prepare(`
+    const session = this.db
+      .prepare(
+        `
       SELECT id, memory_session_id FROM sdk_sessions WHERE id = ?
-    `).get(sessionDbId) as { id: number; memory_session_id: string | null } | undefined;
+    `
+      )
+      .get(sessionDbId) as { id: number; memory_session_id: string | null } | undefined;
 
     if (!session) {
       throw new Error(`Session ${sessionDbId} not found in sdk_sessions`);
     }
 
     if (session.memory_session_id !== memorySessionId) {
-      this.db.prepare(`
+      this.db
+        .prepare(
+          `
         UPDATE sdk_sessions SET memory_session_id = ? WHERE id = ?
-      `).run(memorySessionId, sessionDbId);
+      `
+        )
+        .run(memorySessionId, sessionDbId);
 
-      logger.info('DB', 'Registered memory_session_id before storage (FK fix)', {
+      logger.info("DB", "Registered memory_session_id before storage (FK fix)", {
         sessionDbId,
         oldId: session.memory_session_id,
         newId: memorySessionId
@@ -1050,7 +1207,10 @@ export class SessionStore {
     }
   }
 
-  getRecentSummaries(project: string, limit: number = 10): Array<{
+  getRecentSummaries(
+    project: string,
+    limit: number = 10
+  ): Array<{
     request: string | null;
     investigated: string | null;
     learned: string | null;
@@ -1086,7 +1246,10 @@ export class SessionStore {
     }>;
   }
 
-  getRecentSummariesWithSessionInfo(project: string, limit: number = 3): Array<{
+  getRecentSummariesWithSessionInfo(
+    project: string,
+    limit: number = 3
+  ): Array<{
     memory_session_id: string;
     request: string | null;
     learned: string | null;
@@ -1116,7 +1279,10 @@ export class SessionStore {
     }>;
   }
 
-  getRecentObservations(project: string, limit: number = 20): Array<{
+  getRecentObservations(
+    project: string,
+    limit: number = 20
+  ): Array<{
     type: string;
     text: string;
     prompt_number: number | null;
@@ -1287,14 +1453,14 @@ export class SessionStore {
     const params: SQLQueryBindings[] = [OBSERVER_SESSIONS_PROJECT];
 
     if (normalizedPlatformSource) {
-      query += ' AND COALESCE(platform_source, ?) = ?';
+      query += " AND COALESCE(platform_source, ?) = ?";
       params.push(DEFAULT_PLATFORM_SOURCE, normalizedPlatformSource);
     }
 
-    query += ' ORDER BY project ASC';
+    query += " ORDER BY project ASC";
 
     const rows = this.db.prepare(query).all(...params) as Array<{ project: string }>;
-    return rows.map(row => row.project);
+    return rows.map((row) => row.project);
   }
 
   getProjectCatalog(): {
@@ -1302,7 +1468,9 @@ export class SessionStore {
     sources: string[];
     projectsBySource: Record<string, string[]>;
   } {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT
         COALESCE(platform_source, '${DEFAULT_PLATFORM_SOURCE}') as platform_source,
         project,
@@ -1312,7 +1480,9 @@ export class SessionStore {
         AND project != ?
       GROUP BY COALESCE(platform_source, '${DEFAULT_PLATFORM_SOURCE}'), project
       ORDER BY latest_epoch DESC
-    `).all(OBSERVER_SESSIONS_PROJECT) as Array<{ platform_source: string; project: string; latest_epoch: number }>;
+    `
+      )
+      .all(OBSERVER_SESSIONS_PROJECT) as Array<{ platform_source: string; project: string; latest_epoch: number }>;
 
     const projects: string[] = [];
     const seenProjects = new Set<string>();
@@ -1340,22 +1510,22 @@ export class SessionStore {
     return {
       projects,
       sources,
-      projectsBySource: Object.fromEntries(
-        sources.map(source => [source, projectsBySource[source] || []])
-      )
+      projectsBySource: Object.fromEntries(sources.map((source) => [source, projectsBySource[source] || []]))
     };
   }
 
-  getLatestUserPrompt(contentSessionId: string): {
-    id: number;
-    content_session_id: string;
-    memory_session_id: string;
-    project: string;
-    platform_source: string;
-    prompt_number: number;
-    prompt_text: string;
-    created_at_epoch: number;
-  } | undefined {
+  getLatestUserPrompt(contentSessionId: string):
+    | {
+        id: number;
+        content_session_id: string;
+        memory_session_id: string;
+        project: string;
+        platform_source: string;
+        prompt_number: number;
+        prompt_text: string;
+        created_at_epoch: number;
+      }
+    | undefined {
     const stmt = this.db.prepare(`
       SELECT
         up.*,
@@ -1372,7 +1542,10 @@ export class SessionStore {
     return stmt.get(contentSessionId) as LatestPromptResult | undefined;
   }
 
-  getRecentSessionsWithStatus(project: string, limit: number = 3): Array<{
+  getRecentSessionsWithStatus(
+    project: string,
+    limit: number = 3
+  ): Array<{
     memory_session_id: string | null;
     status: string;
     started_at: string;
@@ -1435,63 +1608,69 @@ export class SessionStore {
       WHERE id = ?
     `);
 
-    return stmt.get(id) as ObservationRecord | undefined || null;
+    return (stmt.get(id) as ObservationRecord | undefined) || null;
   }
 
   getObservationsByIds(
     ids: number[],
-    options: { orderBy?: 'date_desc' | 'date_asc' | 'relevance'; limit?: number; project?: string; type?: string | string[]; concepts?: string | string[]; files?: string | string[] } = {}
+    options: {
+      orderBy?: "date_desc" | "date_asc" | "relevance";
+      limit?: number;
+      project?: string;
+      type?: string | string[];
+      concepts?: string | string[];
+      files?: string | string[];
+    } = {}
   ): ObservationSearchResult[] {
     if (ids.length === 0) return [];
 
-    const { orderBy = 'date_desc', limit, project, type, concepts, files } = options;
-    const preserveIdOrder = orderBy === 'relevance';
-    const orderClause = preserveIdOrder ? '' : `ORDER BY created_at_epoch ${orderBy === 'date_asc' ? 'ASC' : 'DESC'}`;
-    const limitClause = limit ? `LIMIT ${limit}` : '';
+    const { orderBy = "date_desc", limit, project, type, concepts, files } = options;
+    const preserveIdOrder = orderBy === "relevance";
+    const orderClause = preserveIdOrder ? "" : `ORDER BY created_at_epoch ${orderBy === "date_asc" ? "ASC" : "DESC"}`;
+    const limitClause = limit ? `LIMIT ${limit}` : "";
 
-    const placeholders = ids.map(() => '?').join(',');
+    const placeholders = ids.map(() => "?").join(",");
     const params: any[] = [...ids];
     const additionalConditions: string[] = [];
 
     if (project) {
-      additionalConditions.push('project = ?');
+      additionalConditions.push("project = ?");
       params.push(project);
     }
 
     if (type) {
       if (Array.isArray(type)) {
-        const typePlaceholders = type.map(() => '?').join(',');
+        const typePlaceholders = type.map(() => "?").join(",");
         additionalConditions.push(`type IN (${typePlaceholders})`);
         params.push(...type);
       } else {
-        additionalConditions.push('type = ?');
+        additionalConditions.push("type = ?");
         params.push(type);
       }
     }
 
     if (concepts) {
       const conceptsList = Array.isArray(concepts) ? concepts : [concepts];
-      const conceptConditions = conceptsList.map(() =>
-        'EXISTS (SELECT 1 FROM json_each(concepts) WHERE value = ?)'
-      );
+      const conceptConditions = conceptsList.map(() => "EXISTS (SELECT 1 FROM json_each(concepts) WHERE value = ?)");
       params.push(...conceptsList);
-      additionalConditions.push(`(${conceptConditions.join(' OR ')})`);
+      additionalConditions.push(`(${conceptConditions.join(" OR ")})`);
     }
 
     if (files) {
       const filesList = Array.isArray(files) ? files : [files];
       const fileConditions = filesList.map(() => {
-        return '(EXISTS (SELECT 1 FROM json_each(files_read) WHERE value LIKE ?) OR EXISTS (SELECT 1 FROM json_each(files_modified) WHERE value LIKE ?))';
+        return "(EXISTS (SELECT 1 FROM json_each(files_read) WHERE value LIKE ?) OR EXISTS (SELECT 1 FROM json_each(files_modified) WHERE value LIKE ?))";
       });
-      filesList.forEach(file => {
+      filesList.forEach((file) => {
         params.push(`%${file}%`, `%${file}%`);
       });
-      additionalConditions.push(`(${fileConditions.join(' OR ')})`);
+      additionalConditions.push(`(${fileConditions.join(" OR ")})`);
     }
 
-    const whereClause = additionalConditions.length > 0
-      ? `WHERE id IN (${placeholders}) AND ${additionalConditions.join(' AND ')}`
-      : `WHERE id IN (${placeholders})`;
+    const whereClause =
+      additionalConditions.length > 0
+        ? `WHERE id IN (${placeholders}) AND ${additionalConditions.join(" AND ")}`
+        : `WHERE id IN (${placeholders})`;
 
     const stmt = this.db.prepare(`
       SELECT *
@@ -1504,8 +1683,8 @@ export class SessionStore {
     const rows = stmt.all(...params) as ObservationSearchResult[];
     if (!preserveIdOrder) return rows;
 
-    const rowMap = new Map(rows.map(r => [r.id, r]));
-    return ids.map(id => rowMap.get(id)).filter((r): r is ObservationSearchResult => !!r);
+    const rowMap = new Map(rows.map((r) => [r.id, r]));
+    return ids.map((id) => rowMap.get(id)).filter((r): r is ObservationSearchResult => !!r);
   }
 
   getSummaryForSession(memorySessionId: string): {
@@ -1532,19 +1711,21 @@ export class SessionStore {
       LIMIT 1
     `);
 
-    return (stmt.get(memorySessionId) as {
-      request: string | null;
-      investigated: string | null;
-      learned: string | null;
-      completed: string | null;
-      next_steps: string | null;
-      files_read: string | null;
-      files_edited: string | null;
-      notes: string | null;
-      prompt_number: number | null;
-      created_at: string;
-      created_at_epoch: number;
-    } | null) || null;
+    return (
+      (stmt.get(memorySessionId) as {
+        request: string | null;
+        investigated: string | null;
+        learned: string | null;
+        completed: string | null;
+        next_steps: string | null;
+        files_read: string | null;
+        files_edited: string | null;
+        notes: string | null;
+        prompt_number: number | null;
+        created_at: string;
+        created_at_epoch: number;
+      } | null) || null
+    );
   }
 
   getFilesForSession(memorySessionId: string): {
@@ -1566,9 +1747,9 @@ export class SessionStore {
     const filesModifiedSet = new Set<string>();
 
     for (const row of rows) {
-      parseFileList(row.files_read).forEach(f => filesReadSet.add(f));
+      parseFileList(row.files_read).forEach((f) => filesReadSet.add(f));
 
-      parseFileList(row.files_modified).forEach(f => filesModifiedSet.add(f));
+      parseFileList(row.files_modified).forEach((f) => filesModifiedSet.add(f));
     }
 
     return {
@@ -1596,16 +1777,18 @@ export class SessionStore {
       LIMIT 1
     `);
 
-    return (stmt.get(id) as {
-      id: number;
-      content_session_id: string;
-      memory_session_id: string | null;
-      project: string;
-      platform_source: string;
-      user_prompt: string;
-      custom_title: string | null;
-      status: string;
-    } | null) || null;
+    return (
+      (stmt.get(id) as {
+        id: number;
+        content_session_id: string;
+        memory_session_id: string | null;
+        project: string;
+        platform_source: string;
+        user_prompt: string;
+        custom_title: string | null;
+        status: string;
+      } | null) || null
+    );
   }
 
   getSdkSessionsBySessionIds(memorySessionIds: string[]): {
@@ -1624,7 +1807,7 @@ export class SessionStore {
   }[] {
     if (memorySessionIds.length === 0) return [];
 
-    const placeholders = memorySessionIds.map(() => '?').join(',');
+    const placeholders = memorySessionIds.map(() => "?").join(",");
     const stmt = this.db.prepare(`
       SELECT id, content_session_id, memory_session_id, project,
              COALESCE(platform_source, '${DEFAULT_PLATFORM_SOURCE}') as platform_source,
@@ -1639,9 +1822,13 @@ export class SessionStore {
   }
 
   getPromptNumberFromUserPrompts(contentSessionId: string): number {
-    const result = this.db.prepare(`
+    const result = this.db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM user_prompts WHERE content_session_id = ?
-    `).get(contentSessionId) as { count: number };
+    `
+      )
+      .get(contentSessionId) as { count: number };
     return result.count;
   }
 
@@ -1657,22 +1844,34 @@ export class SessionStore {
     const resolved = resolveCreateSessionArgs(customTitle, platformSource);
     const normalizedPlatformSource = resolved.platformSource ?? DEFAULT_PLATFORM_SOURCE;
 
-    const existing = this.db.prepare(`
+    const existing = this.db
+      .prepare(
+        `
       SELECT id, platform_source FROM sdk_sessions WHERE content_session_id = ?
-    `).get(contentSessionId) as { id: number; platform_source: string | null } | undefined;
+    `
+      )
+      .get(contentSessionId) as { id: number; platform_source: string | null } | undefined;
 
     if (existing) {
       if (project) {
-        this.db.prepare(`
+        this.db
+          .prepare(
+            `
           UPDATE sdk_sessions SET project = ?
           WHERE content_session_id = ? AND (project IS NULL OR project = '')
-        `).run(project, contentSessionId);
+        `
+          )
+          .run(project, contentSessionId);
       }
       if (resolved.customTitle) {
-        this.db.prepare(`
+        this.db
+          .prepare(
+            `
           UPDATE sdk_sessions SET custom_title = ?
           WHERE content_session_id = ? AND custom_title IS NULL
-        `).run(resolved.customTitle, contentSessionId);
+        `
+          )
+          .run(resolved.customTitle, contentSessionId);
       }
 
       if (resolved.platformSource) {
@@ -1681,11 +1880,15 @@ export class SessionStore {
           : undefined;
 
         if (!storedPlatformSource) {
-          this.db.prepare(`
+          this.db
+            .prepare(
+              `
             UPDATE sdk_sessions SET platform_source = ?
             WHERE content_session_id = ?
               AND COALESCE(platform_source, '') = ''
-          `).run(resolved.platformSource, contentSessionId);
+          `
+            )
+            .run(resolved.platformSource, contentSessionId);
         } else if (storedPlatformSource !== resolved.platformSource) {
           throw new Error(
             `Platform source conflict for session ${contentSessionId}: existing=${storedPlatformSource}, received=${resolved.platformSource}`
@@ -1695,14 +1898,27 @@ export class SessionStore {
       return existing.id;
     }
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO sdk_sessions
       (content_session_id, memory_session_id, project, platform_source, user_prompt, custom_title, started_at, started_at_epoch, status)
       VALUES (?, NULL, ?, ?, ?, ?, ?, ?, 'active')
-    `).run(contentSessionId, project, normalizedPlatformSource, userPrompt, resolved.customTitle || null, now.toISOString(), nowEpoch);
+    `
+      )
+      .run(
+        contentSessionId,
+        project,
+        normalizedPlatformSource,
+        userPrompt,
+        resolved.customTitle || null,
+        now.toISOString(),
+        nowEpoch
+      );
 
-    const row = this.db.prepare('SELECT id FROM sdk_sessions WHERE content_session_id = ?')
-      .get(contentSessionId) as { id: number };
+    const row = this.db.prepare("SELECT id FROM sdk_sessions WHERE content_session_id = ?").get(contentSessionId) as {
+      id: number;
+    };
     return row.id;
   }
 
@@ -1794,14 +2010,12 @@ export class SessionStore {
       return { id: inserted.id, createdAtEpoch: inserted.created_at_epoch };
     }
 
-    const existing = this.db.prepare(
-      'SELECT id, created_at_epoch FROM observations WHERE memory_session_id = ? AND content_hash = ?'
-    ).get(memorySessionId, contentHash) as { id: number; created_at_epoch: number } | null;
+    const existing = this.db
+      .prepare("SELECT id, created_at_epoch FROM observations WHERE memory_session_id = ? AND content_hash = ?")
+      .get(memorySessionId, contentHash) as { id: number; created_at_epoch: number } | null;
 
     if (!existing) {
-      throw new Error(
-        `storeObservation: ON CONFLICT without existing row for content_hash=${contentHash}`
-      );
+      throw new Error(`storeObservation: ON CONFLICT without existing row for content_hash=${contentHash}`);
     }
     return { id: existing.id, createdAtEpoch: existing.created_at_epoch };
   }
@@ -1896,7 +2110,7 @@ export class SessionStore {
         RETURNING id
       `);
       const lookupExistingStmt = this.db.prepare(
-        'SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?'
+        "SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?"
       );
 
       for (const observation of observations) {
@@ -1929,9 +2143,7 @@ export class SessionStore {
 
         const existing = lookupExistingStmt.get(memorySessionId, contentHash) as { id: number } | null;
         if (!existing) {
-          throw new Error(
-            `storeObservations: ON CONFLICT without existing row for content_hash=${contentHash}`
-          );
+          throw new Error(`storeObservations: ON CONFLICT without existing row for content_hash=${contentHash}`);
         }
         observationIds.push(existing.id);
       }
@@ -2014,7 +2226,7 @@ export class SessionStore {
         RETURNING id
       `);
       const lookupExistingStmt = this.db.prepare(
-        'SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?'
+        "SELECT id FROM observations WHERE memory_session_id = ? AND content_hash = ?"
       );
 
       for (const observation of observations) {
@@ -2098,20 +2310,18 @@ export class SessionStore {
 
   getSessionSummariesByIds(
     ids: number[],
-    options: { orderBy?: 'date_desc' | 'date_asc' | 'relevance'; limit?: number; project?: string } = {}
+    options: { orderBy?: "date_desc" | "date_asc" | "relevance"; limit?: number; project?: string } = {}
   ): SessionSummarySearchResult[] {
     if (ids.length === 0) return [];
 
-    const { orderBy = 'date_desc', limit, project } = options;
-    const preserveIdOrder = orderBy === 'relevance';
-    const orderClause = preserveIdOrder ? '' : `ORDER BY created_at_epoch ${orderBy === 'date_asc' ? 'ASC' : 'DESC'}`;
-    const limitClause = limit ? `LIMIT ${limit}` : '';
-    const placeholders = ids.map(() => '?').join(',');
+    const { orderBy = "date_desc", limit, project } = options;
+    const preserveIdOrder = orderBy === "relevance";
+    const orderClause = preserveIdOrder ? "" : `ORDER BY created_at_epoch ${orderBy === "date_asc" ? "ASC" : "DESC"}`;
+    const limitClause = limit ? `LIMIT ${limit}` : "";
+    const placeholders = ids.map(() => "?").join(",");
     const params: any[] = [...ids];
 
-    const whereClause = project
-      ? `WHERE id IN (${placeholders}) AND project = ?`
-      : `WHERE id IN (${placeholders})`;
+    const whereClause = project ? `WHERE id IN (${placeholders}) AND project = ?` : `WHERE id IN (${placeholders})`;
     if (project) params.push(project);
 
     const stmt = this.db.prepare(`
@@ -2124,24 +2334,26 @@ export class SessionStore {
     const rows = stmt.all(...params) as SessionSummarySearchResult[];
     if (!preserveIdOrder) return rows;
 
-    const rowMap = new Map(rows.map(r => [r.id, r]));
-    return ids.map(id => rowMap.get(id)).filter((r): r is SessionSummarySearchResult => !!r);
+    const rowMap = new Map(rows.map((r) => [r.id, r]));
+    return ids.map((id) => rowMap.get(id)).filter((r): r is SessionSummarySearchResult => !!r);
   }
 
   getUserPromptsByIds(
     ids: number[],
-    options: { orderBy?: 'date_desc' | 'date_asc' | 'relevance'; limit?: number; project?: string } = {}
+    options: { orderBy?: "date_desc" | "date_asc" | "relevance"; limit?: number; project?: string } = {}
   ): UserPromptRecord[] {
     if (ids.length === 0) return [];
 
-    const { orderBy = 'date_desc', limit, project } = options;
-    const preserveIdOrder = orderBy === 'relevance';
-    const orderClause = preserveIdOrder ? '' : `ORDER BY up.created_at_epoch ${orderBy === 'date_asc' ? 'ASC' : 'DESC'}`;
-    const limitClause = limit ? `LIMIT ${limit}` : '';
-    const placeholders = ids.map(() => '?').join(',');
+    const { orderBy = "date_desc", limit, project } = options;
+    const preserveIdOrder = orderBy === "relevance";
+    const orderClause = preserveIdOrder
+      ? ""
+      : `ORDER BY up.created_at_epoch ${orderBy === "date_asc" ? "ASC" : "DESC"}`;
+    const limitClause = limit ? `LIMIT ${limit}` : "";
+    const placeholders = ids.map(() => "?").join(",");
     const params: any[] = [...ids];
 
-    const projectFilter = project ? 'AND s.project = ?' : '';
+    const projectFilter = project ? "AND s.project = ?" : "";
     if (project) params.push(project);
 
     const stmt = this.db.prepare(`
@@ -2159,8 +2371,8 @@ export class SessionStore {
     const rows = stmt.all(...params) as UserPromptRecord[];
     if (!preserveIdOrder) return rows;
 
-    const rowMap = new Map(rows.map(r => [r.id, r]));
-    return ids.map(id => rowMap.get(id)).filter((r): r is UserPromptRecord => !!r);
+    const rowMap = new Map(rows.map((r) => [r.id, r]));
+    return ids.map((id) => rowMap.get(id)).filter((r): r is UserPromptRecord => !!r);
   }
 
   getTimelineAroundTimestamp(
@@ -2187,7 +2399,7 @@ export class SessionStore {
     sessions: any[];
     prompts: any[];
   } {
-    const projectFilter = project ? 'AND project = ?' : '';
+    const projectFilter = project ? "AND project = ?" : "";
     const projectParams = project ? [project] : [];
 
     let startEpoch: number;
@@ -2210,8 +2422,18 @@ export class SessionStore {
       `;
 
       try {
-        const beforeRecords = this.db.prepare(beforeQuery).all(anchorObservationId, ...projectParams, depthBefore + 1) as Array<{id: number; created_at_epoch: number}>;
-        const afterRecords = this.db.prepare(afterQuery).all(anchorObservationId, ...projectParams, depthAfter + 1) as Array<{id: number; created_at_epoch: number}>;
+        const beforeRecords = this.db
+          .prepare(beforeQuery)
+          .all(anchorObservationId, ...projectParams, depthBefore + 1) as Array<{
+          id: number;
+          created_at_epoch: number;
+        }>;
+        const afterRecords = this.db
+          .prepare(afterQuery)
+          .all(anchorObservationId, ...projectParams, depthAfter + 1) as Array<{
+          id: number;
+          created_at_epoch: number;
+        }>;
 
         if (beforeRecords.length === 0 && afterRecords.length === 0) {
           return { observations: [], sessions: [], prompts: [] };
@@ -2221,9 +2443,9 @@ export class SessionStore {
         endEpoch = afterRecords.length > 0 ? afterRecords[afterRecords.length - 1].created_at_epoch : anchorEpoch;
       } catch (err) {
         if (err instanceof Error) {
-          logger.error('DB', 'Error getting boundary observations', { project }, err);
+          logger.error("DB", "Error getting boundary observations", { project }, err);
         } else {
-          logger.error('DB', 'Error getting boundary observations with non-Error', {}, new Error(String(err)));
+          logger.error("DB", "Error getting boundary observations with non-Error", {}, new Error(String(err)));
         }
         return { observations: [], sessions: [], prompts: [] };
       }
@@ -2244,8 +2466,12 @@ export class SessionStore {
       `;
 
       try {
-        const beforeRecords = this.db.prepare(beforeQuery).all(anchorEpoch, ...projectParams, depthBefore) as Array<{created_at_epoch: number}>;
-        const afterRecords = this.db.prepare(afterQuery).all(anchorEpoch, ...projectParams, depthAfter + 1) as Array<{created_at_epoch: number}>;
+        const beforeRecords = this.db.prepare(beforeQuery).all(anchorEpoch, ...projectParams, depthBefore) as Array<{
+          created_at_epoch: number;
+        }>;
+        const afterRecords = this.db.prepare(afterQuery).all(anchorEpoch, ...projectParams, depthAfter + 1) as Array<{
+          created_at_epoch: number;
+        }>;
 
         if (beforeRecords.length === 0 && afterRecords.length === 0) {
           return { observations: [], sessions: [], prompts: [] };
@@ -2255,9 +2481,9 @@ export class SessionStore {
         endEpoch = afterRecords.length > 0 ? afterRecords[afterRecords.length - 1].created_at_epoch : anchorEpoch;
       } catch (err) {
         if (err instanceof Error) {
-          logger.error('DB', 'Error getting boundary timestamps', { project }, err);
+          logger.error("DB", "Error getting boundary timestamps", { project }, err);
         } else {
-          logger.error('DB', 'Error getting boundary timestamps with non-Error', {}, new Error(String(err)));
+          logger.error("DB", "Error getting boundary timestamps with non-Error", {}, new Error(String(err)));
         }
         return { observations: [], sessions: [], prompts: [] };
       }
@@ -2281,7 +2507,7 @@ export class SessionStore {
       SELECT up.*, s.project, s.memory_session_id
       FROM user_prompts up
       JOIN sdk_sessions s ON up.content_session_id = s.content_session_id
-      WHERE up.created_at_epoch >= ? AND up.created_at_epoch <= ? ${projectFilter.replace('project', 's.project')}
+      WHERE up.created_at_epoch >= ? AND up.created_at_epoch <= ? ${projectFilter.replace("project", "s.project")}
       ORDER BY up.created_at_epoch ASC
     `;
 
@@ -2291,7 +2517,7 @@ export class SessionStore {
 
     return {
       observations,
-      sessions: sessions.map(s => ({
+      sessions: sessions.map((s) => ({
         id: s.id,
         memory_session_id: s.memory_session_id,
         project: s.project,
@@ -2301,7 +2527,7 @@ export class SessionStore {
         created_at: s.created_at,
         created_at_epoch: s.created_at_epoch
       })),
-      prompts: prompts.map(p => ({
+      prompts: prompts.map((p) => ({
         id: p.id,
         content_session_id: p.content_session_id,
         prompt_number: p.prompt_number,
@@ -2337,15 +2563,17 @@ export class SessionStore {
       LIMIT 1
     `);
 
-    return (stmt.get(id) as {
-      id: number;
-      content_session_id: string;
-      prompt_number: number;
-      prompt_text: string;
-      project: string;
-      created_at: string;
-      created_at_epoch: number;
-    } | null) || null;
+    return (
+      (stmt.get(id) as {
+        id: number;
+        content_session_id: string;
+        prompt_number: number;
+        prompt_text: string;
+        project: string;
+        created_at: string;
+        created_at_epoch: number;
+      } | null) || null
+    );
   }
 
   getPromptsByIds(ids: number[]): Array<{
@@ -2359,7 +2587,7 @@ export class SessionStore {
   }> {
     if (ids.length === 0) return [];
 
-    const placeholders = ids.map(() => '?').join(',');
+    const placeholders = ids.map(() => "?").join(",");
     const stmt = this.db.prepare(`
       SELECT
         p.id,
@@ -2415,39 +2643,45 @@ export class SessionStore {
       LIMIT 1
     `);
 
-    return (stmt.get(id) as {
-      id: number;
-      memory_session_id: string | null;
-      content_session_id: string;
-      project: string;
-      user_prompt: string;
-      request_summary: string | null;
-      learned_summary: string | null;
-      status: string;
-      created_at: string;
-      created_at_epoch: number;
-    } | null) || null;
+    return (
+      (stmt.get(id) as {
+        id: number;
+        memory_session_id: string | null;
+        content_session_id: string;
+        project: string;
+        user_prompt: string;
+        request_summary: string | null;
+        learned_summary: string | null;
+        status: string;
+        created_at: string;
+        created_at_epoch: number;
+      } | null) || null
+    );
   }
 
   getOrCreateManualSession(project: string): string {
     const memorySessionId = `manual-${project}`;
     const contentSessionId = `manual-content-${project}`;
 
-    const existing = this.db.prepare(
-      'SELECT memory_session_id FROM sdk_sessions WHERE memory_session_id = ?'
-    ).get(memorySessionId) as { memory_session_id: string } | undefined;
+    const existing = this.db
+      .prepare("SELECT memory_session_id FROM sdk_sessions WHERE memory_session_id = ?")
+      .get(memorySessionId) as { memory_session_id: string } | undefined;
 
     if (existing) {
       return memorySessionId;
     }
 
     const now = new Date();
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO sdk_sessions (memory_session_id, content_session_id, project, platform_source, started_at, started_at_epoch, status)
       VALUES (?, ?, ?, ?, ?, ?, 'active')
-    `).run(memorySessionId, contentSessionId, project, DEFAULT_PLATFORM_SOURCE, now.toISOString(), now.getTime());
+    `
+      )
+      .run(memorySessionId, contentSessionId, project, DEFAULT_PLATFORM_SOURCE, now.toISOString(), now.getTime());
 
-    logger.info('SESSION', 'Created manual session', { memorySessionId, project });
+    logger.info("SESSION", "Created manual session", { memorySessionId, project });
 
     return memorySessionId;
   }
@@ -2468,9 +2702,9 @@ export class SessionStore {
     completed_at_epoch: number | null;
     status: string;
   }): { imported: boolean; id: number } {
-    const existing = this.db.prepare(
-      'SELECT id FROM sdk_sessions WHERE content_session_id = ?'
-    ).get(session.content_session_id) as { id: number } | undefined;
+    const existing = this.db
+      .prepare("SELECT id FROM sdk_sessions WHERE content_session_id = ?")
+      .get(session.content_session_id) as { id: number } | undefined;
 
     if (existing) {
       return { imported: false, id: existing.id };
@@ -2515,9 +2749,9 @@ export class SessionStore {
     created_at: string;
     created_at_epoch: number;
   }): { imported: boolean; id: number } {
-    const existing = this.db.prepare(
-      'SELECT id FROM session_summaries WHERE memory_session_id = ?'
-    ).get(summary.memory_session_id) as { id: number } | undefined;
+    const existing = this.db
+      .prepare("SELECT id FROM session_summaries WHERE memory_session_id = ?")
+      .get(summary.memory_session_id) as { id: number } | undefined;
 
     if (existing) {
       return { imported: false, id: existing.id };
@@ -2570,10 +2804,14 @@ export class SessionStore {
     agent_type?: string | null;
     agent_id?: string | null;
   }): { imported: boolean; id: number } {
-    const existing = this.db.prepare(`
+    const existing = this.db
+      .prepare(
+        `
       SELECT id FROM observations
       WHERE memory_session_id = ? AND title = ? AND created_at_epoch = ?
-    `).get(obs.memory_session_id, obs.title, obs.created_at_epoch) as { id: number } | undefined;
+    `
+      )
+      .get(obs.memory_session_id, obs.title, obs.created_at_epoch) as { id: number } | undefined;
 
     if (existing) {
       return { imported: false, id: existing.id };
@@ -2612,9 +2850,12 @@ export class SessionStore {
   }
 
   rebuildObservationsFTSIndex(): void {
-    const hasFTS = (this.db.prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='observations_fts'"
-    ).all() as { name: string }[]).length > 0;
+    const hasFTS =
+      (
+        this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='observations_fts'").all() as {
+          name: string;
+        }[]
+      ).length > 0;
 
     if (!hasFTS) {
       return;
@@ -2630,10 +2871,14 @@ export class SessionStore {
     created_at: string;
     created_at_epoch: number;
   }): { imported: boolean; id: number } {
-    const existing = this.db.prepare(`
+    const existing = this.db
+      .prepare(
+        `
       SELECT id FROM user_prompts
       WHERE content_session_id = ? AND prompt_number = ?
-    `).get(prompt.content_session_id, prompt.prompt_number) as { id: number } | undefined;
+    `
+      )
+      .get(prompt.content_session_id, prompt.prompt_number) as { id: number } | undefined;
 
     if (existing) {
       return { imported: false, id: existing.id };

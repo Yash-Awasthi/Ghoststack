@@ -1,4 +1,3 @@
-
 import { execFileSync } from "node:child_process";
 import { writeFileSync, readFileSync, mkdtempSync, rmSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -6,13 +5,31 @@ import { tmpdir } from "node:os";
 import { createRequire } from "node:module";
 import { logger } from "../../utils/logger.js";
 
-const _require = typeof __filename !== 'undefined'
-  ? createRequire(__filename)
-  : createRequire(import.meta.url);
+const _require = typeof __filename !== "undefined" ? createRequire(__filename) : createRequire(import.meta.url);
 
 export interface CodeSymbol {
   name: string;
-  kind: "function" | "class" | "method" | "interface" | "type" | "const" | "variable" | "export" | "struct" | "enum" | "trait" | "impl" | "property" | "getter" | "setter" | "mixin" | "section" | "code" | "metadata" | "reference";
+  kind:
+    | "function"
+    | "class"
+    | "method"
+    | "interface"
+    | "type"
+    | "const"
+    | "variable"
+    | "export"
+    | "struct"
+    | "enum"
+    | "trait"
+    | "impl"
+    | "property"
+    | "getter"
+    | "setter"
+    | "mixin"
+    | "section"
+    | "code"
+    | "metadata"
+    | "reference";
   signature: string;
   jsdoc?: string;
   lineStart: number;
@@ -72,7 +89,7 @@ const LANG_MAP: Record<string, string> = {
   ".yaml": "yaml",
   ".sql": "sql",
   ".md": "markdown",
-  ".mdx": "markdown",
+  ".mdx": "markdown"
 };
 
 function detectLanguageWithUserGrammars(filePath: string, userConfig: UserGrammarConfig): string {
@@ -106,7 +123,7 @@ const userGrammarCache = new Map<string, UserGrammarConfig>();
 const EMPTY_USER_GRAMMAR_CONFIG: UserGrammarConfig = {
   grammars: {},
   extensionToLanguage: {},
-  languageToQueryKey: {},
+  languageToQueryKey: {}
 };
 
 export function loadUserGrammars(projectRoot: string): UserGrammarConfig {
@@ -132,7 +149,7 @@ export function loadUserGrammars(projectRoot: string): UserGrammarConfig {
   const config: UserGrammarConfig = {
     grammars: {},
     extensionToLanguage: {},
-    languageToQueryKey: {},
+    languageToQueryKey: {}
   };
 
   for (const [language, entry] of Object.entries(grammarsRaw as Record<string, unknown>)) {
@@ -151,7 +168,7 @@ export function loadUserGrammars(projectRoot: string): UserGrammarConfig {
     config.grammars[language] = {
       package: pkg,
       extensions: extensions as string[],
-      query: typeof queryPath === "string" ? queryPath : undefined,
+      query: typeof queryPath === "string" ? queryPath : undefined
     };
 
     for (const ext of extensions as string[]) {
@@ -205,11 +222,11 @@ const GRAMMAR_PACKAGES: Record<string, string> = {
   toml: "@tree-sitter-grammars/tree-sitter-toml",
   yaml: "@tree-sitter-grammars/tree-sitter-yaml",
   sql: "@derekstride/tree-sitter-sql",
-  markdown: "@tree-sitter-grammars/tree-sitter-markdown",
+  markdown: "@tree-sitter-grammars/tree-sitter-markdown"
 };
 
 const GRAMMAR_SUBDIR: Record<string, string> = {
-  markdown: "tree-sitter-markdown",
+  markdown: "tree-sitter-markdown"
 };
 
 function resolveGrammarPath(language: string): string | null {
@@ -256,7 +273,9 @@ export function resolveGrammarPathWithFallback(language: string, projectRoot?: s
     // Grammar package not installed
   }
 
-  console.error(`[smart-file-read] Grammar package not found for "${language}": ${entry.package} (install it in your project's node_modules)`);
+  console.error(
+    `[smart-file-read] Grammar package not found for "${language}": ${entry.package} (install it in your project's node_modules)`
+  );
   return null;
 }
 
@@ -416,7 +435,7 @@ const QUERIES: Record<string, string> = {
 (class_definition name: (identifier) @name) @cls
 (import_statement) @imp
 (import_declaration) @imp
-`,
+`
 };
 
 function getQueryKey(language: string): string {
@@ -425,27 +444,48 @@ function getQueryKey(language: string): string {
     case "typescript":
     case "tsx":
       return "jsts";
-    case "python": return "python";
-    case "go": return "go";
-    case "rust": return "rust";
-    case "ruby": return "ruby";
-    case "java": return "java";
-    case "kotlin": return "kotlin";
-    case "swift": return "swift";
-    case "php": return "php";
-    case "elixir": return "generic";
-    case "lua": return "lua";
-    case "scala": return "scala";
-    case "bash": return "bash";
-    case "haskell": return "haskell";
-    case "zig": return "zig";
-    case "css": return "css";
-    case "scss": return "scss";
-    case "toml": return "toml";
-    case "yaml": return "yaml";
-    case "sql": return "sql";
-    case "markdown": return "markdown";
-    default: return "generic";
+    case "python":
+      return "python";
+    case "go":
+      return "go";
+    case "rust":
+      return "rust";
+    case "ruby":
+      return "ruby";
+    case "java":
+      return "java";
+    case "kotlin":
+      return "kotlin";
+    case "swift":
+      return "swift";
+    case "php":
+      return "php";
+    case "elixir":
+      return "generic";
+    case "lua":
+      return "lua";
+    case "scala":
+      return "scala";
+    case "bash":
+      return "bash";
+    case "haskell":
+      return "haskell";
+    case "zig":
+      return "zig";
+    case "css":
+      return "css";
+    case "scss":
+      return "scss";
+    case "toml":
+      return "toml";
+    case "yaml":
+      return "yaml";
+    case "sql":
+      return "sql";
+    case "markdown":
+      return "markdown";
+    default:
+      return "generic";
   }
 }
 
@@ -514,7 +554,12 @@ function runBatchQuery(queryFile: string, sourceFiles: string[], grammarPath: st
   try {
     output = execFileSync(bin, execArgs, { encoding: "utf-8", timeout: 30000, stdio: ["pipe", "pipe", "pipe"] });
   } catch (error) {
-    logger.debug('WORKER', `tree-sitter query failed for ${sourceFiles.length} file(s)`, undefined, error instanceof Error ? error : undefined);
+    logger.debug(
+      "WORKER",
+      `tree-sitter query failed for ${sourceFiles.length} file(s)`,
+      undefined,
+      error instanceof Error ? error : undefined
+    );
     return new Map();
   }
 
@@ -555,7 +600,7 @@ function parseMultiFileQueryOutput(output: string): Map<string, RawMatch[]> {
         startCol: parseInt(captureMatch[3]),
         endRow: parseInt(captureMatch[4]),
         endCol: parseInt(captureMatch[5]),
-        text: captureMatch[6],
+        text: captureMatch[6]
       });
     }
   }
@@ -578,7 +623,7 @@ const KIND_MAP: Record<string, CodeSymbol["kind"]> = {
   heading: "section",
   code_block: "code",
   frontmatter: "metadata",
-  ref: "reference",
+  ref: "reference"
 };
 
 const CONTAINER_KINDS = new Set(["class", "struct", "impl", "trait"]);
@@ -610,9 +655,16 @@ function findCommentAbove(lines: string[], startRow: number): string | undefined
       if (foundComment) break;
       continue;
     }
-    if (trimmed.startsWith("/**") || trimmed.startsWith("*") || trimmed.startsWith("*/") ||
-        trimmed.startsWith("//") || trimmed.startsWith("///") || trimmed.startsWith("//!") ||
-        trimmed.startsWith("#") || trimmed.startsWith("@")) {
+    if (
+      trimmed.startsWith("/**") ||
+      trimmed.startsWith("*") ||
+      trimmed.startsWith("*/") ||
+      trimmed.startsWith("//") ||
+      trimmed.startsWith("///") ||
+      trimmed.startsWith("//!") ||
+      trimmed.startsWith("#") ||
+      trimmed.startsWith("@")
+    ) {
       commentLines.unshift(lines[i]);
       foundComment = true;
     } else {
@@ -634,15 +686,18 @@ function findPythonDocstringFromLines(lines: string[], startRow: number, endRow:
 }
 
 function isExported(
-  name: string, startRow: number, endRow: number,
+  name: string,
+  startRow: number,
+  endRow: number,
   exportRanges: Array<{ startRow: number; endRow: number }>,
-  lines: string[], language: string
+  lines: string[],
+  language: string
 ): boolean {
   switch (language) {
     case "javascript":
     case "typescript":
     case "tsx":
-      return exportRanges.some(r => startRow >= r.startRow && endRow <= r.endRow);
+      return exportRanges.some((r) => startRow >= r.startRow && endRow <= r.endRow);
     case "python":
       return !name.startsWith("_");
     case "go":
@@ -654,7 +709,11 @@ function isExported(
   }
 }
 
-function buildSymbols(matches: RawMatch[], lines: string[], language: string): { symbols: CodeSymbol[]; imports: string[] } {
+function buildSymbols(
+  matches: RawMatch[],
+  lines: string[],
+  language: string
+): { symbols: CodeSymbol[]; imports: string[] } {
   const symbols: CodeSymbol[] = [];
   const imports: string[] = [];
   const exportRanges: Array<{ startRow: number; endRow: number }> = [];
@@ -672,8 +731,8 @@ function buildSymbols(matches: RawMatch[], lines: string[], language: string): {
   }
 
   for (const match of matches) {
-    const kindCapture = match.captures.find(c => KIND_MAP[c.tag]);
-    const nameCapture = match.captures.find(c => c.tag === "name");
+    const kindCapture = match.captures.find((c) => KIND_MAP[c.tag]);
+    const nameCapture = match.captures.find((c) => c.tag === "name");
     if (!kindCapture) continue;
 
     const startRow = kindCapture.startRow;
@@ -708,7 +767,7 @@ function buildSymbols(matches: RawMatch[], lines: string[], language: string): {
       jsdoc: comment || docstring,
       lineStart: startRow,
       lineEnd: endRow,
-      exported: isExported(name, startRow, endRow, exportRanges, lines, language),
+      exported: isExported(name, startRow, endRow, exportRanges, lines, language)
     };
 
     if (CONTAINER_KINDS.has(kind)) {
@@ -738,7 +797,7 @@ function buildSymbols(matches: RawMatch[], lines: string[], language: string): {
       }
     }
     if (duplicateCodeBlocks.size > 0) {
-      const filtered = symbols.filter(s => !duplicateCodeBlocks.has(s));
+      const filtered = symbols.filter((s) => !duplicateCodeBlocks.has(s));
       symbols.length = 0;
       symbols.push(...filtered);
     }
@@ -756,7 +815,7 @@ function buildSymbols(matches: RawMatch[], lines: string[], language: string): {
     }
   }
 
-  return { symbols: symbols.filter(s => !nested.has(s)), imports };
+  return { symbols: symbols.filter((s) => !nested.has(s)), imports };
 }
 
 export function parseFile(content: string, filePath: string, projectRoot?: string): FoldedFile {
@@ -767,8 +826,12 @@ export function parseFile(content: string, filePath: string, projectRoot?: strin
   const grammarPath = resolveGrammarPathWithFallback(language, projectRoot);
   if (!grammarPath) {
     return {
-      filePath, language, symbols: [], imports: [],
-      totalLines: lines.length, foldedTokenEstimate: 50,
+      filePath,
+      language,
+      symbols: [],
+      imports: [],
+      totalLines: lines.length,
+      foldedTokenEstimate: 50
     };
   }
 
@@ -785,16 +848,21 @@ export function parseFile(content: string, filePath: string, projectRoot?: strin
     const result = buildSymbols(matches, lines, language);
 
     const folded = formatFoldedView({
-      filePath, language,
-      symbols: result.symbols, imports: result.imports,
-      totalLines: lines.length, foldedTokenEstimate: 0,
+      filePath,
+      language,
+      symbols: result.symbols,
+      imports: result.imports,
+      totalLines: lines.length,
+      foldedTokenEstimate: 0
     });
 
     return {
-      filePath, language,
-      symbols: result.symbols, imports: result.imports,
+      filePath,
+      language,
+      symbols: result.symbols,
+      imports: result.imports,
       totalLines: lines.length,
-      foldedTokenEstimate: Math.ceil(folded.length / 4),
+      foldedTokenEstimate: Math.ceil(folded.length / 4)
     };
   } finally {
     rmSync(tmpDir, { recursive: true, force: true });
@@ -821,8 +889,12 @@ export function parseFilesBatch(
       for (const file of groupFiles) {
         const lines = file.content.split("\n");
         results.set(file.relativePath, {
-          filePath: file.relativePath, language, symbols: [], imports: [],
-          totalLines: lines.length, foldedTokenEstimate: 50,
+          filePath: file.relativePath,
+          language,
+          symbols: [],
+          imports: [],
+          totalLines: lines.length,
+          foldedTokenEstimate: 50
         });
       }
       continue;
@@ -831,7 +903,7 @@ export function parseFilesBatch(
     const queryKey = getUserAwareQueryKey(language, userConfig);
     const queryFile = getQueryFile(queryKey);
 
-    const absolutePaths = groupFiles.map(f => f.absolutePath);
+    const absolutePaths = groupFiles.map((f) => f.absolutePath);
     const batchResults = runBatchQuery(queryFile, absolutePaths, grammarPath);
 
     for (const file of groupFiles) {
@@ -840,16 +912,21 @@ export function parseFilesBatch(
       const symbolResult = buildSymbols(matches, lines, language);
 
       const folded = formatFoldedView({
-        filePath: file.relativePath, language,
-        symbols: symbolResult.symbols, imports: symbolResult.imports,
-        totalLines: lines.length, foldedTokenEstimate: 0,
+        filePath: file.relativePath,
+        language,
+        symbols: symbolResult.symbols,
+        imports: symbolResult.imports,
+        totalLines: lines.length,
+        foldedTokenEstimate: 0
       });
 
       results.set(file.relativePath, {
-        filePath: file.relativePath, language,
-        symbols: symbolResult.symbols, imports: symbolResult.imports,
+        filePath: file.relativePath,
+        language,
+        symbols: symbolResult.symbols,
+        imports: symbolResult.imports,
         totalLines: lines.length,
-        foldedTokenEstimate: Math.ceil(folded.length / 4),
+        foldedTokenEstimate: Math.ceil(folded.length / 4)
       });
     }
   }
@@ -902,15 +979,13 @@ function formatMarkdownFoldedView(file: FoldedFile): string {
     } else if (sym.kind === "code") {
       const containingLevel = findContainingHeadingLevel(file.symbols, sym.lineStart);
       const indent = "  ".repeat(containingLevel + 1);
-      const lineRange = sym.lineStart === sym.lineEnd
-        ? `L${sym.lineStart + 1}`
-        : `L${sym.lineStart + 1}-${sym.lineEnd + 1}`;
+      const lineRange =
+        sym.lineStart === sym.lineEnd ? `L${sym.lineStart + 1}` : `L${sym.lineStart + 1}-${sym.lineEnd + 1}`;
       const content = `${indent}${sym.signature}`;
       parts.push(`${content.padEnd(COL_WIDTH)}${lineRange}`);
     } else if (sym.kind === "metadata") {
-      const lineRange = sym.lineStart === sym.lineEnd
-        ? `L${sym.lineStart + 1}`
-        : `L${sym.lineStart + 1}-${sym.lineEnd + 1}`;
+      const lineRange =
+        sym.lineStart === sym.lineEnd ? `L${sym.lineStart + 1}` : `L${sym.lineStart + 1}-${sym.lineEnd + 1}`;
       const content = `  ${sym.signature}`;
       parts.push(`${content.padEnd(COL_WIDTH)}${lineRange}`);
     } else if (sym.kind === "reference") {
@@ -941,21 +1016,27 @@ function formatSymbol(sym: CodeSymbol, indent: string): string {
 
   const icon = getSymbolIcon(sym.kind);
   const exportTag = sym.exported ? " [exported]" : "";
-  const lineRange = sym.lineStart === sym.lineEnd
-    ? `L${sym.lineStart + 1}`
-    : `L${sym.lineStart + 1}-${sym.lineEnd + 1}`;
+  const lineRange =
+    sym.lineStart === sym.lineEnd ? `L${sym.lineStart + 1}` : `L${sym.lineStart + 1}-${sym.lineEnd + 1}`;
 
   parts.push(`${indent}${icon} ${sym.name}${exportTag} (${lineRange})`);
   parts.push(`${indent}  ${sym.signature}`);
 
   if (sym.jsdoc) {
     const jsdocLines = sym.jsdoc.split("\n");
-    const firstLine = jsdocLines.find(l => {
-      const t = l.replace(/^[\s*/]+/, "").replace(/^['"`]{3}/, "").trim();
+    const firstLine = jsdocLines.find((l) => {
+      const t = l
+        .replace(/^[\s*/]+/, "")
+        .replace(/^['"`]{3}/, "")
+        .trim();
       return t.length > 0 && !t.startsWith("/**");
     });
     if (firstLine) {
-      const cleaned = firstLine.replace(/^[\s*/]+/, "").replace(/^['"`]{3}/, "").replace(/['"`]{3}$/, "").trim();
+      const cleaned = firstLine
+        .replace(/^[\s*/]+/, "")
+        .replace(/^['"`]{3}/, "")
+        .replace(/['"`]{3}$/, "")
+        .trim();
       if (cleaned) {
         parts.push(`${indent}  💬 ${cleaned}`);
       }
@@ -973,11 +1054,26 @@ function formatSymbol(sym: CodeSymbol, indent: string): string {
 
 function getSymbolIcon(kind: CodeSymbol["kind"]): string {
   const icons: Record<string, string> = {
-    function: "ƒ", method: "ƒ", class: "◆", interface: "◇",
-    type: "◇", const: "●", variable: "○", export: "→",
-    struct: "◆", enum: "▣", trait: "◇", impl: "◈",
-    property: "○", getter: "⇢", setter: "⇠", mixin: "◈",
-    section: "§", code: "⌘", metadata: "◊", reference: "↗",
+    function: "ƒ",
+    method: "ƒ",
+    class: "◆",
+    interface: "◇",
+    type: "◇",
+    const: "●",
+    variable: "○",
+    export: "→",
+    struct: "◆",
+    enum: "▣",
+    trait: "◇",
+    impl: "◈",
+    property: "○",
+    getter: "⇢",
+    setter: "⇠",
+    mixin: "◈",
+    section: "§",
+    code: "⌘",
+    metadata: "◊",
+    reference: "↗"
   };
   return icons[kind] || "·";
 }
@@ -1026,10 +1122,16 @@ export function unfoldSymbol(content: string, filePath: string, symbolName: stri
   let start = symbol.lineStart;
   for (let i = symbol.lineStart - 1; i >= 0; i--) {
     const trimmed = lines[i].trim();
-    if (trimmed === "" || trimmed.startsWith("*") || trimmed.startsWith("/**") ||
-        trimmed.startsWith("///") || trimmed.startsWith("//") ||
-        trimmed.startsWith("#") || trimmed.startsWith("@") ||
-        trimmed === "*/") {
+    if (
+      trimmed === "" ||
+      trimmed.startsWith("*") ||
+      trimmed.startsWith("/**") ||
+      trimmed.startsWith("///") ||
+      trimmed.startsWith("//") ||
+      trimmed.startsWith("#") ||
+      trimmed.startsWith("@") ||
+      trimmed === "*/"
+    ) {
       start = i;
     } else {
       break;

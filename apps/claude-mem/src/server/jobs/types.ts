@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
+import { z } from "zod";
 import type {
   ObservationGenerationJobSourceType,
   ObservationGenerationJobStatus
-} from '../../storage/postgres/generation-jobs.js';
+} from "../../storage/postgres/generation-jobs.js";
 
-export type ServerGenerationJobKind = 'event' | 'event-batch' | 'summary' | 'reindex';
+export type ServerGenerationJobKind = "event" | "event-batch" | "summary" | "reindex";
 
 export type ServerGenerationJobStatus = ObservationGenerationJobStatus;
 
@@ -38,22 +38,22 @@ export interface ServerGenerationJob {
 }
 
 export interface GenerateObservationsForEventJob extends ServerGenerationJob {
-  kind: 'event';
+  kind: "event";
   agent_event_id: string;
 }
 
 export interface GenerateObservationsForEventBatchJob extends ServerGenerationJob {
-  kind: 'event-batch';
+  kind: "event-batch";
   agent_event_ids: string[];
 }
 
 export interface GenerateSessionSummaryJob extends ServerGenerationJob {
-  kind: 'summary';
+  kind: "summary";
   server_session_id: string;
 }
 
 export interface ReindexObservationJob extends ServerGenerationJob {
-  kind: 'reindex';
+  kind: "reindex";
   observation_id: string;
 }
 
@@ -64,17 +64,17 @@ export type ServerGenerationJobPayload =
   | ReindexObservationJob;
 
 export const SERVER_JOB_QUEUE_NAMES: Record<ServerGenerationJobKind, string> = {
-  event: 'server_beta_generate_event',
-  'event-batch': 'server_beta_generate_event_batch',
-  summary: 'server_beta_generate_summary',
-  reindex: 'server_beta_reindex'
+  event: "server_beta_generate_event",
+  "event-batch": "server_beta_generate_event_batch",
+  summary: "server_beta_generate_summary",
+  reindex: "server_beta_reindex"
 };
 
 export const SERVER_JOB_KIND_PREFIX: Record<ServerGenerationJobKind, string> = {
-  event: 'evt',
-  'event-batch': 'evtb',
-  summary: 'sum',
-  reindex: 'rdx'
+  event: "evt",
+  "event-batch": "evtb",
+  summary: "sum",
+  reindex: "rdx"
 };
 
 // Phase 11 — Zod schema validates payloads at the queue boundary so a
@@ -84,55 +84,55 @@ export const SERVER_JOB_KIND_PREFIX: Record<ServerGenerationJobKind, string> = {
 // generation_job_id should always be a programmer error caught at enqueue.
 
 const baseFieldsSchema = z.object({
-  team_id: z.string().min(1, 'team_id is required'),
-  project_id: z.string().min(1, 'project_id is required'),
-  source_type: z.enum(['agent_event', 'session_summary', 'observation_reindex']),
-  source_id: z.string().min(1, 'source_id is required'),
-  generation_job_id: z.string().min(1, 'generation_job_id is required'),
+  team_id: z.string().min(1, "team_id is required"),
+  project_id: z.string().min(1, "project_id is required"),
+  source_type: z.enum(["agent_event", "session_summary", "observation_reindex"]),
+  source_id: z.string().min(1, "source_id is required"),
+  generation_job_id: z.string().min(1, "generation_job_id is required"),
   // api_key_id and actor_id are nullable to accommodate local-dev/system
   // enqueues, but the *field* must be present in the payload so audit
   // records always render the same shape.
   api_key_id: z.string().min(1).nullable(),
   actor_id: z.string().min(1).nullable(),
-  source_adapter: z.string().min(1, 'source_adapter is required'),
+  source_adapter: z.string().min(1, "source_adapter is required"),
   // Phase 12 — request_id is optional in the schema (older jobs predating
   // this phase have nullable/missing values) but always passes through to
   // logs and audit when present.
-  request_id: z.string().min(1).nullable().optional(),
+  request_id: z.string().min(1).nullable().optional()
 });
 
 export const GenerateObservationsForEventJobSchema = baseFieldsSchema.extend({
-  kind: z.literal('event'),
-  agent_event_id: z.string().min(1),
+  kind: z.literal("event"),
+  agent_event_id: z.string().min(1)
 });
 
 export const GenerateObservationsForEventBatchJobSchema = baseFieldsSchema.extend({
-  kind: z.literal('event-batch'),
-  agent_event_ids: z.array(z.string().min(1)).min(1),
+  kind: z.literal("event-batch"),
+  agent_event_ids: z.array(z.string().min(1)).min(1)
 });
 
 export const GenerateSessionSummaryJobSchema = baseFieldsSchema.extend({
-  kind: z.literal('summary'),
-  server_session_id: z.string().min(1),
+  kind: z.literal("summary"),
+  server_session_id: z.string().min(1)
 });
 
 export const ReindexObservationJobSchema = baseFieldsSchema.extend({
-  kind: z.literal('reindex'),
-  observation_id: z.string().min(1),
+  kind: z.literal("reindex"),
+  observation_id: z.string().min(1)
 });
 
-export const ServerGenerationJobPayloadSchema = z.discriminatedUnion('kind', [
+export const ServerGenerationJobPayloadSchema = z.discriminatedUnion("kind", [
   GenerateObservationsForEventJobSchema,
   GenerateObservationsForEventBatchJobSchema,
   GenerateSessionSummaryJobSchema,
-  ReindexObservationJobSchema,
+  ReindexObservationJobSchema
 ]);
 
 export class ServerGenerationJobPayloadValidationError extends Error {
   readonly issues: z.ZodIssue[];
 
   constructor(issues: z.ZodIssue[]) {
-    super(`invalid server generation job payload: ${issues.map(i => i.message).join('; ')}`);
+    super(`invalid server generation job payload: ${issues.map((i) => i.message).join("; ")}`);
     this.issues = issues;
   }
 }
@@ -144,9 +144,7 @@ export class ServerGenerationJobPayloadValidationError extends Error {
  * transport — the worker MUST also re-validate from Postgres but defense in
  * depth is cheap.
  */
-export function assertServerGenerationJobPayload(
-  candidate: unknown,
-): ServerGenerationJobPayload {
+export function assertServerGenerationJobPayload(candidate: unknown): ServerGenerationJobPayload {
   const result = ServerGenerationJobPayloadSchema.safeParse(candidate);
   if (!result.success) {
     throw new ServerGenerationJobPayloadValidationError(result.error.issues);

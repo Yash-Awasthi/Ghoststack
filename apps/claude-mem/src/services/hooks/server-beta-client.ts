@@ -11,39 +11,38 @@
 // API key, etc.) callers receive a typed `ServerBetaClientError` so the
 // hook handler can decide whether to fall back to the worker path.
 
-import { fetchWithTimeout } from '../../shared/worker-utils.js';
-import { HOOK_TIMEOUTS, getTimeout } from '../../shared/hook-constants.js';
+import { fetchWithTimeout } from "../../shared/worker-utils.js";
+import { HOOK_TIMEOUTS, getTimeout } from "../../shared/hook-constants.js";
 
 const DEFAULT_TIMEOUT_MS = getTimeout(HOOK_TIMEOUTS.API_REQUEST);
 
-export type ServerBetaClientErrorKind =
-  | 'missing_api_key'
-  | 'transport'
-  | 'timeout'
-  | 'http_error'
-  | 'invalid_response';
+export type ServerBetaClientErrorKind = "missing_api_key" | "transport" | "timeout" | "http_error" | "invalid_response";
 
 export class ServerBetaClientError extends Error {
   readonly kind: ServerBetaClientErrorKind;
   readonly status: number | null;
   readonly cause?: unknown;
 
-  constructor(kind: ServerBetaClientErrorKind, message: string, options: {
-    status?: number | null;
-    cause?: unknown;
-  } = {}) {
+  constructor(
+    kind: ServerBetaClientErrorKind,
+    message: string,
+    options: {
+      status?: number | null;
+      cause?: unknown;
+    } = {}
+  ) {
     super(message);
-    this.name = 'ServerBetaClientError';
+    this.name = "ServerBetaClientError";
     this.kind = kind;
     this.status = options.status ?? null;
     this.cause = options.cause;
   }
 
   isFallbackEligible(): boolean {
-    if (this.kind === 'transport' || this.kind === 'timeout' || this.kind === 'missing_api_key') {
+    if (this.kind === "transport" || this.kind === "timeout" || this.kind === "missing_api_key") {
       return true;
     }
-    if (this.kind === 'http_error') {
+    if (this.kind === "http_error") {
       // 5xx and 429 are transient; fall back. 4xx other than 429 is a real
       // client bug — surface it via the worker path so it can be observed.
       if (this.status !== null && this.status >= 500) return true;
@@ -85,7 +84,7 @@ export interface ServerBetaRecordEventRequest {
   serverSessionId?: string | null;
   contentSessionId?: string | null;
   memorySessionId?: string | null;
-  sourceType: 'hook' | 'worker' | 'provider' | 'server' | 'api';
+  sourceType: "hook" | "worker" | "provider" | "server" | "api";
   eventType: string;
   payload?: unknown;
   occurredAtEpoch: number;
@@ -204,23 +203,23 @@ export class ServerBetaClient {
 
   async startSession(input: ServerBetaStartSessionRequest): Promise<ServerBetaStartSessionResponse> {
     const body = this.buildStartSessionPayload(input);
-    return this.request<ServerBetaStartSessionResponse>('POST', '/v1/sessions/start', body);
+    return this.request<ServerBetaStartSessionResponse>("POST", "/v1/sessions/start", body);
   }
 
   async recordEvent(input: ServerBetaRecordEventRequest): Promise<ServerBetaRecordEventResponse> {
     const body = this.buildEventPayload(input);
-    const path = input.generate === false ? '/v1/events?generate=false' : '/v1/events';
-    return this.request<ServerBetaRecordEventResponse>('POST', path, body);
+    const path = input.generate === false ? "/v1/events?generate=false" : "/v1/events";
+    return this.request<ServerBetaRecordEventResponse>("POST", path, body);
   }
 
   async endSession(input: ServerBetaEndSessionRequest): Promise<ServerBetaEndSessionResponse> {
     if (!input.sessionId) {
-      throw new ServerBetaClientError('invalid_response', 'sessionId is required for endSession');
+      throw new ServerBetaClientError("invalid_response", "sessionId is required for endSession");
     }
     return this.request<ServerBetaEndSessionResponse>(
-      'POST',
+      "POST",
       `/v1/sessions/${encodeURIComponent(input.sessionId)}/end`,
-      {},
+      {}
     );
   }
 
@@ -228,38 +227,26 @@ export class ServerBetaClient {
   // `/v1/memories`, which is the canonical write path that MUST NOT enqueue
   // a generation job. Anti-pattern guard for plan line 770: never duplicate
   // generation logic in MCP tools.
-  async addObservation(
-    input: ServerBetaAddObservationRequest,
-  ): Promise<ServerBetaAddObservationResponse> {
+  async addObservation(input: ServerBetaAddObservationRequest): Promise<ServerBetaAddObservationResponse> {
     return this.request<ServerBetaAddObservationResponse>(
-      'POST',
-      '/v1/memories',
-      this.buildAddObservationPayload(input),
+      "POST",
+      "/v1/memories",
+      this.buildAddObservationPayload(input)
     );
   }
 
   // Phase 8 — MCP `observation_search`. Routes to the FTS-backed REST
   // endpoint so search ranking and tenant scoping are owned by one place.
-  async searchObservations(
-    input: ServerBetaSearchObservationsRequest,
-  ): Promise<ServerBetaSearchObservationsResponse> {
-    return this.request<ServerBetaSearchObservationsResponse>(
-      'POST',
-      '/v1/search',
-      this.buildSearchPayload(input),
-    );
+  async searchObservations(input: ServerBetaSearchObservationsRequest): Promise<ServerBetaSearchObservationsResponse> {
+    return this.request<ServerBetaSearchObservationsResponse>("POST", "/v1/search", this.buildSearchPayload(input));
   }
 
   // Phase 8 — MCP `observation_context`. Same FTS surface as search, but
   // returns a pre-joined context string suitable for direct prompt injection.
   async contextObservations(
-    input: ServerBetaContextObservationsRequest,
+    input: ServerBetaContextObservationsRequest
   ): Promise<ServerBetaContextObservationsResponse> {
-    return this.request<ServerBetaContextObservationsResponse>(
-      'POST',
-      '/v1/context',
-      this.buildSearchPayload(input),
-    );
+    return this.request<ServerBetaContextObservationsResponse>("POST", "/v1/context", this.buildSearchPayload(input));
   }
 
   // Phase 8 — MCP `observation_generation_status`. Server returns the same
@@ -267,33 +254,26 @@ export class ServerBetaClient {
   // job status (including transport state).
   async getJobStatus(jobId: string): Promise<ServerBetaJobStatusResponse> {
     if (!jobId) {
-      throw new ServerBetaClientError('invalid_response', 'jobId is required for getJobStatus');
+      throw new ServerBetaClientError("invalid_response", "jobId is required for getJobStatus");
     }
-    return this.request<ServerBetaJobStatusResponse>(
-      'GET',
-      `/v1/jobs/${encodeURIComponent(jobId)}`,
-    );
+    return this.request<ServerBetaJobStatusResponse>("GET", `/v1/jobs/${encodeURIComponent(jobId)}`);
   }
 
-  buildAddObservationPayload(
-    input: ServerBetaAddObservationRequest,
-  ): Record<string, unknown> {
+  buildAddObservationPayload(input: ServerBetaAddObservationRequest): Record<string, unknown> {
     return {
       projectId: input.projectId,
       content: input.content,
       ...(input.serverSessionId !== undefined ? { serverSessionId: input.serverSessionId } : {}),
       ...(input.kind !== undefined ? { kind: input.kind } : {}),
-      ...(input.metadata !== undefined ? { metadata: input.metadata } : {}),
+      ...(input.metadata !== undefined ? { metadata: input.metadata } : {})
     };
   }
 
-  buildSearchPayload(
-    input: { projectId: string; query: string; limit?: number },
-  ): Record<string, unknown> {
+  buildSearchPayload(input: { projectId: string; query: string; limit?: number }): Record<string, unknown> {
     return {
       projectId: input.projectId,
       query: input.query,
-      ...(input.limit !== undefined ? { limit: input.limit } : {}),
+      ...(input.limit !== undefined ? { limit: input.limit } : {})
     };
   }
 
@@ -305,7 +285,7 @@ export class ServerBetaClient {
       ...(input.agentId !== undefined ? { agentId: input.agentId } : {}),
       ...(input.agentType !== undefined ? { agentType: input.agentType } : {}),
       ...(input.platformSource !== undefined ? { platformSource: input.platformSource } : {}),
-      ...(input.metadata !== undefined ? { metadata: input.metadata } : {}),
+      ...(input.metadata !== undefined ? { metadata: input.metadata } : {})
     };
   }
 
@@ -318,19 +298,15 @@ export class ServerBetaClient {
       ...(input.serverSessionId !== undefined ? { serverSessionId: input.serverSessionId } : {}),
       ...(input.contentSessionId !== undefined ? { contentSessionId: input.contentSessionId } : {}),
       ...(input.memorySessionId !== undefined ? { memorySessionId: input.memorySessionId } : {}),
-      ...(input.payload !== undefined ? { payload: input.payload } : {}),
+      ...(input.payload !== undefined ? { payload: input.payload } : {})
     };
   }
 
-  private async request<T>(
-    method: 'GET' | 'POST',
-    path: string,
-    body?: unknown,
-  ): Promise<T> {
+  private async request<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<T> {
     if (!this.apiKey || !this.apiKey.trim()) {
       throw new ServerBetaClientError(
-        'missing_api_key',
-        'Server beta API key is not configured (CLAUDE_MEM_SERVER_BETA_API_KEY).',
+        "missing_api_key",
+        "Server beta API key is not configured (CLAUDE_MEM_SERVER_BETA_API_KEY)."
       );
     }
 
@@ -338,9 +314,9 @@ export class ServerBetaClient {
     const init: RequestInit = {
       method,
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`
+      }
     };
     if (body !== undefined) {
       init.body = JSON.stringify(body);
@@ -353,18 +329,18 @@ export class ServerBetaClient {
       const message = error instanceof Error ? error.message : String(error);
       const isTimeout = /timed out|timeout/i.test(message);
       throw new ServerBetaClientError(
-        isTimeout ? 'timeout' : 'transport',
+        isTimeout ? "timeout" : "transport",
         `Server beta ${method} ${path} failed: ${message}`,
-        { cause: error },
+        { cause: error }
       );
     }
 
     if (!response.ok) {
-      const text = await response.text().catch(() => '');
+      const text = await response.text().catch(() => "");
       throw new ServerBetaClientError(
-        'http_error',
+        "http_error",
         `Server beta ${method} ${path} returned ${response.status}: ${truncate(text, 200)}`,
-        { status: response.status },
+        { status: response.status }
       );
     }
 
@@ -377,11 +353,9 @@ export class ServerBetaClient {
     try {
       return JSON.parse(text) as T;
     } catch (error: unknown) {
-      throw new ServerBetaClientError(
-        'invalid_response',
-        `Server beta ${method} ${path} returned non-JSON response`,
-        { cause: error },
-      );
+      throw new ServerBetaClientError("invalid_response", `Server beta ${method} ${path} returned non-JSON response`, {
+        cause: error
+      });
     }
   }
 }
@@ -391,7 +365,7 @@ export function isServerBetaClientError(error: unknown): error is ServerBetaClie
 }
 
 function stripTrailingSlash(url: string): string {
-  return url.replace(/\/+$/, '');
+  return url.replace(/\/+$/, "");
 }
 
 function truncate(text: string, max: number): string {

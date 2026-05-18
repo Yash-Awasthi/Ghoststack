@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { existsSync } from 'fs';
-import { logger } from '../../utils/logger.js';
-import { createPostgresStorageRepositories, getSharedPostgresPool, SERVER_BETA_POSTGRES_SCHEMA_VERSION } from '../../storage/postgres/index.js';
-import { bootstrapServerBetaPostgresSchema } from '../../storage/postgres/schema.js';
-import type { PostgresPool } from '../../storage/postgres/pool.js';
-import { getRedisQueueConfig } from '../queue/redis-config.js';
-import { ActiveServerBetaQueueManager } from './ActiveServerBetaQueueManager.js';
-import { ActiveServerBetaGenerationWorkerManager } from './ActiveServerBetaGenerationWorkerManager.js';
-import { ClaudeObservationProvider } from '../generation/providers/ClaudeObservationProvider.js';
-import { GeminiObservationProvider } from '../generation/providers/GeminiObservationProvider.js';
-import { OpenRouterObservationProvider } from '../generation/providers/OpenRouterObservationProvider.js';
-import type { ServerGenerationProvider } from '../generation/providers/shared/types.js';
-import { ServerBetaService } from './ServerBetaService.js';
+import { existsSync } from "fs";
+import { logger } from "../../utils/logger.js";
+import {
+  createPostgresStorageRepositories,
+  getSharedPostgresPool,
+  SERVER_BETA_POSTGRES_SCHEMA_VERSION
+} from "../../storage/postgres/index.js";
+import { bootstrapServerBetaPostgresSchema } from "../../storage/postgres/schema.js";
+import type { PostgresPool } from "../../storage/postgres/pool.js";
+import { getRedisQueueConfig } from "../queue/redis-config.js";
+import { ActiveServerBetaQueueManager } from "./ActiveServerBetaQueueManager.js";
+import { ActiveServerBetaGenerationWorkerManager } from "./ActiveServerBetaGenerationWorkerManager.js";
+import { ClaudeObservationProvider } from "../generation/providers/ClaudeObservationProvider.js";
+import { GeminiObservationProvider } from "../generation/providers/GeminiObservationProvider.js";
+import { OpenRouterObservationProvider } from "../generation/providers/OpenRouterObservationProvider.js";
+import type { ServerGenerationProvider } from "../generation/providers/shared/types.js";
+import { ServerBetaService } from "./ServerBetaService.js";
 import {
   DisabledServerBetaEventBroadcaster,
   DisabledServerBetaGenerationWorkerManager,
@@ -22,8 +26,8 @@ import {
   type ServerBetaBootstrapStatus,
   type ServerBetaGenerationWorkerManager,
   type ServerBetaQueueManager,
-  type ServerBetaServiceGraph,
-} from './types.js';
+  type ServerBetaServiceGraph
+} from "./types.js";
 
 export interface CreateServerBetaServiceOptions {
   pool?: PostgresPool;
@@ -67,94 +71,88 @@ export interface ServerBetaEnvValidationResult {
 }
 
 export function detectDockerEnvironment(env: NodeJS.ProcessEnv = process.env): boolean {
-  if (env.CLAUDE_MEM_DOCKER === '1' || env.CLAUDE_MEM_DOCKER === 'true') return true;
+  if (env.CLAUDE_MEM_DOCKER === "1" || env.CLAUDE_MEM_DOCKER === "true") return true;
   // /.dockerenv is the canonical Docker marker; existsSync is cheap.
   try {
-    if (existsSync('/.dockerenv')) return true;
+    if (existsSync("/.dockerenv")) return true;
   } catch {
     // ignore
   }
   return false;
 }
 
-export function validateServerBetaEnv(
-  options: ServerBetaEnvValidationOptions = {},
-): ServerBetaEnvValidationResult {
+export function validateServerBetaEnv(options: ServerBetaEnvValidationOptions = {}): ServerBetaEnvValidationResult {
   const env = options.env ?? process.env;
   const isDocker = options.isDocker ?? detectDockerEnvironment(env);
   const errors: string[] = [];
 
-  const runtime = (env.CLAUDE_MEM_RUNTIME ?? '').trim();
+  const runtime = (env.CLAUDE_MEM_RUNTIME ?? "").trim();
   if (!runtime) {
     // Warn but allow — defaulted to 'worker' upstream; we log a warning so
     // operators know server-beta is the active runtime here.
     if (isDocker) {
-      logger.warn('SYSTEM', 'CLAUDE_MEM_RUNTIME unset; server-beta container assumes runtime=server-beta');
+      logger.warn("SYSTEM", "CLAUDE_MEM_RUNTIME unset; server-beta container assumes runtime=server-beta");
     }
-  } else if (runtime !== 'server-beta' && isDocker) {
+  } else if (runtime !== "server-beta" && isDocker) {
     errors.push(
-      `CLAUDE_MEM_RUNTIME=${runtime} is invalid in Docker; the server-beta image only runs CLAUDE_MEM_RUNTIME=server-beta.`,
+      `CLAUDE_MEM_RUNTIME=${runtime} is invalid in Docker; the server-beta image only runs CLAUDE_MEM_RUNTIME=server-beta.`
     );
   }
 
-  const authMode = (env.CLAUDE_MEM_AUTH_MODE ?? 'api-key').trim();
+  const authMode = (env.CLAUDE_MEM_AUTH_MODE ?? "api-key").trim();
   if (isDocker) {
-    if (authMode === 'local-dev') {
+    if (authMode === "local-dev") {
       errors.push(
-        'CLAUDE_MEM_AUTH_MODE=local-dev is not allowed in Docker. Set CLAUDE_MEM_AUTH_MODE=api-key and create a key with `claude-mem server api-key create`.',
+        "CLAUDE_MEM_AUTH_MODE=local-dev is not allowed in Docker. Set CLAUDE_MEM_AUTH_MODE=api-key and create a key with `claude-mem server api-key create`."
       );
     }
-    if (
-      env.CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS === '1'
-      || env.CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS === 'true'
-    ) {
+    if (env.CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS === "1" || env.CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS === "true") {
       errors.push(
-        'CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS is not allowed in Docker. Loopback bypass cannot be enforced inside a container; remove the variable.',
+        "CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS is not allowed in Docker. Loopback bypass cannot be enforced inside a container; remove the variable."
       );
     }
   }
 
-  const queueEngine = (env.CLAUDE_MEM_QUEUE_ENGINE ?? '').trim().toLowerCase();
+  const queueEngine = (env.CLAUDE_MEM_QUEUE_ENGINE ?? "").trim().toLowerCase();
   if (isDocker) {
     if (!queueEngine) {
       errors.push('CLAUDE_MEM_QUEUE_ENGINE is required in Docker; set it to "bullmq".');
-    } else if (queueEngine !== 'bullmq') {
+    } else if (queueEngine !== "bullmq") {
       errors.push(
-        `CLAUDE_MEM_QUEUE_ENGINE=${queueEngine} is not allowed in Docker. Only "bullmq" is supported (no in-process queues across container boundaries).`,
+        `CLAUDE_MEM_QUEUE_ENGINE=${queueEngine} is not allowed in Docker. Only "bullmq" is supported (no in-process queues across container boundaries).`
       );
     }
   }
 
-  const hasDatabaseUrl = Boolean((env.CLAUDE_MEM_SERVER_DATABASE_URL ?? '').trim());
+  const hasDatabaseUrl = Boolean((env.CLAUDE_MEM_SERVER_DATABASE_URL ?? "").trim());
   if (!hasDatabaseUrl) {
-    errors.push('CLAUDE_MEM_SERVER_DATABASE_URL is required to start server-beta (Postgres connection string).');
+    errors.push("CLAUDE_MEM_SERVER_DATABASE_URL is required to start server-beta (Postgres connection string).");
   }
 
-  const hasRedisUrl = Boolean((env.CLAUDE_MEM_REDIS_URL ?? '').trim());
-  if (queueEngine === 'bullmq' && !hasRedisUrl) {
-    errors.push('CLAUDE_MEM_REDIS_URL is required when CLAUDE_MEM_QUEUE_ENGINE=bullmq.');
+  const hasRedisUrl = Boolean((env.CLAUDE_MEM_REDIS_URL ?? "").trim());
+  if (queueEngine === "bullmq" && !hasRedisUrl) {
+    errors.push("CLAUDE_MEM_REDIS_URL is required when CLAUDE_MEM_QUEUE_ENGINE=bullmq.");
   }
 
   if (errors.length > 0) {
-    const message = [
-      'server-beta startup configuration is invalid:',
-      ...errors.map(line => `  - ${line}`),
-    ].join('\n');
+    const message = ["server-beta startup configuration is invalid:", ...errors.map((line) => `  - ${line}`)].join(
+      "\n"
+    );
     throw new Error(message);
   }
 
   return {
     isDocker,
-    runtime: runtime || 'server-beta',
+    runtime: runtime || "server-beta",
     authMode,
-    queueEngine: queueEngine || 'disabled',
+    queueEngine: queueEngine || "disabled",
     hasDatabaseUrl,
-    hasRedisUrl,
+    hasRedisUrl
   };
 }
 
 export async function createServerBetaService(
-  options: CreateServerBetaServiceOptions = {},
+  options: CreateServerBetaServiceOptions = {}
 ): Promise<ServerBetaService> {
   if (!options.skipEnvValidation) {
     validateServerBetaEnv();
@@ -162,27 +160,32 @@ export async function createServerBetaService(
   const pool = options.pool ?? getSharedPostgresPool({ requireDatabaseUrl: true });
   const bootstrap = await initializePostgres(pool, options.bootstrapSchema ?? true);
   const queueManager = options.queueManager ?? buildQueueManager();
-  const generationDisabled = options.generationDisabled
-    ?? (process.env.CLAUDE_MEM_GENERATION_DISABLED === '1'
-      || process.env.CLAUDE_MEM_GENERATION_DISABLED === 'true');
-  const generationWorkerManager = options.generationWorkerManager
-    ?? (generationDisabled
+  const generationDisabled =
+    options.generationDisabled ??
+    (process.env.CLAUDE_MEM_GENERATION_DISABLED === "1" || process.env.CLAUDE_MEM_GENERATION_DISABLED === "true");
+  const generationWorkerManager =
+    options.generationWorkerManager ??
+    (generationDisabled
       ? new DisabledServerBetaGenerationWorkerManager(
-          'CLAUDE_MEM_GENERATION_DISABLED is set; this server runs HTTP only. A separate `claude-mem server worker start` process consumes the BullMQ queues.',
+          "CLAUDE_MEM_GENERATION_DISABLED is set; this server runs HTTP only. A separate `claude-mem server worker start` process consumes the BullMQ queues."
         )
       : buildGenerationWorkerManager(pool, queueManager, options.generationProvider));
   const graph: ServerBetaServiceGraph = {
-    runtime: 'server-beta',
+    runtime: "server-beta",
     postgres: {
       pool,
-      bootstrap,
+      bootstrap
     },
     authMode: options.authMode ?? parseAuthMode(process.env.CLAUDE_MEM_AUTH_MODE),
     queueManager,
     generationWorkerManager,
-    providerRegistry: new DisabledServerBetaProviderRegistry('Phase 5 keeps the provider registry boundary as inert; per-call providers are owned by the generation worker manager.'),
-    eventBroadcaster: new DisabledServerBetaEventBroadcaster('Phase 2 boundary only; SSE/event broadcasting is not wired.'),
-    storage: createPostgresStorageRepositories(pool),
+    providerRegistry: new DisabledServerBetaProviderRegistry(
+      "Phase 5 keeps the provider registry boundary as inert; per-call providers are owned by the generation worker manager."
+    ),
+    eventBroadcaster: new DisabledServerBetaEventBroadcaster(
+      "Phase 2 boundary only; SSE/event broadcasting is not wired."
+    ),
+    storage: createPostgresStorageRepositories(pool)
   };
 
   if (generationWorkerManager instanceof ActiveServerBetaGenerationWorkerManager) {
@@ -195,46 +198,46 @@ export async function createServerBetaService(
 function buildGenerationWorkerManager(
   pool: PostgresPool,
   queueManager: ServerBetaQueueManager,
-  injectedProvider?: ServerGenerationProvider,
+  injectedProvider?: ServerGenerationProvider
 ): ServerBetaGenerationWorkerManager {
   if (!(queueManager instanceof ActiveServerBetaQueueManager)) {
     return new DisabledServerBetaGenerationWorkerManager(
-      'queue manager is disabled; set CLAUDE_MEM_QUEUE_ENGINE=bullmq to enable provider generation.',
+      "queue manager is disabled; set CLAUDE_MEM_QUEUE_ENGINE=bullmq to enable provider generation."
     );
   }
   const provider = injectedProvider ?? buildServerGenerationProviderFromEnv();
   if (!provider) {
     return new DisabledServerBetaGenerationWorkerManager(
-      'no server generation provider configured; set CLAUDE_MEM_SERVER_PROVIDER and the matching API key to enable.',
+      "no server generation provider configured; set CLAUDE_MEM_SERVER_PROVIDER and the matching API key to enable."
     );
   }
   return new ActiveServerBetaGenerationWorkerManager({
     pool,
     queueManager,
-    provider,
+    provider
   });
 }
 
 function buildServerGenerationProviderFromEnv(): ServerGenerationProvider | null {
-  const provider = (process.env.CLAUDE_MEM_SERVER_PROVIDER ?? '').trim().toLowerCase();
+  const provider = (process.env.CLAUDE_MEM_SERVER_PROVIDER ?? "").trim().toLowerCase();
   if (!provider) return null;
   try {
-    if (provider === 'claude' || provider === 'anthropic') {
-      const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_MEM_ANTHROPIC_API_KEY ?? '';
+    if (provider === "claude" || provider === "anthropic") {
+      const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_MEM_ANTHROPIC_API_KEY ?? "";
       if (!apiKey) return null;
       const opts: { apiKey: string; model?: string } = { apiKey };
       if (process.env.CLAUDE_MEM_SERVER_MODEL) opts.model = process.env.CLAUDE_MEM_SERVER_MODEL;
       return new ClaudeObservationProvider(opts);
     }
-    if (provider === 'gemini') {
-      const apiKey = process.env.GEMINI_API_KEY ?? process.env.CLAUDE_MEM_GEMINI_API_KEY ?? '';
+    if (provider === "gemini") {
+      const apiKey = process.env.GEMINI_API_KEY ?? process.env.CLAUDE_MEM_GEMINI_API_KEY ?? "";
       if (!apiKey) return null;
       const opts: { apiKey: string; model?: string } = { apiKey };
       if (process.env.CLAUDE_MEM_SERVER_MODEL) opts.model = process.env.CLAUDE_MEM_SERVER_MODEL;
       return new GeminiObservationProvider(opts);
     }
-    if (provider === 'openrouter') {
-      const apiKey = process.env.OPENROUTER_API_KEY ?? process.env.CLAUDE_MEM_OPENROUTER_API_KEY ?? '';
+    if (provider === "openrouter") {
+      const apiKey = process.env.OPENROUTER_API_KEY ?? process.env.CLAUDE_MEM_OPENROUTER_API_KEY ?? "";
       if (!apiKey) return null;
       const opts: { apiKey: string; model?: string } = { apiKey };
       if (process.env.CLAUDE_MEM_SERVER_MODEL) opts.model = process.env.CLAUDE_MEM_SERVER_MODEL;
@@ -254,9 +257,9 @@ function buildServerGenerationProviderFromEnv(): ServerGenerationProvider | null
 // compatible.
 function buildQueueManager(): ServerBetaQueueManager {
   const config = getRedisQueueConfig();
-  if (config.engine !== 'bullmq') {
+  if (config.engine !== "bullmq") {
     return new DisabledServerBetaQueueManager(
-      `Queue engine is "${config.engine}"; set CLAUDE_MEM_QUEUE_ENGINE=bullmq to activate the server-beta queue manager.`,
+      `Queue engine is "${config.engine}"; set CLAUDE_MEM_QUEUE_ENGINE=bullmq to activate the server-beta queue manager.`
     );
   }
   return new ActiveServerBetaQueueManager(config);
@@ -274,20 +277,20 @@ async function initializePostgres(pool: PostgresPool, bootstrapSchema: boolean):
       FROM server_beta_schema_migrations
       WHERE version = $1
     `,
-    [SERVER_BETA_POSTGRES_SCHEMA_VERSION],
+    [SERVER_BETA_POSTGRES_SCHEMA_VERSION]
   );
   const row = result.rows[0] as { version?: number; applied_at?: Date | string } | undefined;
 
   return {
     initialized: row?.version === SERVER_BETA_POSTGRES_SCHEMA_VERSION,
-    schemaVersion: typeof row?.version === 'number' ? row.version : null,
-    appliedAt: row?.applied_at ? new Date(row.applied_at).toISOString() : null,
+    schemaVersion: typeof row?.version === "number" ? row.version : null,
+    appliedAt: row?.applied_at ? new Date(row.applied_at).toISOString() : null
   };
 }
 
 function parseAuthMode(value: string | undefined): ServerBetaAuthMode {
-  if (value === 'local-dev' || value === 'disabled') {
+  if (value === "local-dev" || value === "disabled") {
     return value;
   }
-  return 'api-key';
+  return "api-key";
 }

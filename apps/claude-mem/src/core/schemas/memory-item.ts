@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
+import { z } from "zod";
 
-export const MemoryItemKindSchema = z.enum(['observation', 'summary', 'prompt', 'manual']);
-export const MemorySourceTypeSchema = z.enum(['observation', 'session_summary', 'user_prompt', 'manual', 'import']);
+export const MemoryItemKindSchema = z.enum(["observation", "summary", "prompt", "manual"]);
+export const MemorySourceTypeSchema = z.enum(["observation", "session_summary", "user_prompt", "manual", "import"]);
 
 export const MemoryItemSchema = z.object({
   id: z.string().min(1),

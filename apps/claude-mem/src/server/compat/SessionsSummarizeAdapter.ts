@@ -12,22 +12,24 @@
 // UNIQUE constraint stays in force — exactly the same idempotency guarantee
 // as `/v1/sessions/:id/end`.
 
-import type { Application, Request, Response } from 'express';
-import { z } from 'zod';
-import type { RouteHandler } from '../../services/server/Server.js';
-import type { PostgresPool } from '../../storage/postgres/pool.js';
-import { PostgresServerSessionsRepository } from '../../storage/postgres/server-sessions.js';
-import { logger } from '../../utils/logger.js';
-import { requirePostgresServerAuth } from '../middleware/postgres-auth.js';
-import { EndSessionService } from '../services/EndSessionService.js';
-import { resolveServerSession } from './SessionsObservationsAdapter.js';
+import type { Application, Request, Response } from "express";
+import { z } from "zod";
+import type { RouteHandler } from "../../services/server/Server.js";
+import type { PostgresPool } from "../../storage/postgres/pool.js";
+import { PostgresServerSessionsRepository } from "../../storage/postgres/server-sessions.js";
+import { logger } from "../../utils/logger.js";
+import { requirePostgresServerAuth } from "../middleware/postgres-auth.js";
+import { EndSessionService } from "../services/EndSessionService.js";
+import { resolveServerSession } from "./SessionsObservationsAdapter.js";
 
-const summarizeSchema = z.object({
-  contentSessionId: z.string().min(1),
-  last_assistant_message: z.string().optional(),
-  agentId: z.string().optional(),
-  platformSource: z.string().optional(),
-}).passthrough();
+const summarizeSchema = z
+  .object({
+    contentSessionId: z.string().min(1),
+    last_assistant_message: z.string().optional(),
+    agentId: z.string().optional(),
+    platformSource: z.string().optional()
+  })
+  .passthrough();
 
 export interface SessionsSummarizeAdapterOptions {
   pool: PostgresPool;
@@ -43,76 +45,80 @@ export class SessionsSummarizeAdapter implements RouteHandler {
     const writeAuth = requirePostgresServerAuth(this.options.pool, {
       authMode: this.options.authMode,
       allowLocalDevBypass: this.options.allowLocalDevBypass,
-      requiredScopes: ['memories:write'],
+      requiredScopes: ["memories:write"]
     });
 
-    app.post('/api/sessions/summarize', writeAuth, this.asyncHandler(async (req, res) => {
-      const parsed = summarizeSchema.safeParse(req.body);
-      if (!parsed.success) {
-        res.status(400).json({ error: 'ValidationError', issues: parsed.error.issues });
-        return;
-      }
-      const teamId = req.authContext?.teamId ?? null;
-      const projectId = req.authContext?.projectId ?? null;
-      if (!teamId) {
-        res.status(403).json({ error: 'Forbidden', message: 'API key is not bound to a team' });
-        return;
-      }
-      if (!projectId) {
-        res.status(400).json({
-          error: 'BadRequest',
-          message: 'Legacy /api/sessions/summarize requires a project-scoped API key',
-        });
-        return;
-      }
-
-      // Subagent contexts in legacy code emit summarize calls but the worker
-      // skipped them. We preserve the legacy semantics so existing clients
-      // see the same response shape.
-      if (parsed.data.agentId) {
-        res.json({ status: 'skipped', reason: 'subagent_context' });
-        return;
-      }
-
-      try {
-        const session = await resolveServerSession({
-          pool: this.options.pool,
-          teamId,
-          projectId,
-          contentSessionId: parsed.data.contentSessionId,
-          platformSource: typeof parsed.data.platformSource === 'string' ? parsed.data.platformSource : null,
-          agentId: null,
-          agentType: null,
-        });
-
-        const result = await this.options.endSession.end({
-          sessionId: session.id,
-          projectId,
-          teamId,
-          source: 'http_post_api_sessions_summarize',
-          apiKeyId: req.authContext?.apiKeyId ?? null,
-          actorId: null,
-          sourceAdapter: 'claude-code-compat',
-        });
-        if (!result.session) {
-          res.status(404).json({ status: 'not_found', reason: 'session_not_found' });
+    app.post(
+      "/api/sessions/summarize",
+      writeAuth,
+      this.asyncHandler(async (req, res) => {
+        const parsed = summarizeSchema.safeParse(req.body);
+        if (!parsed.success) {
+          res.status(400).json({ error: "ValidationError", issues: parsed.error.issues });
           return;
         }
-        res.json({
-          status: 'queued',
-          sessionId: session.id,
-          serverSessionId: session.id,
-          generationJobId: result.outbox?.id ?? null,
-          transport: result.enqueueState,
-        });
-      } catch (error) {
-        logger.error('SYSTEM', 'compat summarize adapter failed', {
-          error: error instanceof Error ? error.message : String(error),
-          contentSessionId: parsed.data.contentSessionId,
-        });
-        res.status(500).json({ status: 'error', reason: 'internal_error' });
-      }
-    }));
+        const teamId = req.authContext?.teamId ?? null;
+        const projectId = req.authContext?.projectId ?? null;
+        if (!teamId) {
+          res.status(403).json({ error: "Forbidden", message: "API key is not bound to a team" });
+          return;
+        }
+        if (!projectId) {
+          res.status(400).json({
+            error: "BadRequest",
+            message: "Legacy /api/sessions/summarize requires a project-scoped API key"
+          });
+          return;
+        }
+
+        // Subagent contexts in legacy code emit summarize calls but the worker
+        // skipped them. We preserve the legacy semantics so existing clients
+        // see the same response shape.
+        if (parsed.data.agentId) {
+          res.json({ status: "skipped", reason: "subagent_context" });
+          return;
+        }
+
+        try {
+          const session = await resolveServerSession({
+            pool: this.options.pool,
+            teamId,
+            projectId,
+            contentSessionId: parsed.data.contentSessionId,
+            platformSource: typeof parsed.data.platformSource === "string" ? parsed.data.platformSource : null,
+            agentId: null,
+            agentType: null
+          });
+
+          const result = await this.options.endSession.end({
+            sessionId: session.id,
+            projectId,
+            teamId,
+            source: "http_post_api_sessions_summarize",
+            apiKeyId: req.authContext?.apiKeyId ?? null,
+            actorId: null,
+            sourceAdapter: "claude-code-compat"
+          });
+          if (!result.session) {
+            res.status(404).json({ status: "not_found", reason: "session_not_found" });
+            return;
+          }
+          res.json({
+            status: "queued",
+            sessionId: session.id,
+            serverSessionId: session.id,
+            generationJobId: result.outbox?.id ?? null,
+            transport: result.enqueueState
+          });
+        } catch (error) {
+          logger.error("SYSTEM", "compat summarize adapter failed", {
+            error: error instanceof Error ? error.message : String(error),
+            contentSessionId: parsed.data.contentSessionId
+          });
+          res.status(500).json({ status: "error", reason: "internal_error" });
+        }
+      })
+    );
   }
 
   private asyncHandler(fn: (req: Request, res: Response) => Promise<void> | void) {

@@ -28,6 +28,7 @@ ERROR [SESSION] Generator exited unexpectedly
 Two issues in the Windows code path:
 
 1. **`SDKAgent.ts`** - Returns full auto-detected path with spaces:
+
    ```
    C:\Users\Anderson Wang\AppData\Roaming\npm\claude.cmd
    ```
@@ -44,10 +45,10 @@ On Windows, prefer `claude.cmd` via PATH instead of full auto-detected path:
 
 ```typescript
 // On Windows, prefer "claude.cmd" (via PATH) to avoid spawn issues with spaces in paths
-if (process.platform === 'win32') {
+if (process.platform === "win32") {
   try {
-    execSync('where claude.cmd', { encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
-    return 'claude.cmd'; // Let Windows resolve via PATHEXT
+    execSync("where claude.cmd", { encoding: "utf8", windowsHide: true, stdio: ["ignore", "pipe", "ignore"] });
+    return "claude.cmd"; // Let Windows resolve via PATHEXT
   } catch {
     // Fall through to generic error
   }
@@ -59,13 +60,13 @@ if (process.platform === 'win32') {
 Use `cmd.exe /d /c` wrapper for .cmd files on Windows:
 
 ```typescript
-const useCmdWrapper = process.platform === 'win32' && spawnOptions.command.endsWith('.cmd');
+const useCmdWrapper = process.platform === "win32" && spawnOptions.command.endsWith(".cmd");
 
 if (useCmdWrapper) {
-  child = spawn('cmd.exe', ['/d', '/c', spawnOptions.command, ...spawnOptions.args], {
+  child = spawn("cmd.exe", ["/d", "/c", spawnOptions.command, ...spawnOptions.args], {
     cwd: spawnOptions.cwd,
     env: spawnOptions.env,
-    stdio: ['pipe', 'pipe', 'pipe'],
+    stdio: ["pipe", "pipe", "pipe"],
     signal: spawnOptions.signal,
     windowsHide: true
   });
@@ -85,6 +86,7 @@ if (useCmdWrapper) {
 ## Testing
 
 Verified on Windows 11 with username containing spaces:
+
 - PostToolUse hook completes successfully
 - Observations are stored to database
 - No more "process exited with code 1" errors

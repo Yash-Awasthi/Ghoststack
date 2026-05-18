@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { PostgresQueryable, JsonObject } from './utils.js';
-import { newId, queryOne, toEpoch, toJsonObject } from './utils.js';
+import type { PostgresQueryable, JsonObject } from "./utils.js";
+import { newId, queryOne, toEpoch, toJsonObject } from "./utils.js";
 
-export type PostgresTeamRole = 'owner' | 'admin' | 'member' | 'viewer';
+export type PostgresTeamRole = "owner" | "admin" | "member" | "viewer";
 
 export interface PostgresTeam {
   id: string;
@@ -78,10 +78,7 @@ export class PostgresTeamsRepository {
     return mapTeamMemberRow(row!);
   }
 
-  async getByIdForUser(input: {
-    id: string;
-    userId: string;
-  }): Promise<PostgresTeam | null> {
+  async getByIdForUser(input: { id: string; userId: string }): Promise<PostgresTeam | null> {
     const row = await queryOne<TeamRow>(
       this.client,
       `
@@ -98,7 +95,7 @@ export class PostgresTeamsRepository {
   async getMember(teamId: string, userId: string): Promise<PostgresTeamMember | null> {
     const row = await queryOne<TeamMemberRow>(
       this.client,
-      'SELECT * FROM team_members WHERE team_id = $1 AND user_id = $2',
+      "SELECT * FROM team_members WHERE team_id = $1 AND user_id = $2",
       [teamId, userId]
     );
     return row ? mapTeamMemberRow(row) : null;

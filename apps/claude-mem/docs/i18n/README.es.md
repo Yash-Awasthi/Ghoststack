@@ -181,7 +181,8 @@ Ver [Descripción General de la Arquitectura](https://docs.claude-mem.ai/archite
 Claude-Mem proporciona búsqueda inteligente a través de la habilidad mem-search que se invoca automáticamente cuando preguntas sobre trabajo previo:
 
 **Cómo Funciona:**
-- Simplemente pregunta naturalmente: *"¿Qué hicimos en la última sesión?"* o *"¿Arreglamos este error antes?"*
+
+- Simplemente pregunta naturalmente: _"¿Qué hicimos en la última sesión?"_ o _"¿Arreglamos este error antes?"_
 - Claude invoca automáticamente la habilidad mem-search para encontrar contexto relevante
 
 **Operaciones de Búsqueda Disponibles:**
@@ -287,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Soporte
 

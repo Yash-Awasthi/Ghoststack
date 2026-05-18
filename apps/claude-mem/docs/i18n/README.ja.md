@@ -1,6 +1,7 @@
 🌐 これは自動翻訳です。コミュニティによる修正を歓迎します!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ Claude Codeを再起動します。以前のセッションからのコンテキ
 Claude-Memは、過去の作業について尋ねると自動的に呼び出されるmem-searchスキルを通じてインテリジェント検索を提供します:
 
 **仕組み:**
-- 自然に質問するだけ: *「前回のセッションで何をしましたか?」* または *「以前このバグを修正しましたか?」*
+
+- 自然に質問するだけ: _「前回のセッションで何をしましたか?」_ または _「以前このバグを修正しましたか?」_
 - Claudeは自動的にmem-searchスキルを呼び出して関連するコンテキストを検索します
 
 **利用可能な検索操作:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## サポート
 

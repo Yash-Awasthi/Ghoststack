@@ -1,8 +1,7 @@
-
-import { ParsedObservation } from '../../sdk/parser.js';
-import { SettingsDefaultsManager } from '../../shared/SettingsDefaultsManager.js';
-import { USER_SETTINGS_PATH } from '../../shared/paths.js';
-import { logger } from '../../utils/logger.js';
+import { ParsedObservation } from "../../sdk/parser.js";
+import { SettingsDefaultsManager } from "../../shared/SettingsDefaultsManager.js";
+import { USER_SETTINGS_PATH } from "../../shared/paths.js";
+import { logger } from "../../utils/logger.js";
 
 export interface TelegramNotifyInput {
   observations: ParsedObservation[];
@@ -14,32 +13,32 @@ export interface TelegramNotifyInput {
 const MARKDOWN_V2_RESERVED = /[_*\[\]()~`>#+\-=|{}.!\\]/g;
 
 const TYPE_EMOJI: Record<string, string> = {
-  security_alert: '🚨',
-  security_note: '🔐',
+  security_alert: "🚨",
+  security_note: "🔐"
 };
-const DEFAULT_EMOJI = '🔔';
+const DEFAULT_EMOJI = "🔔";
 
 function escapeMarkdownV2(value: string): string {
-  return value.replace(MARKDOWN_V2_RESERVED, '\\$&');
+  return value.replace(MARKDOWN_V2_RESERVED, "\\$&");
 }
 
 function splitCsv(value: string): string[] {
   return value
-    .split(',')
-    .map(entry => entry.trim())
-    .filter(entry => entry.length > 0);
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
 }
 
 function formatMessage(
   obs: ParsedObservation,
   project: string,
   memorySessionId: string,
-  observationId: number,
+  observationId: number
 ): string {
   const emoji = TYPE_EMOJI[obs.type] ?? DEFAULT_EMOJI;
   const type = escapeMarkdownV2(obs.type);
-  const title = escapeMarkdownV2(obs.title ?? '');
-  const subtitle = escapeMarkdownV2(obs.subtitle ?? '');
+  const title = escapeMarkdownV2(obs.title ?? "");
+  const subtitle = escapeMarkdownV2(obs.subtitle ?? "");
   const projectEscaped = escapeMarkdownV2(project);
   const idEscaped = escapeMarkdownV2(String(observationId));
   return `${emoji} *${type}* — ${title}\n${subtitle}\nProject: \`${projectEscaped}\` · obs \\#${idEscaped}`;
@@ -48,13 +47,13 @@ function formatMessage(
 async function postOne(botToken: string, chatId: string, text: string): Promise<void> {
   const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
   const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
       chat_id: chatId,
       text,
-      parse_mode: 'MarkdownV2',
-    }),
+      parse_mode: "MarkdownV2"
+    })
   });
   if (!response.ok) {
     const status = response.status;
@@ -66,7 +65,7 @@ async function postOne(botToken: string, chatId: string, text: string): Promise<
 export async function notifyTelegram(input: TelegramNotifyInput): Promise<void> {
   const settings = SettingsDefaultsManager.loadFromFile(USER_SETTINGS_PATH);
 
-  if (settings.CLAUDE_MEM_TELEGRAM_ENABLED !== 'true') {
+  if (settings.CLAUDE_MEM_TELEGRAM_ENABLED !== "true") {
     return;
   }
 
@@ -86,7 +85,7 @@ export async function notifyTelegram(input: TelegramNotifyInput): Promise<void> 
   for (let i = 0; i < observations.length; i++) {
     const obs = observations[i];
     const matchesType = triggerTypes.includes(obs.type);
-    const matchesConcept = obs.concepts.some(c => triggerConcepts.includes(c));
+    const matchesConcept = obs.concepts.some((c) => triggerConcepts.includes(c));
     if (!matchesType && !matchesConcept) {
       continue;
     }
@@ -96,12 +95,17 @@ export async function notifyTelegram(input: TelegramNotifyInput): Promise<void> 
       const text = formatMessage(obs, project, memorySessionId, observationId);
       await postOne(botToken, chatId, text);
     } catch (error) {
-      logger.warn('TELEGRAM', 'Failed to send Telegram notification', {
-        observationId,
-        project,
-        memorySessionId,
-        type: obs.type,
-      }, error as Error);
+      logger.warn(
+        "TELEGRAM",
+        "Failed to send Telegram notification",
+        {
+          observationId,
+          project,
+          memorySessionId,
+          type: obs.type
+        },
+        error as Error
+      );
     }
   }
 }

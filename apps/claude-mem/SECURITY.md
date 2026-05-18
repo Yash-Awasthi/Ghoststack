@@ -28,17 +28,19 @@ We take security seriously, will acknowledge valid reports within 48 hours, and 
 Claude-mem executes system commands for git operations and process management. We have implemented comprehensive protections against command injection:
 
 #### Safe Command Execution
+
 - **Array-based Arguments:** All commands use array-based arguments to prevent shell interpretation
 - **No Shell Execution:** `shell: false` is explicitly set for all spawn operations involving user input
 - **Input Validation:** All user-controlled parameters are validated before use
 
 #### Example Safe Pattern
+
 ```typescript
 // ✅ SAFE: Array-based arguments with validation
 if (!isValidBranchName(userInput)) {
-  throw new Error('Invalid input');
+  throw new Error("Invalid input");
 }
-spawnSync('git', ['checkout', userInput], { shell: false });
+spawnSync("git", ["checkout", userInput], { shell: false });
 
 // ❌ UNSAFE: Never do this
 execSync(`git checkout ${userInput}`);
@@ -70,6 +72,7 @@ Tags are stripped at the hook layer before data reaches worker/database.
 ## Security Audit History
 
 ### 2025-12-16: Command Injection Vulnerability (Issue #354)
+
 - **Severity:** CRITICAL
 - **Status:** RESOLVED
 - **Affected Versions:** All versions prior to fix
@@ -78,6 +81,7 @@ Tags are stripped at the hook layer before data reaches worker/database.
 - **Vulnerabilities Fixed:** 3
 
 **Summary of Fixes:**
+
 1. Replaced string interpolation with array-based arguments in `BranchManager.ts`
 2. Added `isValidBranchName()` validation function
 3. Removed unnecessary shell usage in `bun-path.ts`
@@ -88,6 +92,7 @@ Tags are stripped at the hook layer before data reaches worker/database.
 ### When Adding Command Execution
 
 1. **NEVER use shell with user input:**
+
    ```typescript
    // ❌ NEVER
    execSync(`command ${userInput}`);
@@ -98,24 +103,26 @@ Tags are stripped at the hook layer before data reaches worker/database.
    ```
 
 2. **ALWAYS validate user input:**
+
    ```typescript
    if (!isValidInput(userInput)) {
-     throw new Error('Invalid input');
+     throw new Error("Invalid input");
    }
    ```
 
 3. **Use array-based arguments:**
+
    ```typescript
    // ❌ NEVER
    execSync(`git ${command} ${arg}`);
 
    // ✅ ALWAYS
-   spawnSync('git', [command, arg], { shell: false });
+   spawnSync("git", [command, arg], { shell: false });
    ```
 
 4. **Explicitly set shell: false:**
    ```typescript
-   spawnSync('command', args, { shell: false });
+   spawnSync("command", args, { shell: false });
    ```
 
 ### When Adding User Input

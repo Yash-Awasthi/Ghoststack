@@ -1,12 +1,8 @@
-import type { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
-import type { RecentSummary, SummaryWithSessionInfo, FullSummary } from './types.js';
+import type { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
+import type { RecentSummary, SummaryWithSessionInfo, FullSummary } from "./types.js";
 
-export function getRecentSummaries(
-  db: Database,
-  project: string,
-  limit: number = 10
-): RecentSummary[] {
+export function getRecentSummaries(db: Database, project: string, limit: number = 10): RecentSummary[] {
   const stmt = db.prepare(`
     SELECT
       request, investigated, learned, completed, next_steps,
@@ -38,10 +34,7 @@ export function getRecentSummariesWithSessionInfo(
   return stmt.all(project, limit) as SummaryWithSessionInfo[];
 }
 
-export function getAllRecentSummaries(
-  db: Database,
-  limit: number = 50
-): FullSummary[] {
+export function getAllRecentSummaries(db: Database, limit: number = 50): FullSummary[] {
   const stmt = db.prepare(`
     SELECT id, request, investigated, learned, completed, next_steps,
            files_read, files_edited, notes, project, prompt_number,

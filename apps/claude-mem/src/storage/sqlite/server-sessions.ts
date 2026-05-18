@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { randomUUID } from 'crypto';
-import { Database } from 'bun:sqlite';
-import { CreateServerSessionSchema, ServerSessionSchema, type CreateServerSession, type ServerSession, type ServerSessionStatus } from '../../core/schemas/session.js';
-import { ensureServerStorageSchema } from './schema.js';
-import { parseJsonObject, stringifyJson } from './serde.js';
+import { randomUUID } from "crypto";
+import { Database } from "bun:sqlite";
+import {
+  CreateServerSessionSchema,
+  ServerSessionSchema,
+  type CreateServerSession,
+  type ServerSession,
+  type ServerSessionStatus
+} from "../../core/schemas/session.js";
+import { ensureServerStorageSchema } from "./schema.js";
+import { parseJsonObject, stringifyJson } from "./serde.js";
 
 interface ServerSessionRow {
   id: string;
@@ -46,51 +52,63 @@ export class ServerSessionsRepository {
     const now = Date.now();
     const id = randomUUID();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO server_sessions (
         id, project_id, content_session_id, memory_session_id, platform_source,
         title, status, metadata, started_at_epoch, completed_at_epoch, updated_at_epoch
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
-      session.projectId,
-      session.contentSessionId ?? null,
-      session.memorySessionId ?? null,
-      session.platformSource ?? 'claude',
-      session.title ?? null,
-      'active',
-      stringifyJson(session.metadata),
-      now,
-      null,
-      now
-    );
+    `
+      )
+      .run(
+        id,
+        session.projectId,
+        session.contentSessionId ?? null,
+        session.memorySessionId ?? null,
+        session.platformSource ?? "claude",
+        session.title ?? null,
+        "active",
+        stringifyJson(session.metadata),
+        now,
+        null,
+        now
+      );
 
     return this.getById(id)!;
   }
 
   markCompleted(id: string, completedAtEpoch = Date.now()): ServerSession | null {
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE server_sessions
       SET status = 'completed', completed_at_epoch = ?, updated_at_epoch = ?
       WHERE id = ?
-    `).run(completedAtEpoch, completedAtEpoch, id);
+    `
+      )
+      .run(completedAtEpoch, completedAtEpoch, id);
 
     return this.getById(id);
   }
 
   getById(id: string): ServerSession | null {
-    const row = this.db.prepare('SELECT * FROM server_sessions WHERE id = ?').get(id) as ServerSessionRow | null;
+    const row = this.db.prepare("SELECT * FROM server_sessions WHERE id = ?").get(id) as ServerSessionRow | null;
     return row ? mapServerSessionRow(row) : null;
   }
 
   getByMemorySessionId(memorySessionId: string): ServerSession | null {
-    const row = this.db.prepare('SELECT * FROM server_sessions WHERE memory_session_id = ? ORDER BY started_at_epoch DESC LIMIT 1').get(memorySessionId) as ServerSessionRow | null;
+    const row = this.db
+      .prepare("SELECT * FROM server_sessions WHERE memory_session_id = ? ORDER BY started_at_epoch DESC LIMIT 1")
+      .get(memorySessionId) as ServerSessionRow | null;
     return row ? mapServerSessionRow(row) : null;
   }
 
   listByProject(projectId: string): ServerSession[] {
-    const rows = this.db.prepare('SELECT * FROM server_sessions WHERE project_id = ? ORDER BY started_at_epoch DESC').all(projectId) as ServerSessionRow[];
+    const rows = this.db
+      .prepare("SELECT * FROM server_sessions WHERE project_id = ? ORDER BY started_at_epoch DESC")
+      .all(projectId) as ServerSessionRow[];
     return rows.map(mapServerSessionRow);
   }
 }

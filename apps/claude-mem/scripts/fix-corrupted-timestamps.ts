@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 
-import Database from 'bun:sqlite';
-import { resolve } from 'path';
+import Database from "bun:sqlite";
+import { resolve } from "path";
 
-const DB_PATH = resolve(process.env.HOME!, '.claude-mem/claude-mem.db');
+const DB_PATH = resolve(process.env.HOME!, ".claude-mem/claude-mem.db");
 
-const BAD_WINDOW_START = 1766623500000; 
-const BAD_WINDOW_END = 1766626260000;   
+const BAD_WINDOW_START = 1766623500000;
+const BAD_WINDOW_END = 1766626260000;
 
 interface AffectedObservation {
   id: number;
@@ -30,47 +30,51 @@ interface TimestampFix {
 }
 
 function formatTimestamp(epoch: number): string {
-  return new Date(epoch).toLocaleString('en-US', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+  return new Date(epoch).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
   });
 }
 
 function main() {
   const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry-run');
-  const autoYes = args.includes('--yes') || args.includes('-y');
+  const dryRun = args.includes("--dry-run");
+  const autoYes = args.includes("--yes") || args.includes("-y");
 
-  console.log('🔍 Analyzing corrupted observation timestamps...\n');
+  console.log("🔍 Analyzing corrupted observation timestamps...\n");
   if (dryRun) {
-    console.log('🏃 DRY RUN MODE - No changes will be made\n');
+    console.log("🏃 DRY RUN MODE - No changes will be made\n");
   }
 
   const db = new Database(DB_PATH);
 
   try {
-    console.log('Step 1: Finding observations created during bad window...');
-    const affectedObs = db.query<AffectedObservation, []>(`
+    console.log("Step 1: Finding observations created during bad window...");
+    const affectedObs = db
+      .query<AffectedObservation, []>(
+        `
       SELECT id, memory_session_id, created_at_epoch, title
       FROM observations
       WHERE created_at_epoch >= ${BAD_WINDOW_START}
         AND created_at_epoch <= ${BAD_WINDOW_END}
       ORDER BY id
-    `).all();
+    `
+      )
+      .all();
 
     console.log(`Found ${affectedObs.length} observations in bad window\n`);
 
     if (affectedObs.length === 0) {
-      console.log('✅ No affected observations found!');
+      console.log("✅ No affected observations found!");
       return;
     }
 
-    console.log('Step 2: Matching observations to session start times...');
+    console.log("Step 2: Matching observations to session start times...");
     const fixes: TimestampFix[] = [];
 
     interface ObsWithSession {
@@ -81,7 +85,9 @@ function main() {
       memory_session_id: string;
     }
 
-    const obsWithSessions = db.query<ObsWithSession, []>(`
+    const obsWithSessions = db
+      .query<ObsWithSession, []>(
+        `
       SELECT
         o.id as obs_id,
         o.title as obs_title,
@@ -94,24 +100,26 @@ function main() {
         AND o.created_at_epoch <= ${BAD_WINDOW_END}
         AND s.started_at_epoch < ${BAD_WINDOW_START}
       ORDER BY o.id
-    `).all();
+    `
+      )
+      .all();
 
     for (const row of obsWithSessions) {
       fixes.push({
         observation_id: row.obs_id,
-        observation_title: row.obs_title || '(no title)',
+        observation_title: row.obs_title || "(no title)",
         wrong_timestamp: row.obs_created,
         correct_timestamp: row.session_started,
         session_db_id: 0, // Not needed for this approach
-        pending_message_id: 0 
+        pending_message_id: 0
       });
     }
 
     console.log(`Identified ${fixes.length} observations to fix\n`);
 
-    console.log('═══════════════════════════════════════════════════════════════════════');
-    console.log('PROPOSED FIXES:');
-    console.log('═══════════════════════════════════════════════════════════════════════\n');
+    console.log("═══════════════════════════════════════════════════════════════════════");
+    console.log("PROPOSED FIXES:");
+    console.log("═══════════════════════════════════════════════════════════════════════\n");
 
     for (const fix of fixes) {
       const daysDiff = Math.round((fix.wrong_timestamp - fix.correct_timestamp) / (1000 * 60 * 60 * 24));
@@ -121,23 +129,23 @@ function main() {
       console.log(`  📅 Off by ${daysDiff} days\n`);
     }
 
-    console.log('═══════════════════════════════════════════════════════════════════════');
+    console.log("═══════════════════════════════════════════════════════════════════════");
     console.log(`Ready to fix ${fixes.length} observations.`);
 
     if (dryRun) {
-      console.log('\n🏃 DRY RUN COMPLETE - No changes made.');
-      console.log('Run without --dry-run flag to apply fixes.\n');
+      console.log("\n🏃 DRY RUN COMPLETE - No changes made.");
+      console.log("Run without --dry-run flag to apply fixes.\n");
       db.close();
       return;
     }
 
     if (autoYes) {
-      console.log('Auto-confirming with --yes flag...\n');
+      console.log("Auto-confirming with --yes flag...\n");
       applyFixes(db, fixes);
       return;
     }
 
-    console.log('Apply these fixes? (y/n): ');
+    console.log("Apply these fixes? (y/n): ");
 
     const stdin = Bun.stdin.stream();
     const reader = stdin.getReader();
@@ -145,23 +153,22 @@ function main() {
     reader.read().then(({ value }) => {
       const response = new TextDecoder().decode(value).trim().toLowerCase();
 
-      if (response === 'y' || response === 'yes') {
+      if (response === "y" || response === "yes") {
         applyFixes(db, fixes);
       } else {
-        console.log('\n❌ Fixes cancelled. No changes made.');
+        console.log("\n❌ Fixes cancelled. No changes made.");
         db.close();
       }
     });
-
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error("❌ Error:", error);
     db.close();
     process.exit(1);
   }
 }
 
 function applyFixes(db: Database, fixes: TimestampFix[]) {
-  console.log('\n🔧 Applying fixes...\n');
+  console.log("\n🔧 Applying fixes...\n");
 
   const updateStmt = db.prepare(`
     UPDATE observations
@@ -175,11 +182,7 @@ function applyFixes(db: Database, fixes: TimestampFix[]) {
 
   for (const fix of fixes) {
     try {
-      updateStmt.run(
-        fix.correct_timestamp,
-        fix.correct_timestamp,
-        fix.observation_id
-      );
+      updateStmt.run(fix.correct_timestamp, fix.correct_timestamp, fix.observation_id);
       successCount++;
       console.log(`✅ Fixed observation #${fix.observation_id}`);
     } catch (error) {
@@ -188,18 +191,18 @@ function applyFixes(db: Database, fixes: TimestampFix[]) {
     }
   }
 
-  console.log('\n═══════════════════════════════════════════════════════════════════════');
-  console.log('RESULTS:');
-  console.log('═══════════════════════════════════════════════════════════════════════');
+  console.log("\n═══════════════════════════════════════════════════════════════════════");
+  console.log("RESULTS:");
+  console.log("═══════════════════════════════════════════════════════════════════════");
   console.log(`✅ Successfully fixed: ${successCount}`);
   console.log(`❌ Failed: ${errorCount}`);
   console.log(`📊 Total processed: ${fixes.length}\n`);
 
   if (successCount > 0) {
-    console.log('🎉 Timestamp corruption has been repaired!');
-    console.log('💡 Next steps:');
-    console.log('   1. Verify the fixes with: bun scripts/verify-timestamp-fix.ts');
-    console.log('   2. Consider re-enabling orphan processing if timestamp fix is working\n');
+    console.log("🎉 Timestamp corruption has been repaired!");
+    console.log("💡 Next steps:");
+    console.log("   1. Verify the fixes with: bun scripts/verify-timestamp-fix.ts");
+    console.log("   2. Consider re-enabling orphan processing if timestamp fix is working\n");
   }
 
   db.close();

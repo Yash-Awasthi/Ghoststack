@@ -6,7 +6,7 @@ import {
   getEffectiveVersion,
   getPlatformTag,
   parseVersion,
-  versionNewer,
+  versionNewer
 } from "../src/config.js";
 import {
   binaryInfo,
@@ -17,7 +17,7 @@ import {
   fetchChecksums,
   getLatestChromiumVersion,
   parseChecksums,
-  resetWrapperUpdateChecked,
+  resetWrapperUpdateChecked
 } from "../src/download.js";
 
 describe("version comparison", () => {
@@ -92,7 +92,7 @@ describe("latest version (platform-aware)", () => {
   function mockFetch(releases: Array<Record<string, unknown>>) {
     return vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => releases,
+      json: async () => releases
     } as Response);
   }
 
@@ -105,8 +105,8 @@ describe("latest version (platform-aware)", () => {
       {
         tag_name: "chromium-v145.0.7718.0",
         draft: false,
-        assets: makeAssets(["linux-x64", "darwin-arm64", "darwin-x64", "windows-x64"]),
-      },
+        assets: makeAssets(["linux-x64", "darwin-arm64", "darwin-x64", "windows-x64"])
+      }
     ]);
     expect(await getLatestChromiumVersion()).toBe("145.0.7718.0");
   });
@@ -116,13 +116,13 @@ describe("latest version (platform-aware)", () => {
       {
         tag_name: "chromium-v145.0.7718.0",
         draft: false,
-        assets: makeAssets(["linux-x64"]), // Linux only
+        assets: makeAssets(["linux-x64"]) // Linux only
       },
       {
         tag_name: "chromium-v142.0.7444.175",
         draft: false,
-        assets: makeAssets(["linux-x64", "darwin-arm64", "darwin-x64", "windows-x64"]),
-      },
+        assets: makeAssets(["linux-x64", "darwin-arm64", "darwin-x64", "windows-x64"])
+      }
     ]);
     const result = await getLatestChromiumVersion();
     const tag = getPlatformTag();
@@ -138,8 +138,8 @@ describe("latest version (platform-aware)", () => {
       {
         tag_name: "chromium-v145.0.7718.0",
         draft: false,
-        assets: [{ name: "cloakbrowser-freebsd-x64.tar.gz" }],
-      },
+        assets: [{ name: "cloakbrowser-freebsd-x64.tar.gz" }]
+      }
     ]);
     expect(await getLatestChromiumVersion()).toBeNull();
   });
@@ -148,7 +148,7 @@ describe("latest version (platform-aware)", () => {
     const all = ["linux-x64", "darwin-arm64", "darwin-x64", "windows-x64"];
     mockFetch([
       { tag_name: "chromium-v999.0.0.0", draft: true, assets: makeAssets(all) },
-      { tag_name: "chromium-v145.0.7718.0", draft: false, assets: makeAssets(all) },
+      { tag_name: "chromium-v145.0.7718.0", draft: false, assets: makeAssets(all) }
     ]);
     expect(await getLatestChromiumVersion()).toBe("145.0.7718.0");
   });
@@ -175,7 +175,7 @@ describe("wrapper update check", () => {
   it("warns when newer version available", async () => {
     const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ version: "99.0.0" }),
+      json: async () => ({ version: "99.0.0" })
     } as Response);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -189,7 +189,7 @@ describe("wrapper update check", () => {
     const { WRAPPER_VERSION } = await import("../src/config.js");
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ version: WRAPPER_VERSION }),
+      json: async () => ({ version: WRAPPER_VERSION })
     } as Response);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -228,7 +228,7 @@ describe("wrapper update check", () => {
   it("runs only once per process", async () => {
     const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ version: "0.0.1" }),
+      json: async () => ({ version: "0.0.1" })
     } as Response);
 
     await checkWrapperUpdate();
@@ -244,10 +244,7 @@ describe("parseChecksums", () => {
   const HASH_B = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
 
   it("parses standard SHA256SUMS format", () => {
-    const text = [
-      `${HASH_A}  cloakbrowser-linux-x64.tar.gz`,
-      `${HASH_B}  cloakbrowser-darwin-arm64.tar.gz`,
-    ].join("\n");
+    const text = [`${HASH_A}  cloakbrowser-linux-x64.tar.gz`, `${HASH_B}  cloakbrowser-darwin-arm64.tar.gz`].join("\n");
     const result = parseChecksums(text);
     expect(result.get("cloakbrowser-linux-x64.tar.gz")).toBe(HASH_A);
     expect(result.get("cloakbrowser-darwin-arm64.tar.gz")).toBe(HASH_B);
@@ -277,22 +274,16 @@ describe("download fallback", () => {
   });
 
   it("checksum fetch falls back to GitHub on primary 429", async () => {
-    const HASH =
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    const HASH = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
     const checksumText = `${HASH}  cloakbrowser-${getPlatformTag()}.tar.gz`;
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
-      const url =
-        typeof input === "string"
-          ? input
-          : input instanceof URL
-            ? input.toString()
-            : (input as Request).url;
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
       if (url.includes("cloakbrowser.dev")) {
         return {
           ok: false,
           status: 429,
-          statusText: "Too Many Requests",
+          statusText: "Too Many Requests"
         } as Response;
       }
       // GitHub fallback
@@ -301,16 +292,14 @@ describe("download fallback", () => {
 
     const result = await fetchChecksums();
     expect(result).not.toBeNull();
-    expect(
-      result!.has(`cloakbrowser-${getPlatformTag()}.tar.gz`)
-    ).toBe(true);
+    expect(result!.has(`cloakbrowser-${getPlatformTag()}.tar.gz`)).toBe(true);
   });
 
   it("checksum fetch returns null when both sources fail", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 429,
-      statusText: "Too Many Requests",
+      statusText: "Too Many Requests"
     } as Response);
 
     const result = await fetchChecksums();
@@ -370,7 +359,7 @@ describe("checkForUpdate", () => {
   it("returns null when no newer version", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => [],
+      json: async () => []
     } as Response);
     expect(await checkForUpdate()).toBeNull();
   });

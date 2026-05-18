@@ -22,6 +22,7 @@ build_corpus name="hooks-expertise" description="Everything about the hooks life
 ```
 
 Filter options:
+
 - `project` — filter by project name
 - `types` — comma-separated: decision, bugfix, feature, refactor, discovery, change
 - `concepts` — comma-separated concept tags

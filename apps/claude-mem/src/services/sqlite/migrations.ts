@@ -1,8 +1,8 @@
-import { Database } from 'bun:sqlite';
-import { Migration } from './Database.js';
-import { logger } from '../../utils/logger.js';
+import { Database } from "bun:sqlite";
+import { Migration } from "./Database.js";
+import { logger } from "../../utils/logger.js";
 
-export { MigrationRunner } from './migrations/runner.js';
+export { MigrationRunner } from "./migrations/runner.js";
 
 export const migration001: Migration = {
   version: 1,
@@ -108,7 +108,7 @@ export const migration001: Migration = {
       CREATE INDEX IF NOT EXISTS idx_transcript_events_captured ON transcript_events(captured_at_epoch DESC);
     `);
 
-    console.log('✅ Created all database tables successfully');
+    console.log("✅ Created all database tables successfully");
   },
 
   down: (db: Database) => {
@@ -138,12 +138,12 @@ export const migration002: Migration = {
       CREATE INDEX IF NOT EXISTS idx_memories_concepts ON memories(concepts);
     `);
 
-    console.log('✅ Added hierarchical memory fields to memories table');
+    console.log("✅ Added hierarchical memory fields to memories table");
   },
 
   down: (_db: Database) => {
-    console.log('⚠️  Warning: SQLite ALTER TABLE DROP COLUMN not fully supported');
-    console.log('⚠️  To rollback, manually recreate the memories table');
+    console.log("⚠️  Warning: SQLite ALTER TABLE DROP COLUMN not fully supported");
+    console.log("⚠️  To rollback, manually recreate the memories table");
   }
 };
 
@@ -175,7 +175,7 @@ export const migration003: Migration = {
       CREATE INDEX IF NOT EXISTS idx_streaming_sessions_started ON streaming_sessions(started_at_epoch DESC);
     `);
 
-    console.log('✅ Created streaming_sessions table for real-time session tracking');
+    console.log("✅ Created streaming_sessions table for real-time session tracking");
   },
 
   down: (db: Database) => {
@@ -267,7 +267,7 @@ export const migration004: Migration = {
       CREATE INDEX IF NOT EXISTS idx_session_summaries_created ON session_summaries(created_at_epoch DESC);
     `);
 
-    console.log('✅ Created SDK agent architecture tables');
+    console.log("✅ Created SDK agent architecture tables");
   },
 
   down: (db: Database) => {
@@ -287,7 +287,7 @@ export const migration005: Migration = {
 
     db.run(`DROP TABLE IF EXISTS observation_queue`);
 
-    console.log('✅ Dropped orphaned tables: streaming_sessions, observation_queue');
+    console.log("✅ Dropped orphaned tables: streaming_sessions, observation_queue");
   },
 
   down: (db: Database) => {
@@ -323,7 +323,7 @@ export const migration005: Migration = {
       )
     `);
 
-    console.log('⚠️  Recreated streaming_sessions and observation_queue (for rollback only)');
+    console.log("⚠️  Recreated streaming_sessions and observation_queue (for rollback only)");
   }
 };
 
@@ -331,10 +331,15 @@ export const migration006: Migration = {
   version: 6,
   up: (db: Database) => {
     try {
-      db.run('CREATE VIRTUAL TABLE _fts5_probe USING fts5(test_column)');
-      db.run('DROP TABLE _fts5_probe');
+      db.run("CREATE VIRTUAL TABLE _fts5_probe USING fts5(test_column)");
+      db.run("DROP TABLE _fts5_probe");
     } catch (error) {
-      logger.warn('DB', 'FTS5 not available on this platform — skipping FTS migration (search uses ChromaDB)', {}, error instanceof Error ? error : undefined);
+      logger.warn(
+        "DB",
+        "FTS5 not available on this platform — skipping FTS migration (search uses ChromaDB)",
+        {},
+        error instanceof Error ? error : undefined
+      );
       return;
     }
 
@@ -414,7 +419,7 @@ export const migration006: Migration = {
       END;
     `);
 
-    console.log('✅ Created FTS5 virtual tables and triggers for full-text search');
+    console.log("✅ Created FTS5 virtual tables and triggers for full-text search");
   },
 
   down: (db: Database) => {
@@ -439,12 +444,12 @@ export const migration007: Migration = {
 
     db.run(`ALTER TABLE session_summaries ADD COLUMN discovery_tokens INTEGER DEFAULT 0`);
 
-    console.log('✅ Added discovery_tokens columns for ROI tracking');
+    console.log("✅ Added discovery_tokens columns for ROI tracking");
   },
 
   down: (db: Database) => {
-    console.log('⚠️  Warning: SQLite ALTER TABLE DROP COLUMN not fully supported');
-    console.log('⚠️  To rollback, manually recreate the observations and session_summaries tables');
+    console.log("⚠️  Warning: SQLite ALTER TABLE DROP COLUMN not fully supported");
+    console.log("⚠️  To rollback, manually recreate the observations and session_summaries tables");
   }
 };
 
@@ -464,7 +469,7 @@ export const migration008: Migration = {
     `);
     db.run(`CREATE INDEX IF NOT EXISTS idx_feedback_observation ON observation_feedback(observation_id)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_feedback_signal ON observation_feedback(signal_type)`);
-    console.log('✅ Created observation_feedback table for usage tracking');
+    console.log("✅ Created observation_feedback table for usage tracking");
   },
   down: (db: Database) => {
     db.run(`DROP TABLE IF EXISTS observation_feedback`);
@@ -474,15 +479,15 @@ export const migration008: Migration = {
 export const migration009: Migration = {
   version: 26,
   up: (db: Database) => {
-    const columns = db.prepare('PRAGMA table_info(observations)').all() as any[];
-    const hasGeneratedByModel = columns.some((c: any) => c.name === 'generated_by_model');
-    const hasRelevanceCount = columns.some((c: any) => c.name === 'relevance_count');
+    const columns = db.prepare("PRAGMA table_info(observations)").all() as any[];
+    const hasGeneratedByModel = columns.some((c: any) => c.name === "generated_by_model");
+    const hasRelevanceCount = columns.some((c: any) => c.name === "relevance_count");
 
     if (!hasGeneratedByModel) {
-      db.run('ALTER TABLE observations ADD COLUMN generated_by_model TEXT');
+      db.run("ALTER TABLE observations ADD COLUMN generated_by_model TEXT");
     }
     if (!hasRelevanceCount) {
-      db.run('ALTER TABLE observations ADD COLUMN relevance_count INTEGER DEFAULT 0');
+      db.run("ALTER TABLE observations ADD COLUMN relevance_count INTEGER DEFAULT 0");
     }
   },
   down: (_db: Database) => {
@@ -495,39 +500,39 @@ export const migration010: Migration = {
   up: (db: Database) => {
     const added: string[] = [];
 
-    const obsColumns = db.prepare('PRAGMA table_info(observations)').all() as Array<{ name: string }>;
-    const obsHasAgentType = obsColumns.some(c => c.name === 'agent_type');
-    const obsHasAgentId = obsColumns.some(c => c.name === 'agent_id');
+    const obsColumns = db.prepare("PRAGMA table_info(observations)").all() as Array<{ name: string }>;
+    const obsHasAgentType = obsColumns.some((c) => c.name === "agent_type");
+    const obsHasAgentId = obsColumns.some((c) => c.name === "agent_id");
     if (!obsHasAgentType) {
-      db.run('ALTER TABLE observations ADD COLUMN agent_type TEXT');
-      added.push('observations.agent_type');
+      db.run("ALTER TABLE observations ADD COLUMN agent_type TEXT");
+      added.push("observations.agent_type");
     }
     if (!obsHasAgentId) {
-      db.run('ALTER TABLE observations ADD COLUMN agent_id TEXT');
-      added.push('observations.agent_id');
+      db.run("ALTER TABLE observations ADD COLUMN agent_id TEXT");
+      added.push("observations.agent_id");
     }
-    db.run('CREATE INDEX IF NOT EXISTS idx_observations_agent_type ON observations(agent_type)');
-    db.run('CREATE INDEX IF NOT EXISTS idx_observations_agent_id ON observations(agent_id)');
+    db.run("CREATE INDEX IF NOT EXISTS idx_observations_agent_type ON observations(agent_type)");
+    db.run("CREATE INDEX IF NOT EXISTS idx_observations_agent_id ON observations(agent_id)");
 
-    const pendingColumns = db.prepare('PRAGMA table_info(pending_messages)').all() as Array<{ name: string }>;
+    const pendingColumns = db.prepare("PRAGMA table_info(pending_messages)").all() as Array<{ name: string }>;
     if (pendingColumns.length > 0) {
-      const pendingHasAgentType = pendingColumns.some(c => c.name === 'agent_type');
-      const pendingHasAgentId = pendingColumns.some(c => c.name === 'agent_id');
+      const pendingHasAgentType = pendingColumns.some((c) => c.name === "agent_type");
+      const pendingHasAgentId = pendingColumns.some((c) => c.name === "agent_id");
       if (!pendingHasAgentType) {
-        db.run('ALTER TABLE pending_messages ADD COLUMN agent_type TEXT');
-        added.push('pending_messages.agent_type');
+        db.run("ALTER TABLE pending_messages ADD COLUMN agent_type TEXT");
+        added.push("pending_messages.agent_type");
       }
       if (!pendingHasAgentId) {
-        db.run('ALTER TABLE pending_messages ADD COLUMN agent_id TEXT');
-        added.push('pending_messages.agent_id');
+        db.run("ALTER TABLE pending_messages ADD COLUMN agent_id TEXT");
+        added.push("pending_messages.agent_id");
       }
     }
 
     logger.debug(
-      'DB',
+      "DB",
       added.length > 0
-        ? `[migration010] Added columns: ${added.join(', ')}`
-        : '[migration010] Subagent identity columns already present; ensured indexes'
+        ? `[migration010] Added columns: ${added.join(", ")}`
+        : "[migration010] Subagent identity columns already present; ensured indexes"
     );
   },
   down: (_db: Database) => {

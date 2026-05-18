@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { logger } from '../../../utils/logger.js';
+import { logger } from "../../../utils/logger.js";
 import {
   ServerClassifiedProviderError,
   classifyHttpProviderError,
-  parseRetryAfterMs,
-} from './shared/error-classification.js';
-import { buildServerGenerationPrompt } from './shared/prompt-builder.js';
-import type {
-  ServerGenerationContext,
-  ServerGenerationProvider,
-  ServerGenerationResult,
-} from './shared/types.js';
+  parseRetryAfterMs
+} from "./shared/error-classification.js";
+import { buildServerGenerationPrompt } from "./shared/prompt-builder.js";
+import type { ServerGenerationContext, ServerGenerationProvider, ServerGenerationResult } from "./shared/types.js";
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models';
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 export interface GeminiObservationProviderOptions {
   apiKey: string;
@@ -32,7 +28,7 @@ interface GeminiResponse {
 }
 
 export class GeminiObservationProvider implements ServerGenerationProvider {
-  readonly providerLabel = 'gemini' as const;
+  readonly providerLabel = "gemini" as const;
   private readonly apiKey: string;
   private readonly model: string;
   private readonly maxOutputTokens: number;
@@ -40,9 +36,9 @@ export class GeminiObservationProvider implements ServerGenerationProvider {
 
   constructor(options: GeminiObservationProviderOptions) {
     if (!options.apiKey) {
-      throw new ServerClassifiedProviderError('Gemini API key not configured', {
-        kind: 'auth_invalid',
-        cause: new Error('apiKey is required'),
+      throw new ServerClassifiedProviderError("Gemini API key not configured", {
+        kind: "auth_invalid",
+        cause: new Error("apiKey is required")
       });
     }
     this.apiKey = options.apiKey;
@@ -51,16 +47,13 @@ export class GeminiObservationProvider implements ServerGenerationProvider {
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
-  async generate(
-    context: ServerGenerationContext,
-    signal?: AbortSignal,
-  ): Promise<ServerGenerationResult> {
+  async generate(context: ServerGenerationContext, signal?: AbortSignal): Promise<ServerGenerationResult> {
     const { prompt, skippedAll } = buildServerGenerationPrompt(context);
     if (skippedAll) {
       return {
         rawText: '<skip_summary reason="all_events_private" />',
         providerLabel: this.providerLabel,
-        modelId: this.model,
+        modelId: this.model
       };
     }
 
@@ -69,21 +62,21 @@ export class GeminiObservationProvider implements ServerGenerationProvider {
     let response: Response;
     try {
       response = await this.fetchImpl(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: this.maxOutputTokens,
-          },
+            maxOutputTokens: this.maxOutputTokens
+          }
         }),
-        signal,
+        signal
       });
     } catch (networkError) {
       throw classifyHttpProviderError({
         cause: networkError,
-        providerLabel: 'Gemini',
+        providerLabel: "Gemini"
       });
     }
 
@@ -94,7 +87,7 @@ export class GeminiObservationProvider implements ServerGenerationProvider {
         bodyText,
         headers: response.headers,
         cause: new Error(`Gemini API error: ${response.status} - ${bodyText}`),
-        providerLabel: 'Gemini',
+        providerLabel: "Gemini"
       });
     }
 
@@ -102,36 +95,35 @@ export class GeminiObservationProvider implements ServerGenerationProvider {
     try {
       data = (await response.json()) as GeminiResponse;
     } catch (parseError) {
-      throw new ServerClassifiedProviderError('Gemini returned invalid JSON', {
-        kind: 'parse_error',
-        cause: parseError,
+      throw new ServerClassifiedProviderError("Gemini returned invalid JSON", {
+        kind: "parse_error",
+        cause: parseError
       });
     }
 
     if (data.error) {
       throw classifyHttpProviderError({
         status: response.status,
-        bodyText: `${data.error.status ?? ''} ${data.error.message ?? ''}`,
+        bodyText: `${data.error.status ?? ""} ${data.error.message ?? ""}`,
         headers: response.headers,
         cause: new Error(`Gemini API error: ${data.error.status} - ${data.error.message}`),
-        providerLabel: 'Gemini',
+        providerLabel: "Gemini"
       });
     }
 
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
     if (!rawText) {
-      logger.warn('SDK', 'Gemini returned empty content', { provider: 'gemini', model: this.model });
+      logger.warn("SDK", "Gemini returned empty content", { provider: "gemini", model: this.model });
     }
 
-    const tokensUsed = typeof data.usageMetadata?.totalTokenCount === 'number'
-      ? data.usageMetadata.totalTokenCount
-      : undefined;
+    const tokensUsed =
+      typeof data.usageMetadata?.totalTokenCount === "number" ? data.usageMetadata.totalTokenCount : undefined;
 
     return {
       rawText,
       ...(tokensUsed !== undefined ? { tokensUsed } : {}),
       providerLabel: this.providerLabel,
-      modelId: this.model,
+      modelId: this.model
     };
   }
 }
@@ -143,6 +135,6 @@ async function safeReadBody(response: Response): Promise<string> {
   try {
     return await response.text();
   } catch {
-    return '';
+    return "";
   }
 }

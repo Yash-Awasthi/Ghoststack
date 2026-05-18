@@ -9,9 +9,7 @@
 
 import { launch } from "../src/index.js";
 
-const PROXY = process.argv.includes("--proxy")
-  ? process.argv[process.argv.indexOf("--proxy") + 1]
-  : undefined;
+const PROXY = process.argv.includes("--proxy") ? process.argv[process.argv.indexOf("--proxy") + 1] : undefined;
 
 interface TestResult {
   name: string;
@@ -36,7 +34,7 @@ async function testSannysoft() {
   console.log("--- bot.sannysoft.com ---");
   await page.goto("https://bot.sannysoft.com", {
     waitUntil: "networkidle",
-    timeout: 30000,
+    timeout: 30000
   });
   await page.waitForTimeout(3000);
 
@@ -77,7 +75,7 @@ async function testIncolumitas() {
   console.log("--- bot.incolumitas.com ---");
   await page.goto("https://bot.incolumitas.com", {
     waitUntil: "networkidle",
-    timeout: 30000,
+    timeout: 30000
   });
   await page.waitForTimeout(12000); // needs time for all detection tests
 
@@ -93,7 +91,7 @@ async function testIncolumitas() {
       passed: okMatches.length,
       failed: failMatches.length,
       failedTests,
-      total: okMatches.length + failMatches.length,
+      total: okMatches.length + failMatches.length
     };
   });
 
@@ -114,7 +112,7 @@ async function testBrowserScan() {
   console.log("--- BrowserScan ---");
   await page.goto("https://www.browserscan.net/bot-detection", {
     waitUntil: "networkidle",
-    timeout: 30000,
+    timeout: 30000
   });
   await page.waitForTimeout(5000);
 
@@ -124,7 +122,7 @@ async function testBrowserScan() {
     const abnormalMatches = text.match(/Abnormal/g);
     return {
       normal: normalMatches ? normalMatches.length : 0,
-      abnormal: abnormalMatches ? abnormalMatches.length : 0,
+      abnormal: abnormalMatches ? abnormalMatches.length : 0
     };
   });
 
@@ -141,7 +139,7 @@ async function testDeviceAndBrowserInfo() {
   console.log("--- deviceandbrowserinfo.com ---");
   await page.goto("https://deviceandbrowserinfo.com/are_you_a_bot", {
     waitUntil: "domcontentloaded",
-    timeout: 30000,
+    timeout: 30000
   });
   await page.waitForTimeout(8000);
 
@@ -158,7 +156,7 @@ async function testDeviceAndBrowserInfo() {
       "isAutomatedWithCDP",
       "hasSuspiciousWeakSignals",
       "isPlaywright",
-      "hasInconsistentChromeObject",
+      "hasInconsistentChromeObject"
     ];
     patterns.forEach((p) => {
       const match = text.match(new RegExp('"' + p + '":\\s*(true|false)'));
@@ -171,8 +169,7 @@ async function testDeviceAndBrowserInfo() {
     .filter(([, v]) => v)
     .map(([k]) => k);
   const verdict =
-    `isBot: ${result.isBot}` +
-    (trueFlags.length > 0 ? ` (flagged: ${trueFlags.join(", ")})` : " — all clear");
+    `isBot: ${result.isBot}` + (trueFlags.length > 0 ? ` (flagged: ${trueFlags.join(", ")})` : " — all clear");
   const status = !result.isBot ? "PASS" : "FAIL";
   console.log(`Result: [${status}] ${verdict}\n`);
   results.push({ name: "deviceandbrowserinfo.com", status, verdict });
@@ -185,7 +182,7 @@ async function testFingerprintJS() {
   console.log("--- FingerprintJS ---");
   await page.goto("https://demo.fingerprint.com/web-scraping", {
     waitUntil: "networkidle",
-    timeout: 30000,
+    timeout: 30000
   });
   await page.waitForTimeout(5000);
 
@@ -198,19 +195,12 @@ async function testFingerprintJS() {
 
   const result = await page.evaluate(() => {
     const text = document.body.innerText;
-    const hasFlights =
-      text.includes("Price per adult") || text.includes("$");
-    const isBlocked =
-      text.includes("request was blocked") ||
-      text.includes("bot visit detected");
+    const hasFlights = text.includes("Price per adult") || text.includes("$");
+    const isBlocked = text.includes("request was blocked") || text.includes("bot visit detected");
     return { passed: hasFlights && !isBlocked, isBlocked, hasFlights };
   });
 
-  const verdict = result.passed
-    ? "PASSED (flights shown)"
-    : result.isBlocked
-      ? "BLOCKED"
-      : "NO FLIGHTS";
+  const verdict = result.passed ? "PASSED (flights shown)" : result.isBlocked ? "BLOCKED" : "NO FLIGHTS";
   const status = result.passed ? "PASS" : "FAIL";
   console.log(`Result: [${status}] ${verdict}\n`);
   results.push({ name: "FingerprintJS", status, verdict });
@@ -221,17 +211,17 @@ async function testFingerprintJS() {
 // ---------------------------------------------------------------------------
 async function testRecaptcha() {
   console.log("--- reCAPTCHA v3 (Google) ---");
-  await page.goto(
-    "https://recaptcha-demo.appspot.com/recaptcha-v3-request-scores.php",
-    { waitUntil: "networkidle", timeout: 30000 }
-  );
+  await page.goto("https://recaptcha-demo.appspot.com/recaptcha-v3-request-scores.php", {
+    waitUntil: "networkidle",
+    timeout: 30000
+  });
   await page.waitForTimeout(8000);
 
   const result = await page.evaluate(() => {
     const text = document.body.innerText;
     const scoreMatch = text.match(/"score":\s*(\d+\.\d+)/);
     return {
-      score: scoreMatch ? parseFloat(scoreMatch[1]) : null,
+      score: scoreMatch ? parseFloat(scoreMatch[1]) : null
     };
   });
 
@@ -250,7 +240,7 @@ const tests = [
   testBrowserScan,
   testDeviceAndBrowserInfo,
   testFingerprintJS,
-  testRecaptcha,
+  testRecaptcha
 ];
 
 for (const test of tests) {

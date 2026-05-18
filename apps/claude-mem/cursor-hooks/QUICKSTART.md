@@ -5,6 +5,7 @@
 ## What This Does
 
 Connects claude-mem to Cursor so that:
+
 - **Agent actions** (MCP tools, shell commands, file edits) are automatically saved
 - **Context from past sessions** is automatically injected via `.cursor/rules/`
 - **Sessions are summarized** for future reference
@@ -45,6 +46,7 @@ claude-mem settings set CLAUDE_MEM_OPENROUTER_API_KEY your-api-key
 ```
 
 **Get free API keys**:
+
 - Gemini: https://aistudio.google.com/apikey
 - OpenRouter: https://openrouter.ai/keys
 
@@ -79,27 +81,32 @@ Restart Cursor to load the hooks.
 ## Accessing Memory
 
 ### Via Web Viewer
+
 - Open http://localhost:37777
 - Browse sessions, observations, and summaries
 - Search your project history
 
 ### Via MCP Tools (if enabled)
+
 - claude-mem provides search tools via MCP
 - Use `search`, `timeline`, and `get_observations` tools
 
 ## Troubleshooting
 
 **Hooks not running?**
+
 - Check Cursor Settings → Hooks tab for errors
 - Verify scripts are executable: `chmod +x ~/.cursor/hooks/*.sh`
 - Check Hooks output channel in Cursor
 
 **Worker not responding?**
+
 - Check if worker is running: `curl http://127.0.0.1:37777/api/readiness`
 - Check logs: `tail -f ~/.claude-mem/logs/worker-$(date +%Y-%m-%d).log`
 - Restart worker: `bun run worker:restart`
 
 **Observations not saving?**
+
 - Check worker logs for errors
 - Verify session was initialized in web viewer
 - Test API directly: `curl -X POST http://127.0.0.1:37777/api/sessions/observations ...`
@@ -109,4 +116,3 @@ Restart Cursor to load the hooks.
 - Read [README.md](README.md) for detailed documentation
 - Read [INTEGRATION.md](INTEGRATION.md) for architecture details
 - Visit [claude-mem docs](https://docs.claude-mem.ai) for full feature set
-

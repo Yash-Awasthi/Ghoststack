@@ -52,6 +52,7 @@ graph TB
 ```
 
 **Key Principles:**
+
 - Extension process never blocks (fire-and-forget HTTP)
 - Worker processes observations asynchronously
 - Session state persists across IDE restarts
@@ -113,37 +114,37 @@ graph LR
 ```typescript
 // VS Code Extension - SessionStart Hook
 export async function activate(context: vscode.ExtensionContext) {
-  const sessionId = generateSessionId()
-  const project = workspace.name || 'default'
+  const sessionId = generateSessionId();
+  const project = workspace.name || "default";
 
   // Fetch context from worker
-  const response = await fetch(`http://localhost:37777/api/context/inject?project=${project}`)
-  const context = await response.text()
+  const response = await fetch(`http://localhost:37777/api/context/inject?project=${project}`);
+  const context = await response.text();
 
   // Inject into chat or UI panel
-  injectContextToChat(context)
+  injectContextToChat(context);
 }
 
 // VS Code Extension - UserPromptSubmit Hook
-const command = vscode.commands.registerCommand('extension.command', async (prompt) => {
-  await fetch('http://localhost:37777/sessions/init', {
-    method: 'POST',
+const command = vscode.commands.registerCommand("extension.command", async (prompt) => {
+  await fetch("http://localhost:37777/sessions/init", {
+    method: "POST",
     body: JSON.stringify({ sessionId, project, userPrompt: prompt })
-  })
-})
+  });
+});
 
 // VS Code Extension - PostToolUse Hook (middleware pattern)
 workspace.onDidSaveTextDocument(async (document) => {
-  await fetch('http://localhost:37777/api/sessions/observations', {
-    method: 'POST',
+  await fetch("http://localhost:37777/api/sessions/observations", {
+    method: "POST",
     body: JSON.stringify({
       claudeSessionId: sessionId,
-      tool_name: 'FileSave',
+      tool_name: "FileSave",
       tool_input: { path: document.uri.path },
-      tool_response: 'File saved successfully'
+      tool_response: "File saved successfully"
     })
-  })
-})
+  });
+});
 ```
 
 ### Async Processing Pipeline
@@ -175,13 +176,13 @@ graph TB
 
 ## The 5 Lifecycle Stages
 
-| Stage | Hook | Trigger | Purpose |
-|-------|------|---------|---------|
-| **1. SessionStart** | `context-hook.js` | User opens Claude Code | Inject prior context silently |
-| **2. UserPromptSubmit** | `new-hook.js` | User submits a prompt | Create/get session, save prompt, init worker |
-| **3. PostToolUse** | `save-hook.js` | Claude uses any tool | Queue observation for AI compression |
-| **4. Stop** | `summary-hook.js` | User stops asking questions | Generate session summary |
-| **5. SessionEnd** | `cleanup-hook.js` | Session closes | Mark session completed |
+| Stage                   | Hook              | Trigger                     | Purpose                                      |
+| ----------------------- | ----------------- | --------------------------- | -------------------------------------------- |
+| **1. SessionStart**     | `context-hook.js` | User opens Claude Code      | Inject prior context silently                |
+| **2. UserPromptSubmit** | `new-hook.js`     | User submits a prompt       | Create/get session, save prompt, init worker |
+| **3. PostToolUse**      | `save-hook.js`    | Claude uses any tool        | Queue observation for AI compression         |
+| **4. Stop**             | `summary-hook.js` | User stops asking questions | Generate session summary                     |
+| **5. SessionEnd**       | `cleanup-hook.js` | Session closes              | Mark session completed                       |
 
 ## Hook Configuration
 
@@ -190,54 +191,79 @@ Hooks are configured in `plugin/hooks/hooks.json`:
 ```json
 {
   "hooks": {
-    "Setup": [{
-      "hooks": [{
-        "type": "command",
-        "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/version-check.js",
-        "timeout": 60
-      }]
-    }],
-    "SessionStart": [{
-      "matcher": "startup|clear|compact",
-      "hooks": [{
-        "type": "command",
-        "command": "bun ${CLAUDE_PLUGIN_ROOT}/scripts/worker-service.cjs start",
-        "timeout": 60
-      }, {
-        "type": "command",
-        "command": "bun ${CLAUDE_PLUGIN_ROOT}/scripts/context-hook.js",
-        "timeout": 60
-      }]
-    }],
-    "UserPromptSubmit": [{
-      "hooks": [{
-        "type": "command",
-        "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/new-hook.js",
-        "timeout": 120
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/save-hook.js",
-        "timeout": 120
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/summary-hook.js",
-        "timeout": 120
-      }]
-    }],
-    "SessionEnd": [{
-      "hooks": [{
-        "type": "command",
-        "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/cleanup-hook.js",
-        "timeout": 120
-      }]
-    }]
+    "Setup": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/version-check.js",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ${CLAUDE_PLUGIN_ROOT}/scripts/worker-service.cjs start",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "bun ${CLAUDE_PLUGIN_ROOT}/scripts/context-hook.js",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/new-hook.js",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/save-hook.js",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/summary-hook.js",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/cleanup-hook.js",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
   }
 }
 ```
@@ -249,13 +275,15 @@ Hooks are configured in `plugin/hooks/hooks.json`:
 **Timing**: When user opens Claude Code or resumes session
 
 **Hooks Triggered** (in order):
+
 1. `worker-service.cjs start` - Starts the worker service
 2. `context-hook.js` - Fetches and silently injects prior session context
 
 (Runtime setup is handled out-of-band by `npx claude-mem install` / `npx claude-mem repair`. The Setup phase runs a sub-100ms `version-check.js` that prompts the user to repair if the `.install-version` marker is stale.)
 
 <Note>
-As of Claude Code 2.1.0 (ultrathink update), SessionStart hooks no longer display user-visible messages. Context is silently injected via `hookSpecificOutput.additionalContext`.
+  As of Claude Code 2.1.0 (ultrathink update), SessionStart hooks no longer display user-visible messages. Context is
+  silently injected via `hookSpecificOutput.additionalContext`.
 </Note>
 
 ### Sequence Diagram
@@ -294,6 +322,7 @@ sequenceDiagram
 **Purpose**: Inject context from previous sessions into Claude's initial context.
 
 **Input** (via stdin):
+
 ```json
 {
   "session_id": "claude-session-123",
@@ -303,11 +332,13 @@ sequenceDiagram
 ```
 
 **Processing**:
+
 1. Wait for worker to be available (health check, max 10 seconds)
 2. Call: `GET http://127.0.0.1:37777/api/context/inject?project={project}`
 3. Return formatted context as `additionalContext` in `hookSpecificOutput`
 
 **Output** (via stdout):
+
 ```json
 {
   "hookSpecificOutput": {
@@ -367,6 +398,7 @@ sequenceDiagram
 **Key Pattern:** The `INSERT OR IGNORE` ensures the same `session_id` always maps to the same `sessionDbId`, enabling conversation continuations.
 
 **Input** (via stdin):
+
 ```json
 {
   "session_id": "claude-session-123",
@@ -407,6 +439,7 @@ Body: { project, userPrompt, promptNumber }
 ```
 
 **Output**:
+
 ```json
 { "continue": true, "suppressOutput": true }
 ```
@@ -414,7 +447,8 @@ Body: { project, userPrompt, promptNumber }
 **Implementation**: `src/hooks/new-hook.ts`
 
 <Note>
-The same `session_id` flows through ALL hooks in a conversation. The `createSDKSession` call is idempotent - it returns the existing session for continuation prompts.
+  The same `session_id` flows through ALL hooks in a conversation. The `createSDKSession` call is idempotent - it
+  returns the existing session for continuation prompts.
 </Note>
 
 ---
@@ -469,6 +503,7 @@ sequenceDiagram
 **Key Pattern:** The hook returns immediately after HTTP POST. AI compression happens asynchronously in the worker without blocking Claude's tool execution.
 
 **Input** (via stdin):
+
 ```json
 {
   "session_id": "claude-session-123",
@@ -509,6 +544,7 @@ Timeout: 2000ms
 ```
 
 **Worker Processing**:
+
 1. Looks up or creates session: `createSDKSession(claudeSessionId, '', '')`
 2. Gets prompt counter
 3. Checks privacy (skips if user prompt was entirely private)
@@ -518,6 +554,7 @@ Timeout: 2000ms
 7. Stores observation in database and syncs to Chroma
 
 **Output**:
+
 ```json
 { "continue": true, "suppressOutput": true }
 ```
@@ -572,6 +609,7 @@ sequenceDiagram
 **Key Pattern:** The summary is generated asynchronously and doesn't block the user from resuming work or closing the session.
 
 **Input** (via stdin):
+
 ```json
 {
   "session_id": "claude-session-123",
@@ -606,11 +644,13 @@ Body: { isProcessing: false }
 ```
 
 **Worker Processing**:
+
 1. Queues summarization for SDK agent
 2. Agent calls Claude to generate structured summary
 3. Summary stored in database with fields: `request`, `investigated`, `learned`, `completed`, `next_steps`
 
 **Output**:
+
 ```json
 { "continue": true, "suppressOutput": true }
 ```
@@ -658,6 +698,7 @@ sequenceDiagram
 **Key Pattern:** Session completion is tracked for analytics and UI updates, but doesn't prevent the user from closing the IDE.
 
 **Input** (via stdin):
+
 ```json
 {
   "session_id": "claude-session-123",
@@ -680,11 +721,13 @@ Timeout: 2000ms
 ```
 
 **Worker Processing**:
+
 1. Finds session by `claudeSessionId`
 2. Marks session as 'completed' in database
 3. Broadcasts session completion event to SSE clients
 
 **Output**:
+
 ```json
 { "continue": true, "suppressOutput": true }
 ```
@@ -734,6 +777,7 @@ stateDiagram-v2
 ```
 
 **Key Insights:**
+
 - `session_id` never changes during a conversation
 - `sessionDbId` is the database primary key for the session
 - `promptNumber` increments with each user prompt
@@ -808,12 +852,14 @@ RETURNING id;
 **Foreign Key Cascade:**
 
 All child tables (user_prompts, observations, session_summaries) use `session_id` foreign key referencing `SDK_SESSIONS.id`. This ensures:
+
 - All data for a session is queryable by sessionDbId
 - Session deletions cascade to child tables
 - Efficient joins for context injection
 
 <Warning>
-Never generate your own session IDs. Always use the `session_id` provided by the IDE - this is the source of truth for linking all data together.
+  Never generate your own session IDs. Always use the `session_id` provided by the IDE - this is the source of truth for
+  linking all data together.
 </Warning>
 
 ---
@@ -843,6 +889,7 @@ stripMemoryTagsFromJson(jsonString: string): string
 ```
 
 **Execution Order** (Edge Processing):
+
 1. `new-hook.js` strips tags from user prompt before saving
 2. `save-hook.js` strips tags from tool data before sending to worker
 3. Worker strips tags again (defense in depth) before storing
@@ -895,21 +942,25 @@ The message generator yields three types of prompts:
 For developers implementing this pattern on other platforms:
 
 ### Hook Registration
+
 - [ ] Define hook entry points in platform config
 - [ ] 5 hook types: SessionStart (2 hooks), UserPromptSubmit, PostToolUse, Stop, SessionEnd
 - [ ] Pass `session_id`, `cwd`, and context-specific data
 
 ### Database Schema
+
 - [ ] SQLite with WAL mode
 - [ ] 4 main tables: `sdk_sessions`, `user_prompts`, `observations`, `session_summaries`
 - [ ] Indices for common queries
 
 ### Worker Service
+
 - [ ] HTTP server on configurable port (default 37777)
 - [ ] Bun runtime for process management
 - [ ] 3 core services: SessionManager, SDKAgent, DatabaseManager
 
 ### Hook Implementation
+
 - [ ] context-hook: `GET /api/context/inject` (with health check)
 - [ ] new-hook: createSDKSession, saveUserPrompt, `POST /sessions/{id}/init`
 - [ ] save-hook: Skip low-value tools, `POST /api/sessions/observations`
@@ -917,11 +968,13 @@ For developers implementing this pattern on other platforms:
 - [ ] cleanup-hook: `POST /api/sessions/complete`
 
 ### Privacy & Tags
+
 - [ ] Implement `stripMemoryTagsFromPrompt()` and `stripMemoryTagsFromJson()`
 - [ ] Process tags at hook layer (edge processing)
 - [ ] Max tag count = 100 (ReDoS protection)
 
 ### SDK Integration
+
 - [ ] Call Claude Agent SDK to process observations/summaries
 - [ ] Parse XML responses for structured data
 - [ ] Store to database + sync to vector DB
@@ -941,13 +994,13 @@ For developers implementing this pattern on other platforms:
 
 ## Common Pitfalls
 
-| Problem | Root Cause | Solution |
-|---------|-----------|----------|
-| Session ID mismatch | Different `session_id` used in different hooks | Always use ID from hook input |
-| Duplicate sessions | Creating new session instead of using existing | Use `INSERT OR IGNORE` with `session_id` as key |
-| Blocking IDE | Waiting for full response | Use fire-and-forget with short timeouts |
-| Memory tags in DB | Stripping tags in wrong layer | Strip at hook layer, before HTTP send |
-| Worker not found | Health check too fast | Add retry loop with exponential backoff |
+| Problem             | Root Cause                                     | Solution                                        |
+| ------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| Session ID mismatch | Different `session_id` used in different hooks | Always use ID from hook input                   |
+| Duplicate sessions  | Creating new session instead of using existing | Use `INSERT OR IGNORE` with `session_id` as key |
+| Blocking IDE        | Waiting for full response                      | Use fire-and-forget with short timeouts         |
+| Memory tags in DB   | Stripping tags in wrong layer                  | Strip at hook layer, before HTTP send           |
+| Worker not found    | Health check too fast                          | Add retry loop with exponential backoff         |
 
 ---
 

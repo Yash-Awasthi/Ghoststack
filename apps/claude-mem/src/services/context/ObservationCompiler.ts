@@ -1,31 +1,28 @@
-
-import path from 'path';
-import { existsSync, readFileSync } from 'fs';
-import { SessionStore } from '../sqlite/SessionStore.js';
-import { logger } from '../../utils/logger.js';
-import { SYSTEM_REMINDER_REGEX } from '../../utils/tag-stripping.js';
-import { CLAUDE_CONFIG_DIR } from '../../shared/paths.js';
+import path from "path";
+import { existsSync, readFileSync } from "fs";
+import { SessionStore } from "../sqlite/SessionStore.js";
+import { logger } from "../../utils/logger.js";
+import { SYSTEM_REMINDER_REGEX } from "../../utils/tag-stripping.js";
+import { CLAUDE_CONFIG_DIR } from "../../shared/paths.js";
 import type {
   ContextConfig,
   Observation,
   SessionSummary,
   SummaryTimelineItem,
   TimelineItem,
-  PriorMessages,
-} from './types.js';
-import { SUMMARY_LOOKAHEAD } from './types.js';
+  PriorMessages
+} from "./types.js";
+import { SUMMARY_LOOKAHEAD } from "./types.js";
 
-export function queryObservations(
-  db: SessionStore,
-  project: string,
-  config: ContextConfig
-): Observation[] {
+export function queryObservations(db: SessionStore, project: string, config: ContextConfig): Observation[] {
   const typeArray = Array.from(config.observationTypes);
-  const typePlaceholders = typeArray.map(() => '?').join(',');
+  const typePlaceholders = typeArray.map(() => "?").join(",");
   const conceptArray = Array.from(config.observationConcepts);
-  const conceptPlaceholders = conceptArray.map(() => '?').join(',');
+  const conceptPlaceholders = conceptArray.map(() => "?").join(",");
 
-  return db.db.prepare(`
+  return db.db
+    .prepare(
+      `
     SELECT
       o.id,
       o.memory_session_id,
@@ -51,21 +48,15 @@ export function queryObservations(
       )
     ORDER BY o.created_at_epoch DESC
     LIMIT ?
-  `).all(
-    project,
-    project,
-    ...typeArray,
-    ...conceptArray,
-    config.totalObservationCount
-  ) as Observation[];
+  `
+    )
+    .all(project, project, ...typeArray, ...conceptArray, config.totalObservationCount) as Observation[];
 }
 
-export function querySummaries(
-  db: SessionStore,
-  project: string,
-  config: ContextConfig
-): SessionSummary[] {
-  return db.db.prepare(`
+export function querySummaries(db: SessionStore, project: string, config: ContextConfig): SessionSummary[] {
+  return db.db
+    .prepare(
+      `
     SELECT
       ss.id,
       ss.memory_session_id,
@@ -82,22 +73,22 @@ export function querySummaries(
     WHERE (ss.project = ? OR ss.merged_into_project = ?)
     ORDER BY ss.created_at_epoch DESC
     LIMIT ?
-  `).all(project, project, config.sessionCount + SUMMARY_LOOKAHEAD) as SessionSummary[];
+  `
+    )
+    .all(project, project, config.sessionCount + SUMMARY_LOOKAHEAD) as SessionSummary[];
 }
 
-export function queryObservationsMulti(
-  db: SessionStore,
-  projects: string[],
-  config: ContextConfig
-): Observation[] {
+export function queryObservationsMulti(db: SessionStore, projects: string[], config: ContextConfig): Observation[] {
   const typeArray = Array.from(config.observationTypes);
-  const typePlaceholders = typeArray.map(() => '?').join(',');
+  const typePlaceholders = typeArray.map(() => "?").join(",");
   const conceptArray = Array.from(config.observationConcepts);
-  const conceptPlaceholders = conceptArray.map(() => '?').join(',');
+  const conceptPlaceholders = conceptArray.map(() => "?").join(",");
 
-  const projectPlaceholders = projects.map(() => '?').join(',');
+  const projectPlaceholders = projects.map(() => "?").join(",");
 
-  return db.db.prepare(`
+  return db.db
+    .prepare(
+      `
     SELECT
       o.id,
       o.memory_session_id,
@@ -125,34 +116,32 @@ export function queryObservationsMulti(
       )
     ORDER BY o.created_at_epoch DESC
     LIMIT ?
-  `).all(
-    ...projects,
-    ...projects,
-    ...typeArray,
-    ...conceptArray,
-    config.totalObservationCount
-  ) as Observation[];
+  `
+    )
+    .all(...projects, ...projects, ...typeArray, ...conceptArray, config.totalObservationCount) as Observation[];
 }
 
 export function countObservationsByProjects(db: SessionStore, projects: string[]): number {
   if (projects.length === 0) return 0;
-  const projectPlaceholders = projects.map(() => '?').join(',');
-  const row = db.db.prepare(`
+  const projectPlaceholders = projects.map(() => "?").join(",");
+  const row = db.db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM observations
     WHERE project IN (${projectPlaceholders})
        OR merged_into_project IN (${projectPlaceholders})
-  `).get(...projects, ...projects) as { count: number } | undefined;
+  `
+    )
+    .get(...projects, ...projects) as { count: number } | undefined;
   return row?.count ?? 0;
 }
 
-export function querySummariesMulti(
-  db: SessionStore,
-  projects: string[],
-  config: ContextConfig
-): SessionSummary[] {
-  const projectPlaceholders = projects.map(() => '?').join(',');
+export function querySummariesMulti(db: SessionStore, projects: string[], config: ContextConfig): SessionSummary[] {
+  const projectPlaceholders = projects.map(() => "?").join(",");
 
-  return db.db.prepare(`
+  return db.db
+    .prepare(
+      `
     SELECT
       ss.id,
       ss.memory_session_id,
@@ -171,23 +160,25 @@ export function querySummariesMulti(
            OR ss.merged_into_project IN (${projectPlaceholders}))
     ORDER BY ss.created_at_epoch DESC
     LIMIT ?
-  `).all(...projects, ...projects, config.sessionCount + SUMMARY_LOOKAHEAD) as SessionSummary[];
+  `
+    )
+    .all(...projects, ...projects, config.sessionCount + SUMMARY_LOOKAHEAD) as SessionSummary[];
 }
 
 function cwdToDashed(cwd: string): string {
-  return cwd.replace(/\//g, '-');
+  return cwd.replace(/\//g, "-");
 }
 
 function parseAssistantTextFromLine(line: string): string | null {
   if (!line.includes('"type":"assistant"')) return null;
 
   const entry = JSON.parse(line);
-  if (entry.type === 'assistant' && entry.message?.content && Array.isArray(entry.message.content)) {
-    let text = '';
+  if (entry.type === "assistant" && entry.message?.content && Array.isArray(entry.message.content)) {
+    let text = "";
     for (const block of entry.message.content) {
-      if (block.type === 'text') text += block.text;
+      if (block.type === "text") text += block.text;
     }
-    text = text.replace(SYSTEM_REMINDER_REGEX, '').trim();
+    text = text.replace(SYSTEM_REMINDER_REGEX, "").trim();
     if (text) return text;
   }
   return null;
@@ -200,32 +191,35 @@ function findLastAssistantMessage(lines: string[]): string {
       if (result) return result;
     } catch (parseError) {
       if (parseError instanceof Error) {
-        logger.debug('WORKER', 'Skipping malformed transcript line', { lineIndex: i }, parseError);
+        logger.debug("WORKER", "Skipping malformed transcript line", { lineIndex: i }, parseError);
       } else {
-        logger.debug('WORKER', 'Skipping malformed transcript line', { lineIndex: i, error: String(parseError) });
+        logger.debug("WORKER", "Skipping malformed transcript line", { lineIndex: i, error: String(parseError) });
       }
       continue;
     }
   }
-  return '';
+  return "";
 }
 
 export function extractPriorMessages(transcriptPath: string): PriorMessages {
   try {
-    if (!existsSync(transcriptPath)) return { userMessage: '', assistantMessage: '' };
-    const content = readFileSync(transcriptPath, 'utf-8').trim();
-    if (!content) return { userMessage: '', assistantMessage: '' };
+    if (!existsSync(transcriptPath)) return { userMessage: "", assistantMessage: "" };
+    const content = readFileSync(transcriptPath, "utf-8").trim();
+    if (!content) return { userMessage: "", assistantMessage: "" };
 
-    const lines = content.split('\n').filter(line => line.trim());
+    const lines = content.split("\n").filter((line) => line.trim());
     const lastAssistantMessage = findLastAssistantMessage(lines);
-    return { userMessage: '', assistantMessage: lastAssistantMessage };
+    return { userMessage: "", assistantMessage: lastAssistantMessage };
   } catch (error) {
     if (error instanceof Error) {
-      logger.failure('WORKER', 'Failed to extract prior messages from transcript', { transcriptPath }, error);
+      logger.failure("WORKER", "Failed to extract prior messages from transcript", { transcriptPath }, error);
     } else {
-      logger.warn('WORKER', 'Failed to extract prior messages from transcript', { transcriptPath, error: String(error) });
+      logger.warn("WORKER", "Failed to extract prior messages from transcript", {
+        transcriptPath,
+        error: String(error)
+      });
     }
-    return { userMessage: '', assistantMessage: '' };
+    return { userMessage: "", assistantMessage: "" };
   }
 }
 
@@ -236,17 +230,17 @@ export function getPriorSessionMessages(
   cwd: string
 ): PriorMessages {
   if (!config.showLastMessage || observations.length === 0) {
-    return { userMessage: '', assistantMessage: '' };
+    return { userMessage: "", assistantMessage: "" };
   }
 
-  const priorSessionObs = observations.find(obs => obs.memory_session_id !== currentSessionId);
+  const priorSessionObs = observations.find((obs) => obs.memory_session_id !== currentSessionId);
   if (!priorSessionObs) {
-    return { userMessage: '', assistantMessage: '' };
+    return { userMessage: "", assistantMessage: "" };
   }
 
   const priorSessionId = priorSessionObs.memory_session_id;
   const dashedCwd = cwdToDashed(cwd);
-  const transcriptPath = path.join(CLAUDE_CONFIG_DIR, 'projects', dashedCwd, `${priorSessionId}.jsonl`);
+  const transcriptPath = path.join(CLAUDE_CONFIG_DIR, "projects", dashedCwd, `${priorSessionId}.jsonl`);
   return extractPriorMessages(transcriptPath);
 }
 
@@ -267,18 +261,15 @@ export function prepareSummariesForTimeline(
   });
 }
 
-export function buildTimeline(
-  observations: Observation[],
-  summaries: SummaryTimelineItem[]
-): TimelineItem[] {
+export function buildTimeline(observations: Observation[], summaries: SummaryTimelineItem[]): TimelineItem[] {
   const timeline: TimelineItem[] = [
-    ...observations.map(obs => ({ type: 'observation' as const, data: obs })),
-    ...summaries.map(summary => ({ type: 'summary' as const, data: summary }))
+    ...observations.map((obs) => ({ type: "observation" as const, data: obs })),
+    ...summaries.map((summary) => ({ type: "summary" as const, data: summary }))
   ];
 
   timeline.sort((a, b) => {
-    const aEpoch = a.type === 'observation' ? a.data.created_at_epoch : a.data.displayEpoch;
-    const bEpoch = b.type === 'observation' ? b.data.created_at_epoch : b.data.displayEpoch;
+    const aEpoch = a.type === "observation" ? a.data.created_at_epoch : a.data.displayEpoch;
+    const bEpoch = b.type === "observation" ? b.data.created_at_epoch : b.data.displayEpoch;
     return aEpoch - bEpoch;
   });
 
@@ -286,9 +277,5 @@ export function buildTimeline(
 }
 
 export function getFullObservationIds(observations: Observation[], count: number): Set<number> {
-  return new Set(
-    observations
-      .slice(0, count)
-      .map(obs => obs.id)
-  );
+  return new Set(observations.slice(0, count).map((obs) => obs.id));
 }

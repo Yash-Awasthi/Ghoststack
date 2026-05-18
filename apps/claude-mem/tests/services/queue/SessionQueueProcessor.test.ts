@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
-import { EventEmitter } from 'events';
-import { SessionQueueProcessor, CreateIteratorOptions } from '../../../src/services/queue/SessionQueueProcessor.js';
-import type { PendingMessageStore, PersistentPendingMessage } from '../../../src/services/sqlite/PendingMessageStore.js';
+import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { EventEmitter } from "events";
+import { SessionQueueProcessor, CreateIteratorOptions } from "../../../src/services/queue/SessionQueueProcessor.js";
+import type {
+  PendingMessageStore,
+  PersistentPendingMessage
+} from "../../../src/services/sqlite/PendingMessageStore.js";
 
 function createMockStore(): PendingMessageStore {
   return {
@@ -24,15 +27,15 @@ function createMockMessage(overrides: Partial<PersistentPendingMessage> = {}): P
   return {
     id: 1,
     session_db_id: 123,
-    content_session_id: 'test-session',
-    message_type: 'observation',
-    tool_name: 'Read',
-    tool_input: JSON.stringify({ file: 'test.ts' }),
-    tool_response: JSON.stringify({ content: 'file contents' }),
-    cwd: '/test',
+    content_session_id: "test-session",
+    message_type: "observation",
+    tool_name: "Read",
+    tool_input: JSON.stringify({ file: "test.ts" }),
+    tool_response: JSON.stringify({ content: "file contents" }),
+    cwd: "/test",
     last_assistant_message: null,
     prompt_number: 1,
-    status: 'pending',
+    status: "pending",
     created_at_epoch: Date.now(),
     agent_type: null,
     agent_id: null,
@@ -40,7 +43,7 @@ function createMockMessage(overrides: Partial<PersistentPendingMessage> = {}): P
   };
 }
 
-describe('SessionQueueProcessor', () => {
+describe("SessionQueueProcessor", () => {
   let store: PendingMessageStore;
   let events: EventEmitter;
   let processor: SessionQueueProcessor;
@@ -58,9 +61,9 @@ describe('SessionQueueProcessor', () => {
     events.removeAllListeners();
   });
 
-  describe('createIterator', () => {
-    describe('idle timeout behavior', () => {
-      it('should exit after idle timeout when no messages arrive', async () => {
+  describe("createIterator", () => {
+    describe("idle timeout behavior", () => {
+      it("should exit after idle timeout when no messages arrive", async () => {
         const SHORT_TIMEOUT_MS = 50;
 
         const onIdleTimeout = mock(() => {});
@@ -84,8 +87,7 @@ describe('SessionQueueProcessor', () => {
         expect(onIdleTimeout).toHaveBeenCalled();
       });
 
-      it('should invoke onIdleTimeout callback when idle timeout occurs', async () => {
-
+      it("should invoke onIdleTimeout callback when idle timeout occurs", async () => {
         const onIdleTimeout = mock(() => {
           abortController.abort();
         });
@@ -107,7 +109,7 @@ describe('SessionQueueProcessor', () => {
         expect(results).toHaveLength(0);
       });
 
-      it('should reset idle timer when message arrives', async () => {
+      it("should reset idle timer when message arrives", async () => {
         const onIdleTimeout = mock(() => abortController.abort());
         let callCount = 0;
 
@@ -142,8 +144,8 @@ describe('SessionQueueProcessor', () => {
       });
     });
 
-    describe('abort signal handling', () => {
-      it('should exit immediately when abort signal is triggered', async () => {
+    describe("abort signal handling", () => {
+      it("should exit immediately when abort signal is triggered", async () => {
         const onIdleTimeout = mock(() => {});
 
         const options: CreateIteratorOptions = {
@@ -165,7 +167,7 @@ describe('SessionQueueProcessor', () => {
         expect(onIdleTimeout).not.toHaveBeenCalled();
       });
 
-      it('should take precedence over timeout when both could fire', async () => {
+      it("should take precedence over timeout when both could fire", async () => {
         const onIdleTimeout = mock(() => {});
 
         (store.claimNextMessage as any) = mock(() => null);
@@ -190,13 +192,10 @@ describe('SessionQueueProcessor', () => {
       });
     });
 
-    describe('message event handling', () => {
-      it('should wake up when message event is emitted', async () => {
+    describe("message event handling", () => {
+      it("should wake up when message event is emitted", async () => {
         let callCount = 0;
-        const mockMessages = [
-          createMockMessage({ id: 1 }),
-          createMockMessage({ id: 2 })
-        ];
+        const mockMessages = [createMockMessage({ id: 1 }), createMockMessage({ id: 2 })];
 
         (store.claimNextMessage as any) = mock(() => {
           callCount++;
@@ -218,7 +217,7 @@ describe('SessionQueueProcessor', () => {
         const iterator = processor.createIterator(options);
         const results: any[] = [];
 
-        setTimeout(() => events.emit('message'), 50);
+        setTimeout(() => events.emit("message"), 50);
 
         setTimeout(() => abortController.abort(), 150);
 
@@ -233,8 +232,8 @@ describe('SessionQueueProcessor', () => {
       });
     });
 
-    describe('event listener cleanup', () => {
-      it('should clean up event listeners on abort', async () => {
+    describe("event listener cleanup", () => {
+      it("should clean up event listeners on abort", async () => {
         const options: CreateIteratorOptions = {
           sessionDbId: 123,
           signal: abortController.signal
@@ -242,7 +241,7 @@ describe('SessionQueueProcessor', () => {
 
         const iterator = processor.createIterator(options);
 
-        const initialListenerCount = events.listenerCount('message');
+        const initialListenerCount = events.listenerCount("message");
 
         abortController.abort();
 
@@ -251,11 +250,11 @@ describe('SessionQueueProcessor', () => {
           results.push(message);
         }
 
-        const finalListenerCount = events.listenerCount('message');
+        const finalListenerCount = events.listenerCount("message");
         expect(finalListenerCount).toBeLessThanOrEqual(initialListenerCount + 1);
       });
 
-      it('should clean up event listeners when message received', async () => {
+      it("should clean up event listeners when message received", async () => {
         (store.claimNextMessage as any) = mock(() => createMockMessage({ id: 1 }));
 
         const options: CreateIteratorOptions = {
@@ -275,19 +274,19 @@ describe('SessionQueueProcessor', () => {
           // Should not get here since we aborted
         }
 
-        const finalListenerCount = events.listenerCount('message');
+        const finalListenerCount = events.listenerCount("message");
         expect(finalListenerCount).toBeLessThanOrEqual(1);
       });
     });
 
-    describe('error handling', () => {
-      it('should retry after a transient store claim error', async () => {
+    describe("error handling", () => {
+      it("should retry after a transient store claim error", async () => {
         let callCount = 0;
 
         (store.claimNextMessage as any) = mock(() => {
           callCount++;
           if (callCount === 1) {
-            throw new Error('Database error');
+            throw new Error("Database error");
           }
           return createMockMessage({ id: 7 });
         });
@@ -307,9 +306,9 @@ describe('SessionQueueProcessor', () => {
         expect(callCount).toBe(2);
       });
 
-      it('should exit cleanly if aborted during error backoff', async () => {
+      it("should exit cleanly if aborted during error backoff", async () => {
         (store.claimNextMessage as any) = mock(() => {
-          throw new Error('Database error');
+          throw new Error("Database error");
         });
 
         const options: CreateIteratorOptions = {
@@ -330,14 +329,14 @@ describe('SessionQueueProcessor', () => {
       });
     });
 
-    describe('message conversion', () => {
-      it('should convert PersistentPendingMessage to PendingMessageWithId', async () => {
+    describe("message conversion", () => {
+      it("should convert PersistentPendingMessage to PendingMessageWithId", async () => {
         const mockPersistentMessage = createMockMessage({
           id: 42,
-          message_type: 'observation',
-          tool_name: 'Grep',
-          tool_input: JSON.stringify({ pattern: 'test' }),
-          tool_response: JSON.stringify({ matches: ['file.ts'] }),
+          message_type: "observation",
+          tool_name: "Grep",
+          tool_input: JSON.stringify({ pattern: "test" }),
+          tool_response: JSON.stringify({ matches: ["file.ts"] }),
           prompt_number: 5,
           created_at_epoch: 1704067200000
         });
@@ -358,8 +357,8 @@ describe('SessionQueueProcessor', () => {
         expect(result.value).toMatchObject({
           _persistentId: 42,
           _originalTimestamp: 1704067200000,
-          type: 'observation',
-          tool_name: 'Grep',
+          type: "observation",
+          tool_name: "Grep",
           prompt_number: 5
         });
       });

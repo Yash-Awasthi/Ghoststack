@@ -49,11 +49,13 @@ Same API, same code — just swap the import. <strong>3 lines of code, 30 second
 - **Free and open source** — no subscriptions, no usage limits
 
 **Try it now** — no install needed:
+
 ```bash
 docker run --rm cloakhq/cloakbrowser cloaktest
 ```
 
 **Python:**
+
 ```python
 from cloakbrowser import launch
 
@@ -64,12 +66,13 @@ browser.close()
 ```
 
 **JavaScript (Playwright):**
+
 ```javascript
-import { launch } from 'cloakbrowser';
+import { launch } from "cloakbrowser";
 
 const browser = await launch();
 const page = await browser.newPage();
-await page.goto('https://protected-site.com');
+await page.goto("https://protected-site.com");
 await browser.close();
 ```
 
@@ -78,11 +81,13 @@ Also works with Puppeteer: `import { launch } from 'cloakbrowser/puppeteer'` ([d
 ## Install
 
 **Python:**
+
 ```bash
 pip install cloakbrowser
 ```
 
 **JavaScript / Node.js:**
+
 ```bash
 # With Playwright
 npm install cloakbrowser playwright-core
@@ -94,6 +99,7 @@ npm install cloakbrowser puppeteer-core
 On first run, the stealth Chromium binary is automatically downloaded (~200MB, cached locally).
 
 **Optional:** Auto-detect timezone/locale from proxy IP:
+
 ```bash
 pip install cloakbrowser[geoip]
 ```
@@ -149,7 +155,7 @@ See the full [CHANGELOG.md](CHANGELOG.md) for details.
 ## Why CloakBrowser?
 
 - **Config-level patches break** — `playwright-stealth`, `undetected-chromedriver`, and `puppeteer-extra` inject JavaScript or tweak flags. Every Chrome update breaks them. Antibot systems detect the patches themselves.
-- **CloakBrowser patches Chromium source code** — fingerprints are modified at the C++ level, compiled into the binary. Detection sites see a real browser because it *is* a real browser.
+- **CloakBrowser patches Chromium source code** — fingerprints are modified at the C++ level, compiled into the binary. Detection sites see a real browser because it _is_ a real browser.
 - **Source-level stealth** — C++ patches handle fingerprints (GPU, screen, UA, hardware reporting) at the binary level. No JavaScript injection, no config-level hacks. Most stealth tools only patch at the surface.
 - **Same behavior everywhere** — works identically local, in Docker, and on VPS. No environment-specific patches or config needed.
 - **Works with AI agents and automation frameworks** — drop-in stealth for browser-use, Crawl4AI, Scrapling, Stagehand, LangChain, Selenium, and more. See [integrations](#framework-integrations).
@@ -160,23 +166,23 @@ CloakBrowser doesn't solve CAPTCHAs — it prevents them from appearing. No CAPT
 
 All tests verified against live detection services. Last tested: Apr 2026 (Chromium 146).
 
-| Detection Service | Stock Playwright | CloakBrowser | Notes |
-|---|---|---|---|
-| **reCAPTCHA v3** | 0.1 (bot) | **0.9** (human) | Server-side verified |
-| **Cloudflare Turnstile** (non-interactive) | FAIL | **PASS** | Auto-resolve |
-| **Cloudflare Turnstile** (managed) | FAIL | **PASS** | Single click |
-| **ShieldSquare** | BLOCKED | **PASS** | Production site |
-| **FingerprintJS** bot detection | DETECTED | **PASS** | demo.fingerprint.com |
-| **BrowserScan** bot detection | DETECTED | **NORMAL** (4/4) | browserscan.net |
-| **bot.incolumitas.com** | 13 fails | **1 fail** | WEBDRIVER spec only |
-| **deviceandbrowserinfo.com** | 6 true flags | **0 true flags** | `isBot: false` |
-| `navigator.webdriver` | `true` | **`false`** | Source-level patch |
-| `navigator.plugins.length` | 0 | **5** | Real plugin list |
-| `window.chrome` | `undefined` | **`object`** | Present like real Chrome |
-| UA string | `HeadlessChrome` | **`Chrome/146.0.0.0`** | No headless leak |
-| CDP detection | Detected | **Not detected** | `isAutomatedWithCDP: false` |
-| TLS fingerprint | Mismatch | **Identical to Chrome** | ja3n/ja4/akamai match |
-| | | **Tested against 30+ detection sites** | |
+| Detection Service                          | Stock Playwright | CloakBrowser                           | Notes                       |
+| ------------------------------------------ | ---------------- | -------------------------------------- | --------------------------- |
+| **reCAPTCHA v3**                           | 0.1 (bot)        | **0.9** (human)                        | Server-side verified        |
+| **Cloudflare Turnstile** (non-interactive) | FAIL             | **PASS**                               | Auto-resolve                |
+| **Cloudflare Turnstile** (managed)         | FAIL             | **PASS**                               | Single click                |
+| **ShieldSquare**                           | BLOCKED          | **PASS**                               | Production site             |
+| **FingerprintJS** bot detection            | DETECTED         | **PASS**                               | demo.fingerprint.com        |
+| **BrowserScan** bot detection              | DETECTED         | **NORMAL** (4/4)                       | browserscan.net             |
+| **bot.incolumitas.com**                    | 13 fails         | **1 fail**                             | WEBDRIVER spec only         |
+| **deviceandbrowserinfo.com**               | 6 true flags     | **0 true flags**                       | `isBot: false`              |
+| `navigator.webdriver`                      | `true`           | **`false`**                            | Source-level patch          |
+| `navigator.plugins.length`                 | 0                | **5**                                  | Real plugin list            |
+| `window.chrome`                            | `undefined`      | **`object`**                           | Present like real Chrome    |
+| UA string                                  | `HeadlessChrome` | **`Chrome/146.0.0.0`**                 | No headless leak            |
+| CDP detection                              | Detected         | **Not detected**                       | `isAutomatedWithCDP: false` |
+| TLS fingerprint                            | Mismatch         | **Identical to Chrome**                | ja3n/ja4/akamai match       |
+|                                            |                  | **Tested against 30+ detection sites** |                             |
 
 ### Proof
 
@@ -207,15 +213,15 @@ All tests verified against live detection services. Last tested: Apr 2026 (Chrom
 
 ## Comparison
 
-| Feature | Playwright | playwright-stealth | undetected-chromedriver | Camoufox | CloakBrowser |
-|---|---|---|---|---|---|
-| reCAPTCHA v3 score | 0.1 | 0.3-0.5 | 0.3-0.7 | 0.7-0.9 | **0.9** |
-| Cloudflare Turnstile | Fail | Sometimes | Sometimes | Pass | **Pass** |
-| Patch level | None | JS injection | Config patches | C++ (Firefox) | **C++ (Chromium)** |
-| Survives Chrome updates | N/A | Breaks often | Breaks often | Yes | **Yes** |
-| Maintained | Yes | Stale | Stale | Unstable | **Active** |
-| Browser engine | Chromium | Chromium | Chrome | Firefox | **Chromium** |
-| Playwright API | Native | Native | No (Selenium) | No | **Native** |
+| Feature                 | Playwright | playwright-stealth | undetected-chromedriver | Camoufox      | CloakBrowser       |
+| ----------------------- | ---------- | ------------------ | ----------------------- | ------------- | ------------------ |
+| reCAPTCHA v3 score      | 0.1        | 0.3-0.5            | 0.3-0.7                 | 0.7-0.9       | **0.9**            |
+| Cloudflare Turnstile    | Fail       | Sometimes          | Sometimes               | Pass          | **Pass**           |
+| Patch level             | None       | JS injection       | Config patches          | C++ (Firefox) | **C++ (Chromium)** |
+| Survives Chrome updates | N/A        | Breaks often       | Breaks often            | Yes           | **Yes**            |
+| Maintained              | Yes        | Stale              | Stale                   | Unstable      | **Active**         |
+| Browser engine          | Chromium   | Chromium           | Chrome                  | Firefox       | **Chromium**       |
+| Playwright API          | Native     | Native             | No (Selenium)           | No            | **Native**         |
 
 ## How It Works
 
@@ -355,6 +361,7 @@ asyncio.run(main())
 Same as `launch_context()`, but with a persistent user profile. Cookies, localStorage, and cache persist across sessions.
 
 Use this when you need to:
+
 - **Stay logged in** across runs (cookies/sessions survive restarts)
 - **Bypass incognito detection** (some sites flag empty, ephemeral profiles)
 - **Load Chrome extensions** (extensions only work from a real user data dir)
@@ -390,9 +397,9 @@ Async version: `launch_persistent_context_async()`.
 ctx = launch_persistent_context("./my-profile", args=["--fingerprint-storage-quota=5000"])
 ```
 
-| Quota setting | FingerprintJS | BrowserScan `notPrivate` |
-|---|---|---|
-| Default (auto, ~500MB) | PASS | -10 (flagged as incognito) |
+| Quota setting                      | FingerprintJS         | BrowserScan `notPrivate`     |
+| ---------------------------------- | --------------------- | ---------------------------- |
+| Default (auto, ~500MB)             | PASS                  | -10 (flagged as incognito)   |
 | `--fingerprint-storage-quota=5000` | May trigger detection | PASS (appears non-incognito) |
 
 ### CLI
@@ -429,7 +436,7 @@ CloakBrowser ships a TypeScript package with full type definitions. Choose Playw
 ### Playwright (default)
 
 ```javascript
-import { launch, launchContext, launchPersistentContext } from 'cloakbrowser';
+import { launch, launchContext, launchPersistentContext } from "cloakbrowser";
 
 // Basic
 const browser = await launch();
@@ -437,27 +444,27 @@ const browser = await launch();
 // With options
 const browser = await launch({
   headless: false,
-  proxy: 'http://user:pass@proxy:8080',
-  args: ['--fingerprint=12345'],
-  timezone: 'America/New_York',
-  locale: 'en-US',
-  humanize: true,
+  proxy: "http://user:pass@proxy:8080",
+  args: ["--fingerprint=12345"],
+  timezone: "America/New_York",
+  locale: "en-US",
+  humanize: true
 });
 
 // Convenience: browser + context in one call
 const context = await launchContext({
-  userAgent: 'Custom UA',
+  userAgent: "Custom UA",
   viewport: { width: 1920, height: 1080 },
-  locale: 'en-US',
-  timezone: 'America/New_York',
+  locale: "en-US",
+  timezone: "America/New_York"
 });
 const page = await context.newPage();
 
 // Persistent profile — cookies/localStorage survive restarts, avoids incognito detection
 const ctx = await launchPersistentContext({
-  userDataDir: './chrome-profile',
+  userDataDir: "./chrome-profile",
   headless: false,
-  proxy: 'http://user:pass@proxy:8080',
+  proxy: "http://user:pass@proxy:8080"
 });
 ```
 
@@ -470,18 +477,18 @@ All Python options work in JS: `stealthArgs: false` to disable defaults, `geoip:
 > **Note:** The Playwright wrapper is recommended for sites with reCAPTCHA Enterprise. Puppeteer's CDP protocol leaks automation signals that reCAPTCHA Enterprise can detect, causing intermittent 403 errors. This is a known Puppeteer limitation, not specific to CloakBrowser. Use Playwright for best results.
 
 ```javascript
-import { launch } from 'cloakbrowser/puppeteer';
+import { launch } from "cloakbrowser/puppeteer";
 
 const browser = await launch({ headless: true });
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto("https://example.com");
 await browser.close();
 ```
 
 ### Utility Functions (JS)
 
 ```javascript
-import { ensureBinary, clearCache, binaryInfo } from 'cloakbrowser';
+import { ensureBinary, clearCache, binaryInfo } from "cloakbrowser";
 
 // Pre-download binary (e.g., during Docker build)
 await ensureBinary();
@@ -507,25 +514,25 @@ page.locator("button[type=submit]").click()       # Bézier curve, realistic aim
 
 ```javascript
 // Playwright
-import { launch } from 'cloakbrowser';
+import { launch } from "cloakbrowser";
 const browser = await launch({ humanize: true });
 ```
 
 ```javascript
 // Puppeteer
-import { launch } from 'cloakbrowser/puppeteer';
+import { launch } from "cloakbrowser/puppeteer";
 const browser = await launch({ humanize: true });
 ```
 
 **What changes:**
 
-| Interaction | Default | With `humanize=True` |
-|---|---|---|
-| Mouse movement | Instant teleport | Bézier curve with easing and slight overshoot |
-| Clicks | Instant | Realistic aim point + hold duration |
-| Keyboard | Instant fill | Per-character timing, thinking pauses, occasional typos with self-correction |
-| Scroll | Jump | Accelerate → cruise → decelerate micro-steps |
-| `fill()` | Instant value set | Clears existing content, types character by character |
+| Interaction    | Default           | With `humanize=True`                                                         |
+| -------------- | ----------------- | ---------------------------------------------------------------------------- |
+| Mouse movement | Instant teleport  | Bézier curve with easing and slight overshoot                                |
+| Clicks         | Instant           | Realistic aim point + hold duration                                          |
+| Keyboard       | Instant fill      | Per-character timing, thinking pauses, occasional typos with self-correction |
+| Scroll         | Jump              | Accelerate → cruise → decelerate micro-steps                                 |
+| `fill()`       | Instant value set | Clears existing content, types character by character                        |
 
 **Presets** — `default` (normal speed) or `careful` (slower, more deliberate, idle micro-movements between actions):
 
@@ -534,7 +541,7 @@ browser = launch(humanize=True, human_preset="careful")
 ```
 
 ```javascript
-const browser = await launch({ humanize: true, humanPreset: 'careful' });
+const browser = await launch({ humanize: true, humanPreset: "careful" });
 ```
 
 **Custom config** — override any parameter:
@@ -550,13 +557,13 @@ browser = launch(humanize=True, human_config={
 
 ```javascript
 const browser = await launch({
-    humanize: true,
-    humanConfig: {
-        mistype_chance: 0.05,
-        typing_delay: 100,
-        idle_between_actions: true,
-        idle_between_duration: [0.3, 0.8],
-    }
+  humanize: true,
+  humanConfig: {
+    mistype_chance: 0.05,
+    typing_delay: 100,
+    idle_between_actions: true,
+    idle_between_duration: [0.3, 0.8]
+  }
 });
 ```
 
@@ -570,14 +577,14 @@ Access the original un-patched Playwright page at `page._original` if you need r
 
 ## Configuration
 
-| Env Variable | Default | Description |
-|---|---|---|
-| `CLOAKBROWSER_BINARY_PATH` | — | Skip download, use a local Chromium binary |
-| `CLOAKBROWSER_CACHE_DIR` | `~/.cloakbrowser` | Binary cache directory |
-| `CLOAKBROWSER_DOWNLOAD_URL` | `cloakbrowser.dev` | Custom download URL for binary |
-| `CLOAKBROWSER_AUTO_UPDATE` | `true` | Set to `false` to disable background update checks |
-| `CLOAKBROWSER_SKIP_CHECKSUM` | `false` | Set to `true` to skip SHA-256 verification after download |
-| `CLOAKBROWSER_GEOIP_TIMEOUT_SECONDS` | `5` | Max seconds for GeoIP resolution before continuing without it |
+| Env Variable                         | Default            | Description                                                   |
+| ------------------------------------ | ------------------ | ------------------------------------------------------------- |
+| `CLOAKBROWSER_BINARY_PATH`           | —                  | Skip download, use a local Chromium binary                    |
+| `CLOAKBROWSER_CACHE_DIR`             | `~/.cloakbrowser`  | Binary cache directory                                        |
+| `CLOAKBROWSER_DOWNLOAD_URL`          | `cloakbrowser.dev` | Custom download URL for binary                                |
+| `CLOAKBROWSER_AUTO_UPDATE`           | `true`             | Set to `false` to disable background update checks            |
+| `CLOAKBROWSER_SKIP_CHECKSUM`         | `false`            | Set to `true` to skip SHA-256 verification after download     |
+| `CLOAKBROWSER_GEOIP_TIMEOUT_SECONDS` | `5`                | Max seconds for GeoIP resolution before continuing without it |
 
 ## Fingerprint Management
 
@@ -585,30 +592,32 @@ The binary is **stealthy by default** — no flags needed. It auto-generates a r
 
 **How fingerprinting works:**
 
-| Scenario | What happens |
-|----------|-------------|
-| **No flags** | Random seed auto-generated at startup. GPU, screen, hardware specs, and all noise patches are spoofed automatically. Fresh identity each launch. |
-| **`--fingerprint=seed`** | Deterministic identity from the seed. Same seed = same fingerprint across launches. Use this for session persistence (returning visitor). |
-| **`--fingerprint=seed` + explicit flags** | Explicit flags override individual auto-generated values. The seed fills in everything else. |
+| Scenario                                  | What happens                                                                                                                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **No flags**                              | Random seed auto-generated at startup. GPU, screen, hardware specs, and all noise patches are spoofed automatically. Fresh identity each launch. |
+| **`--fingerprint=seed`**                  | Deterministic identity from the seed. Same seed = same fingerprint across launches. Use this for session persistence (returning visitor).        |
+| **`--fingerprint=seed` + explicit flags** | Explicit flags override individual auto-generated values. The seed fills in everything else.                                                     |
 
 The binary detects its platform at compile time — a macOS binary reports as macOS with Apple GPU, a Linux binary reports as Linux with NVIDIA GPU. The **wrapper** overrides this on Linux by passing `--fingerprint-platform=windows`, so sessions appear as Windows desktops (more common fingerprint, harder to cluster). Use `--fingerprint-platform` for cross-platform spoofing when running the binary directly.
 
 > **Tip: Use a fixed seed when revisiting the same site.** A random seed makes every session look like a different device — which can be suspicious when hitting the same site repeatedly from the same IP. For reCAPTCHA v3 Enterprise and similar scoring systems, a fixed seed produces a consistent fingerprint across sessions, making you look like a returning visitor:
+>
 > ```python
 > browser = launch(args=["--fingerprint=12345"])
 > ```
+>
 > ```javascript
-> const browser = await launch({ args: ['--fingerprint=12345'] });
+> const browser = await launch({ args: ["--fingerprint=12345"] });
 > ```
 
 ### Default Fingerprint
 
 Every `launch()` call sets these automatically. The **wrapper** applies platform-aware defaults — on Linux it spoofs as Windows for a more common fingerprint, on macOS it runs as a native Mac browser:
 
-| Flag | Linux/Windows Default | macOS Default | Controls |
-|------|--------------|---------------|----------|
-| `--fingerprint` | Random (10000–99999) | Random (10000–99999) | Master seed for canvas, WebGL, audio, fonts, client rects |
-| `--fingerprint-platform` | `windows` | `macos` | `navigator.platform`, User-Agent OS, GPU pool selection |
+| Flag                     | Linux/Windows Default | macOS Default        | Controls                                                  |
+| ------------------------ | --------------------- | -------------------- | --------------------------------------------------------- |
+| `--fingerprint`          | Random (10000–99999)  | Random (10000–99999) | Master seed for canvas, WebGL, audio, fonts, client rects |
+| `--fingerprint-platform` | `windows`             | `macos`              | `navigator.platform`, User-Agent OS, GPU pool selection   |
 
 The binary auto-generates everything else from the seed: GPU, hardware concurrency, device memory, and screen dimensions. Each seed produces a unique, consistent fingerprint. Override with explicit flags if needed.
 
@@ -618,26 +627,26 @@ The binary auto-generates everything else from the seed: GPU, hardware concurren
 
 Supported by the binary but **not set by default** — pass via `args` to customize:
 
-| Flag | Controls |
-|------|----------|
-| `--fingerprint-gpu-vendor` | WebGL `UNMASKED_VENDOR_WEBGL` (auto-generated from seed + platform) |
-| `--fingerprint-gpu-renderer` | WebGL `UNMASKED_RENDERER_WEBGL` (auto-generated from seed + platform) |
-| `--fingerprint-hardware-concurrency` | `navigator.hardwareConcurrency` (auto-generated: `8`) |
-| `--fingerprint-device-memory` | `navigator.deviceMemory` in GB (auto-generated: `8`) |
-| `--fingerprint-screen-width` | Screen width (auto-generated: `1920` Win/Linux, `1440` macOS) |
-| `--fingerprint-screen-height` | Screen height (auto-generated: `1080` Win/Linux, `900` macOS) |
-| `--fingerprint-brand` | Browser brand: `Chrome`, `Edge`, `Opera`, `Vivaldi` |
-| `--fingerprint-brand-version` | Brand version (UA + Client Hints) |
-| `--fingerprint-platform-version` | Client Hints platform version |
-| `--fingerprint-location` | Geolocation coordinates |
-| `--fingerprint-timezone` | Timezone (e.g. `America/New_York`) |
-| `--fingerprint-locale` | Locale (e.g. `en-US`) |
-| `--fingerprint-storage-quota` | Override storage quota in MB — affects `storage.estimate()`, `storageBuckets`, and legacy webkit APIs. Auto-normalized when `--fingerprint` is set |
-| `--fingerprint-taskbar-height` | Override taskbar height (binary defaults: Win=48, Mac=95, Linux=0) |
-| `--fingerprint-fonts-dir` | Path to directory containing target-platform fonts (see [Font Setup on Linux](#font-setup-on-linux)) |
-| `--fingerprint-webrtc-ip` | WebRTC ICE candidate IP replacement. Use `auto` to resolve from proxy exit IP (makes an HTTP call through the proxy), or pass an explicit IP. Auto-injected when `geoip=True` |
-| `--fingerprint-noise=false` | Disable noise injection (canvas, WebGL, audio, client rects) while keeping the deterministic fingerprint seed active |
-| `--enable-blink-features=FakeShadowRoot` | Access closed shadow DOM elements |
+| Flag                                     | Controls                                                                                                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--fingerprint-gpu-vendor`               | WebGL `UNMASKED_VENDOR_WEBGL` (auto-generated from seed + platform)                                                                                                           |
+| `--fingerprint-gpu-renderer`             | WebGL `UNMASKED_RENDERER_WEBGL` (auto-generated from seed + platform)                                                                                                         |
+| `--fingerprint-hardware-concurrency`     | `navigator.hardwareConcurrency` (auto-generated: `8`)                                                                                                                         |
+| `--fingerprint-device-memory`            | `navigator.deviceMemory` in GB (auto-generated: `8`)                                                                                                                          |
+| `--fingerprint-screen-width`             | Screen width (auto-generated: `1920` Win/Linux, `1440` macOS)                                                                                                                 |
+| `--fingerprint-screen-height`            | Screen height (auto-generated: `1080` Win/Linux, `900` macOS)                                                                                                                 |
+| `--fingerprint-brand`                    | Browser brand: `Chrome`, `Edge`, `Opera`, `Vivaldi`                                                                                                                           |
+| `--fingerprint-brand-version`            | Brand version (UA + Client Hints)                                                                                                                                             |
+| `--fingerprint-platform-version`         | Client Hints platform version                                                                                                                                                 |
+| `--fingerprint-location`                 | Geolocation coordinates                                                                                                                                                       |
+| `--fingerprint-timezone`                 | Timezone (e.g. `America/New_York`)                                                                                                                                            |
+| `--fingerprint-locale`                   | Locale (e.g. `en-US`)                                                                                                                                                         |
+| `--fingerprint-storage-quota`            | Override storage quota in MB — affects `storage.estimate()`, `storageBuckets`, and legacy webkit APIs. Auto-normalized when `--fingerprint` is set                            |
+| `--fingerprint-taskbar-height`           | Override taskbar height (binary defaults: Win=48, Mac=95, Linux=0)                                                                                                            |
+| `--fingerprint-fonts-dir`                | Path to directory containing target-platform fonts (see [Font Setup on Linux](#font-setup-on-linux))                                                                          |
+| `--fingerprint-webrtc-ip`                | WebRTC ICE candidate IP replacement. Use `auto` to resolve from proxy exit IP (makes an HTTP call through the proxy), or pass an explicit IP. Auto-injected when `geoip=True` |
+| `--fingerprint-noise=false`              | Disable noise injection (canvas, WebGL, audio, client rects) while keeping the deterministic fingerprint seed active                                                          |
+| `--enable-blink-features=FakeShadowRoot` | Access closed shadow DOM elements                                                                                                                                             |
 
 > **Note:** All stealth tests were verified with the default fingerprint config above. Changing these flags may affect detection results — test your configuration before using in production.
 
@@ -689,6 +698,7 @@ browser = launch(args=[
 ## Examples
 
 **Python** — see [`examples/`](examples/):
+
 - [`basic.py`](examples/basic.py) — Launch and load a page
 - [`persistent_context.py`](examples/persistent_context.py) — Persistent profile with cookie/localStorage persistence
 - [`recaptcha_score.py`](examples/recaptcha_score.py) — Check your reCAPTCHA v3 score
@@ -696,6 +706,7 @@ browser = launch(args=[
 - [`fingerprint_scan_test.py`](examples/fingerprint_scan_test.py) — Test against fingerprint-scan.com and CreepJS
 
 **JavaScript** — see [`js/examples/`](js/examples/):
+
 - [`basic-playwright.ts`](js/examples/basic-playwright.ts) — Playwright launch and load
 - [`basic-puppeteer.ts`](js/examples/basic-puppeteer.ts) — Puppeteer launch and load
 - [`stealth-test.ts`](js/examples/stealth-test.ts) — Run against 6 detection sites
@@ -721,37 +732,37 @@ browser = await launch_async(args=["--remote-debugging-port=9242"])
 > **Humanize over CDP**: Stealth fingerprint patches work automatically over CDP, but `humanize=True` is a wrapper-level feature. If you connect to CloakBrowser via CDP from a separate script, import the patching functions to add humanization:
 >
 > ```js
-> import { patchBrowser, resolveConfig } from 'cloakbrowser/human';
-> patchBrowser(browser, resolveConfig('default'));
+> import { patchBrowser, resolveConfig } from "cloakbrowser/human";
+> patchBrowser(browser, resolveConfig("default"));
 > ```
 
-| Framework | Stars | Language | Example |
-|-----------|-------|----------|---------|
-| [browser-use](https://github.com/browser-use/browser-use) | 70K | Python | [`browser_use_example.py`](examples/integrations/browser_use_example.py) |
-| [Crawl4AI](https://github.com/unclecode/crawl4ai) | 58K | Python | [`crawl4ai_example.py`](examples/integrations/crawl4ai_example.py) |
-| [Crawlee](https://github.com/apify/crawlee-python) | 8.6K | Python | [`crawlee_example.py`](examples/integrations/crawlee_example.py) |
-| [Scrapling](https://github.com/D4Vinci/Scrapling) | 21K | Python | [`scrapling_example.py`](examples/integrations/scrapling_example.py) |
-| [Stagehand](https://github.com/browserbase/stagehand) | 21K | TypeScript | [`stagehand.ts`](js/examples/stagehand.ts) |
-| [LangChain](https://github.com/langchain-ai/langchain) | 100K+ | Python | [`langchain_loader.py`](examples/integrations/langchain_loader.py) |
-| [Selenium](https://github.com/SeleniumHQ/selenium) | — | Python | [`selenium_example.py`](examples/integrations/selenium_example.py) |
-| [undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver) | 12K | Python | [`undetected_chromedriver.py`](examples/integrations/undetected_chromedriver.py) |
-| [agent-browser](https://github.com/nichochar/agent-browser) | — | Shell | [`agent_browser.sh`](examples/integrations/agent_browser.sh) |
+| Framework                                                                                | Stars | Language   | Example                                                                          |
+| ---------------------------------------------------------------------------------------- | ----- | ---------- | -------------------------------------------------------------------------------- |
+| [browser-use](https://github.com/browser-use/browser-use)                                | 70K   | Python     | [`browser_use_example.py`](examples/integrations/browser_use_example.py)         |
+| [Crawl4AI](https://github.com/unclecode/crawl4ai)                                        | 58K   | Python     | [`crawl4ai_example.py`](examples/integrations/crawl4ai_example.py)               |
+| [Crawlee](https://github.com/apify/crawlee-python)                                       | 8.6K  | Python     | [`crawlee_example.py`](examples/integrations/crawlee_example.py)                 |
+| [Scrapling](https://github.com/D4Vinci/Scrapling)                                        | 21K   | Python     | [`scrapling_example.py`](examples/integrations/scrapling_example.py)             |
+| [Stagehand](https://github.com/browserbase/stagehand)                                    | 21K   | TypeScript | [`stagehand.ts`](js/examples/stagehand.ts)                                       |
+| [LangChain](https://github.com/langchain-ai/langchain)                                   | 100K+ | Python     | [`langchain_loader.py`](examples/integrations/langchain_loader.py)               |
+| [Selenium](https://github.com/SeleniumHQ/selenium)                                       | —     | Python     | [`selenium_example.py`](examples/integrations/selenium_example.py)               |
+| [undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver) | 12K   | Python     | [`undetected_chromedriver.py`](examples/integrations/undetected_chromedriver.py) |
+| [agent-browser](https://github.com/nichochar/agent-browser)                              | —     | Shell      | [`agent_browser.sh`](examples/integrations/agent_browser.sh)                     |
 
 ### Deployment Integrations
 
-| Platform | Example |
-|----------|---------|
+| Platform                                     | Example                                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | [AWS Lambda](https://aws.amazon.com/lambda/) | [`aws_lambda/`](examples/integrations/aws_lambda/) — One-shot scrapes in Lambda (container image) |
 
 ## Platforms
 
-| Platform | Chromium | Patches | Status |
-|---|---|---|---|
-| Linux x86_64 | 146 | 57 | ✅ Latest |
-| Linux arm64 (RPi, Graviton) | 146 | 57 | ✅ Latest |
-| macOS arm64 (Apple Silicon) | 145 | 26 | ✅ |
-| macOS x86_64 (Intel) | 145 | 26 | ✅ |
-| Windows x86_64 | 146 | 57 | ✅ Latest |
+| Platform                    | Chromium | Patches | Status    |
+| --------------------------- | -------- | ------- | --------- |
+| Linux x86_64                | 146      | 57      | ✅ Latest |
+| Linux arm64 (RPi, Graviton) | 146      | 57      | ✅ Latest |
+| macOS arm64 (Apple Silicon) | 145      | 26      | ✅        |
+| macOS x86_64 (Intel)        | 145      | 26      | ✅        |
+| Windows x86_64              | 146      | 57      | ✅ Latest |
 
 The wrapper auto-downloads the correct binary for your platform.
 
@@ -967,10 +978,10 @@ browser = launch(
 
 ```javascript
 const browser = await launch({
-    proxy: 'http://your-residential-proxy:port',
-    geoip: true,
-    headless: false,
-    humanize: true,
+  proxy: "http://your-residential-proxy:port",
+  geoip: true,
+  headless: false,
+  humanize: true
 });
 ```
 
@@ -1012,16 +1023,16 @@ page.goto("https://example.com")  # passes with saved cookies
 ```
 
 ```javascript
-import { launchPersistentContext } from 'cloakbrowser';
+import { launchPersistentContext } from "cloakbrowser";
 
 // First run: warm up with --disable-http2
-let ctx = await launchPersistentContext({ userDataDir: './profile', args: ['--disable-http2'] });
+let ctx = await launchPersistentContext({ userDataDir: "./profile", args: ["--disable-http2"] });
 let page = await ctx.newPage();
-await page.goto('https://example.com');
+await page.goto("https://example.com");
 await ctx.close();
 
 // Future runs — no --disable-http2 needed
-ctx = await launchPersistentContext({ userDataDir: './profile' });
+ctx = await launchPersistentContext({ userDataDir: "./profile" });
 ```
 
 For stateless/ephemeral use cases, `launch(args=["--disable-http2"])` forces HTTP/1.1 which bypasses the check. Only use this flag for sites that require it — most work fine with HTTP/2. If your proxy supports SOCKS5, use `proxy="socks5://user:pass@host:port"` instead — SOCKS5 bypasses HTTP CONNECT entirely.
@@ -1031,6 +1042,7 @@ For stateless/ephemeral use cases, `launch(args=["--disable-http2"])` forces HTT
 ### Something not working? Make sure you're on the latest version
 
 Older versions may use outdated stealth args or download an older binary:
+
 ```bash
 pip install -U cloakbrowser    # Python
 npm install cloakbrowser@latest # JavaScript
@@ -1042,6 +1054,7 @@ docker pull cloakhq/cloakbrowser:latest  # Docker
 ### Binary download fails / timeout
 
 Set a custom download URL or use a local binary:
+
 ```bash
 export CLOAKBROWSER_BINARY_PATH=/path/to/your/chrome
 ```
@@ -1051,11 +1064,13 @@ export CLOAKBROWSER_BINARY_PATH=/path/to/your/chrome
 ### New update broke something? Roll back to the previous version
 
 Install a specific wrapper version to downgrade both the wrapper and the binary it downloads:
+
 ```bash
 pip install cloakbrowser==0.3.21              # Python
 npm install cloakbrowser@0.3.21               # JavaScript
 docker pull cloakhq/cloakbrowser:0.3.21       # Docker
 ```
+
 Each wrapper version pins its own binary version, so downgrading the wrapper automatically gets you the matching binary on next launch.
 
 ---
@@ -1063,6 +1078,7 @@ Each wrapper version pins its own binary version, so downgrading the wrapper aut
 ### macOS: "App is damaged" or Gatekeeper blocks launch
 
 The binary is ad-hoc signed. macOS quarantines downloaded files. Run once to clear it:
+
 ```bash
 xattr -cr ~/.cloakbrowser/chromium-*/Chromium.app
 ```
@@ -1072,6 +1088,7 @@ xattr -cr ~/.cloakbrowser/chromium-*/Chromium.app
 ### "playwright install" vs CloakBrowser binary
 
 You do NOT need `playwright install chromium`. CloakBrowser downloads its own binary. You only need Playwright's system deps:
+
 ```bash
 playwright install-deps chromium
 ```
@@ -1116,10 +1133,11 @@ time.sleep(3)
 await page.waitForTimeout(3000);
 
 // Good — invisible to the browser
-await new Promise(r => setTimeout(r, 3000));
+await new Promise((r) => setTimeout(r, 3000));
 ```
 
 Other tips for maximizing reCAPTCHA scores:
+
 - **Try the Patchright backend** — suppresses additional CDP automation signals at the Playwright protocol layer. Install with `pip install cloakbrowser[patchright]`, then use `launch(backend="patchright")` or set `CLOAKBROWSER_BACKEND=patchright` globally. Note: Patchright breaks proxy auth and `add_init_script` — only use it if you're still seeing low scores after trying the steps above
 - **Use Playwright, not Puppeteer** — Puppeteer sends more CDP protocol traffic that reCAPTCHA detects ([details](#puppeteer))
 - **Use residential proxies** — datacenter IPs are flagged by IP reputation, not browser fingerprint
@@ -1148,14 +1166,14 @@ A: Yes. Pass `proxy="http://user:pass@host:port"` or `proxy="socks5://user:pass@
 
 ## Roadmap
 
-| Feature | Status |
-|---------|--------|
-| Linux x64 — Chromium 146 (57 patches) | ✅ Released |
+| Feature                                     | Status      |
+| ------------------------------------------- | ----------- |
+| Linux x64 — Chromium 146 (57 patches)       | ✅ Released |
 | macOS arm64/x64 — Chromium 145 (26 patches) | ✅ Released |
-| Windows x64 — Chromium 146 (57 patches) | ✅ Released |
-| JavaScript/Puppeteer + Playwright support | ✅ Released |
-| Fingerprint rotation per session | ✅ Released |
-| Built-in proxy rotation | 📋 Planned |
+| Windows x64 — Chromium 146 (57 patches)     | ✅ Released |
+| JavaScript/Puppeteer + Playwright support   | ✅ Released |
+| Fingerprint rotation per session            | ✅ Released |
+| Built-in proxy rotation                     | 📋 Planned  |
 
 ## Links
 

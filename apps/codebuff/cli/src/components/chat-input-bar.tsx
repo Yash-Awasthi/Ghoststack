@@ -134,7 +134,8 @@ export const ChatInputBar = ({
       option?: boolean
     }) => {
       const isPlainEnter =
-        (key.name === 'return' || key.name === 'enter' ||
+        (key.name === 'return' ||
+          key.name === 'enter' ||
           (key.name === 'linefeed' && isLinefeedActingAsEnter())) &&
         !key.shift &&
         !key.ctrl &&
@@ -142,7 +143,8 @@ export const ChatInputBar = ({
         !key.option
       const isTab = key.name === 'tab' && !key.ctrl && !key.meta && !key.option
       const isUp = key.name === 'up' && !key.ctrl && !key.meta && !key.option
-      const isDown = key.name === 'down' && !key.ctrl && !key.meta && !key.option
+      const isDown =
+        key.name === 'down' && !key.ctrl && !key.meta && !key.option
       const isUpDown = isUp || isDown
 
       const hasSuggestions = hasSlashSuggestions || hasMentionSuggestions
@@ -156,7 +158,8 @@ export const ChatInputBar = ({
       }
 
       const historyUpEnabled = lastEditDueToNav || cursorPosition === 0
-      const historyDownEnabled = lastEditDueToNav || cursorPosition === inputValue.length
+      const historyDownEnabled =
+        lastEditDueToNav || cursorPosition === inputValue.length
       if (isUp && historyUpEnabled) {
         return true
       }
@@ -351,7 +354,10 @@ export const ChatInputBar = ({
           {modeConfig.label && (
             <box style={{ flexShrink: 0, paddingRight: 1 }}>
               <text>
-                <span bg={theme.info} fg={theme.background}>{` ${modeConfig.label} `}</span>
+                <span
+                  bg={theme.info}
+                  fg={theme.background}
+                >{` ${modeConfig.label} `}</span>
               </text>
             </box>
           )}
@@ -441,7 +447,10 @@ export const ChatInputBar = ({
             {modeConfig.label && (
               <box style={{ flexShrink: 0, paddingRight: 1 }}>
                 <text>
-                  <span bg={theme.info} fg={theme.background}>{` ${modeConfig.label} `}</span>
+                  <span
+                    bg={theme.info}
+                    fg={theme.background}
+                  >{` ${modeConfig.label} `}</span>
                 </text>
               </box>
             )}

@@ -57,14 +57,11 @@ export function buildArgs(options: LaunchOptions): string[] {
   }
 
   if (options.extensionPaths?.length) {
-    const absPaths = options.extensionPaths.map(p => path.resolve(p));
+    const absPaths = options.extensionPaths.map((p) => path.resolve(p));
     const joined = absPaths.join(",");
 
     seen.set("--load-extension", `--load-extension=${joined}`);
-    seen.set(
-      "--disable-extensions-except",
-      `--disable-extensions-except=${joined}`
-    );
+    seen.set("--disable-extensions-except", `--disable-extensions-except=${joined}`);
   }
   return [...seen.values()];
 }

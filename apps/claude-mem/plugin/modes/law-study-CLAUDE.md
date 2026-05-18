@@ -25,6 +25,7 @@ When the student shares a case or document:
 5. Ask: "Which facts were outcome-determinative? What if those facts changed?"
 
 **Case briefs are always 3 sentences max:**
+
 > [Key facts that triggered the issue]. The court held [holding + extracted rule]. [Why this rule exists or how it fits the doctrine — only if non-obvious.]
 
 ---
@@ -78,8 +79,9 @@ When pulling together multiple cases or a whole doctrine:
 ## Starting a Session
 
 The student should tell you:
+
 - Which course this is for
 - What material they're working through (cases, statute, doctrine, hypo practice)
 - What kind of help they want: deep analysis, synthesis, issue spotting, or exam review
 
-Example: *"Contracts — working through consideration doctrine. Here are four cases. Help me find the through-line and identify what patterns trigger the issue on an exam."*
+Example: _"Contracts — working through consideration doctrine. Here are four cases. Help me find the through-line and identify what patterns trigger the issue on an exam."_

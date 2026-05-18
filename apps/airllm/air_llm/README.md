@@ -1,9 +1,9 @@
 ![airllm_logo](https://github.com/lyogavin/airllm/blob/main/assets/airllm_logo_sm.png?v=3&raw=true)
 
-[**Quickstart**](#quickstart) | 
-[**Configurations**](#configurations) | 
-[**MacOS**](#macos) | 
-[**Example notebooks**](#example-python-notebook) | 
+[**Quickstart**](#quickstart) |
+[**Configurations**](#configurations) |
+[**MacOS**](#macos) |
+[**Example notebooks**](#example-python-notebook) |
 [**FAQ**](#faq)
 
 **AirLLM** optimizes inference memory usage, allowing 70B large language models to run inference on a single 4GB GPU card. No quantization, distillation, pruning or other model compression techniques that would result in degraded model performance are needed.
@@ -13,14 +13,12 @@
 
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://github.com/LianjiaTech/BELLE/blob/main/LICENSE)
 [![Generic badge](https://img.shields.io/badge/wechat-Anima-brightgreen?logo=wechat)](https://static.aicompose.cn/static/wecom_barcode.png?t=1671918938)
-[![Discord](https://img.shields.io/discord/1175437549783760896?logo=discord&color=7289da
-)](https://discord.gg/2xffU5sn)
+[![Discord](https://img.shields.io/discord/1175437549783760896?logo=discord&color=7289da)](https://discord.gg/2xffU5sn)
 [![PyPI - AirLLM](https://img.shields.io/pypi/format/airllm?logo=pypi&color=3571a3)
 ](https://pypi.org/project/airllm/)
 [![Website](https://img.shields.io/website?up_message=blog&url=https%3A%2F%2Fmedium.com%2F%40lyo.gavin&logo=medium&color=black)](https://medium.com/@lyo.gavin)
 [![Support me on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dgavinli%26type%3Dpatrons&style=flat)](https://patreon.com/gavinli)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/lyogavin?logo=GitHub&color=lightgray)](https://github.com/sponsors/lyogavin)
-
 
 ## Updates
 
@@ -28,7 +26,7 @@
 
 [2023/12/25] v2.8.2: Support MacOS running 70B large language models.
 
-[2023/12/20] v2.7: Support AirLLMMixtral. 
+[2023/12/20] v2.7: Support AirLLMMixtral.
 
 [2023/12/20] v2.6: Added AutoModel, automatically detect model type, no need to provide model class to initialize model.
 
@@ -44,14 +42,14 @@
 
 ## Table of Contents
 
-* [Quick start](#quickstart)
-* [Model Compression](#model-compression---3x-inference-speed-up)
-* [Configurations](#configurations)
-* [Run on MacOS](#macos)
-* [Example notebooks](#example-python-notebook)
-* [Supported Models](#supported-models)
-* [Acknowledgement](#acknowledgement)
-* [FAQ](#faq)
+- [Quick start](#quickstart)
+- [Model Compression](#model-compression---3x-inference-speed-up)
+- [Configurations](#configurations)
+- [Run on MacOS](#macos)
+- [Example notebooks](#example-python-notebook)
+- [Supported Models](#supported-models)
+- [Acknowledgement](#acknowledgement)
+- [FAQ](#faq)
 
 ## Quickstart
 
@@ -67,7 +65,7 @@ pip install airllm
 
 Then, initialize AirLLMLlama2, pass in the huggingface repo ID of the model being used, or the local path, and inference can be performed similar to a regular transformer model.
 
-(*You can also specify the path to save the splitted layered model through **layer_shards_saving_path** when init AirLLMLlama2.*
+(_You can also specify the path to save the splitted layered model through **layer_shards_saving_path** when init AirLLMLlama2._
 
 ```python
 from airllm import AutoModel
@@ -85,14 +83,14 @@ input_text = [
     ]
 
 input_tokens = model.tokenizer(input_text,
-    return_tensors="pt", 
-    return_attention_mask=False, 
-    truncation=True, 
-    max_length=MAX_LENGTH, 
+    return_tensors="pt",
+    return_attention_mask=False,
+    truncation=True,
+    max_length=MAX_LENGTH,
     padding=False)
-           
+
 generation_output = model.generate(
-    input_tokens['input_ids'].cuda(), 
+    input_tokens['input_ids'].cuda(),
     max_new_tokens=20,
     use_cache=True,
     return_dict_in_generate=True)
@@ -102,10 +100,8 @@ output = model.tokenizer.decode(generation_output.sequences[0])
 print(output)
 
 ```
- 
- 
+
 Note: During inference, the original model will first be decomposed and saved layer-wise. Please ensure there is sufficient disk space in the huggingface cache directory.
- 
 
 ## Model Compression - 3x Inference Speed Up!
 
@@ -115,13 +111,13 @@ We just added model compression based on block-wise quantization-based model com
 
 #### How to enable model compression speed up:
 
-* Step 1. make sure you have [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) installed by `pip install -U bitsandbytes `
-* Step 2. make sure airllm verion later than 2.0.0: `pip install -U airllm` 
-* Step 3. when initialize the model, passing the argument compression ('4bit' or '8bit'):
+- Step 1. make sure you have [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) installed by `pip install -U bitsandbytes `
+- Step 2. make sure airllm verion later than 2.0.0: `pip install -U airllm`
+- Step 3. when initialize the model, passing the argument compression ('4bit' or '8bit'):
 
 ```python
 model = AutoModel.from_pretrained("garage-bAInd/Platypus2-70B-instruct",
-                     compression='4bit' # specify '8bit' for 8-bit block-wise quantization 
+                     compression='4bit' # specify '8bit' for 8-bit block-wise quantization
                     )
 ```
 
@@ -132,26 +128,25 @@ Quantization normally needs to quantize both weights and activations to really s
 While in our case the bottleneck is mainly at the disk loading, we only need to make the model loading size smaller. So, we get to only quantize the weights' part, which is easier to ensure the accuracy.
 
 ## Configurations
- 
+
 When initialize the model, we support the following configurations:
 
-* **compression**: supported options: 4bit, 8bit for 4-bit or 8-bit block-wise quantization, or by default None for no compression
-* **profiling_mode**: supported options: True to output time consumptions or by default False
-* **layer_shards_saving_path**: optionally another path to save the splitted model
-* **hf_token**: huggingface token can be provided here if downloading gated models like: *meta-llama/Llama-2-7b-hf*
-* **prefetching**: prefetching to overlap the model loading and compute. By default, turned on. For now, only AirLLMLlama2 supports this.
-* **delete_original**: if you don't have too much disk space, you can set delete_original to true to delete the original downloaded hugging face model, only keep the transformed one to save half of the disk space. 
+- **compression**: supported options: 4bit, 8bit for 4-bit or 8-bit block-wise quantization, or by default None for no compression
+- **profiling_mode**: supported options: True to output time consumptions or by default False
+- **layer_shards_saving_path**: optionally another path to save the splitted model
+- **hf_token**: huggingface token can be provided here if downloading gated models like: _meta-llama/Llama-2-7b-hf_
+- **prefetching**: prefetching to overlap the model loading and compute. By default, turned on. For now, only AirLLMLlama2 supports this.
+- **delete_original**: if you don't have too much disk space, you can set delete_original to true to delete the original downloaded hugging face model, only keep the transformed one to save half of the disk space.
 
 ## MacOS
 
 Just install airllm and run the code the same as on linux. See more in [Quick Start](#quickstart).
 
-* make sure you installed [mlx](https://github.com/ml-explore/mlx?tab=readme-ov-file#installation) and torch
-* you probabaly need to install python native see more [here](https://stackoverflow.com/a/65432861/21230266)
-* only [Apple silicon](https://support.apple.com/en-us/HT211814) is supported
+- make sure you installed [mlx](https://github.com/ml-explore/mlx?tab=readme-ov-file#installation) and torch
+- you probabaly need to install python native see more [here](https://stackoverflow.com/a/65432861/21230266)
+- only [Apple silicon](https://support.apple.com/en-us/HT211814) is supported
 
 Example [python notebook] (https://github.com/lyogavin/Anima/blob/main/air_llm/examples/run_on_macos.ipynb)
-
 
 ## Example Python Notebook
 
@@ -165,8 +160,7 @@ Example colabs here:
 
 <details>
 
-
-* ChatGLM:
+- ChatGLM:
 
 ```python
 from airllm import AutoModel
@@ -174,20 +168,20 @@ MAX_LENGTH = 128
 model = AutoModel.from_pretrained("THUDM/chatglm3-6b-base")
 input_text = ['What is the capital of China?',]
 input_tokens = model.tokenizer(input_text,
-    return_tensors="pt", 
-    return_attention_mask=False, 
-    truncation=True, 
-    max_length=MAX_LENGTH, 
+    return_tensors="pt",
+    return_attention_mask=False,
+    truncation=True,
+    max_length=MAX_LENGTH,
     padding=True)
 generation_output = model.generate(
-    input_tokens['input_ids'].cuda(), 
+    input_tokens['input_ids'].cuda(),
     max_new_tokens=5,
     use_cache= True,
     return_dict_in_generate=True)
 model.tokenizer.decode(generation_output.sequences[0])
 ```
 
-* QWen:
+- QWen:
 
 ```python
 from airllm import AutoModel
@@ -195,20 +189,19 @@ MAX_LENGTH = 128
 model = AutoModel.from_pretrained("Qwen/Qwen-7B")
 input_text = ['What is the capital of China?',]
 input_tokens = model.tokenizer(input_text,
-    return_tensors="pt", 
-    return_attention_mask=False, 
-    truncation=True, 
+    return_tensors="pt",
+    return_attention_mask=False,
+    truncation=True,
     max_length=MAX_LENGTH)
 generation_output = model.generate(
-    input_tokens['input_ids'].cuda(), 
+    input_tokens['input_ids'].cuda(),
     max_new_tokens=5,
     use_cache=True,
     return_dict_in_generate=True)
 model.tokenizer.decode(generation_output.sequences[0])
 ```
 
-
-* Baichuan, InternLM, Mistral, etc:
+- Baichuan, InternLM, Mistral, etc:
 
 ```python
 from airllm import AutoModel
@@ -218,34 +211,29 @@ model = AutoModel.from_pretrained("baichuan-inc/Baichuan2-7B-Base")
 #model = AutoModel.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
 input_text = ['What is the capital of China?',]
 input_tokens = model.tokenizer(input_text,
-    return_tensors="pt", 
-    return_attention_mask=False, 
-    truncation=True, 
+    return_tensors="pt",
+    return_attention_mask=False,
+    truncation=True,
     max_length=MAX_LENGTH)
 generation_output = model.generate(
-    input_tokens['input_ids'].cuda(), 
+    input_tokens['input_ids'].cuda(),
     max_new_tokens=5,
     use_cache=True,
     return_dict_in_generate=True)
 model.tokenizer.decode(generation_output.sequences[0])
 ```
 
-
 </details>
 
-
 #### To request other model support: [here](https://docs.google.com/forms/d/e/1FAIpQLSe0Io9ANMT964Zi-OQOq1TJmnvP-G3_ZgQDhP7SatN0IEdbOg/viewform?usp=sf_link)
-
-
 
 ## Acknowledgement
 
 A lot of the code are based on SimJeg's great work in the Kaggle exam competition. Big shoutout to SimJeg:
 
-[GitHub account @SimJeg](https://github.com/SimJeg), 
-[the code on Kaggle](https://www.kaggle.com/code/simjeg/platypus2-70b-with-wikipedia-rag), 
+[GitHub account @SimJeg](https://github.com/SimJeg),
+[the code on Kaggle](https://www.kaggle.com/code/simjeg/platypus2-70b-with-wikipedia-rag),
 [the associated discussion](https://www.kaggle.com/competitions/kaggle-llm-science-exam/discussion/446414).
-
 
 ## FAQ
 
@@ -253,20 +241,20 @@ A lot of the code are based on SimJeg's great work in the Kaggle exam competitio
 
 safetensors_rust.SafetensorError: Error while deserializing header: MetadataIncompleteBuffer
 
-If you run into this error, most possible cause is you run out of disk space. The process of splitting model is very disk-consuming. See [this](https://huggingface.co/TheBloke/guanaco-65B-GPTQ/discussions/12). You may need to extend your disk space, clear huggingface [.cache](https://huggingface.co/docs/datasets/cache) and rerun. 
+If you run into this error, most possible cause is you run out of disk space. The process of splitting model is very disk-consuming. See [this](https://huggingface.co/TheBloke/guanaco-65B-GPTQ/discussions/12). You may need to extend your disk space, clear huggingface [.cache](https://huggingface.co/docs/datasets/cache) and rerun.
 
 ### 2. ValueError: max() arg is an empty sequence
 
 Most likely you are loading QWen or ChatGLM model with Llama2 class. Try the following:
 
-For QWen model: 
+For QWen model:
 
 ```python
 from airllm import AutoModel #<----- instead of AirLLMLlama2
 AutoModel.from_pretrained(...)
 ```
 
-For ChatGLM model: 
+For ChatGLM model:
 
 ```python
 from airllm import AutoModel #<----- instead of AirLLMLlama2
@@ -285,13 +273,13 @@ model = AutoModel.from_pretrained("meta-llama/Llama-2-7b-hf", #hf_token='HF_API_
 
 Some model's tokenizer doesn't have padding token, so you can set a padding token or simply turn the padding config off:
 
- ```python
+```python
 input_tokens = model.tokenizer(input_text,
-    return_tensors="pt", 
-    return_attention_mask=False, 
-    truncation=True, 
-    max_length=MAX_LENGTH, 
-    padding=False  #<-----------   turn off padding 
+   return_tensors="pt",
+   return_attention_mask=False,
+   truncation=True,
+   max_length=MAX_LENGTH,
+   padding=False  #<-----------   turn off padding
 )
 ```
 
@@ -311,8 +299,7 @@ BibTex entry:
 }
 ```
 
-
-## Contribution 
+## Contribution
 
 Welcomed contributions, ideas and discussions!
 

@@ -1,6 +1,5 @@
-
-import { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
+import { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
 
 export interface ImportResult {
   imported: boolean;
@@ -22,7 +21,7 @@ export function importSdkSession(
   }
 ): ImportResult {
   const existing = db
-    .prepare('SELECT id FROM sdk_sessions WHERE content_session_id = ?')
+    .prepare("SELECT id FROM sdk_sessions WHERE content_session_id = ?")
     .get(session.content_session_id) as { id: number } | undefined;
 
   if (existing) {
@@ -71,7 +70,7 @@ export function importSessionSummary(
   }
 ): ImportResult {
   const existing = db
-    .prepare('SELECT id FROM session_summaries WHERE memory_session_id = ?')
+    .prepare("SELECT id FROM session_summaries WHERE memory_session_id = ?")
     .get(summary.memory_session_id) as { id: number } | undefined;
 
   if (existing) {
@@ -135,9 +134,7 @@ export function importObservation(
       WHERE memory_session_id = ? AND title = ? AND created_at_epoch = ?
     `
     )
-    .get(obs.memory_session_id, obs.title, obs.created_at_epoch) as
-    | { id: number }
-    | undefined;
+    .get(obs.memory_session_id, obs.title, obs.created_at_epoch) as { id: number } | undefined;
 
   if (existing) {
     return { imported: false, id: existing.id };
@@ -192,9 +189,7 @@ export function importUserPrompt(
       WHERE content_session_id = ? AND prompt_number = ?
     `
     )
-    .get(prompt.content_session_id, prompt.prompt_number) as
-    | { id: number }
-    | undefined;
+    .get(prompt.content_session_id, prompt.prompt_number) as { id: number } | undefined;
 
   if (existing) {
     return { imported: false, id: existing.id };

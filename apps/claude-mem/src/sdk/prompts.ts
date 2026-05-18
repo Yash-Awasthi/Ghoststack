@@ -1,8 +1,7 @@
+import { logger } from "../utils/logger.js";
+import type { ModeConfig } from "../services/domain/types.js";
 
-import { logger } from '../utils/logger.js';
-import type { ModeConfig } from '../services/domain/types.js';
-
-export const SUMMARY_MODE_MARKER = 'MODE SWITCH: PROGRESS SUMMARY';
+export const SUMMARY_MODE_MARKER = "MODE SWITCH: PROGRESS SUMMARY";
 
 export interface Observation {
   id: number;
@@ -26,7 +25,7 @@ export function buildInitPrompt(project: string, sessionId: string, userPrompt: 
 
 <observed_from_primary_session>
   <user_request>${userPrompt}</user_request>
-  <requested_at>${new Date().toISOString().split('T')[0]}</requested_at>
+  <requested_at>${new Date().toISOString().split("T")[0]}</requested_at>
 </observed_from_primary_session>
 
 ${mode.prompts.observer_role}
@@ -40,7 +39,7 @@ ${mode.prompts.skip_guidance}
 ${mode.prompts.output_format_header}
 
 <observation>
-  <type>[ ${mode.observation_types.map(t => t.id).join(' | ')} ]</type>
+  <type>[ ${mode.observation_types.map((t) => t.id).join(" | ")} ]</type>
   <!--
     ${mode.prompts.type_guidance}
   -->
@@ -83,26 +82,36 @@ export function buildObservationPrompt(obs: Observation): string {
   let toolOutput: any;
 
   try {
-    toolInput = typeof obs.tool_input === 'string' ? JSON.parse(obs.tool_input) : obs.tool_input;
+    toolInput = typeof obs.tool_input === "string" ? JSON.parse(obs.tool_input) : obs.tool_input;
   } catch (error: unknown) {
-    logger.debug('SDK', 'Tool input is plain string, using as-is', {
-      toolName: obs.tool_name
-    }, error instanceof Error ? error : new Error(String(error)));
+    logger.debug(
+      "SDK",
+      "Tool input is plain string, using as-is",
+      {
+        toolName: obs.tool_name
+      },
+      error instanceof Error ? error : new Error(String(error))
+    );
     toolInput = obs.tool_input;
   }
 
   try {
-    toolOutput = typeof obs.tool_output === 'string' ? JSON.parse(obs.tool_output) : obs.tool_output;
+    toolOutput = typeof obs.tool_output === "string" ? JSON.parse(obs.tool_output) : obs.tool_output;
   } catch (error: unknown) {
-    logger.debug('SDK', 'Tool output is plain string, using as-is', {
-      toolName: obs.tool_name
-    }, error instanceof Error ? error : new Error(String(error)));
+    logger.debug(
+      "SDK",
+      "Tool output is plain string, using as-is",
+      {
+        toolName: obs.tool_name
+      },
+      error instanceof Error ? error : new Error(String(error))
+    );
     toolOutput = obs.tool_output;
   }
 
   return `<observed_from_primary_session>
   <what_happened>${obs.tool_name}</what_happened>
-  <occurred_at>${new Date(obs.created_at_epoch).toISOString()}</occurred_at>${obs.cwd ? `\n  <working_directory>${obs.cwd}</working_directory>` : ''}
+  <occurred_at>${new Date(obs.created_at_epoch).toISOString()}</occurred_at>${obs.cwd ? `\n  <working_directory>${obs.cwd}</working_directory>` : ""}
   <parameters>${JSON.stringify(toolInput, null, 2)}</parameters>
   <outcome>${JSON.stringify(toolOutput, null, 2)}</outcome>
 </observed_from_primary_session>
@@ -113,12 +122,14 @@ Never reply with prose such as "Skipping", "No substantive tool executions", or 
 }
 
 export function buildSummaryPrompt(session: SDKSession, mode: ModeConfig): string {
-  const lastAssistantMessage = session.last_assistant_message || (() => {
-    logger.error('SDK', 'Missing last_assistant_message in session for summary prompt', {
-      sessionId: session.id
-    });
-    return '';
-  })();
+  const lastAssistantMessage =
+    session.last_assistant_message ||
+    (() => {
+      logger.error("SDK", "Missing last_assistant_message in session for summary prompt", {
+        sessionId: session.id
+      });
+      return "";
+    })();
 
   return `--- ${SUMMARY_MODE_MARKER} ---
 ⚠️ CRITICAL TAG REQUIREMENT — READ CAREFULLY:
@@ -146,12 +157,17 @@ REMINDER: Your response MUST use <summary> as the root tag, NOT <observation>.
 ${mode.prompts.summary_footer}`;
 }
 
-export function buildContinuationPrompt(userPrompt: string, promptNumber: number, contentSessionId: string, mode: ModeConfig): string {
+export function buildContinuationPrompt(
+  userPrompt: string,
+  promptNumber: number,
+  contentSessionId: string,
+  mode: ModeConfig
+): string {
   return `${mode.prompts.continuation_greeting}
 
 <observed_from_primary_session>
   <user_request>${userPrompt}</user_request>
-  <requested_at>${new Date().toISOString().split('T')[0]}</requested_at>
+  <requested_at>${new Date().toISOString().split("T")[0]}</requested_at>
 </observed_from_primary_session>
 
 ${mode.prompts.system_identity}
@@ -169,7 +185,7 @@ ${mode.prompts.continuation_instruction}
 ${mode.prompts.output_format_header}
 
 <observation>
-  <type>[ ${mode.observation_types.map(t => t.id).join(' | ')} ]</type>
+  <type>[ ${mode.observation_types.map((t) => t.id).join(" | ")} ]</type>
   <!--
     ${mode.prompts.type_guidance}
   -->
@@ -205,4 +221,4 @@ ${mode.prompts.format_examples}
 ${mode.prompts.footer}
 
 ${mode.prompts.header_memory_continued}`;
-} 
+}

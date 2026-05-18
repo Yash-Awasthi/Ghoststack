@@ -52,28 +52,17 @@
       {
         "group": "Cursor Integration",
         "icon": "wand-magic-sparkles",
-        "pages": [
-          "cursor/index",
-          "cursor/gemini-setup",
-          "cursor/openrouter-setup"
-        ]
+        "pages": ["cursor/index", "cursor/gemini-setup", "cursor/openrouter-setup"]
       },
       {
         "group": "Gemini CLI Integration",
         "icon": "terminal",
-        "pages": [
-          "gemini-cli/setup"
-        ]
+        "pages": ["gemini-cli/setup"]
       },
       {
         "group": "Best Practices",
         "icon": "lightbulb",
-        "pages": [
-          "context-engineering",
-          "progressive-disclosure",
-          "file-read-gate",
-          "smart-explore-benchmark"
-        ]
+        "pages": ["context-engineering", "progressive-disclosure", "file-read-gate", "smart-explore-benchmark"]
       },
       {
         "group": "Configuration & Development",
@@ -143,13 +132,7 @@
     }
   },
   "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "cursor"
-    ]
+    "options": ["copy", "view", "chatgpt", "claude", "cursor"]
   },
   "integrations": {
     "telemetry": {

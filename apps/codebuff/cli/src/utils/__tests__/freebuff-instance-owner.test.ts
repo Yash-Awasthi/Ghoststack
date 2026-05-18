@@ -40,9 +40,9 @@ describe('freebuff instance owner', () => {
   test('does not classify the current process as dead', () => {
     recordFreebuffInstanceOwner('inst-current')
 
-    expect(
-      isFreebuffInstanceOwnedByDeadLocalProcess('inst-current'),
-    ).toBe(false)
+    expect(isFreebuffInstanceOwnedByDeadLocalProcess('inst-current')).toBe(
+      false,
+    )
   })
 
   test('classifies a matching owner with a dead pid as dead', () => {
@@ -62,8 +62,8 @@ describe('freebuff instance owner', () => {
       JSON.stringify({ instanceId: 'inst-other', pid: 2_147_483_647 }),
     )
 
-    expect(
-      isFreebuffInstanceOwnedByDeadLocalProcess('inst-current'),
-    ).toBe(false)
+    expect(isFreebuffInstanceOwnedByDeadLocalProcess('inst-current')).toBe(
+      false,
+    )
   })
 })

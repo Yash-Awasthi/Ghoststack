@@ -1,3 +1,3 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from "../../utils/logger.js";
 
-export * from './import/bulk.js';
+export * from "./import/bulk.js";

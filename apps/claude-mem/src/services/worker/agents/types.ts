@@ -1,6 +1,5 @@
-
-import type { ActiveSession } from '../../worker-types.js';
-import type { ParsedObservation, ParsedSummary } from '../../../sdk/parser.js';
+import type { ActiveSession } from "../../worker-types.js";
+import type { ParsedObservation, ParsedSummary } from "../../../sdk/parser.js";
 
 export interface WorkerRef {
   sseBroadcaster?: {
@@ -19,10 +18,10 @@ export interface ObservationSSEPayload {
   subtitle: string | null;
   text: string | null;
   narrative: string | null;
-  facts: string;  
-  concepts: string;  
-  files_read: string;  
-  files_modified: string;  
+  facts: string;
+  concepts: string;
+  files_read: string;
+  files_modified: string;
   project: string;
   prompt_number: number;
   created_at_epoch: number;
@@ -44,8 +43,8 @@ export interface SummarySSEPayload {
 }
 
 export type SSEEventPayload =
-  | { type: 'new_observation'; observation: ObservationSSEPayload }
-  | { type: 'new_summary'; summary: SummarySSEPayload };
+  | { type: "new_observation"; observation: ObservationSSEPayload }
+  | { type: "new_summary"; summary: SummarySSEPayload };
 
 export interface StorageResult {
   observationIds: number[];
@@ -66,16 +65,16 @@ export interface ParsedResponse {
 }
 
 export interface BaseAgentConfig {
-  dbManager: import('../DatabaseManager.js').DatabaseManager;
-  sessionManager: import('../SessionManager.js').SessionManager;
+  dbManager: import("../DatabaseManager.js").DatabaseManager;
+  sessionManager: import("../SessionManager.js").SessionManager;
 }
 
 export const FALLBACK_ERROR_PATTERNS = [
-  '429',           // Rate limit
-  '500',           // Internal server error
-  '502',           // Bad gateway
-  '503',           // Service unavailable
-  'ECONNREFUSED',  // Connection refused
-  'ETIMEDOUT',     // Timeout
-  'fetch failed',  // Network failure
+  "429", // Rate limit
+  "500", // Internal server error
+  "502", // Bad gateway
+  "503", // Service unavailable
+  "ECONNREFUSED", // Connection refused
+  "ETIMEDOUT", // Timeout
+  "fetch failed" // Network failure
 ] as const;

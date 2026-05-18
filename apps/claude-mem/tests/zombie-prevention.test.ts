@@ -1,17 +1,16 @@
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
+import { ClaudeMemDatabase } from "../src/services/sqlite/Database.js";
+import { PendingMessageStore } from "../src/services/sqlite/PendingMessageStore.js";
+import { createSDKSession } from "../src/services/sqlite/Sessions.js";
+import type { ActiveSession, PendingMessage } from "../src/services/worker-types.js";
+import type { Database } from "bun:sqlite";
 
-import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import { ClaudeMemDatabase } from '../src/services/sqlite/Database.js';
-import { PendingMessageStore } from '../src/services/sqlite/PendingMessageStore.js';
-import { createSDKSession } from '../src/services/sqlite/Sessions.js';
-import type { ActiveSession, PendingMessage } from '../src/services/worker-types.js';
-import type { Database } from 'bun:sqlite';
-
-describe('Zombie Agent Prevention', () => {
+describe("Zombie Agent Prevention", () => {
   let db: Database;
   let pendingStore: PendingMessageStore;
 
   beforeEach(() => {
-    db = new ClaudeMemDatabase(':memory:').db;
+    db = new ClaudeMemDatabase(":memory:").db;
     pendingStore = new PendingMessageStore(db);
   });
 
@@ -19,16 +18,13 @@ describe('Zombie Agent Prevention', () => {
     db.close();
   });
 
-  function createMockSession(
-    sessionDbId: number,
-    overrides: Partial<ActiveSession> = {}
-  ): ActiveSession {
+  function createMockSession(sessionDbId: number, overrides: Partial<ActiveSession> = {}): ActiveSession {
     return {
       sessionDbId,
       contentSessionId: `content-session-${sessionDbId}`,
       memorySessionId: null,
-      project: 'test-project',
-      userPrompt: 'Test prompt',
+      project: "test-project",
+      userPrompt: "Test prompt",
       pendingMessages: [],
       abortController: new AbortController(),
       generatorPromise: null,
@@ -40,26 +36,26 @@ describe('Zombie Agent Prevention', () => {
       claimedMessageIds: [],
       conversationHistory: [],
       currentProvider: null,
-      ...overrides,
+      ...overrides
     };
   }
 
-  function createDbSession(contentSessionId: string, project: string = 'test-project'): number {
-    return createSDKSession(db, contentSessionId, project, 'Test user prompt');
+  function createDbSession(contentSessionId: string, project: string = "test-project"): number {
+    return createSDKSession(db, contentSessionId, project, "Test user prompt");
   }
 
   function enqueueTestMessage(sessionDbId: number, contentSessionId: string): number {
     const message: PendingMessage = {
-      type: 'observation',
-      tool_name: 'TestTool',
-      tool_input: { test: 'input' },
-      tool_response: { test: 'response' },
-      prompt_number: 1,
+      type: "observation",
+      tool_name: "TestTool",
+      tool_input: { test: "input" },
+      tool_response: { test: "response" },
+      prompt_number: 1
     };
     return pendingStore.enqueue(sessionDbId, contentSessionId, message);
   }
 
-  test('should prevent concurrent spawns for same session', async () => {
+  test("should prevent concurrent spawns for same session", async () => {
     const session = createMockSession(1);
 
     session.generatorPromise = new Promise<void>((resolve) => {
@@ -79,24 +75,24 @@ describe('Zombie Agent Prevention', () => {
     expect(canSpawnNow).toBe(true);
   });
 
-  test('should prevent duplicate crash recovery spawns', async () => {
-    const sessionId1 = createDbSession('content-1');
-    const sessionId2 = createDbSession('content-2');
+  test("should prevent duplicate crash recovery spawns", async () => {
+    const sessionId1 = createDbSession("content-1");
+    const sessionId2 = createDbSession("content-2");
 
-    enqueueTestMessage(sessionId1, 'content-1');
-    enqueueTestMessage(sessionId2, 'content-2');
+    enqueueTestMessage(sessionId1, "content-1");
+    enqueueTestMessage(sessionId2, "content-2");
 
     const orphanedSessions = pendingStore.getSessionsWithPendingMessages();
     expect(orphanedSessions).toContain(sessionId1);
     expect(orphanedSessions).toContain(sessionId2);
 
     const session1 = createMockSession(sessionId1, {
-      contentSessionId: 'content-1',
-      generatorPromise: new Promise<void>(() => {}), // Active generator
+      contentSessionId: "content-1",
+      generatorPromise: new Promise<void>(() => {}) // Active generator
     });
     const session2 = createMockSession(sessionId2, {
-      contentSessionId: 'content-2',
-      generatorPromise: null, // No active generator
+      contentSessionId: "content-2",
+      generatorPromise: null // No active generator
     });
 
     const sessions = new Map<number, ActiveSession>();
@@ -106,7 +102,7 @@ describe('Zombie Agent Prevention', () => {
     const result = {
       sessionsStarted: 0,
       sessionsSkipped: 0,
-      startedSessionIds: [] as number[],
+      startedSessionIds: [] as number[]
     };
 
     for (const sessionDbId of orphanedSessions) {
@@ -127,19 +123,19 @@ describe('Zombie Agent Prevention', () => {
     expect(result.startedSessionIds).not.toContain(sessionId1);
   });
 
-  test('should report accurate queueDepth from database', async () => {
-    const sessionId = createDbSession('content-queue-test');
+  test("should report accurate queueDepth from database", async () => {
+    const sessionId = createDbSession("content-queue-test");
 
     expect(pendingStore.getPendingCount(sessionId)).toBe(0);
     expect(pendingStore.hasAnyPendingWork()).toBe(false);
 
-    const msgId1 = enqueueTestMessage(sessionId, 'content-queue-test');
+    const msgId1 = enqueueTestMessage(sessionId, "content-queue-test");
     expect(pendingStore.getPendingCount(sessionId)).toBe(1);
 
-    const msgId2 = enqueueTestMessage(sessionId, 'content-queue-test');
+    const msgId2 = enqueueTestMessage(sessionId, "content-queue-test");
     expect(pendingStore.getPendingCount(sessionId)).toBe(2);
 
-    const msgId3 = enqueueTestMessage(sessionId, 'content-queue-test');
+    const msgId3 = enqueueTestMessage(sessionId, "content-queue-test");
     expect(pendingStore.getPendingCount(sessionId)).toBe(3);
 
     expect(pendingStore.hasAnyPendingWork()).toBe(true);
@@ -164,15 +160,15 @@ describe('Zombie Agent Prevention', () => {
     expect(pendingStore.hasAnyPendingWork()).toBe(false);
   });
 
-  test('should track pending work across multiple sessions', async () => {
-    const session1Id = createDbSession('content-multi-1');
-    const session2Id = createDbSession('content-multi-2');
-    const session3Id = createDbSession('content-multi-3');
+  test("should track pending work across multiple sessions", async () => {
+    const session1Id = createDbSession("content-multi-1");
+    const session2Id = createDbSession("content-multi-2");
+    const session3Id = createDbSession("content-multi-3");
 
-    enqueueTestMessage(session1Id, 'content-multi-1');
-    enqueueTestMessage(session1Id, 'content-multi-1'); 
+    enqueueTestMessage(session1Id, "content-multi-1");
+    enqueueTestMessage(session1Id, "content-multi-1");
 
-    enqueueTestMessage(session2Id, 'content-multi-2');
+    enqueueTestMessage(session2Id, "content-multi-2");
 
     expect(pendingStore.getPendingCount(session1Id)).toBe(2);
     expect(pendingStore.getPendingCount(session2Id)).toBe(1);
@@ -185,7 +181,7 @@ describe('Zombie Agent Prevention', () => {
     expect(sessionsWithPending.length).toBe(2);
   });
 
-  test('should reset AbortController when restarting after abort', async () => {
+  test("should reset AbortController when restarting after abort", async () => {
     const session = createMockSession(1);
 
     session.abortController.abort();
@@ -198,15 +194,15 @@ describe('Zombie Agent Prevention', () => {
     expect(session.abortController.signal.aborted).toBe(false);
   });
 
-  test('should recover processing messages through explicit restart reset', async () => {
-    const sessionId = createDbSession('content-restart-reset');
+  test("should recover processing messages through explicit restart reset", async () => {
+    const sessionId = createDbSession("content-restart-reset");
 
-    const msgId = enqueueTestMessage(sessionId, 'content-restart-reset');
+    const msgId = enqueueTestMessage(sessionId, "content-restart-reset");
     const claimed = pendingStore.claimNextMessage(sessionId);
     expect(claimed).not.toBeNull();
     expect(claimed!.id).toBe(msgId);
 
-    expect(pendingStore.getPendingCount(sessionId)).toBe(1); 
+    expect(pendingStore.getPendingCount(sessionId)).toBe(1);
     expect(pendingStore.claimNextMessage(sessionId)).toBeNull();
 
     expect(pendingStore.resetProcessingToPending(sessionId)).toBe(1);
@@ -218,7 +214,7 @@ describe('Zombie Agent Prevention', () => {
     expect(pendingStore.getPendingCount(sessionId)).toBe(0);
   });
 
-  test('should properly cleanup generator promise on session delete', async () => {
+  test("should properly cleanup generator promise on session delete", async () => {
     const session = createMockSession(1);
 
     let generatorCompleted = false;
@@ -242,12 +238,11 @@ describe('Zombie Agent Prevention', () => {
     expect(session.generatorPromise).toBeNull();
   });
 
-  describe('Session Termination Invariant', () => {
-
-    test('should clear messages when session is terminated', () => {
-      const sessionId = createDbSession('content-terminate-1');
-      enqueueTestMessage(sessionId, 'content-terminate-1');
-      enqueueTestMessage(sessionId, 'content-terminate-1');
+  describe("Session Termination Invariant", () => {
+    test("should clear messages when session is terminated", () => {
+      const sessionId = createDbSession("content-terminate-1");
+      enqueueTestMessage(sessionId, "content-terminate-1");
+      enqueueTestMessage(sessionId, "content-terminate-1");
 
       expect(pendingStore.getPendingCount(sessionId)).toBe(2);
       expect(pendingStore.hasAnyPendingWork()).toBe(true);
@@ -259,8 +254,8 @@ describe('Zombie Agent Prevention', () => {
       expect(pendingStore.getPendingCount(sessionId)).toBe(0);
     });
 
-    test('should handle terminate with zero pending messages', () => {
-      const sessionId = createDbSession('content-terminate-empty');
+    test("should handle terminate with zero pending messages", () => {
+      const sessionId = createDbSession("content-terminate-empty");
 
       expect(pendingStore.getPendingCount(sessionId)).toBe(0);
 
@@ -270,9 +265,9 @@ describe('Zombie Agent Prevention', () => {
       expect(pendingStore.hasAnyPendingWork()).toBe(false);
     });
 
-    test('should be idempotent — double terminate clears zero on second call', () => {
-      const sessionId = createDbSession('content-terminate-idempotent');
-      enqueueTestMessage(sessionId, 'content-terminate-idempotent');
+    test("should be idempotent — double terminate clears zero on second call", () => {
+      const sessionId = createDbSession("content-terminate-idempotent");
+      enqueueTestMessage(sessionId, "content-terminate-idempotent");
 
       const first = pendingStore.clearPendingForSession(sessionId);
       expect(first).toBe(1);
@@ -283,10 +278,10 @@ describe('Zombie Agent Prevention', () => {
       expect(pendingStore.hasAnyPendingWork()).toBe(false);
     });
 
-    test('should remove session from Map via removeSessionImmediate', () => {
-      const sessionId = createDbSession('content-terminate-map');
+    test("should remove session from Map via removeSessionImmediate", () => {
+      const sessionId = createDbSession("content-terminate-map");
       const session = createMockSession(sessionId, {
-        contentSessionId: 'content-terminate-map',
+        contentSessionId: "content-terminate-map"
       });
 
       const sessions = new Map<number, ActiveSession>();
@@ -297,15 +292,15 @@ describe('Zombie Agent Prevention', () => {
       expect(sessions.has(sessionId)).toBe(false);
     });
 
-    test('should return hasAnyPendingWork false after all sessions terminated', () => {
-      const sid1 = createDbSession('content-multi-term-1');
-      const sid2 = createDbSession('content-multi-term-2');
-      const sid3 = createDbSession('content-multi-term-3');
+    test("should return hasAnyPendingWork false after all sessions terminated", () => {
+      const sid1 = createDbSession("content-multi-term-1");
+      const sid2 = createDbSession("content-multi-term-2");
+      const sid3 = createDbSession("content-multi-term-3");
 
-      enqueueTestMessage(sid1, 'content-multi-term-1');
-      enqueueTestMessage(sid1, 'content-multi-term-1');
-      enqueueTestMessage(sid2, 'content-multi-term-2');
-      enqueueTestMessage(sid3, 'content-multi-term-3');
+      enqueueTestMessage(sid1, "content-multi-term-1");
+      enqueueTestMessage(sid1, "content-multi-term-1");
+      enqueueTestMessage(sid2, "content-multi-term-2");
+      enqueueTestMessage(sid3, "content-multi-term-3");
 
       expect(pendingStore.hasAnyPendingWork()).toBe(true);
 
@@ -316,12 +311,12 @@ describe('Zombie Agent Prevention', () => {
       expect(pendingStore.hasAnyPendingWork()).toBe(false);
     });
 
-    test('should not affect other sessions when terminating one', () => {
-      const sid1 = createDbSession('content-isolate-1');
-      const sid2 = createDbSession('content-isolate-2');
+    test("should not affect other sessions when terminating one", () => {
+      const sid1 = createDbSession("content-isolate-1");
+      const sid2 = createDbSession("content-isolate-2");
 
-      enqueueTestMessage(sid1, 'content-isolate-1');
-      enqueueTestMessage(sid2, 'content-isolate-2');
+      enqueueTestMessage(sid1, "content-isolate-1");
+      enqueueTestMessage(sid2, "content-isolate-2");
 
       pendingStore.clearPendingForSession(sid1);
 
@@ -330,11 +325,11 @@ describe('Zombie Agent Prevention', () => {
       expect(pendingStore.hasAnyPendingWork()).toBe(true);
     });
 
-    test('should clear both pending and processing messages', () => {
-      const sessionId = createDbSession('content-mixed-status');
+    test("should clear both pending and processing messages", () => {
+      const sessionId = createDbSession("content-mixed-status");
 
-      const msgId1 = enqueueTestMessage(sessionId, 'content-mixed-status');
-      enqueueTestMessage(sessionId, 'content-mixed-status');
+      const msgId1 = enqueueTestMessage(sessionId, "content-mixed-status");
+      enqueueTestMessage(sessionId, "content-mixed-status");
 
       const claimed = pendingStore.claimNextMessage(sessionId);
       expect(claimed).not.toBeNull();
@@ -347,12 +342,12 @@ describe('Zombie Agent Prevention', () => {
       expect(pendingStore.hasAnyPendingWork()).toBe(false);
     });
 
-    test('should enforce invariant: no pending work after terminate regardless of initial state', () => {
-      const sessionId = createDbSession('content-invariant');
+    test("should enforce invariant: no pending work after terminate regardless of initial state", () => {
+      const sessionId = createDbSession("content-invariant");
 
-      enqueueTestMessage(sessionId, 'content-invariant');
-      enqueueTestMessage(sessionId, 'content-invariant');
-      enqueueTestMessage(sessionId, 'content-invariant');
+      enqueueTestMessage(sessionId, "content-invariant");
+      enqueueTestMessage(sessionId, "content-invariant");
+      enqueueTestMessage(sessionId, "content-invariant");
 
       pendingStore.claimNextMessage(sessionId);
 

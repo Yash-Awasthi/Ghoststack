@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { z } from 'zod';
+import { z } from "zod";
 
-export const TeamRoleSchema = z.enum(['owner', 'admin', 'member', 'viewer']);
+export const TeamRoleSchema = z.enum(["owner", "admin", "member", "viewer"]);
 
 export const TeamSchema = z.object({
   id: z.string().min(1),

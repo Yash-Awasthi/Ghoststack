@@ -161,7 +161,6 @@ describe('fetchUserDetails', () => {
 
       expect(result).toEqual(mockUserDetails)
     })
-
   })
 
   describe('environment validation', () => {
@@ -175,11 +174,10 @@ describe('fetchUserDetails', () => {
       )
       const apiClient = createMockApiClient({ me: meMock })
 
-      const setTokenSpy = spyOn(
-        CodebuffApiModule,
-        'setApiClientAuthToken',
+      const setTokenSpy = spyOn(CodebuffApiModule, 'setApiClientAuthToken')
+      spyOn(CodebuffApiModule, 'getApiClient').mockReturnValue(
+        apiClient as ReturnType<typeof CodebuffApiModule.getApiClient>,
       )
-      spyOn(CodebuffApiModule, 'getApiClient').mockReturnValue(apiClient as ReturnType<typeof CodebuffApiModule.getApiClient>)
 
       await expect(
         fetchUserDetails({

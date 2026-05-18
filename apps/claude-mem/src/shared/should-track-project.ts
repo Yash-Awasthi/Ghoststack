@@ -1,17 +1,16 @@
-
-import { relative, isAbsolute } from 'path';
-import { isProjectExcluded } from '../utils/project-filter.js';
-import { loadFromFileOnce } from './hook-settings.js';
-import { OBSERVER_SESSIONS_DIR, OBSERVER_SESSIONS_PROJECT } from './paths.js';
+import { relative, isAbsolute } from "path";
+import { isProjectExcluded } from "../utils/project-filter.js";
+import { loadFromFileOnce } from "./hook-settings.js";
+import { OBSERVER_SESSIONS_DIR, OBSERVER_SESSIONS_PROJECT } from "./paths.js";
 
 function isWithin(child: string, parent: string): boolean {
   if (child === parent) return true;
   const rel = relative(parent, child);
-  return rel.length > 0 && !rel.startsWith('..') && !isAbsolute(rel);
+  return rel.length > 0 && !rel.startsWith("..") && !isAbsolute(rel);
 }
 
 export function shouldTrackProject(cwd: string): boolean {
-  if (process.env.CLAUDE_MEM_INTERNAL === '1') return false;
+  if (process.env.CLAUDE_MEM_INTERNAL === "1") return false;
   if (!cwd) return true;
   if (isWithin(cwd, OBSERVER_SESSIONS_DIR)) {
     return false;

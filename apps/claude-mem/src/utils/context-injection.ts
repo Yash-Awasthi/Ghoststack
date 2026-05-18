@@ -1,22 +1,17 @@
+import path from "path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 
-import path from 'path';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+export const CONTEXT_TAG_OPEN = "<claude-mem-context>";
+export const CONTEXT_TAG_CLOSE = "</claude-mem-context>";
 
-export const CONTEXT_TAG_OPEN = '<claude-mem-context>';
-export const CONTEXT_TAG_CLOSE = '</claude-mem-context>';
-
-export function injectContextIntoMarkdownFile(
-  filePath: string,
-  contextContent: string,
-  headerLine?: string,
-): void {
+export function injectContextIntoMarkdownFile(filePath: string, contextContent: string, headerLine?: string): void {
   const parentDirectory = path.dirname(filePath);
   mkdirSync(parentDirectory, { recursive: true });
 
   const wrappedContent = `${CONTEXT_TAG_OPEN}\n${contextContent}\n${CONTEXT_TAG_CLOSE}`;
 
   if (existsSync(filePath)) {
-    let existingContent = readFileSync(filePath, 'utf-8');
+    let existingContent = readFileSync(filePath, "utf-8");
 
     const tagStartIndex = existingContent.indexOf(CONTEXT_TAG_OPEN);
     const tagEndIndex = existingContent.indexOf(CONTEXT_TAG_CLOSE);
@@ -27,15 +22,15 @@ export function injectContextIntoMarkdownFile(
         wrappedContent +
         existingContent.slice(tagEndIndex + CONTEXT_TAG_CLOSE.length);
     } else {
-      existingContent = existingContent.trimEnd() + '\n\n' + wrappedContent + '\n';
+      existingContent = existingContent.trimEnd() + "\n\n" + wrappedContent + "\n";
     }
 
-    writeFileSync(filePath, existingContent, 'utf-8');
+    writeFileSync(filePath, existingContent, "utf-8");
   } else {
     if (headerLine) {
-      writeFileSync(filePath, `${headerLine}\n\n${wrappedContent}\n`, 'utf-8');
+      writeFileSync(filePath, `${headerLine}\n\n${wrappedContent}\n`, "utf-8");
     } else {
-      writeFileSync(filePath, wrappedContent + '\n', 'utf-8');
+      writeFileSync(filePath, wrappedContent + "\n", "utf-8");
     }
   }
 }

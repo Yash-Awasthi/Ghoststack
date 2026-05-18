@@ -5,7 +5,11 @@ import { handleAdsEnable, handleAdsDisable } from './ads'
 import { handleHelpCommand } from './help'
 import { handleImageCommand } from './image'
 import { handleInitializationFlowLocally } from './init'
-import { buildInterviewPrompt, buildPlanPrompt, buildReviewPromptFromArgs } from './prompt-builders'
+import {
+  buildInterviewPrompt,
+  buildPlanPrompt,
+  buildReviewPromptFromArgs,
+} from './prompt-builders'
 import { runBashCommand } from './router'
 import { handleUsageCommand } from './usage'
 import { returnToFreebuffLanding } from '../hooks/use-freebuff-session'
@@ -15,7 +19,11 @@ import { useChatStore } from '../state/chat-store'
 import { useFeedbackStore } from '../state/feedback-store'
 import { useLoginStore } from '../state/login-store'
 import { getChatGptOAuthStatus } from '../utils/chatgpt-oauth'
-import { AGENT_MODES, END_SESSION_MESSAGE, IS_FREEBUFF } from '../utils/constants'
+import {
+  AGENT_MODES,
+  END_SESSION_MESSAGE,
+  IS_FREEBUFF,
+} from '../utils/constants'
 import { getSystemMessage, getUserMessage } from '../utils/message-history'
 import { capturePendingAttachments } from '../utils/pending-attachments'
 import { getSkillByName } from '../utils/skill-registry'
@@ -174,11 +182,7 @@ const FREEBUFF_REMOVED_COMMANDS = new Set([
   'gpt-5-agent',
 ])
 
-const FREEBUFF_ONLY_COMMANDS = new Set([
-  'connect',
-  'plan',
-  'end-session',
-])
+const FREEBUFF_ONLY_COMMANDS = new Set(['connect', 'plan', 'end-session'])
 
 const ALL_COMMANDS: CommandDefinition[] = [
   defineCommand({
@@ -657,23 +661,30 @@ function createSkillCommand(skillName: string): CommandDefinition {
           getSystemMessage(`Skill not found: ${skillName}`),
         ])
         params.saveToHistory(params.inputValue.trim())
-        params.setInputValue({ text: '', cursorPosition: 0, lastEditDueToNav: false })
+        params.setInputValue({
+          text: '',
+          cursorPosition: 0,
+          lastEditDueToNav: false,
+        })
         return
       }
 
       const trimmed = params.inputValue.trim()
       params.saveToHistory(trimmed)
-      params.setInputValue({ text: '', cursorPosition: 0, lastEditDueToNav: false })
+      params.setInputValue({
+        text: '',
+        cursorPosition: 0,
+        lastEditDueToNav: false,
+      })
 
       // Build the message content with skill context and optional user args
       const skillContext = `<skill name="${skill.name}">
 ${skill.content}
 </skill>`
 
-      const userPrompt = `I invoke the following skill:\n\n${skillContext}\n\n`
-        + (args.trim()
-          ? `User request: ${args.trim()}`
-          : '')
+      const userPrompt =
+        `I invoke the following skill:\n\n${skillContext}\n\n` +
+        (args.trim() ? `User request: ${args.trim()}` : '')
 
       // Check streaming/queue state
       if (

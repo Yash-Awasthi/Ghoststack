@@ -13,7 +13,9 @@ The OpenClaw plugin gives claude-mem persistent memory to agents running on the 
 3. **Observation feed** — Streams new observations to messaging channels (Telegram, Discord, Slack, etc.) in real-time via SSE
 
 <Info>
-OpenClaw's embedded runner (`pi-embedded`) calls the Anthropic API directly without spawning a `claude` process, so claude-mem's standard hooks never fire. This plugin bridges that gap by using OpenClaw's event system to capture the same data.
+  OpenClaw's embedded runner (`pi-embedded`) calls the Anthropic API directly without spawning a `claude` process, so
+  claude-mem's standard hooks never fire. This plugin bridges that gap by using OpenClaw's event system to capture the
+  same data.
 </Info>
 
 ## How It Works
@@ -47,11 +49,13 @@ OpenClaw Gateway
     Before each LLM call, the plugin fetches the observation timeline from the worker's `/api/context/inject` endpoint and returns it as `appendSystemContext`. This injects cross-session context directly into the agent's system prompt without writing any files.
 
     The context is cached for 60 seconds to avoid re-fetching on every LLM turn within a session.
+
   </Step>
   <Step title="Tool use recorded (tool_result_persist)">
     Every time the agent uses a tool (Read, Write, Bash, etc.), the plugin sends the observation to `POST /api/sessions/observations` with the tool name, input, and truncated response (max 1000 chars). This is fire-and-forget — it doesn't block the agent from continuing work.
 
     Tools prefixed with `memory_` are skipped to avoid recursive recording.
+
   </Step>
   <Step title="Agent finishes (agent_end)">
     When the agent completes, the plugin extracts the last assistant message and sends it to `POST /api/sessions/summarize`, then calls `POST /api/sessions/complete` to close the session. Both are fire-and-forget.
@@ -68,7 +72,8 @@ The plugin injects cross-session observation context into each agent's system pr
 This approach keeps `MEMORY.md` under the agent's control for curated long-term memory (decisions, preferences, durable facts), while the observation timeline is delivered through the system prompt where it belongs.
 
 <Info>
-Context is cached for 60 seconds per project to avoid re-fetching on every LLM turn. The cache is cleared on gateway restart. Use `syncMemoryFileExclude` to opt specific agents out of context injection entirely.
+  Context is cached for 60 seconds per project to avoid re-fetching on every LLM turn. The cache is cleared on gateway
+  restart. Use `syncMemoryFileExclude` to opt specific agents out of context injection entirely.
 </Info>
 
 ### Observation Feed (SSE → Messaging)
@@ -112,6 +117,7 @@ The observation feed works with any channel that your OpenClaw gateway has confi
       "to": "123456789"
     }
     ```
+
   </Accordion>
 
   <Accordion title="Discord" icon="discord">
@@ -128,6 +134,7 @@ The observation feed works with any channel that your OpenClaw gateway has confi
       "to": "1234567890123456789"
     }
     ```
+
   </Accordion>
 
   <Accordion title="Slack" icon="slack">
@@ -145,6 +152,7 @@ The observation feed works with any channel that your OpenClaw gateway has confi
       "to": "C01ABC2DEFG"
     }
     ```
+
   </Accordion>
 
   <Accordion title="Signal" icon="signal-messenger">
@@ -159,6 +167,7 @@ The observation feed works with any channel that your OpenClaw gateway has confi
       "to": "+1234567890"
     }
     ```
+
   </Accordion>
 
   <Accordion title="WhatsApp" icon="whatsapp">
@@ -173,6 +182,7 @@ The observation feed works with any channel that your OpenClaw gateway has confi
       "to": "+1234567890"
     }
     ```
+
   </Accordion>
 
   <Accordion title="LINE" icon="line">
@@ -187,6 +197,7 @@ The observation feed works with any channel that your OpenClaw gateway has confi
       "to": "U1234567890abcdef"
     }
     ```
+
   </Accordion>
 </AccordionGroup>
 
@@ -221,6 +232,7 @@ The `channel` value must match a channel plugin that is already configured and r
 After starting the gateway, check that the feed is connected:
 
 1. **Check the logs** — You should see:
+
    ```
    [claude-mem] Observation feed starting — channel: telegram, target: 123456789
    [claude-mem] Connecting to SSE stream at http://localhost:37777/stream
@@ -228,6 +240,7 @@ After starting the gateway, check that the feed is connected:
    ```
 
 2. **Use the status command** — Run `/claude_mem_feed` in any OpenClaw chat to see:
+
    ```
    Claude-Mem Observation Feed
    Enabled: yes
@@ -239,19 +252,21 @@ After starting the gateway, check that the feed is connected:
 3. **Trigger a test** — Have an agent do some work. When the worker processes the tool usage into an observation, you'll receive a message in your configured channel.
 
 <Info>
-The feed only sends `new_observation` events — not raw tool usage. Observations are generated asynchronously by the worker's AI agent, so there's a 1-2 second delay between tool use and the observation message appearing in your channel.
+  The feed only sends `new_observation` events — not raw tool usage. Observations are generated asynchronously by the
+  worker's AI agent, so there's a 1-2 second delay between tool use and the observation message appearing in your
+  channel.
 </Info>
 
 ### Troubleshooting the Feed
 
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| `Connection: disconnected` | Worker not running or wrong port | Check `workerPort` config, run `npm run worker:status` |
-| `Connection: reconnecting` | Worker was running but connection dropped | The plugin auto-reconnects with backoff — wait up to 30s |
-| `Unknown channel type` in logs | Channel plugin not loaded on gateway | Verify your OpenClaw gateway has the channel plugin configured |
-| No messages appearing | Feed connected but no observations being created | Check that agents are running and the worker is processing observations |
-| `Observation feed disabled` in logs | `enabled` is `false` or missing | Set `observationFeed.enabled` to `true` |
-| `Observation feed misconfigured` in logs | Missing `channel` or `to` | Both `channel` and `to` are required |
+| Symptom                                  | Cause                                            | Fix                                                                     |
+| ---------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
+| `Connection: disconnected`               | Worker not running or wrong port                 | Check `workerPort` config, run `npm run worker:status`                  |
+| `Connection: reconnecting`               | Worker was running but connection dropped        | The plugin auto-reconnects with backoff — wait up to 30s                |
+| `Unknown channel type` in logs           | Channel plugin not loaded on gateway             | Verify your OpenClaw gateway has the channel plugin configured          |
+| No messages appearing                    | Feed connected but no observations being created | Check that agents are running and the worker is processing observations |
+| `Observation feed disabled` in logs      | `enabled` is `false` or missing                  | Set `observationFeed.enabled` to `true`                                 |
+| `Observation feed misconfigured` in logs | Missing `channel` or `to`                        | Both `channel` and `to` are required                                    |
 
 ## Installation
 
@@ -301,21 +316,27 @@ Add `claude-mem` to your OpenClaw gateway's plugin configuration:
 ```
 
 <Note>
-The claude-mem worker service must be running on the same machine as the OpenClaw gateway. The plugin communicates with it via HTTP on `localhost:37777`.
+  The claude-mem worker service must be running on the same machine as the OpenClaw gateway. The plugin communicates
+  with it via HTTP on `localhost:37777`.
 </Note>
 
 ## Configuration
 
 <ParamField body="project" type="string" default="openclaw">
-  Project name for scoping observations in the memory database. All observations from this gateway will be stored under this project name.
+  Project name for scoping observations in the memory database. All observations from this gateway will be stored under
+  this project name.
 </ParamField>
 
 <ParamField body="syncMemoryFile" type="boolean" default={true}>
-  Inject observation context into the agent system prompt via `before_prompt_build` hook. When `true`, agents receive cross-session context automatically. Set to `false` to disable context injection entirely (observations are still recorded).
+  Inject observation context into the agent system prompt via `before_prompt_build` hook. When `true`, agents receive
+  cross-session context automatically. Set to `false` to disable context injection entirely (observations are still
+  recorded).
 </ParamField>
 
 <ParamField body="syncMemoryFileExclude" type="string[]" default={[]}>
-  Agent IDs excluded from automatic context injection. Useful for agents that curate their own memory and don't need the observation timeline (e.g., `["snarf", "debugger"]`). Observations are still recorded for excluded agents — only the context injection is skipped.
+  Agent IDs excluded from automatic context injection. Useful for agents that curate their own memory and don't need the
+  observation timeline (e.g., `["snarf", "debugger"]`). Observations are still recorded for excluded agents — only the
+  context injection is skipped.
 </ParamField>
 
 <ParamField body="workerPort" type="number" default={37777}>

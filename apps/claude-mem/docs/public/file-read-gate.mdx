@@ -60,12 +60,12 @@ Read blocked: This file has prior observations. Choose the cheapest path:
 
 Claude has four options after seeing the timeline, ordered from cheapest to most expensive:
 
-| Option | Token Cost | When to Use |
-|--------|-----------|-------------|
-| **Semantic priming** | 0 extra | Timeline titles tell Claude enough to proceed |
-| **get_observations([IDs])** | ~300 each | Need specific details from past work |
-| **smart_outline / smart_unfold** | ~1-2k | Need current code structure or a specific function |
-| **Full file read** | 5k-50k | File has changed significantly since observations |
+| Option                           | Token Cost | When to Use                                        |
+| -------------------------------- | ---------- | -------------------------------------------------- |
+| **Semantic priming**             | 0 extra    | Timeline titles tell Claude enough to proceed      |
+| **get_observations([IDs])**      | ~300 each  | Need specific details from past work               |
+| **smart_outline / smart_unfold** | ~1-2k      | Need current code structure or a specific function |
+| **Full file read**               | 5k-50k     | File has changed significantly since observations  |
 
 In practice, most file reads resolve at the semantic priming or get_observations level, saving thousands of tokens per interaction.
 
@@ -93,22 +93,24 @@ The timestamp format matches the session start context header (`YYYY-MM-DD time 
 
 A typical source file costs **5,000-50,000 tokens** to read in full. The File Read Gate replaces that with:
 
-| Component | Tokens |
-|-----------|--------|
-| Timeline header + instructions | ~120 |
-| 15 observation entries | ~250 |
-| **Total timeline** | **~370** |
+| Component                      | Tokens   |
+| ------------------------------ | -------- |
+| Timeline header + instructions | ~120     |
+| 15 observation entries         | ~250     |
+| **Total timeline**             | **~370** |
 
 If Claude needs more detail, it fetches individual observations at ~300 tokens each. Even fetching 3 observations totals ~1,270 tokens -- still a **75-97% savings** over reading the full file.
 
 ### Real-World Example
 
 Without the gate (reading `worker-service.ts`):
+
 ```
 Read: 18,000 tokens
 ```
 
 With the gate:
+
 ```
 Timeline:       370 tokens
 + 2 observations: 600 tokens
@@ -121,12 +123,12 @@ Total:          970 tokens (95% savings)
 
 Not all observations about a file are equally relevant. The gate scores each observation by how specifically it relates to the target file:
 
-| Signal | Score Bonus |
-|--------|------------|
-| File was **modified** (not just read) | +2 |
-| Observation covers **3 or fewer** total files | +2 |
-| Observation covers **4-8** total files | +1 |
-| Observation covers **9+** files (survey-like) | +0 |
+| Signal                                        | Score Bonus |
+| --------------------------------------------- | ----------- |
+| File was **modified** (not just read)         | +2          |
+| Observation covers **3 or fewer** total files | +2          |
+| Observation covers **4-8** total files        | +1          |
+| Observation covers **9+** files (survey-like) | +0          |
 
 Higher-scoring observations appear first in the timeline. An observation where the file was the primary modification target ranks above one where the file was incidentally read alongside 20 others.
 
@@ -153,6 +155,7 @@ Projects matching patterns in `CLAUDE_MEM_EXCLUDED_PROJECTS` skip the gate entir
 The File Read Gate is implemented as a PreToolUse hook on the `Read` tool matcher. To disable it, remove the `Read` matcher entry from the hooks configuration:
 
 1. Open your Claude Code settings:
+
    ```
    ~/.claude/settings.json
    ```
@@ -162,7 +165,8 @@ The File Read Gate is implemented as a PreToolUse hook on the `Read` tool matche
 Alternatively, if you want to keep the gate installed but bypass it for a specific read, Claude can ask you to allow the read -- the gate's deny decision is presented to the user, who can override it.
 
 <Note>
-Disabling the gate means Claude will read full files every time, which increases token usage but ensures it always sees the latest code. This is a reasonable choice for small projects or when observations are sparse.
+  Disabling the gate means Claude will read full files every time, which increases token usage but ensures it always
+  sees the latest code. This is a reasonable choice for small projects or when observations are sparse.
 </Note>
 
 ---

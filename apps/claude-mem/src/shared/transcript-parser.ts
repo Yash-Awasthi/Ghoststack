@@ -1,6 +1,6 @@
-import { readFileSync, existsSync } from 'fs';
-import { logger } from '../utils/logger.js';
-import { SYSTEM_REMINDER_REGEX } from '../utils/tag-stripping.js';
+import { readFileSync, existsSync } from "fs";
+import { logger } from "../utils/logger.js";
+import { SYSTEM_REMINDER_REGEX } from "../utils/tag-stripping.js";
 
 function isGeminiTranscriptFormat(content: string): { isGemini: true; messages: any[] } | { isGemini: false } {
   try {
@@ -16,18 +16,18 @@ function isGeminiTranscriptFormat(content: string): { isGemini: true; messages: 
 
 export function extractLastMessage(
   transcriptPath: string,
-  role: 'user' | 'assistant',
+  role: "user" | "assistant",
   stripSystemReminders: boolean = false
 ): string {
   if (!transcriptPath || !existsSync(transcriptPath)) {
-    logger.warn('PARSER', `Transcript path missing or file does not exist: ${transcriptPath}`);
-    return '';
+    logger.warn("PARSER", `Transcript path missing or file does not exist: ${transcriptPath}`);
+    return "";
   }
 
-  const content = readFileSync(transcriptPath, 'utf-8').trim();
+  const content = readFileSync(transcriptPath, "utf-8").trim();
   if (!content) {
-    logger.warn('PARSER', `Transcript file exists but is empty: ${transcriptPath}`);
-    return '';
+    logger.warn("PARSER", `Transcript file exists but is empty: ${transcriptPath}`);
+    return "";
   }
 
   const geminiCheck = isGeminiTranscriptFormat(content);
@@ -40,24 +40,24 @@ export function extractLastMessage(
 
 function extractLastMessageFromGeminiTranscript(
   messages: any[],
-  role: 'user' | 'assistant',
+  role: "user" | "assistant",
   stripSystemReminders: boolean
 ): string {
-  const geminiRole = role === 'assistant' ? 'gemini' : 'user';
+  const geminiRole = role === "assistant" ? "gemini" : "user";
 
   for (let i = messages.length - 1; i >= 0; i--) {
     const msg = messages[i];
-    if (msg?.type === geminiRole && typeof msg.content === 'string') {
+    if (msg?.type === geminiRole && typeof msg.content === "string") {
       let text = msg.content;
       if (stripSystemReminders) {
-        text = text.replace(SYSTEM_REMINDER_REGEX, '');
-        text = text.replace(/\n{3,}/g, '\n\n').trim();
+        text = text.replace(SYSTEM_REMINDER_REGEX, "");
+        text = text.replace(/\n{3,}/g, "\n\n").trim();
       }
       return text;
     }
   }
 
-  return '';
+  return "";
 }
 
 /**
@@ -75,10 +75,10 @@ function extractLastMessageFromGeminiTranscript(
  */
 export function extractLastMessageFromJsonl(
   content: string,
-  role: 'user' | 'assistant',
+  role: "user" | "assistant",
   stripSystemReminders: boolean
 ): string {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   let foundMatchingRole = false;
   let lastEmptyText: string | null = null;
 
@@ -99,18 +99,18 @@ export function extractLastMessageFromJsonl(
 
     if (!line.message?.content) continue;
 
-    let text = '';
+    let text = "";
     const msgContent = line.message.content;
-    if (typeof msgContent === 'string') {
+    if (typeof msgContent === "string") {
       text = msgContent;
     } else if (Array.isArray(msgContent)) {
       text = msgContent
         .filter(
-          (c: any): c is { type: 'text'; text: string } =>
-            !!c && typeof c === 'object' && c.type === 'text' && typeof c.text === 'string'
+          (c: any): c is { type: "text"; text: string } =>
+            !!c && typeof c === "object" && c.type === "text" && typeof c.text === "string"
         )
         .map((c) => c.text)
-        .join('\n');
+        .join("\n");
     } else {
       // Unknown content shape (null, number, plain object, etc.) — skip rather
       // than throw. A single weird line should not crash the entire summary
@@ -121,8 +121,8 @@ export function extractLastMessageFromJsonl(
     }
 
     if (stripSystemReminders) {
-      text = text.replace(SYSTEM_REMINDER_REGEX, '');
-      text = text.replace(/\n{3,}/g, '\n\n').trim();
+      text = text.replace(SYSTEM_REMINDER_REGEX, "");
+      text = text.replace(/\n{3,}/g, "\n\n").trim();
     }
 
     if (text && text.trim()) {
@@ -137,7 +137,7 @@ export function extractLastMessageFromJsonl(
   }
 
   if (!foundMatchingRole) {
-    return '';
+    return "";
   }
-  return lastEmptyText ?? '';
+  return lastEmptyText ?? "";
 }

@@ -84,6 +84,7 @@ npm run worker:restart
 ```
 
 Verify:
+
 ```bash
 curl http://localhost:37777/api/health
 ```
@@ -102,6 +103,7 @@ npm run worker:start
 ```
 
 Verify:
+
 ```bash
 curl http://localhost:37777/api/health
 ```
@@ -109,6 +111,7 @@ curl http://localhost:37777/api/health
 **Got `{"status":"ok"}`?** You're set. Move to Step 3.
 
 **Still not working?** Debug steps:
+
 - Check that bun is installed: `bun --version`
 - Check the worker status: `npm run worker:status`
 - Check if something else is using port 37777: `lsof -i :37777`
@@ -198,6 +201,7 @@ Added exponential backoff with configurable max retries to handle transient fail
 ### Pick your channel
 
 You need two things:
+
 - **Channel type** — Must match a channel plugin already running on your OpenClaw gateway
 - **Target ID** — The chat/channel/user ID where messages go
 
@@ -206,6 +210,7 @@ You need two things:
 Channel type: `telegram`
 
 To find your chat ID:
+
 1. Message @userinfobot on Telegram — https://t.me/userinfobot
 2. It replies with your numeric chat ID (e.g., `123456789`)
 3. For group chats, the ID is negative (e.g., `-1001234567890`)
@@ -223,6 +228,7 @@ To find your chat ID:
 Channel type: `discord`
 
 To find your channel ID:
+
 1. Enable Developer Mode in Discord: Settings → Advanced → Developer Mode
 2. Right-click the target channel → Copy Channel ID
 
@@ -239,6 +245,7 @@ To find your channel ID:
 Channel type: `slack`
 
 To find your channel ID (not the channel name):
+
 1. Open the channel in Slack
 2. Click the channel name at the top
 3. Scroll to the bottom of the channel details — the ID looks like `C01ABC2DEFG`
@@ -352,6 +359,7 @@ Reports worker health and current session state.
 ```
 
 Output:
+
 ```
 Claude-Mem Worker Status
 Status: ok
@@ -415,19 +423,19 @@ A background service connects to the worker's SSE stream and forwards `new_obser
 
 ## Troubleshooting
 
-| Problem | What to check |
-|---------|---------------|
-| Worker health check fails | Is bun installed? (`bun --version`). Is something else on port 37777? (`lsof -i :37777`). Try running directly: `bun plugin/scripts/worker-service.cjs start` |
-| Worker started from Claude Code install but not responding | Check `cd ~/.claude/plugins/marketplaces/thedotmack && npm run worker:status`. May need `npm run worker:restart`. |
-| Worker started from cloned repo but not responding | Check `cd /path/to/claude-mem && npm run worker:status`. Make sure you ran `npm install && npm run build` first. |
-| No context in agent system prompt | Check that `syncMemoryFile` is not set to `false`. Check that the agent's ID is not in `syncMemoryFileExclude`. Verify the worker is running and has observations. |
-| Observations not being recorded | Check gateway logs for `[claude-mem]` messages. The worker must be running and reachable on localhost:37777. |
-| Feed shows `disconnected` | Worker's `/stream` endpoint not reachable. Check `workerPort` matches the actual worker port. |
-| Feed shows `reconnecting` | Connection dropped. The plugin auto-reconnects — wait up to 30 seconds. |
-| `Unknown channel type` in logs | The channel plugin (e.g., telegram) isn't loaded on your gateway. Make sure the channel is configured and running. |
-| `Observation feed disabled` in logs | Set `observationFeed.enabled` to `true` in your config. |
-| `Observation feed misconfigured` in logs | Both `observationFeed.channel` and `observationFeed.to` are required. |
-| No messages in channel despite `connected` | The feed only sends processed observations, not raw tool usage. There's a 1-2 second delay. Make sure the worker is actually processing observations (check http://localhost:37777). |
+| Problem                                                    | What to check                                                                                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Worker health check fails                                  | Is bun installed? (`bun --version`). Is something else on port 37777? (`lsof -i :37777`). Try running directly: `bun plugin/scripts/worker-service.cjs start`                        |
+| Worker started from Claude Code install but not responding | Check `cd ~/.claude/plugins/marketplaces/thedotmack && npm run worker:status`. May need `npm run worker:restart`.                                                                    |
+| Worker started from cloned repo but not responding         | Check `cd /path/to/claude-mem && npm run worker:status`. Make sure you ran `npm install && npm run build` first.                                                                     |
+| No context in agent system prompt                          | Check that `syncMemoryFile` is not set to `false`. Check that the agent's ID is not in `syncMemoryFileExclude`. Verify the worker is running and has observations.                   |
+| Observations not being recorded                            | Check gateway logs for `[claude-mem]` messages. The worker must be running and reachable on localhost:37777.                                                                         |
+| Feed shows `disconnected`                                  | Worker's `/stream` endpoint not reachable. Check `workerPort` matches the actual worker port.                                                                                        |
+| Feed shows `reconnecting`                                  | Connection dropped. The plugin auto-reconnects — wait up to 30 seconds.                                                                                                              |
+| `Unknown channel type` in logs                             | The channel plugin (e.g., telegram) isn't loaded on your gateway. Make sure the channel is configured and running.                                                                   |
+| `Observation feed disabled` in logs                        | Set `observationFeed.enabled` to `true` in your config.                                                                                                                              |
+| `Observation feed misconfigured` in logs                   | Both `observationFeed.channel` and `observationFeed.to` are required.                                                                                                                |
+| No messages in channel despite `connected`                 | The feed only sends processed observations, not raw tool usage. There's a 1-2 second delay. Make sure the worker is actually processing observations (check http://localhost:37777). |
 
 ## Full Config Reference
 
@@ -451,12 +459,12 @@ A background service connects to the worker's SSE stream and forwards `new_obser
 }
 ```
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `project` | string | `"openclaw"` | Project name scoping observations in the database |
-| `syncMemoryFile` | boolean | `true` | Inject observation context into agent system prompt |
-| `syncMemoryFileExclude` | string[] | `[]` | Agent IDs excluded from context injection |
-| `workerPort` | number | `37777` | Claude-mem worker service port |
-| `observationFeed.enabled` | boolean | `false` | Stream observations to a messaging channel |
-| `observationFeed.channel` | string | — | Channel type: `telegram`, `discord`, `slack`, `signal`, `whatsapp`, `line` |
-| `observationFeed.to` | string | — | Target chat/channel/user ID |
+| Field                     | Type     | Default      | Description                                                                |
+| ------------------------- | -------- | ------------ | -------------------------------------------------------------------------- |
+| `project`                 | string   | `"openclaw"` | Project name scoping observations in the database                          |
+| `syncMemoryFile`          | boolean  | `true`       | Inject observation context into agent system prompt                        |
+| `syncMemoryFileExclude`   | string[] | `[]`         | Agent IDs excluded from context injection                                  |
+| `workerPort`              | number   | `37777`      | Claude-mem worker service port                                             |
+| `observationFeed.enabled` | boolean  | `false`      | Stream observations to a messaging channel                                 |
+| `observationFeed.channel` | string   | —            | Channel type: `telegram`, `discord`, `slack`, `signal`, `whatsapp`, `line` |
+| `observationFeed.to`      | string   | —            | Target chat/channel/user ID                                                |

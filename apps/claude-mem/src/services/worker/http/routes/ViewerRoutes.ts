@@ -1,37 +1,31 @@
-
-import express, { Request, Response } from 'express';
-import path from 'path';
-import { readFileSync, existsSync } from 'fs';
-import { logger } from '../../../../utils/logger.js';
-import { getPackageRoot } from '../../../../shared/paths.js';
-import { SSEBroadcaster } from '../../SSEBroadcaster.js';
-import { DatabaseManager } from '../../DatabaseManager.js';
-import { SessionManager } from '../../SessionManager.js';
-import { BaseRouteHandler } from '../BaseRouteHandler.js';
+import express, { Request, Response } from "express";
+import path from "path";
+import { readFileSync, existsSync } from "fs";
+import { logger } from "../../../../utils/logger.js";
+import { getPackageRoot } from "../../../../shared/paths.js";
+import { SSEBroadcaster } from "../../SSEBroadcaster.js";
+import { DatabaseManager } from "../../DatabaseManager.js";
+import { SessionManager } from "../../SessionManager.js";
+import { BaseRouteHandler } from "../BaseRouteHandler.js";
 
 const VIEWER_HTML_CANDIDATE_PATHS: readonly string[] = (() => {
   const packageRoot = getPackageRoot();
-  return [
-    path.join(packageRoot, 'ui', 'viewer.html'),
-    path.join(packageRoot, 'plugin', 'ui', 'viewer.html'),
-  ];
+  return [path.join(packageRoot, "ui", "viewer.html"), path.join(packageRoot, "plugin", "ui", "viewer.html")];
 })();
 
 const resolvedViewerHtmlPath: string | null =
   VIEWER_HTML_CANDIDATE_PATHS.find((candidate) => existsSync(candidate)) ?? null;
 
-const viewerHtmlBytes: Buffer | null = resolvedViewerHtmlPath
-  ? readFileSync(resolvedViewerHtmlPath)
-  : null;
+const viewerHtmlBytes: Buffer | null = resolvedViewerHtmlPath ? readFileSync(resolvedViewerHtmlPath) : null;
 
 if (resolvedViewerHtmlPath) {
-  logger.info('SYSTEM', 'Cached viewer.html at boot', {
+  logger.info("SYSTEM", "Cached viewer.html at boot", {
     path: resolvedViewerHtmlPath,
-    bytes: viewerHtmlBytes!.byteLength,
+    bytes: viewerHtmlBytes!.byteLength
   });
 } else {
-  logger.warn('SYSTEM', 'viewer.html not found at any expected location at boot', {
-    candidates: VIEWER_HTML_CANDIDATE_PATHS,
+  logger.warn("SYSTEM", "viewer.html not found at any expected location at boot", {
+    candidates: VIEWER_HTML_CANDIDATE_PATHS
   });
 }
 
@@ -46,18 +40,18 @@ export class ViewerRoutes extends BaseRouteHandler {
 
   setupRoutes(app: express.Application): void {
     const packageRoot = getPackageRoot();
-    app.use(express.static(path.join(packageRoot, 'ui')));
+    app.use(express.static(path.join(packageRoot, "ui")));
 
-    app.get('/health', this.handleHealth.bind(this));
-    app.get('/', this.handleViewerUI.bind(this));
-    app.get('/stream', this.handleSSEStream.bind(this));
+    app.get("/health", this.handleHealth.bind(this));
+    app.get("/", this.handleViewerUI.bind(this));
+    app.get("/stream", this.handleSSEStream.bind(this));
   }
 
   private handleHealth = this.wrapHandler((req: Request, res: Response): void => {
     const activeSessions = this.sessionManager.getActiveSessionCount();
 
     res.json({
-      status: 'ok',
+      status: "ok",
       timestamp: Date.now(),
       activeSessions
     });
@@ -65,9 +59,9 @@ export class ViewerRoutes extends BaseRouteHandler {
 
   private handleViewerUI = this.wrapHandler((req: Request, res: Response): void => {
     if (!viewerHtmlBytes) {
-      throw new Error('Viewer UI not found at any expected location');
+      throw new Error("Viewer UI not found at any expected location");
     }
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.send(viewerHtmlBytes);
   });
 
@@ -76,21 +70,21 @@ export class ViewerRoutes extends BaseRouteHandler {
       this.dbManager.getSessionStore();
     } catch (initError: unknown) {
       if (initError instanceof Error) {
-        logger.warn('HTTP', 'SSE stream requested before DB initialization', {}, initError);
+        logger.warn("HTTP", "SSE stream requested before DB initialization", {}, initError);
       }
-      res.status(503).json({ error: 'Service initializing' });
+      res.status(503).json({ error: "Service initializing" });
       return;
     }
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
 
     this.sseBroadcaster.addClient(res);
 
     const projectCatalog = this.dbManager.getSessionStore().getProjectCatalog();
     this.sseBroadcaster.broadcast({
-      type: 'initial_load',
+      type: "initial_load",
       projects: projectCatalog.projects,
       sources: projectCatalog.sources,
       projectsBySource: projectCatalog.projectsBySource,
@@ -102,13 +96,13 @@ export class ViewerRoutes extends BaseRouteHandler {
         const isProcessing = await this.sessionManager.isAnySessionProcessing();
         const queueDepth = await this.sessionManager.getTotalActiveWork();
         this.sseBroadcaster.broadcast({
-          type: 'processing_status',
+          type: "processing_status",
           isProcessing,
           queueDepth
         });
       } catch (error) {
-        logger.warn('HTTP', 'Failed to broadcast initial processing status', {
-          error: error instanceof Error ? error.message : String(error),
+        logger.warn("HTTP", "Failed to broadcast initial processing status", {
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     })();

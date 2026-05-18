@@ -24,9 +24,7 @@ Every Cursor session starts fresh - your AI doesn't remember what it worked on y
   </Card>
 </CardGroup>
 
-<Info>
-**No Claude Code subscription required.** Use Gemini (free tier) or OpenRouter as your AI provider.
-</Info>
+<Info>**No Claude Code subscription required.** Use Gemini (free tier) or OpenRouter as your AI provider.</Info>
 
 ## How It Works
 
@@ -55,12 +53,14 @@ bun run cursor:setup
 ```
 
 The setup wizard will:
+
 - Detect you don't have Claude Code
 - Help you choose and configure a free AI provider (Gemini recommended)
 - Install hooks automatically
 - Start the worker service
 
 **Detailed guides:**
+
 - [Gemini Setup](/cursor/gemini-setup) - Recommended free option (1500 req/day)
 - [OpenRouter Setup](/cursor/openrouter-setup) - 100+ models including free options
 
@@ -83,20 +83,16 @@ The plugin uses Claude's SDK by default but you can switch to Gemini or OpenRout
 
 <AccordionGroup>
   <Accordion title="macOS">
-    - [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
-    - Cursor IDE
-    - jq and curl: `brew install jq curl`
+    - [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash` - Cursor IDE - jq and curl: `brew install jq
+    curl`
   </Accordion>
   <Accordion title="Linux">
-    - [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
-    - Cursor IDE
-    - jq and curl: `apt install jq curl` or `dnf install jq curl`
+    - [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash` - Cursor IDE - jq and curl: `apt install jq
+    curl` or `dnf install jq curl`
   </Accordion>
   <Accordion title="Windows">
-    - [Bun](https://bun.sh): `powershell -c "irm bun.sh/install.ps1 | iex"`
-    - Cursor IDE
-    - PowerShell 5.1+ (included in Windows 10/11)
-    - Git for Windows
+    - [Bun](https://bun.sh): `powershell -c "irm bun.sh/install.ps1 | iex"` - Cursor IDE - PowerShell 5.1+ (included in
+    Windows 10/11) - Git for Windows
   </Accordion>
 </AccordionGroup>
 
@@ -104,26 +100,28 @@ The plugin uses Claude's SDK by default but you can switch to Gemini or OpenRout
 
 After installation, these commands are available from the claude-mem directory:
 
-| Command | Description |
-|---------|-------------|
-| `bun run cursor:setup` | Interactive setup wizard |
-| `bun run cursor:install` | Install Cursor hooks |
-| `bun run cursor:uninstall` | Remove Cursor hooks |
-| `bun run cursor:status` | Check hook installation status |
-| `bun run worker:start` | Start the worker service |
-| `bun run worker:stop` | Stop the worker service |
-| `bun run worker:status` | Check worker status |
+| Command                    | Description                    |
+| -------------------------- | ------------------------------ |
+| `bun run cursor:setup`     | Interactive setup wizard       |
+| `bun run cursor:install`   | Install Cursor hooks           |
+| `bun run cursor:uninstall` | Remove Cursor hooks            |
+| `bun run cursor:status`    | Check hook installation status |
+| `bun run worker:start`     | Start the worker service       |
+| `bun run worker:stop`      | Stop the worker service        |
+| `bun run worker:status`    | Check worker status            |
 
 ## Verifying Installation
 
 After setup, verify everything is working:
 
 1. **Check worker status:**
+
    ```bash
    bun run worker:status
    ```
 
 2. **Check hook installation:**
+
    ```bash
    bun run cursor:status
    ```
@@ -135,14 +133,15 @@ After setup, verify everything is working:
 
 ## Provider Comparison
 
-| Provider | Cost | Rate Limit | Best For |
-|----------|------|------------|----------|
-| Gemini | Free tier | 1500 req/day | Individual use, getting started |
-| OpenRouter | Pay-per-use + free models | Varies by model | Model variety, high volume |
-| Claude SDK | Included with Claude Code | Unlimited | Claude Code subscribers |
+| Provider   | Cost                      | Rate Limit      | Best For                        |
+| ---------- | ------------------------- | --------------- | ------------------------------- |
+| Gemini     | Free tier                 | 1500 req/day    | Individual use, getting started |
+| OpenRouter | Pay-per-use + free models | Varies by model | Model variety, high volume      |
+| Claude SDK | Included with Claude Code | Unlimited       | Claude Code subscribers         |
 
 <Tip>
-**Recommendation:** Start with Gemini's free tier. It handles typical individual usage well. Switch to OpenRouter or Claude SDK if you need higher limits.
+  **Recommendation:** Start with Gemini's free tier. It handles typical individual usage well. Switch to OpenRouter or
+  Claude SDK if you need higher limits.
 </Tip>
 
 ## Troubleshooting

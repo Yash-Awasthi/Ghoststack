@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: 'Issue number to convert to discussion'
+        description: "Issue number to convert to discussion"
         required: true
         type: number
 

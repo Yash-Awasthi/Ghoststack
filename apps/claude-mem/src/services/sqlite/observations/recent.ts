@@ -1,13 +1,8 @@
+import { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
+import type { RecentObservationRow, AllRecentObservationRow } from "./types.js";
 
-import { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
-import type { RecentObservationRow, AllRecentObservationRow } from './types.js';
-
-export function getRecentObservations(
-  db: Database,
-  project: string,
-  limit: number = 20
-): RecentObservationRow[] {
+export function getRecentObservations(db: Database, project: string, limit: number = 20): RecentObservationRow[] {
   const stmt = db.prepare(`
     SELECT type, text, prompt_number, created_at
     FROM observations
@@ -19,10 +14,7 @@ export function getRecentObservations(
   return stmt.all(project, limit) as RecentObservationRow[];
 }
 
-export function getAllRecentObservations(
-  db: Database,
-  limit: number = 100
-): AllRecentObservationRow[] {
+export function getAllRecentObservations(db: Database, limit: number = 100): AllRecentObservationRow[] {
   const stmt = db.prepare(`
     SELECT id, type, title, subtitle, text, project, prompt_number, created_at, created_at_epoch
     FROM observations

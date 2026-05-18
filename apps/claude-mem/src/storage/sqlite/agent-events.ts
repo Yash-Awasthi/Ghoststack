@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { randomUUID } from 'crypto';
-import { Database } from 'bun:sqlite';
-import { AgentEventSchema, CreateAgentEventSchema, type AgentEvent, type AgentEventSourceType, type CreateAgentEvent } from '../../core/schemas/agent-event.js';
-import { ensureServerStorageSchema } from './schema.js';
+import { randomUUID } from "crypto";
+import { Database } from "bun:sqlite";
+import {
+  AgentEventSchema,
+  CreateAgentEventSchema,
+  type AgentEvent,
+  type AgentEventSourceType,
+  type CreateAgentEvent
+} from "../../core/schemas/agent-event.js";
+import { ensureServerStorageSchema } from "./schema.js";
 
 interface AgentEventRow {
   id: string;
@@ -43,40 +49,48 @@ export class AgentEventsRepository {
     const now = Date.now();
     const id = randomUUID();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO agent_events (
         id, project_id, server_session_id, source_type, event_type, payload,
         content_session_id, memory_session_id, occurred_at_epoch, created_at_epoch
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
-      event.projectId,
-      event.serverSessionId ?? null,
-      event.sourceType,
-      event.eventType,
-      JSON.stringify(event.payload ?? {}),
-      event.contentSessionId ?? null,
-      event.memorySessionId ?? null,
-      event.occurredAtEpoch,
-      now
-    );
+    `
+      )
+      .run(
+        id,
+        event.projectId,
+        event.serverSessionId ?? null,
+        event.sourceType,
+        event.eventType,
+        JSON.stringify(event.payload ?? {}),
+        event.contentSessionId ?? null,
+        event.memorySessionId ?? null,
+        event.occurredAtEpoch,
+        now
+      );
 
     return this.getById(id)!;
   }
 
   getById(id: string): AgentEvent | null {
-    const row = this.db.prepare('SELECT * FROM agent_events WHERE id = ?').get(id) as AgentEventRow | null;
+    const row = this.db.prepare("SELECT * FROM agent_events WHERE id = ?").get(id) as AgentEventRow | null;
     return row ? mapAgentEventRow(row) : null;
   }
 
   listByProject(projectId: string, limit = 100): AgentEvent[] {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT * FROM agent_events
       WHERE project_id = ?
       ORDER BY occurred_at_epoch DESC
       LIMIT ?
-    `).all(projectId, limit) as AgentEventRow[];
+    `
+      )
+      .all(projectId, limit) as AgentEventRow[];
     return rows.map(mapAgentEventRow);
   }
 }

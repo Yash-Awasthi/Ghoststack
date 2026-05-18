@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsonObject, JsonValue, PostgresQueryable } from './utils.js';
+import type { JsonObject, JsonValue, PostgresQueryable } from "./utils.js";
 import {
   assertProjectOwnership,
   assertSessionOwnership,
@@ -10,7 +10,7 @@ import {
   queryOne,
   toEpoch,
   toJsonObject
-} from './utils.js';
+} from "./utils.js";
 
 export interface PostgresAgentEvent {
   id: string;
@@ -103,14 +103,10 @@ export class PostgresAgentEventsRepository {
     return events;
   }
 
-  async getByIdForScope(input: {
-    id: string;
-    projectId: string;
-    teamId: string;
-  }): Promise<PostgresAgentEvent | null> {
+  async getByIdForScope(input: { id: string; projectId: string; teamId: string }): Promise<PostgresAgentEvent | null> {
     const row = await queryOne<AgentEventRow>(
       this.client,
-      'SELECT * FROM agent_events WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT * FROM agent_events WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.id, input.projectId, input.teamId]
     );
     return row ? mapAgentEventRow(row) : null;

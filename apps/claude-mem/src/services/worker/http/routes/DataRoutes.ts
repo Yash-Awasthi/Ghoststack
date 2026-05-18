@@ -1,79 +1,90 @@
-
-import express, { Request, Response } from 'express';
-import { z } from 'zod';
-import path from 'path';
-import { readFileSync, statSync, existsSync } from 'fs';
-import { logger } from '../../../../utils/logger.js';
-import { getPackageRoot, paths } from '../../../../shared/paths.js';
-import { getWorkerPort } from '../../../../shared/worker-utils.js';
-import { PaginationHelper } from '../../PaginationHelper.js';
-import { DatabaseManager } from '../../DatabaseManager.js';
-import { SessionManager } from '../../SessionManager.js';
-import { SSEBroadcaster } from '../../SSEBroadcaster.js';
-import type { WorkerService } from '../../../worker-service.js';
-import { BaseRouteHandler } from '../BaseRouteHandler.js';
-import { validateBody } from '../middleware/validateBody.js';
-import { normalizePlatformSource } from '../../../../shared/platform-source.js';
-import { getObservationsByFilePath } from '../../../sqlite/observations/get.js';
-import { getFirstObservationCreatedAt } from '../../../sqlite/observations/recent.js';
-import { getUptimeSeconds } from '../../../../shared/uptime.js';
+import express, { Request, Response } from "express";
+import { z } from "zod";
+import path from "path";
+import { readFileSync, statSync, existsSync } from "fs";
+import { logger } from "../../../../utils/logger.js";
+import { getPackageRoot, paths } from "../../../../shared/paths.js";
+import { getWorkerPort } from "../../../../shared/worker-utils.js";
+import { PaginationHelper } from "../../PaginationHelper.js";
+import { DatabaseManager } from "../../DatabaseManager.js";
+import { SessionManager } from "../../SessionManager.js";
+import { SSEBroadcaster } from "../../SSEBroadcaster.js";
+import type { WorkerService } from "../../../worker-service.js";
+import { BaseRouteHandler } from "../BaseRouteHandler.js";
+import { validateBody } from "../middleware/validateBody.js";
+import { normalizePlatformSource } from "../../../../shared/platform-source.js";
+import { getObservationsByFilePath } from "../../../sqlite/observations/get.js";
+import { getFirstObservationCreatedAt } from "../../../sqlite/observations/recent.js";
+import { getUptimeSeconds } from "../../../../shared/uptime.js";
 
 const integerArrayLike = z.preprocess((value) => {
   if (Array.isArray(value)) return value;
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     try {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) return parsed;
     } catch {
       // not JSON, fall through to comma split
     }
-    return value.split(',').map((part) => Number(part.trim()));
+    return value.split(",").map((part) => Number(part.trim()));
   }
   return value;
 }, z.array(z.number().int()));
 
 const stringArrayLike = z.preprocess((value) => {
   if (Array.isArray(value)) return value;
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     try {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) return parsed;
     } catch {
       // not JSON, fall through to comma split
     }
-    return value.split(',').map((part) => part.trim()).filter(Boolean);
+    return value
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
   }
   return value;
 }, z.array(z.string()));
 
-const observationsBatchSchema = z.object({
-  ids: integerArrayLike,
-  orderBy: z.enum(['date_desc', 'date_asc']).optional(),
-  limit: z.number().int().positive().optional(),
-  project: z.string().optional(),
-}).passthrough();
+const observationsBatchSchema = z
+  .object({
+    ids: integerArrayLike,
+    orderBy: z.enum(["date_desc", "date_asc"]).optional(),
+    limit: z.number().int().positive().optional(),
+    project: z.string().optional()
+  })
+  .passthrough();
 
-const sdkSessionsBatchSchema = z.preprocess((value) => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+const sdkSessionsBatchSchema = z.preprocess(
+  (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return value;
 
-  const body = value as Record<string, unknown>;
-  if (body.memorySessionIds === undefined && body.sdkSessionIds !== undefined) {
-    return { ...body, memorySessionIds: body.sdkSessionIds };
-  }
+    const body = value as Record<string, unknown>;
+    if (body.memorySessionIds === undefined && body.sdkSessionIds !== undefined) {
+      return { ...body, memorySessionIds: body.sdkSessionIds };
+    }
 
-  return value;
-}, z.object({
-  memorySessionIds: stringArrayLike,
-}).passthrough());
+    return value;
+  },
+  z
+    .object({
+      memorySessionIds: stringArrayLike
+    })
+    .passthrough()
+);
 
 const setProcessingSchema = z.object({}).passthrough();
 
-const importSchema = z.object({
-  sessions: z.array(z.unknown()).optional(),
-  summaries: z.array(z.unknown()).optional(),
-  observations: z.array(z.unknown()).optional(),
-  prompts: z.array(z.unknown()).optional(),
-}).passthrough();
+const importSchema = z
+  .object({
+    sessions: z.array(z.unknown()).optional(),
+    summaries: z.array(z.unknown()).optional(),
+    observations: z.array(z.unknown()).optional(),
+    prompts: z.array(z.unknown()).optional()
+  })
+  .passthrough();
 
 export class DataRoutes extends BaseRouteHandler {
   constructor(
@@ -88,24 +99,32 @@ export class DataRoutes extends BaseRouteHandler {
   }
 
   setupRoutes(app: express.Application): void {
-    app.get('/api/observations', this.handleGetObservations.bind(this));
-    app.get('/api/summaries', this.handleGetSummaries.bind(this));
-    app.get('/api/prompts', this.handleGetPrompts.bind(this));
+    app.get("/api/observations", this.handleGetObservations.bind(this));
+    app.get("/api/summaries", this.handleGetSummaries.bind(this));
+    app.get("/api/prompts", this.handleGetPrompts.bind(this));
 
-    app.get('/api/observation/:id', this.handleGetObservationById.bind(this));
-    app.get('/api/observations/by-file', this.handleGetObservationsByFile.bind(this));
-    app.post('/api/observations/batch', validateBody(observationsBatchSchema), this.handleGetObservationsByIds.bind(this));
-    app.get('/api/session/:id', this.handleGetSessionById.bind(this));
-    app.post('/api/sdk-sessions/batch', validateBody(sdkSessionsBatchSchema), this.handleGetSdkSessionsByIds.bind(this));
-    app.get('/api/prompt/:id', this.handleGetPromptById.bind(this));
+    app.get("/api/observation/:id", this.handleGetObservationById.bind(this));
+    app.get("/api/observations/by-file", this.handleGetObservationsByFile.bind(this));
+    app.post(
+      "/api/observations/batch",
+      validateBody(observationsBatchSchema),
+      this.handleGetObservationsByIds.bind(this)
+    );
+    app.get("/api/session/:id", this.handleGetSessionById.bind(this));
+    app.post(
+      "/api/sdk-sessions/batch",
+      validateBody(sdkSessionsBatchSchema),
+      this.handleGetSdkSessionsByIds.bind(this)
+    );
+    app.get("/api/prompt/:id", this.handleGetPromptById.bind(this));
 
-    app.get('/api/stats', this.handleGetStats.bind(this));
-    app.get('/api/projects', this.handleGetProjects.bind(this));
+    app.get("/api/stats", this.handleGetStats.bind(this));
+    app.get("/api/projects", this.handleGetProjects.bind(this));
 
-    app.get('/api/processing-status', this.handleGetProcessingStatus.bind(this));
-    app.post('/api/processing', validateBody(setProcessingSchema), this.handleSetProcessing.bind(this));
+    app.get("/api/processing-status", this.handleGetProcessingStatus.bind(this));
+    app.post("/api/processing", validateBody(setProcessingSchema), this.handleSetProcessing.bind(this));
 
-    app.post('/api/import', validateBody(importSchema), this.handleImport.bind(this));
+    app.post("/api/import", validateBody(importSchema), this.handleImport.bind(this));
   }
 
   private handleGetObservations = this.wrapHandler((req: Request, res: Response): void => {
@@ -127,7 +146,7 @@ export class DataRoutes extends BaseRouteHandler {
   });
 
   private handleGetObservationById = this.wrapHandler((req: Request, res: Response): void => {
-    const id = this.parseIntParam(req, res, 'id');
+    const id = this.parseIntParam(req, res, "id");
     if (id === null) return;
 
     const store = this.dbManager.getSessionStore();
@@ -144,12 +163,12 @@ export class DataRoutes extends BaseRouteHandler {
   private handleGetObservationsByFile = this.wrapHandler((req: Request, res: Response): void => {
     const filePath = req.query.path as string | undefined;
     if (!filePath) {
-      this.badRequest(res, 'path query parameter is required');
+      this.badRequest(res, "path query parameter is required");
       return;
     }
 
     const projectsParam = req.query.projects as string | undefined;
-    const projects = projectsParam ? projectsParam.split(',').filter(Boolean) : undefined;
+    const projects = projectsParam ? projectsParam.split(",").filter(Boolean) : undefined;
     const parsedLimit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
     const limit = Number.isFinite(parsedLimit) && parsedLimit! > 0 ? parsedLimit : undefined;
 
@@ -174,7 +193,7 @@ export class DataRoutes extends BaseRouteHandler {
   });
 
   private handleGetSessionById = this.wrapHandler((req: Request, res: Response): void => {
-    const id = this.parseIntParam(req, res, 'id');
+    const id = this.parseIntParam(req, res, "id");
     if (id === null) return;
 
     const store = this.dbManager.getSessionStore();
@@ -197,7 +216,7 @@ export class DataRoutes extends BaseRouteHandler {
   });
 
   private handleGetPromptById = this.wrapHandler((req: Request, res: Response): void => {
-    const id = this.parseIntParam(req, res, 'id');
+    const id = this.parseIntParam(req, res, "id");
     if (id === null) return;
 
     const store = this.dbManager.getSessionStore();
@@ -215,13 +234,13 @@ export class DataRoutes extends BaseRouteHandler {
     const db = this.dbManager.getSessionStore().db;
 
     const packageRoot = getPackageRoot();
-    const packageJsonPath = path.join(packageRoot, 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    const packageJsonPath = path.join(packageRoot, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     const version = packageJson.version;
 
-    const totalObservations = db.prepare('SELECT COUNT(*) as count FROM observations').get() as { count: number };
-    const totalSessions = db.prepare('SELECT COUNT(*) as count FROM sdk_sessions').get() as { count: number };
-    const totalSummaries = db.prepare('SELECT COUNT(*) as count FROM session_summaries').get() as { count: number };
+    const totalObservations = db.prepare("SELECT COUNT(*) as count FROM observations").get() as { count: number };
+    const totalSessions = db.prepare("SELECT COUNT(*) as count FROM sdk_sessions").get() as { count: number };
+    const totalSummaries = db.prepare("SELECT COUNT(*) as count FROM session_summaries").get() as { count: number };
     const firstObservationAt = getFirstObservationCreatedAt(db);
 
     const dbPath = paths.database();
@@ -273,7 +292,7 @@ export class DataRoutes extends BaseRouteHandler {
 
   private handleGetProcessingStatus = this.wrapHandler(async (req: Request, res: Response): Promise<void> => {
     const isProcessing = await this.sessionManager.isAnySessionProcessing();
-    const queueDepth = await this.sessionManager.getTotalActiveWork(); 
+    const queueDepth = await this.sessionManager.getTotalActiveWork();
     res.json({ isProcessing, queueDepth });
   });
 
@@ -282,12 +301,17 @@ export class DataRoutes extends BaseRouteHandler {
     const queueDepth = await this.sessionManager.getTotalQueueDepth();
     const activeSessions = this.sessionManager.getActiveSessionCount();
 
-    res.json({ status: 'ok', isProcessing, queueDepth, activeSessions });
+    res.json({ status: "ok", isProcessing, queueDepth, activeSessions });
   });
 
-  private parsePaginationParams(req: Request): { offset: number; limit: number; project?: string; platformSource?: string } {
+  private parsePaginationParams(req: Request): {
+    offset: number;
+    limit: number;
+    project?: string;
+    platformSource?: string;
+  } {
     const offset = parseInt(req.query.offset as string, 10) || 0;
-    const limit = Math.min(parseInt(req.query.limit as string, 10) || 20, 100); 
+    const limit = Math.min(parseInt(req.query.limit as string, 10) || 20, 100);
     const project = req.query.project as string | undefined;
     const rawPlatformSource = req.query.platformSource as string | undefined;
     const platformSource = rawPlatformSource ? normalizePlatformSource(rawPlatformSource) : undefined;
@@ -333,7 +357,7 @@ export class DataRoutes extends BaseRouteHandler {
       }
     }
 
-    const importedObservations: Array<{ id: number; obs: typeof observations[0] }> = [];
+    const importedObservations: Array<{ id: number; obs: (typeof observations)[0] }> = [];
     if (Array.isArray(observations)) {
       for (const obs of observations) {
         const result = store.importObservation(obs);
@@ -354,32 +378,38 @@ export class DataRoutes extends BaseRouteHandler {
         const CHROMA_SYNC_CONCURRENCY = 8;
         const safeParseJson = (val: string | null): string[] => {
           if (!val) return [];
-          try { return JSON.parse(val); } catch { return []; }
+          try {
+            return JSON.parse(val);
+          } catch {
+            return [];
+          }
         };
 
         const syncOne = async ({ id, obs }: { id: number; obs: any }) => {
           const parsedObs = {
-            type: obs.type || 'discovery',
+            type: obs.type || "discovery",
             title: obs.title || null,
             subtitle: obs.subtitle || null,
             facts: safeParseJson(obs.facts),
             narrative: obs.narrative || null,
             concepts: safeParseJson(obs.concepts),
             files_read: safeParseJson(obs.files_read),
-            files_modified: safeParseJson(obs.files_modified),
+            files_modified: safeParseJson(obs.files_modified)
           };
 
-          await chromaSync.syncObservation(
-            id,
-            obs.memory_session_id,
-            obs.project,
-            parsedObs,
-            obs.prompt_number || 0,
-            obs.created_at_epoch,
-            obs.discovery_tokens || 0
-          ).catch(err => {
-            logger.error('CHROMA', 'Import ChromaDB sync failed', { id }, err as Error);
-          });
+          await chromaSync
+            .syncObservation(
+              id,
+              obs.memory_session_id,
+              obs.project,
+              parsedObs,
+              obs.prompt_number || 0,
+              obs.created_at_epoch,
+              obs.discovery_tokens || 0
+            )
+            .catch((err) => {
+              logger.error("CHROMA", "Import ChromaDB sync failed", { id }, err as Error);
+            });
         };
 
         (async () => {
@@ -387,8 +417,8 @@ export class DataRoutes extends BaseRouteHandler {
             const batch = importedObservations.slice(i, i + CHROMA_SYNC_CONCURRENCY);
             await Promise.all(batch.map(syncOne));
           }
-        })().catch(err => {
-          logger.error('CHROMA', 'Import ChromaDB batch sync failed', {}, err as Error);
+        })().catch((err) => {
+          logger.error("CHROMA", "Import ChromaDB batch sync failed", {}, err as Error);
         });
       }
     }
@@ -409,5 +439,4 @@ export class DataRoutes extends BaseRouteHandler {
       stats
     });
   });
-
 }

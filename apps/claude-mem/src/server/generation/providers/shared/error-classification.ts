@@ -6,12 +6,12 @@
 // Worker code keeps src/services/worker/provider-errors.ts unchanged.
 
 export type ServerProviderErrorClass =
-  | 'transient'
-  | 'unrecoverable'
-  | 'rate_limit'
-  | 'quota_exhausted'
-  | 'auth_invalid'
-  | 'parse_error'
+  | "transient"
+  | "unrecoverable"
+  | "rate_limit"
+  | "quota_exhausted"
+  | "auth_invalid"
+  | "parse_error"
   | (string & {});
 
 export class ServerClassifiedProviderError extends Error {
@@ -25,10 +25,10 @@ export class ServerClassifiedProviderError extends Error {
       kind: ServerProviderErrorClass;
       cause: unknown;
       retryAfterMs?: number;
-    },
+    }
   ) {
     super(message);
-    this.name = 'ServerClassifiedProviderError';
+    this.name = "ServerClassifiedProviderError";
     this.kind = opts.kind;
     this.cause = opts.cause;
     if (opts.retryAfterMs !== undefined) {
@@ -76,61 +76,61 @@ interface ClassifyHttpInput {
  */
 export function classifyHttpProviderError(input: ClassifyHttpInput): ServerClassifiedProviderError {
   const { status, providerLabel } = input;
-  const body = input.bodyText ?? '';
+  const body = input.bodyText ?? "";
   const lower = body.toLowerCase();
-  const retryAfterMs = input.headers ? parseRetryAfterMs(input.headers.get('retry-after')) : undefined;
+  const retryAfterMs = input.headers ? parseRetryAfterMs(input.headers.get("retry-after")) : undefined;
 
   if (
-    lower.includes('quota exceeded') ||
-    lower.includes('insufficient credits') ||
-    lower.includes('insufficient_quota') ||
-    lower.includes('resource_exhausted')
+    lower.includes("quota exceeded") ||
+    lower.includes("insufficient credits") ||
+    lower.includes("insufficient_quota") ||
+    lower.includes("resource_exhausted")
   ) {
     return new ServerClassifiedProviderError(
-      `${providerLabel} quota exhausted${status !== undefined ? ` (status ${status})` : ''}`,
-      { kind: 'quota_exhausted', cause: input.cause },
+      `${providerLabel} quota exhausted${status !== undefined ? ` (status ${status})` : ""}`,
+      { kind: "quota_exhausted", cause: input.cause }
     );
   }
 
   if (status === 429) {
     return new ServerClassifiedProviderError(`${providerLabel} rate limit (429)`, {
-      kind: 'rate_limit',
+      kind: "rate_limit",
       cause: input.cause,
-      ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
+      ...(retryAfterMs !== undefined ? { retryAfterMs } : {})
     });
   }
 
   if (status === 401 || status === 403) {
     return new ServerClassifiedProviderError(`${providerLabel} auth error (status ${status})`, {
-      kind: 'auth_invalid',
-      cause: input.cause,
+      kind: "auth_invalid",
+      cause: input.cause
     });
   }
 
   if (status === 400 || status === 404) {
     return new ServerClassifiedProviderError(`${providerLabel} bad request (status ${status})`, {
-      kind: 'unrecoverable',
-      cause: input.cause,
+      kind: "unrecoverable",
+      cause: input.cause
     });
   }
 
   if (status !== undefined && status >= 500 && status < 600) {
     return new ServerClassifiedProviderError(`${providerLabel} upstream error (status ${status})`, {
-      kind: 'transient',
-      cause: input.cause,
+      kind: "transient",
+      cause: input.cause
     });
   }
 
   if (status === undefined) {
     const message = input.cause instanceof Error ? input.cause.message : String(input.cause);
     return new ServerClassifiedProviderError(`${providerLabel} network error: ${message}`, {
-      kind: 'transient',
-      cause: input.cause,
+      kind: "transient",
+      cause: input.cause
     });
   }
 
   return new ServerClassifiedProviderError(
-    `${providerLabel} API error: ${status}${body ? ` - ${body.substring(0, 200)}` : ''}`,
-    { kind: 'unrecoverable', cause: input.cause },
+    `${providerLabel} API error: ${status}${body ? ` - ${body.substring(0, 200)}` : ""}`,
+    { kind: "unrecoverable", cause: input.cause }
   );
 }

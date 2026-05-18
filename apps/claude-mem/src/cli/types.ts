@@ -1,7 +1,7 @@
 export interface NormalizedHookInput {
   sessionId: string;
   cwd: string;
-  platform?: string;   
+  platform?: string;
   prompt?: string;
   toolName?: string;
   toolInput?: unknown;
@@ -12,12 +12,12 @@ export interface NormalizedHookInput {
   stopHookActive?: boolean;
   permissionMode?: string;
   model?: string;
-  sessionSource?: 'startup' | 'resume' | 'clear';
-  filePath?: string;   
-  edits?: unknown[];   
+  sessionSource?: "startup" | "resume" | "clear";
+  filePath?: string;
+  edits?: unknown[];
   metadata?: Record<string, unknown>;
-  agentId?: string;      
-  agentType?: string;    
+  agentId?: string;
+  agentType?: string;
 }
 
 export interface HookResult {
@@ -26,12 +26,12 @@ export interface HookResult {
   hookSpecificOutput?: {
     hookEventName: string;
     additionalContext: string;
-    permissionDecision?: 'allow' | 'deny';
+    permissionDecision?: "allow" | "deny";
     permissionDecisionReason?: string;
     updatedInput?: Record<string, unknown>;
   };
   systemMessage?: string;
-  decision?: 'block' | 'approve';
+  decision?: "block" | "approve";
   reason?: string;
   exitCode?: number;
 }

@@ -1,14 +1,14 @@
 #!/usr/bin/env bun
 
-import { Database } from 'bun:sqlite';
-import path from 'path';
-import os from 'os';
-import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync, unlinkSync, readdirSync } from 'fs';
-import { execSync } from 'child_process';
-import { SettingsDefaultsManager } from '../src/shared/SettingsDefaultsManager.js';
+import { Database } from "bun:sqlite";
+import path from "path";
+import os from "os";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync, unlinkSync, readdirSync } from "fs";
+import { execSync } from "child_process";
+import { SettingsDefaultsManager } from "../src/shared/SettingsDefaultsManager.js";
 
-const DB_PATH = path.join(os.homedir(), '.claude-mem', 'claude-mem.db');
-const SETTINGS_PATH = path.join(os.homedir(), '.claude-mem', 'settings.json');
+const DB_PATH = path.join(os.homedir(), ".claude-mem", "claude-mem.db");
+const SETTINGS_PATH = path.join(os.homedir(), ".claude-mem", "settings.json");
 const settings = SettingsDefaultsManager.loadFromFile(SETTINGS_PATH);
 const OBSERVATION_LIMIT = parseInt(settings.CLAUDE_MEM_CONTEXT_OBSERVATIONS, 10) || 50;
 
@@ -27,30 +27,28 @@ interface ObservationRow {
   discovery_tokens: number | null;
 }
 
-import { formatTime, groupByDate } from '../src/shared/timeline-formatting.js';
-import { isDirectChild } from '../src/shared/path-utils.js';
-import { replaceTaggedContent } from '../src/utils/claude-md-utils.js';
+import { formatTime, groupByDate } from "../src/shared/timeline-formatting.js";
+import { isDirectChild } from "../src/shared/path-utils.js";
+import { replaceTaggedContent } from "../src/utils/claude-md-utils.js";
 
 const TYPE_ICONS: Record<string, string> = {
-  'bugfix': '🔴',
-  'feature': '🟣',
-  'refactor': '🔄',
-  'change': '✅',
-  'discovery': '🔵',
-  'decision': '⚖️',
-  'session': '🎯',
-  'prompt': '💬'
+  bugfix: "🔴",
+  feature: "🟣",
+  refactor: "🔄",
+  change: "✅",
+  discovery: "🔵",
+  decision: "⚖️",
+  session: "🎯",
+  prompt: "💬"
 };
 
 function getTypeIcon(type: string): string {
-  return TYPE_ICONS[type] || '📝';
+  return TYPE_ICONS[type] || "📝";
 }
 
 function estimateTokens(obs: ObservationRow): number {
-  const size = (obs.title?.length || 0) +
-    (obs.subtitle?.length || 0) +
-    (obs.narrative?.length || 0) +
-    (obs.facts?.length || 0);
+  const size =
+    (obs.title?.length || 0) + (obs.subtitle?.length || 0) + (obs.narrative?.length || 0) + (obs.facts?.length || 0);
   return Math.ceil(size / 4);
 }
 
@@ -62,13 +60,16 @@ function getTrackedFolders(workingDir: string): Set<string> {
   folders.add(workingDir);
 
   try {
-    const output = execSync('git ls-files', {
+    const output = execSync("git ls-files", {
       cwd: workingDir,
-      encoding: 'utf-8',
-      maxBuffer: 50 * 1024 * 1024 
+      encoding: "utf-8",
+      maxBuffer: 50 * 1024 * 1024
     });
 
-    const files = output.trim().split('\n').filter(f => f);
+    const files = output
+      .trim()
+      .split("\n")
+      .filter((f) => f);
 
     for (const file of files) {
       const absPath = path.join(workingDir, file);
@@ -81,7 +82,7 @@ function getTrackedFolders(workingDir: string): Set<string> {
       }
     }
   } catch (error) {
-    console.error('Warning: git ls-files failed, falling back to directory walk');
+    console.error("Warning: git ls-files failed, falling back to directory walk");
     walkDirectoriesWithIgnore(workingDir, folders);
   }
 
@@ -93,9 +94,21 @@ function walkDirectoriesWithIgnore(dir: string, folders: Set<string>, depth: num
   folders.add(dir);
 
   const ignorePatterns = [
-    'node_modules', '.git', '.next', 'dist', 'build', '.cache',
-    '__pycache__', '.venv', 'venv', '.idea', '.vscode', 'coverage',
-    '.claude-mem', '.open-next', '.turbo'
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    "build",
+    ".cache",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".idea",
+    ".vscode",
+    "coverage",
+    ".claude-mem",
+    ".open-next",
+    ".turbo"
   ];
 
   try {
@@ -103,7 +116,7 @@ function walkDirectoriesWithIgnore(dir: string, folders: Set<string>, depth: num
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       if (ignorePatterns.includes(entry.name)) continue;
-      if (entry.name.startsWith('.') && entry.name !== '.claude') continue;
+      if (entry.name.startsWith(".") && entry.name !== ".claude") continue;
 
       const fullPath = path.join(dir, entry.name);
       folders.add(fullPath);
@@ -120,7 +133,7 @@ function hasDirectChildFile(obs: ObservationRow, folderPath: string): boolean {
     try {
       const files = JSON.parse(filesJson);
       if (Array.isArray(files)) {
-        return files.some(f => isDirectChild(f, folderPath));
+        return files.some((f) => isDirectChild(f, folderPath));
       }
     } catch {}
     return false;
@@ -129,12 +142,17 @@ function hasDirectChildFile(obs: ObservationRow, folderPath: string): boolean {
   return checkFiles(obs.files_modified) || checkFiles(obs.files_read);
 }
 
-function findObservationsByFolder(db: Database, relativeFolderPath: string, project: string, limit: number): ObservationRow[] {
+function findObservationsByFolder(
+  db: Database,
+  relativeFolderPath: string,
+  project: string,
+  limit: number
+): ObservationRow[] {
   const queryLimit = limit * 3;
 
   let allMatches: ObservationRow[];
 
-  if (relativeFolderPath === '' || relativeFolderPath === '.') {
+  if (relativeFolderPath === "" || relativeFolderPath === ".") {
     const sql = `
       SELECT o.*, o.discovery_tokens
       FROM observations o
@@ -157,7 +175,7 @@ function findObservationsByFolder(db: Database, relativeFolderPath: string, proj
     allMatches = db.prepare(sql).all(project, likePattern, likePattern, queryLimit) as ObservationRow[];
   }
 
-  return allMatches.filter(obs => hasDirectChildFile(obs, relativeFolderPath)).slice(0, limit);
+  return allMatches.filter((obs) => hasDirectChildFile(obs, relativeFolderPath)).slice(0, limit);
 }
 
 function extractRelevantFile(obs: ObservationRow, relativeFolder: string): string {
@@ -187,23 +205,23 @@ function extractRelevantFile(obs: ObservationRow, relativeFolder: string): strin
     } catch {}
   }
 
-  return 'General';
+  return "General";
 }
 
 function formatObservationsForClaudeMd(observations: ObservationRow[], folderPath: string): string {
   const lines: string[] = [];
-  lines.push('# Recent Activity');
-  lines.push('');
+  lines.push("# Recent Activity");
+  lines.push("");
 
   if (observations.length === 0) {
-    return '';
+    return "";
   }
 
-  const byDate = groupByDate(observations, obs => obs.created_at);
+  const byDate = groupByDate(observations, (obs) => obs.created_at);
 
   for (const [day, dayObs] of byDate) {
     lines.push(`### ${day}`);
-    lines.push('');
+    lines.push("");
 
     const byFile = new Map<string, ObservationRow[]>();
     for (const obs of dayObs) {
@@ -214,42 +232,48 @@ function formatObservationsForClaudeMd(observations: ObservationRow[], folderPat
 
     for (const [file, fileObs] of byFile) {
       lines.push(`**${file}**`);
-      lines.push('| ID | Time | T | Title | Read |');
-      lines.push('|----|------|---|-------|------|');
+      lines.push("| ID | Time | T | Title | Read |");
+      lines.push("|----|------|---|-------|------|");
 
-      let lastTime = '';
+      let lastTime = "";
       for (const obs of fileObs) {
         const time = formatTime(obs.created_at_epoch);
         const timeDisplay = time === lastTime ? '"' : time;
         lastTime = time;
 
         const icon = getTypeIcon(obs.type);
-        const title = obs.title || 'Untitled';
+        const title = obs.title || "Untitled";
         const tokens = estimateTokens(obs);
 
         lines.push(`| #${obs.id} | ${timeDisplay} | ${icon} | ${title} | ~${tokens} |`);
       }
 
-      lines.push('');
+      lines.push("");
     }
   }
 
-  return lines.join('\n').trim();
+  return lines.join("\n").trim();
 }
 
 function writeClaudeMdToFolderForRegenerate(folderPath: string, newContent: string): void {
   const resolvedPath = path.resolve(folderPath);
 
-  if (resolvedPath.includes('/.git/') || resolvedPath.includes('\\.git\\') || resolvedPath.endsWith('/.git') || resolvedPath.endsWith('\\.git')) return;
+  if (
+    resolvedPath.includes("/.git/") ||
+    resolvedPath.includes("\\.git\\") ||
+    resolvedPath.endsWith("/.git") ||
+    resolvedPath.endsWith("\\.git")
+  )
+    return;
 
-  const claudeMdPath = path.join(folderPath, 'CLAUDE.md');
+  const claudeMdPath = path.join(folderPath, "CLAUDE.md");
   const tempFile = `${claudeMdPath}.tmp`;
 
   mkdirSync(folderPath, { recursive: true });
 
-  let existingContent = '';
+  let existingContent = "";
   if (existsSync(claudeMdPath)) {
-    existingContent = readFileSync(claudeMdPath, 'utf-8');
+    existingContent = readFileSync(claudeMdPath, "utf-8");
   }
 
   const finalContent = replaceTaggedContent(existingContent, newContent);
@@ -259,13 +283,13 @@ function writeClaudeMdToFolderForRegenerate(folderPath: string, newContent: stri
 }
 
 function cleanupAutoGeneratedFiles(workingDir: string, dryRun: boolean): void {
-  console.log('=== CLAUDE.md Cleanup Mode ===\n');
+  console.log("=== CLAUDE.md Cleanup Mode ===\n");
   console.log(`Scanning ${workingDir} for CLAUDE.md files with auto-generated content...\n`);
 
   const filesToProcess: string[] = [];
 
   function walkForClaudeMd(dir: string): void {
-    const ignorePatterns = ['node_modules', '.git', '.next', 'dist', 'build'];
+    const ignorePatterns = ["node_modules", ".git", ".next", "dist", "build"];
 
     try {
       const entries = readdirSync(dir, { withFileTypes: true });
@@ -276,10 +300,10 @@ function cleanupAutoGeneratedFiles(workingDir: string, dryRun: boolean): void {
           if (!ignorePatterns.includes(entry.name)) {
             walkForClaudeMd(fullPath);
           }
-        } else if (entry.name === 'CLAUDE.md') {
+        } else if (entry.name === "CLAUDE.md") {
           try {
-            const content = readFileSync(fullPath, 'utf-8');
-            if (content.includes('<claude-mem-context>')) {
+            const content = readFileSync(fullPath, "utf-8");
+            if (content.includes("<claude-mem-context>")) {
               filesToProcess.push(fullPath);
             }
           } catch {
@@ -295,7 +319,7 @@ function cleanupAutoGeneratedFiles(workingDir: string, dryRun: boolean): void {
   walkForClaudeMd(workingDir);
 
   if (filesToProcess.length === 0) {
-    console.log('No CLAUDE.md files with auto-generated content found.');
+    console.log("No CLAUDE.md files with auto-generated content found.");
     return;
   }
 
@@ -309,11 +333,11 @@ function cleanupAutoGeneratedFiles(workingDir: string, dryRun: boolean): void {
     const relativePath = path.relative(workingDir, file);
 
     try {
-      const content = readFileSync(file, 'utf-8');
+      const content = readFileSync(file, "utf-8");
 
-      const stripped = content.replace(/<claude-mem-context>[\s\S]*?<\/claude-mem-context>/g, '').trim();
+      const stripped = content.replace(/<claude-mem-context>[\s\S]*?<\/claude-mem-context>/g, "").trim();
 
-      if (stripped === '') {
+      if (stripped === "") {
         if (dryRun) {
           console.log(`  [DRY-RUN] Would delete (empty): ${relativePath}`);
         } else {
@@ -336,13 +360,13 @@ function cleanupAutoGeneratedFiles(workingDir: string, dryRun: boolean): void {
     }
   }
 
-  console.log('\n=== Summary ===');
+  console.log("\n=== Summary ===");
   console.log(`Deleted (empty): ${deletedCount}`);
   console.log(`Cleaned:         ${cleanedCount}`);
   console.log(`Errors:          ${errorCount}`);
 
   if (dryRun) {
-    console.log('\nRun without --dry-run to actually process files.');
+    console.log("\nRun without --dry-run to actually process files.");
   }
 }
 
@@ -357,7 +381,7 @@ function regenerateFolder(
     const observations = findObservationsByFolder(db, relativeFolder, project, OBSERVATION_LIMIT);
 
     if (observations.length === 0) {
-      return { success: false, observationCount: 0, error: 'No observations for folder' };
+      return { success: false, observationCount: 0, error: "No observations for folder" };
     }
 
     if (dryRun) {
@@ -375,8 +399,8 @@ function regenerateFolder(
 
 async function main() {
   const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry-run');
-  const cleanMode = args.includes('--clean');
+  const dryRun = args.includes("--dry-run");
+  const cleanMode = args.includes("--clean");
 
   const workingDir = process.cwd();
 
@@ -385,32 +409,32 @@ async function main() {
     return;
   }
 
-  console.log('=== CLAUDE.md Regeneration Script ===\n');
+  console.log("=== CLAUDE.md Regeneration Script ===\n");
   console.log(`Working directory: ${workingDir}`);
 
   const project = path.basename(workingDir);
   console.log(`Project: ${project}\n`);
 
-  console.log('Discovering folders (using git ls-files to respect .gitignore)...');
+  console.log("Discovering folders (using git ls-files to respect .gitignore)...");
   const trackedFolders = getTrackedFolders(workingDir);
 
   if (trackedFolders.size === 0) {
-    console.log('No folders found in project.');
+    console.log("No folders found in project.");
     process.exit(0);
   }
 
   console.log(`Found ${trackedFolders.size} folders in project.\n`);
 
   if (!existsSync(DB_PATH)) {
-    console.log('Database not found. No observations to process.');
+    console.log("Database not found. No observations to process.");
     process.exit(0);
   }
 
-  console.log('Opening database...');
+  console.log("Opening database...");
   const db = new Database(DB_PATH, { readonly: true, create: false });
 
   if (dryRun) {
-    console.log('[DRY RUN] Would regenerate the following folders:\n');
+    console.log("[DRY RUN] Would regenerate the following folders:\n");
   }
 
   let successCount = 0;
@@ -440,7 +464,7 @@ async function main() {
     if (result.success) {
       console.log(`${progress} ${relativeFolder} - ${result.observationCount} obs`);
       successCount++;
-    } else if (result.error?.includes('No observations')) {
+    } else if (result.error?.includes("No observations")) {
       skipCount++;
     } else {
       console.log(`${progress} ${relativeFolder} - ERROR: ${result.error}`);
@@ -450,18 +474,18 @@ async function main() {
 
   db.close();
 
-  console.log('\n=== Summary ===');
+  console.log("\n=== Summary ===");
   console.log(`Total folders scanned: ${foldersArray.length}`);
   console.log(`With observations:     ${successCount}`);
   console.log(`No observations:       ${skipCount}`);
   console.log(`Errors:                ${errorCount}`);
 
   if (dryRun) {
-    console.log('\nRun without --dry-run to actually regenerate files.');
+    console.log("\nRun without --dry-run to actually regenerate files.");
   }
 }
 
-main().catch(error => {
-  console.error('Fatal error:', error);
+main().catch((error) => {
+  console.error("Fatal error:", error);
   process.exit(1);
 });

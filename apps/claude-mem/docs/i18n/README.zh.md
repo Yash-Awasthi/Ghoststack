@@ -1,6 +1,7 @@
 🌐 这是自动翻译。欢迎社区修正!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@
 Claude-Mem 通过 mem-search 技能提供智能搜索,当您询问过去的工作时会自动调用:
 
 **工作方式:**
-- 只需自然提问:*"上次会话我们做了什么?"* 或 *"我们之前修复过这个 bug 吗?"*
+
+- 只需自然提问:_"上次会话我们做了什么?"_ 或 _"我们之前修复过这个 bug 吗?"_
 - Claude 自动调用 mem-search 技能查找相关上下文
 
 **可用搜索操作:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## 支持
 

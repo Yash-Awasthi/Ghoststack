@@ -1,11 +1,10 @@
-
 import { translateReadme, TranslationJobResult, SUPPORTED_LANGUAGES } from "./index.js";
 
 async function translateToCommonLanguages(): Promise<void> {
   const result = await translateReadme({
     source: "./README.md",
     languages: ["es", "fr", "de", "ja", "zh"],
-    verbose: true,
+    verbose: true
   });
 
   console.log(`Translated to ${result.successful} languages`);
@@ -20,7 +19,7 @@ async function fullI18nSetup(): Promise<void> {
     preserveCode: true,
     model: "sonnet",
     maxBudgetUsd: 5.0, // Cap spending at $5
-    verbose: true,
+    verbose: true
   });
 
   for (const r of result.results) {
@@ -36,7 +35,7 @@ async function buildScriptIntegration(): Promise<number> {
       source: process.env.README_PATH || "./README.md",
       languages: (process.env.TRANSLATE_LANGS || "es,fr,de").split(","),
       outputDir: process.env.I18N_OUTPUT || "./i18n",
-      verbose: process.env.CI !== "true", // Quiet in CI
+      verbose: process.env.CI !== "true" // Quiet in CI
     });
 
     return result.failed > 0 ? 1 : 0;
@@ -47,11 +46,7 @@ async function buildScriptIntegration(): Promise<number> {
 }
 
 async function batchTranslation(): Promise<void> {
-  const readmes = [
-    "./README.md",
-    "./packages/core/README.md",
-    "./packages/cli/README.md",
-  ];
+  const readmes = ["./README.md", "./packages/core/README.md", "./packages/cli/README.md"];
 
   const languages = ["es", "fr", "de"];
 
@@ -60,7 +55,7 @@ async function batchTranslation(): Promise<void> {
     await translateReadme({
       source: readme,
       languages,
-      verbose: true,
+      verbose: true
     });
   }
 }
@@ -71,7 +66,7 @@ async function docsiteSetup(): Promise<void> {
     languages: ["es", "fr", "de", "ja", "zh"],
     outputDir: "./docs",
     pattern: "README.{lang}.md",
-    verbose: true,
+    verbose: true
   });
 }
 
@@ -89,7 +84,7 @@ async function cicdTranslation(): Promise<void> {
     languages: ["es", "fr", "de", "ja", "ko", "zh", "pt-br"],
     outputDir: "./dist/i18n",
     maxBudgetUsd: 10.0,
-    verbose: true,
+    verbose: true
   });
 
   if (process.env.GITHUB_STEP_SUMMARY) {

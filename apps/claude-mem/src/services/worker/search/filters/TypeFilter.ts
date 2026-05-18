@@ -1,37 +1,40 @@
-import { logger } from '../../../../utils/logger.js';
+import { logger } from "../../../../utils/logger.js";
 
-type ObservationType = 'decision' | 'bugfix' | 'feature' | 'refactor' | 'discovery' | 'change' | 'security_alert' | 'security_note';
+type ObservationType =
+  | "decision"
+  | "bugfix"
+  | "feature"
+  | "refactor"
+  | "discovery"
+  | "change"
+  | "security_alert"
+  | "security_note";
 
 export const OBSERVATION_TYPES: ObservationType[] = [
-  'decision',
-  'bugfix',
-  'feature',
-  'refactor',
-  'discovery',
-  'change',
-  'security_alert',
-  'security_note'
+  "decision",
+  "bugfix",
+  "feature",
+  "refactor",
+  "discovery",
+  "change",
+  "security_alert",
+  "security_note"
 ];
 
-export function normalizeType(
-  type?: string | string[]
-): ObservationType[] | undefined {
+export function normalizeType(type?: string | string[]): ObservationType[] | undefined {
   if (!type) {
     return undefined;
   }
 
   const types = Array.isArray(type) ? type : [type];
   const normalized = types
-    .map(t => t.trim().toLowerCase())
-    .filter(t => OBSERVATION_TYPES.includes(t as ObservationType)) as ObservationType[];
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => OBSERVATION_TYPES.includes(t as ObservationType)) as ObservationType[];
 
   return normalized.length > 0 ? normalized : undefined;
 }
 
-export function matchesType(
-  resultType: string,
-  filterTypes?: ObservationType[]
-): boolean {
+export function matchesType(resultType: string, filterTypes?: ObservationType[]): boolean {
   if (!filterTypes || filterTypes.length === 0) {
     return true;
   }
@@ -47,12 +50,12 @@ export function filterObservationsByType<T extends { type: string }>(
     return observations;
   }
 
-  return observations.filter(obs => matchesType(obs.type, types));
+  return observations.filter((obs) => matchesType(obs.type, types));
 }
 
 export function parseTypeString(typeString: string): ObservationType[] {
   return typeString
-    .split(',')
-    .map(t => t.trim().toLowerCase())
-    .filter(t => OBSERVATION_TYPES.includes(t as ObservationType)) as ObservationType[];
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => OBSERVATION_TYPES.includes(t as ObservationType)) as ObservationType[];
 }

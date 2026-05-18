@@ -13,7 +13,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
     { key: "investigated", label: "Investigated", content: summary.investigated, icon: "/icon-thick-investigated.svg" },
     { key: "learned", label: "Learned", content: summary.learned, icon: "/icon-thick-learned.svg" },
     { key: "completed", label: "Completed", content: summary.completed, icon: "/icon-thick-completed.svg" },
-    { key: "next_steps", label: "Next Steps", content: summary.next_steps, icon: "/icon-thick-next-steps.svg" },
+    { key: "next_steps", label: "Next Steps", content: summary.next_steps, icon: "/icon-thick-next-steps.svg" }
   ].filter((section) => section.content);
 
   return (
@@ -21,23 +21,17 @@ export function SummaryCard({ summary }: SummaryCardProps) {
       <header className="summary-card-header">
         <div className="summary-badge-row">
           <span className="card-type summary-badge">Session Summary</span>
-          <span className={`card-source source-${summary.platform_source || 'claude'}`}>
-            {summary.platform_source || 'claude'}
+          <span className={`card-source source-${summary.platform_source || "claude"}`}>
+            {summary.platform_source || "claude"}
           </span>
           <span className="summary-project-badge">{summary.project}</span>
         </div>
-        {summary.request && (
-          <h2 className="summary-title">{summary.request}</h2>
-        )}
+        {summary.request && <h2 className="summary-title">{summary.request}</h2>}
       </header>
 
       <div className="summary-sections">
         {sections.map((section, index) => (
-          <section
-            key={section.key}
-            className="summary-section"
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
+          <section key={section.key} className="summary-section" style={{ animationDelay: `${index * 50}ms` }}>
             <div className="summary-section-header">
               <img
                 src={section.icon}
@@ -46,9 +40,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
               />
               <h3 className="summary-section-label">{section.label}</h3>
             </div>
-            <div className="summary-section-content">
-              {section.content}
-            </div>
+            <div className="summary-section-content">{section.content}</div>
           </section>
         ))}
       </div>

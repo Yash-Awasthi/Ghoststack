@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Database } from 'bun:sqlite';
+import { Database } from "bun:sqlite";
 
 export const SERVER_STORAGE_SCHEMA_VERSION = 33;
 
 export const SERVER_OWNED_TABLES = [
-  'projects',
-  'server_sessions',
-  'agent_events',
-  'memory_items',
-  'memory_sources',
-  'teams',
-  'team_members',
-  'api_keys',
-  'audit_log'
+  "projects",
+  "server_sessions",
+  "agent_events",
+  "memory_items",
+  "memory_sources",
+  "teams",
+  "team_members",
+  "api_keys",
+  "audit_log"
 ] as const;
 
 const initializedDatabases = new WeakSet<Database>();
@@ -150,23 +150,29 @@ export function ensureServerStorageSchema(db: Database): void {
     );
   `);
 
-  db.run('CREATE INDEX IF NOT EXISTS idx_projects_root_path ON projects(root_path)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_server_sessions_project ON server_sessions(project_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_server_sessions_content ON server_sessions(content_session_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_server_sessions_memory ON server_sessions(memory_session_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_server_sessions_status ON server_sessions(status)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_agent_events_project_time ON agent_events(project_id, occurred_at_epoch DESC)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_agent_events_session_time ON agent_events(server_session_id, occurred_at_epoch DESC)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_agent_events_type ON agent_events(event_type)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_memory_items_project_time ON memory_items(project_id, created_at_epoch DESC)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_memory_items_session_time ON memory_items(server_session_id, created_at_epoch DESC)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_memory_items_legacy_observation ON memory_items(legacy_observation_id)');
+  db.run("CREATE INDEX IF NOT EXISTS idx_projects_root_path ON projects(root_path)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_server_sessions_project ON server_sessions(project_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_server_sessions_content ON server_sessions(content_session_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_server_sessions_memory ON server_sessions(memory_session_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_server_sessions_status ON server_sessions(status)");
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_agent_events_project_time ON agent_events(project_id, occurred_at_epoch DESC)"
+  );
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_agent_events_session_time ON agent_events(server_session_id, occurred_at_epoch DESC)"
+  );
+  db.run("CREATE INDEX IF NOT EXISTS idx_agent_events_type ON agent_events(event_type)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_memory_items_project_time ON memory_items(project_id, created_at_epoch DESC)");
+  db.run(
+    "CREATE INDEX IF NOT EXISTS idx_memory_items_session_time ON memory_items(server_session_id, created_at_epoch DESC)"
+  );
+  db.run("CREATE INDEX IF NOT EXISTS idx_memory_items_legacy_observation ON memory_items(legacy_observation_id)");
   db.run(`
     CREATE UNIQUE INDEX IF NOT EXISTS ux_memory_items_legacy_observation
     ON memory_items(legacy_observation_id)
     WHERE legacy_observation_id IS NOT NULL
   `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_memory_items_kind_type ON memory_items(kind, type)');
+  db.run("CREATE INDEX IF NOT EXISTS idx_memory_items_kind_type ON memory_items(kind, type)");
   db.run(`
     CREATE VIRTUAL TABLE IF NOT EXISTS memory_items_fts USING fts5(
       memory_item_id UNINDEXED,
@@ -180,11 +186,11 @@ export function ensureServerStorageSchema(db: Database): void {
       tokenize='porter unicode61'
     )
   `);
-  const memoryItemCount = db.prepare('SELECT COUNT(*) AS count FROM memory_items').get() as { count: number };
-  const ftsItemCount = db.prepare('SELECT COUNT(*) AS count FROM memory_items_fts').get() as { count: number };
+  const memoryItemCount = db.prepare("SELECT COUNT(*) AS count FROM memory_items").get() as { count: number };
+  const ftsItemCount = db.prepare("SELECT COUNT(*) AS count FROM memory_items_fts").get() as { count: number };
   if (memoryItemCount.count !== ftsItemCount.count) {
     const rebuildMemoryItemsFts = db.transaction(() => {
-      db.run('DELETE FROM memory_items_fts');
+      db.run("DELETE FROM memory_items_fts");
       db.run(`
         INSERT INTO memory_items_fts (
           memory_item_id, project_id, title, subtitle, text, narrative, facts, concepts
@@ -195,20 +201,20 @@ export function ensureServerStorageSchema(db: Database): void {
     });
     rebuildMemoryItemsFts();
   }
-  db.run('CREATE INDEX IF NOT EXISTS idx_memory_sources_item ON memory_sources(memory_item_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_memory_sources_legacy ON memory_sources(legacy_table, legacy_id)');
+  db.run("CREATE INDEX IF NOT EXISTS idx_memory_sources_item ON memory_sources(memory_item_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_memory_sources_legacy ON memory_sources(legacy_table, legacy_id)");
   db.run(`
     CREATE UNIQUE INDEX IF NOT EXISTS ux_memory_sources_legacy_source
     ON memory_sources(source_type, legacy_table, legacy_id)
     WHERE legacy_table IS NOT NULL AND legacy_id IS NOT NULL
   `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_team_members_team ON team_members(team_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_api_keys_team ON api_keys(team_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_api_keys_project ON api_keys(project_id)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(prefix)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_audit_log_team_time ON audit_log(team_id, created_at_epoch DESC)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_audit_log_project_time ON audit_log(project_id, created_at_epoch DESC)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_audit_log_actor ON audit_log(actor_type, actor_id)');
+  db.run("CREATE INDEX IF NOT EXISTS idx_team_members_team ON team_members(team_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_api_keys_team ON api_keys(team_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_api_keys_project ON api_keys(project_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(prefix)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_audit_log_team_time ON audit_log(team_id, created_at_epoch DESC)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_audit_log_project_time ON audit_log(project_id, created_at_epoch DESC)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_audit_log_actor ON audit_log(actor_type, actor_id)");
 
   db.run(`
     CREATE TRIGGER IF NOT EXISTS trg_server_sessions_project_update

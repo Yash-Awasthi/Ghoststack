@@ -49,12 +49,7 @@ export function isSocksProxy(proxy: string | ProxyDict | undefined | null): bool
  * `encPass === null` means no password (no colon in userinfo). Empty string
  * means present-but-empty (colon preserved).
  */
-function assembleSocksUrl(
-  scheme: string,
-  encUser: string,
-  encPass: string | null,
-  hostAndRest: string,
-): string {
+function assembleSocksUrl(scheme: string, encUser: string, encPass: string | null, hostAndRest: string): string {
   let userinfo: string;
   if (encPass !== null) {
     userinfo = `${encUser}:${encPass}@`;
@@ -72,9 +67,7 @@ function assembleSocksUrl(
  * bare ``%`` not followed by two hex digits is left as a literal ``%``.
  */
 function lenientDecodeURIComponent(s: string): string {
-  return s.replace(/%([0-9A-Fa-f]{2})|%/g, (match, hex) =>
-    hex ? String.fromCharCode(parseInt(hex, 16)) : "%",
-  );
+  return s.replace(/%([0-9A-Fa-f]{2})|%/g, (match, hex) => (hex ? String.fromCharCode(parseInt(hex, 16)) : "%"));
 }
 
 /**
@@ -112,7 +105,7 @@ export function normalizeSocksStringUrl(urlStr: string): string {
   const authority = hostStart === -1 ? rest : rest.slice(0, hostStart);
   const suffix = hostStart === -1 ? "" : rest.slice(hostStart);
   const atIdx = authority.lastIndexOf("@");
-  if (atIdx === -1) return urlStr;  // no creds
+  if (atIdx === -1) return urlStr; // no creds
   const userinfo = authority.slice(0, atIdx);
   const hostPart = authority.slice(atIdx + 1);
   // Validate port (matches Python's urlparse().port ValueError guard).
@@ -133,24 +126,23 @@ export function normalizeSocksStringUrl(urlStr: string): string {
   const rawPassEnc = hasPassword ? userinfo.slice(colonIdx + 1) : "";
   try {
     const encUser = rawUserEnc ? encodeURIComponent(lenientDecodeURIComponent(rawUserEnc)) : "";
-    const encPass = hasPassword
-      ? (rawPassEnc ? encodeURIComponent(lenientDecodeURIComponent(rawPassEnc)) : "")
-      : null;
+    const encPass = hasPassword ? (rawPassEnc ? encodeURIComponent(lenientDecodeURIComponent(rawPassEnc)) : "") : null;
     const normalized = assembleSocksUrl(scheme, encUser, encPass, hostAndRest);
     // Compare credentials, not the full URL: keeps the log condition focused
     // on real encoding work, not cosmetic differences (parity with the Python
     // implementation, which has to skip urlparse's hostname lowercasing).
-    const credsChanged = encUser !== rawUserEnc
-      || (hasPassword ? encPass !== rawPassEnc : false);
+    const credsChanged = encUser !== rawUserEnc || (hasPassword ? encPass !== rawPassEnc : false);
     if (credsChanged) {
       console.info(
         "[cloakbrowser] Auto URL-encoded SOCKS5 proxy credentials (special " +
-        "characters detected). Pre-encode the URL to suppress this notice.",
+          "characters detected). Pre-encode the URL to suppress this notice."
       );
     }
     return normalized;
   } catch (e) {
-    console.warn(`[cloakbrowser] Could not normalize SOCKS5 proxy URL, passing through unchanged: ${(e as Error).message}`);
+    console.warn(
+      `[cloakbrowser] Could not normalize SOCKS5 proxy URL, passing through unchanged: ${(e as Error).message}`
+    );
     return urlStr;
   }
 }
@@ -187,8 +179,7 @@ export function resolveProxyConfig(proxy: string | ProxyDict | undefined): Proxy
 export function parseProxyUrl(proxy: string): ParsedProxy {
   let url: URL;
   // Bare format: "user:pass@host:port" — new URL() throws without a scheme.
-  const normalized =
-    proxy.includes("@") && !proxy.includes("://") ? `http://${proxy}` : proxy;
+  const normalized = proxy.includes("@") && !proxy.includes("://") ? `http://${proxy}` : proxy;
   try {
     url = new URL(normalized);
   } catch {
@@ -205,7 +196,7 @@ export function parseProxyUrl(proxy: string): ParsedProxy {
 
   const result: ParsedProxy = {
     server,
-    username: decodeURIComponent(url.username),
+    username: decodeURIComponent(url.username)
   };
   if (url.password) {
     result.password = decodeURIComponent(url.password);

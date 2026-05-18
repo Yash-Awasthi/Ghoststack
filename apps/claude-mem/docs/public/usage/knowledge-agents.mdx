@@ -120,17 +120,17 @@ Each follow-up question adds to the conversation naturally. If the session expir
 
 Use these parameters when building a corpus to control which observations are included:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `name` | string | Name for the corpus (used in all subsequent API calls) |
-| `project` | string | Filter by project name |
-| `types` | string[] | Filter by observation type (bugfix, feature, decision, discovery, refactor, change) |
-| `concepts` | string[] | Filter by tagged concepts |
-| `files` | string[] | Filter by files read or modified |
-| `query` | string | Full-text search query |
-| `dateStart` | string | Start date filter (YYYY-MM-DD) |
-| `dateEnd` | string | End date filter (YYYY-MM-DD) |
-| `limit` | number | Maximum observations to include |
+| Parameter   | Type     | Description                                                                         |
+| ----------- | -------- | ----------------------------------------------------------------------------------- |
+| `name`      | string   | Name for the corpus (used in all subsequent API calls)                              |
+| `project`   | string   | Filter by project name                                                              |
+| `types`     | string[] | Filter by observation type (bugfix, feature, decision, discovery, refactor, change) |
+| `concepts`  | string[] | Filter by tagged concepts                                                           |
+| `files`     | string[] | Filter by files read or modified                                                    |
+| `query`     | string   | Full-text search query                                                              |
+| `dateStart` | string   | Start date filter (YYYY-MM-DD)                                                      |
+| `dateEnd`   | string   | End date filter (YYYY-MM-DD)                                                        |
+| `limit`     | number   | Maximum observations to include                                                     |
 
 ---
 
@@ -165,14 +165,14 @@ reprime_corpus ──┘                          |
 
 ## When to Use `/knowledge-agent` vs `/mem-search`
 
-| | `/mem-search` | `/knowledge-agent` |
-|---|---|---|
-| **Returns** | Raw observation records | Synthesized conversational answers |
-| **Best for** | Finding specific observations, IDs, timelines | Asking questions about patterns, decisions, architecture |
-| **Token model** | Pay-per-query (3-layer progressive disclosure) | Pay-once at prime time, then cheap follow-ups |
-| **Interaction** | Search, filter, fetch | Ask questions in natural language |
-| **Data freshness** | Always current (queries database live) | Snapshot at build time (rebuild to refresh) |
-| **Setup** | None -- works immediately | Build + prime required before first query |
+|                    | `/mem-search`                                  | `/knowledge-agent`                                       |
+| ------------------ | ---------------------------------------------- | -------------------------------------------------------- |
+| **Returns**        | Raw observation records                        | Synthesized conversational answers                       |
+| **Best for**       | Finding specific observations, IDs, timelines  | Asking questions about patterns, decisions, architecture |
+| **Token model**    | Pay-per-query (3-layer progressive disclosure) | Pay-once at prime time, then cheap follow-ups            |
+| **Interaction**    | Search, filter, fetch                          | Ask questions in natural language                        |
+| **Data freshness** | Always current (queries database live)         | Snapshot at build time (rebuild to refresh)              |
+| **Setup**          | None -- works immediately                      | Build + prime required before first query                |
 
 **Rule of thumb:** Use `/mem-search` when you need to find something specific. Use `/knowledge-agent` when you want to understand something broadly.
 
@@ -180,16 +180,16 @@ reprime_corpus ──┘                          |
 
 ## API Reference
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/corpus` | Build a new corpus from filters |
-| GET | `/api/corpus` | List all corpora with stats |
-| GET | `/api/corpus/:name` | Get corpus metadata |
-| DELETE | `/api/corpus/:name` | Delete a corpus |
-| POST | `/api/corpus/:name/rebuild` | Rebuild from stored filters |
-| POST | `/api/corpus/:name/prime` | Create AI session with corpus loaded |
-| POST | `/api/corpus/:name/query` | Ask the knowledge agent a question |
-| POST | `/api/corpus/:name/reprime` | Fresh session (wipe prior Q&A) |
+| Method | Path                        | Description                          |
+| ------ | --------------------------- | ------------------------------------ |
+| POST   | `/api/corpus`               | Build a new corpus from filters      |
+| GET    | `/api/corpus`               | List all corpora with stats          |
+| GET    | `/api/corpus/:name`         | Get corpus metadata                  |
+| DELETE | `/api/corpus/:name`         | Delete a corpus                      |
+| POST   | `/api/corpus/:name/rebuild` | Rebuild from stored filters          |
+| POST   | `/api/corpus/:name/prime`   | Create AI session with corpus loaded |
+| POST   | `/api/corpus/:name/query`   | Ask the knowledge agent a question   |
+| POST   | `/api/corpus/:name/reprime` | Fresh session (wipe prior Q&A)       |
 
 ---
 

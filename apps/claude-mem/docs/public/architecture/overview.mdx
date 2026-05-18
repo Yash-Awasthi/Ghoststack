@@ -17,23 +17,24 @@ Claude-Mem operates as a Claude Code plugin with the following core components:
 
 ## Technology Stack
 
-| Layer                  | Technology                                |
-|------------------------|-------------------------------------------|
-| **Language**           | TypeScript (ES2022, ESNext modules)       |
-| **Runtime**            | Node.js 20+ and Bun ≥ 1.0                 |
-| **Database**           | SQLite 3 with bun:sqlite driver           |
-| **Vector Store**       | Chroma (optional, for semantic search)    |
-| **HTTP Server**        | Express.js 5                              |
-| **Real-time**          | Server-Sent Events (SSE)                  |
-| **UI Framework**       | React + TypeScript                        |
-| **AI SDK**             | @anthropic-ai/claude-agent-sdk (or Gemini / OpenRouter) |
-| **Build Tool**         | esbuild (bundles TypeScript)              |
-| **Process Manager**    | Bun                                       |
-| **Testing**            | `bun test`                                 |
+| Layer               | Technology                                              |
+| ------------------- | ------------------------------------------------------- |
+| **Language**        | TypeScript (ES2022, ESNext modules)                     |
+| **Runtime**         | Node.js 20+ and Bun ≥ 1.0                               |
+| **Database**        | SQLite 3 with bun:sqlite driver                         |
+| **Vector Store**    | Chroma (optional, for semantic search)                  |
+| **HTTP Server**     | Express.js 5                                            |
+| **Real-time**       | Server-Sent Events (SSE)                                |
+| **UI Framework**    | React + TypeScript                                      |
+| **AI SDK**          | @anthropic-ai/claude-agent-sdk (or Gemini / OpenRouter) |
+| **Build Tool**      | esbuild (bundles TypeScript)                            |
+| **Process Manager** | Bun                                                     |
+| **Testing**         | `bun test`                                              |
 
 ## Data Flow
 
 ### Memory Pipeline
+
 ```
 Hook (stdin) → Database → Worker Service → SDK Processor → Database → Next Session Hook
 ```
@@ -45,6 +46,7 @@ Hook (stdin) → Database → Worker Service → SDK Processor → Database → 
 5. **Retrieval**: Next session's context hook reads summaries from database
 
 ### Search Pipeline
+
 ```
 User Query → MCP Tools Invoked → HTTP API → SessionSearch Service → FTS5 Database → Search Results → Claude
 ```
@@ -155,7 +157,9 @@ The actual runtime install (Bun, uv, `bun install`) is performed by `npx claude-
 See [Plugin Hooks](/architecture/hooks) for detailed hook documentation.
 
 ### 2. Worker Service
+
 Express.js HTTP server on a per-user port (default `37700 + (uid % 100)`, override via `CLAUDE_MEM_WORKER_PORT`) with:
+
 - Search HTTP API endpoints
 - Viewer UI HTTP/SSE endpoints
 - Async observation processing via the Claude Agent SDK (or Gemini / OpenRouter)
@@ -165,7 +169,9 @@ Express.js HTTP server on a per-user port (default `37700 + (uid % 100)`, overri
 See [Worker Service](/architecture/worker-service) for HTTP API and endpoints.
 
 ### 3. Database Layer
+
 SQLite3 with bun:sqlite driver featuring:
+
 - FTS5 virtual tables for full-text search
 - SessionStore for CRUD operations
 - SessionSearch for FTS5 queries
@@ -174,13 +180,16 @@ SQLite3 with bun:sqlite driver featuring:
 See [Database Architecture](/architecture/database) for schema and FTS5 search.
 
 ### 4. mem-search Skill (v5.4.0+)
+
 Skill-based search with progressive disclosure providing 10 search operations:
+
 - Search observations, sessions, prompts (full-text FTS5)
 - Filter by type, concept, file
 - Get recent context, timeline, timeline by query
 - API help documentation
 
 **Token Savings**: ~2,250 tokens per session vs MCP approach
+
 - Skill frontmatter: ~250 tokens (loaded at session start)
 - Full instructions: ~2,500 tokens (loaded on-demand when invoked)
 - HTTP API endpoints instead of MCP tools
@@ -190,7 +199,9 @@ Skill-based search with progressive disclosure providing 10 search operations:
 See [Search Architecture](/architecture/search-architecture) for technical details and examples.
 
 ### 5. Viewer UI
+
 React + TypeScript web interface served by the worker on its configured port (default `http://127.0.0.1:<worker-port>`) featuring:
+
 - Real-time memory stream via Server-Sent Events
 - Infinite scroll pagination with automatic deduplication
 - Project filtering and settings persistence

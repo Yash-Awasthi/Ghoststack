@@ -1,10 +1,9 @@
-
-import type { ObservationSearchResult, SessionSummarySearchResult, UserPromptSearchResult } from '../sqlite/types.js';
-import { ModeManager } from '../domain/ModeManager.js';
-import { logger } from '../../utils/logger.js';
+import type { ObservationSearchResult, SessionSummarySearchResult, UserPromptSearchResult } from "../sqlite/types.js";
+import { ModeManager } from "../domain/ModeManager.js";
+import { logger } from "../../utils/logger.js";
 
 export interface TimelineItem {
-  type: 'observation' | 'session' | 'prompt';
+  type: "observation" | "session" | "prompt";
   data: ObservationSearchResult | SessionSummarySearchResult | UserPromptSearchResult;
   epoch: number;
 }
@@ -18,9 +17,9 @@ export interface TimelineData {
 export class TimelineService {
   buildTimeline(data: TimelineData): TimelineItem[] {
     const items: TimelineItem[] = [
-      ...data.observations.map(obs => ({ type: 'observation' as const, data: obs, epoch: obs.created_at_epoch })),
-      ...data.sessions.map(sess => ({ type: 'session' as const, data: sess, epoch: sess.created_at_epoch })),
-      ...data.prompts.map(prompt => ({ type: 'prompt' as const, data: prompt, epoch: prompt.created_at_epoch }))
+      ...data.observations.map((obs) => ({ type: "observation" as const, data: obs, epoch: obs.created_at_epoch })),
+      ...data.sessions.map((sess) => ({ type: "session" as const, data: sess, epoch: sess.created_at_epoch })),
+      ...data.prompts.map((prompt) => ({ type: "prompt" as const, data: prompt, epoch: prompt.created_at_epoch }))
     ];
     items.sort((a, b) => a.epoch - b.epoch);
     return items;
@@ -36,13 +35,17 @@ export class TimelineService {
     if (items.length === 0) return items;
 
     let anchorIndex = -1;
-    if (typeof anchorId === 'number') {
-      anchorIndex = items.findIndex(item => item.type === 'observation' && (item.data as ObservationSearchResult).id === anchorId);
-    } else if (typeof anchorId === 'string' && anchorId.startsWith('S')) {
+    if (typeof anchorId === "number") {
+      anchorIndex = items.findIndex(
+        (item) => item.type === "observation" && (item.data as ObservationSearchResult).id === anchorId
+      );
+    } else if (typeof anchorId === "string" && anchorId.startsWith("S")) {
       const sessionNum = parseInt(anchorId.slice(1), 10);
-      anchorIndex = items.findIndex(item => item.type === 'session' && (item.data as SessionSummarySearchResult).id === sessionNum);
+      anchorIndex = items.findIndex(
+        (item) => item.type === "session" && (item.data as SessionSummarySearchResult).id === sessionNum
+      );
     } else {
-      anchorIndex = items.findIndex(item => item.epoch >= anchorEpoch);
+      anchorIndex = items.findIndex((item) => item.epoch >= anchorEpoch);
       if (anchorIndex === -1) anchorIndex = items.length - 1;
     }
 
@@ -63,14 +66,16 @@ export class TimelineService {
     if (items.length === 0) {
       return query
         ? `Found observation matching "${query}", but no timeline context available.`
-        : 'No timeline items found';
+        : "No timeline items found";
     }
 
     const lines: string[] = [];
 
     if (query && anchorId) {
-      const anchorObs = items.find(item => item.type === 'observation' && (item.data as ObservationSearchResult).id === anchorId);
-      const anchorTitle = anchorObs ? ((anchorObs.data as ObservationSearchResult).title || 'Untitled') : 'Unknown';
+      const anchorObs = items.find(
+        (item) => item.type === "observation" && (item.data as ObservationSearchResult).id === anchorId
+      );
+      const anchorTitle = anchorObs ? (anchorObs.data as ObservationSearchResult).title || "Untitled" : "Unknown";
       lines.push(`# Timeline for query: "${query}"`);
       lines.push(`**Anchor:** Observation #${anchorId} - ${anchorTitle}`);
     } else if (anchorId) {
@@ -80,14 +85,18 @@ export class TimelineService {
     }
 
     if (depth_before !== undefined && depth_after !== undefined) {
-      lines.push(`**Window:** ${depth_before} records before → ${depth_after} records after | **Items:** ${items.length}`);
+      lines.push(
+        `**Window:** ${depth_before} records before → ${depth_after} records after | **Items:** ${items.length}`
+      );
     } else {
       lines.push(`**Items:** ${items.length}`);
     }
-    lines.push('');
+    lines.push("");
 
-    lines.push(`**Legend:** 🎯 session-request | 🔴 bugfix | 🟣 feature | 🔄 refactor | ✅ change | 🔵 discovery | 🧠 decision`);
-    lines.push('');
+    lines.push(
+      `**Legend:** 🎯 session-request | 🔴 bugfix | 🟣 feature | 🔄 refactor | ✅ change | 🔵 discovery | 🧠 decision`
+    );
+    lines.push("");
 
     const dayMap = new Map<string, TimelineItem[]>();
     for (const item of items) {
@@ -106,53 +115,58 @@ export class TimelineService {
 
     for (const [day, dayItems] of sortedDays) {
       lines.push(`### ${day}`);
-      lines.push('');
+      lines.push("");
 
       let currentFile: string | null = null;
-      let lastTime = '';
+      let lastTime = "";
       let tableOpen = false;
 
       for (const item of dayItems) {
-        const isAnchor = (
-          (typeof anchorId === 'number' && item.type === 'observation' && (item.data as ObservationSearchResult).id === anchorId) ||
-          (typeof anchorId === 'string' && anchorId.startsWith('S') && item.type === 'session' && `S${(item.data as SessionSummarySearchResult).id}` === anchorId)
-        );
+        const isAnchor =
+          (typeof anchorId === "number" &&
+            item.type === "observation" &&
+            (item.data as ObservationSearchResult).id === anchorId) ||
+          (typeof anchorId === "string" &&
+            anchorId.startsWith("S") &&
+            item.type === "session" &&
+            `S${(item.data as SessionSummarySearchResult).id}` === anchorId);
 
-        if (item.type === 'session') {
+        if (item.type === "session") {
           if (tableOpen) {
-            lines.push('');
+            lines.push("");
             tableOpen = false;
             currentFile = null;
-            lastTime = '';
+            lastTime = "";
           }
 
           const sess = item.data as SessionSummarySearchResult;
-          const title = sess.request || 'Session summary';
-          const marker = isAnchor ? ' ← **ANCHOR**' : '';
+          const title = sess.request || "Session summary";
+          const marker = isAnchor ? " ← **ANCHOR**" : "";
 
           lines.push(`**🎯 #S${sess.id}** ${title} (${this.formatDateTime(item.epoch)})${marker}`);
-          lines.push('');
-        } else if (item.type === 'prompt') {
+          lines.push("");
+        } else if (item.type === "prompt") {
           if (tableOpen) {
-            lines.push('');
+            lines.push("");
             tableOpen = false;
             currentFile = null;
-            lastTime = '';
+            lastTime = "";
           }
 
           const prompt = item.data as UserPromptSearchResult;
-          const truncated = prompt.prompt_text.length > 100 ? prompt.prompt_text.substring(0, 100) + '...' : prompt.prompt_text;
+          const truncated =
+            prompt.prompt_text.length > 100 ? prompt.prompt_text.substring(0, 100) + "..." : prompt.prompt_text;
 
           lines.push(`**💬 User Prompt #${prompt.prompt_number}** (${this.formatDateTime(item.epoch)})`);
           lines.push(`> ${truncated}`);
-          lines.push('');
-        } else if (item.type === 'observation') {
+          lines.push("");
+        } else if (item.type === "observation") {
           const obs = item.data as ObservationSearchResult;
-          const file = 'General';
+          const file = "General";
 
           if (file !== currentFile) {
             if (tableOpen) {
-              lines.push('');
+              lines.push("");
             }
 
             lines.push(`**${file}**`);
@@ -161,29 +175,29 @@ export class TimelineService {
 
             currentFile = file;
             tableOpen = true;
-            lastTime = '';
+            lastTime = "";
           }
 
           const icon = this.getTypeIcon(obs.type);
           const time = this.formatTime(item.epoch);
-          const title = obs.title || 'Untitled';
+          const title = obs.title || "Untitled";
           const tokens = this.estimateTokens(obs.narrative);
 
           const showTime = time !== lastTime;
-          const timeDisplay = showTime ? time : '″';
+          const timeDisplay = showTime ? time : "″";
           lastTime = time;
 
-          const anchorMarker = isAnchor ? ' ← **ANCHOR**' : '';
+          const anchorMarker = isAnchor ? " ← **ANCHOR**" : "";
           lines.push(`| #${obs.id} | ${timeDisplay} | ${icon} | ${title}${anchorMarker} | ~${tokens} |`);
         }
       }
 
       if (tableOpen) {
-        lines.push('');
+        lines.push("");
       }
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   private getTypeIcon(type: string): string {
@@ -192,29 +206,29 @@ export class TimelineService {
 
   private formatDate(epochMs: number): string {
     const date = new Date(epochMs);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
     });
   }
 
   private formatTime(epochMs: number): string {
     const date = new Date(epochMs);
-    return date.toLocaleString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true
     });
   }
 
   private formatDateTime(epochMs: number): string {
     const date = new Date(epochMs);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true
     });
   }

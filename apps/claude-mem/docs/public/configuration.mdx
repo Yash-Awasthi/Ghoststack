@@ -11,37 +11,37 @@ Settings are managed in `~/.claude-mem/settings.json`. The file is auto-created 
 
 ### Core Settings
 
-| Setting                       | Default                         | Description                           |
-|-------------------------------|---------------------------------|---------------------------------------|
-| `CLAUDE_MEM_MODEL`            | `claude-haiku-4-5-20251001`     | Claude model used to compress observations (when using the Claude provider) |
-| `CLAUDE_MEM_PROVIDER`         | `claude`                        | AI provider: `claude`, `gemini`, or `openrouter` |
-| `CLAUDE_MEM_CLAUDE_AUTH_METHOD` | `subscription`                | Claude provider auth mode: `subscription`, `api-key`, or `gateway` |
-| `CLAUDE_MEM_MODE`             | `code`                          | Active mode profile (e.g., `code--es`, `email-investigation`) |
-| `CLAUDE_MEM_CONTEXT_OBSERVATIONS` | `50`                        | Number of observations to inject      |
-| `CLAUDE_MEM_WORKER_PORT`      | `37700 + (uid % 100)`           | Worker service port (per-user default; override for fixed port) |
-| `CLAUDE_MEM_WORKER_HOST`      | `127.0.0.1`                     | Worker service host address           |
-| `CLAUDE_MEM_DATA_DIR`         | `~/.claude-mem`                 | Data root — every other path (database, chroma, logs, settings.json, worker.pid) derives from this |
-| `CLAUDE_MEM_SKIP_TOOLS`       | `ListMcpResourcesTool,SlashCommand,Skill,TodoWrite,AskUserQuestion` | Comma-separated tools to exclude from observations |
+| Setting                           | Default                                                             | Description                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `CLAUDE_MEM_MODEL`                | `claude-haiku-4-5-20251001`                                         | Claude model used to compress observations (when using the Claude provider)                        |
+| `CLAUDE_MEM_PROVIDER`             | `claude`                                                            | AI provider: `claude`, `gemini`, or `openrouter`                                                   |
+| `CLAUDE_MEM_CLAUDE_AUTH_METHOD`   | `subscription`                                                      | Claude provider auth mode: `subscription`, `api-key`, or `gateway`                                 |
+| `CLAUDE_MEM_MODE`                 | `code`                                                              | Active mode profile (e.g., `code--es`, `email-investigation`)                                      |
+| `CLAUDE_MEM_CONTEXT_OBSERVATIONS` | `50`                                                                | Number of observations to inject                                                                   |
+| `CLAUDE_MEM_WORKER_PORT`          | `37700 + (uid % 100)`                                               | Worker service port (per-user default; override for fixed port)                                    |
+| `CLAUDE_MEM_WORKER_HOST`          | `127.0.0.1`                                                         | Worker service host address                                                                        |
+| `CLAUDE_MEM_DATA_DIR`             | `~/.claude-mem`                                                     | Data root — every other path (database, chroma, logs, settings.json, worker.pid) derives from this |
+| `CLAUDE_MEM_SKIP_TOOLS`           | `ListMcpResourcesTool,SlashCommand,Skill,TodoWrite,AskUserQuestion` | Comma-separated tools to exclude from observations                                                 |
 
 ### Gemini Provider Settings
 
-| Setting                       | Default                         | Description                           |
-|-------------------------------|---------------------------------|---------------------------------------|
-| `CLAUDE_MEM_GEMINI_API_KEY`   | —                               | Gemini API key ([get free key](https://aistudio.google.com/app/apikey)) |
-| `CLAUDE_MEM_GEMINI_MODEL`     | `gemini-2.5-flash-lite`          | Gemini model: `gemini-2.5-flash-lite`, `gemini-2.5-flash`, `gemini-3-flash-preview` |
+| Setting                     | Default                 | Description                                                                         |
+| --------------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| `CLAUDE_MEM_GEMINI_API_KEY` | —                       | Gemini API key ([get free key](https://aistudio.google.com/app/apikey))             |
+| `CLAUDE_MEM_GEMINI_MODEL`   | `gemini-2.5-flash-lite` | Gemini model: `gemini-2.5-flash-lite`, `gemini-2.5-flash`, `gemini-3-flash-preview` |
 
 See [Gemini Provider](usage/gemini-provider) for detailed configuration and free tier information.
 
 ### OpenRouter Provider Settings
 
-| Setting                                      | Default                     | Description                           |
-|----------------------------------------------|-----------------------------|---------------------------------------|
+| Setting                                      | Default                     | Description                                                |
+| -------------------------------------------- | --------------------------- | ---------------------------------------------------------- |
 | `CLAUDE_MEM_OPENROUTER_API_KEY`              | —                           | OpenRouter API key ([get key](https://openrouter.ai/keys)) |
-| `CLAUDE_MEM_OPENROUTER_MODEL`                | `xiaomi/mimo-v2-flash:free` | Model identifier (supports 100+ models) |
-| `CLAUDE_MEM_OPENROUTER_MAX_CONTEXT_MESSAGES` | `20`                        | Max messages in conversation history  |
-| `CLAUDE_MEM_OPENROUTER_MAX_TOKENS`           | `100000`                    | Token budget safety limit             |
-| `CLAUDE_MEM_OPENROUTER_SITE_URL`             | —                           | Optional: URL for analytics           |
-| `CLAUDE_MEM_OPENROUTER_APP_NAME`             | `claude-mem`                | Optional: App name for analytics      |
+| `CLAUDE_MEM_OPENROUTER_MODEL`                | `xiaomi/mimo-v2-flash:free` | Model identifier (supports 100+ models)                    |
+| `CLAUDE_MEM_OPENROUTER_MAX_CONTEXT_MESSAGES` | `20`                        | Max messages in conversation history                       |
+| `CLAUDE_MEM_OPENROUTER_MAX_TOKENS`           | `100000`                    | Token budget safety limit                                  |
+| `CLAUDE_MEM_OPENROUTER_SITE_URL`             | —                           | Optional: URL for analytics                                |
+| `CLAUDE_MEM_OPENROUTER_APP_NAME`             | `claude-mem`                | Optional: App name for analytics                           |
 
 See [OpenRouter Provider](usage/openrouter-provider) for detailed configuration, free model list, and usage guide.
 
@@ -49,22 +49,22 @@ See [OpenRouter Provider](usage/openrouter-provider) for detailed configuration,
 
 Gateway credentials live in `~/.claude-mem/.env`, not `settings.json`.
 
-| Env var | Default | Description |
-|---------|---------|-------------|
-| `ANTHROPIC_BASE_URL` | none | LiteLLM or Anthropic-compatible gateway URL for the Claude Agent SDK path |
-| `ANTHROPIC_AUTH_TOKEN` | none | Optional LiteLLM master key or virtual key |
-| `ANTHROPIC_API_KEY` | none | Direct Anthropic API key; normally omit this in LiteLLM gateway mode |
+| Env var                | Default | Description                                                               |
+| ---------------------- | ------- | ------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`   | none    | LiteLLM or Anthropic-compatible gateway URL for the Claude Agent SDK path |
+| `ANTHROPIC_AUTH_TOKEN` | none    | Optional LiteLLM master key or virtual key                                |
+| `ANTHROPIC_API_KEY`    | none    | Direct Anthropic API key; normally omit this in LiteLLM gateway mode      |
 
 Use [LiteLLM Gateway](configuration/litellm-gateway) when you want `CLAUDE_MEM_PROVIDER=claude` to route through LiteLLM while preserving the Claude Agent SDK worker path.
 
 ### System Configuration
 
-| Setting                       | Default                         | Description                           |
-|-------------------------------|---------------------------------|---------------------------------------|
-| `CLAUDE_MEM_DATA_DIR`         | `~/.claude-mem`                 | Data directory location               |
-| `CLAUDE_MEM_LOG_LEVEL`        | `INFO`                          | Log verbosity (DEBUG, INFO, WARN, ERROR, SILENT) |
-| `CLAUDE_MEM_PYTHON_VERSION`   | `3.13`                          | Python version for chroma-mcp         |
-| `CLAUDE_CODE_PATH`            | _(auto-detect)_                 | Path to Claude Code CLI (for Windows) |
+| Setting                     | Default         | Description                                      |
+| --------------------------- | --------------- | ------------------------------------------------ |
+| `CLAUDE_MEM_DATA_DIR`       | `~/.claude-mem` | Data directory location                          |
+| `CLAUDE_MEM_LOG_LEVEL`      | `INFO`          | Log verbosity (DEBUG, INFO, WARN, ERROR, SILENT) |
+| `CLAUDE_MEM_PYTHON_VERSION` | `3.13`          | Python version for chroma-mcp                    |
+| `CLAUDE_CODE_PATH`          | _(auto-detect)_ | Path to Claude Code CLI (for Windows)            |
 
 ## Model Configuration
 
@@ -72,11 +72,11 @@ Configure which Claude model compresses your observations (only applies when `CL
 
 ### Available Models
 
-| Value | Notes |
-|-------|-------|
+| Value                       | Notes                                           |
+| --------------------------- | ----------------------------------------------- |
 | `claude-haiku-4-5-20251001` | Default — fast and cheap, ideal for compression |
-| `claude-sonnet-4-6` | Balanced quality and cost |
-| `claude-opus-4-7` | Highest quality, most expensive |
+| `claude-sonnet-4-6`         | Balanced quality and cost                       |
+| `claude-opus-4-7`           | Highest quality, most expensive                 |
 
 ### Picking via the Installer
 
@@ -98,13 +98,14 @@ Configure the active workflow mode and language.
 
 ### Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `CLAUDE_MEM_MODE` | `code` | Defines behavior and language. See [Modes & Languages](modes). |
+| Setting           | Default | Description                                                    |
+| ----------------- | ------- | -------------------------------------------------------------- |
+| `CLAUDE_MEM_MODE` | `code`  | Defines behavior and language. See [Modes & Languages](modes). |
 
 ### Examples
 
 **Spanish Code Mode:**
+
 ```json
 {
   "CLAUDE_MEM_MODE": "code--es"
@@ -112,6 +113,7 @@ Configure the active workflow mode and language.
 ```
 
 **Email Investigation Mode:**
+
 ```json
 {
   "CLAUDE_MEM_MODE": "email-investigation"
@@ -123,6 +125,7 @@ Configure the active workflow mode and language.
 ### Data Directory Structure
 
 The data directory location depends on the environment:
+
 - **Production (installed plugin)**: `~/.claude-mem/` (always, regardless of CLAUDE_PLUGIN_ROOT)
 - **Development**: Can be overridden with `CLAUDE_MEM_DATA_DIR`
 
@@ -179,6 +182,7 @@ Claude-Mem provides MCP search tools for querying your project history.
 **No configuration required** - MCP tools are automatically available in Claude Code sessions.
 
 Search operations are provided via:
+
 - **MCP Server**: 3 tools (search, timeline, get_observations) with progressive disclosure
 - **HTTP API**: 10 endpoints on the worker service port (per-user, default `37700 + (uid % 100)`; see `~/.claude-mem/settings.json`)
 - **Auto-Invocation**: Claude recognizes natural language queries about past work
@@ -202,7 +206,8 @@ Claude-Mem supports switching between stable and beta versions via the web viewe
 **Your memory data is preserved** when switching versions. Only the plugin code changes.
 
 <Note>
-Endless Mode is experimental and slower than standard mode. See [Beta Features](beta-features) for full details and important limitations.
+  Endless Mode is experimental and slower than standard mode. See [Beta Features](beta-features) for full details and
+  important limitations.
 </Note>
 
 ## Worker Service Management
@@ -213,8 +218,8 @@ Worker service is managed by Bun as a background process. The worker auto-starts
 
 Claude-mem can automatically generate `CLAUDE.md` files in your project folders with activity timelines. This feature is disabled by default.
 
-| Setting | Default | Description |
-|---------|---------|-------------|
+| Setting                              | Default | Description                                      |
+| ------------------------------------ | ------- | ------------------------------------------------ |
 | `CLAUDE_MEM_FOLDER_CLAUDEMD_ENABLED` | `false` | Enable auto-generation of folder CLAUDE.md files |
 
 See [Folder Context Files](usage/folder-context) for full documentation on how this feature works, configuration options, and git integration recommendations.
@@ -238,12 +243,13 @@ The Terminal Preview shows exactly what will be injected at the start of your ne
 
 Control how many observations are injected:
 
-| Setting | Default | Range | Description |
-|---------|---------|-------|-------------|
-| **Observations** | 50 | 1-200 | Total number of recent observations to include |
-| **Sessions** | 10 | 1-50 | Number of recent sessions to pull observations from |
+| Setting          | Default | Range | Description                                         |
+| ---------------- | ------- | ----- | --------------------------------------------------- |
+| **Observations** | 50      | 1-200 | Total number of recent observations to include      |
+| **Sessions**     | 10      | 1-50  | Number of recent sessions to pull observations from |
 
 **Considerations**:
+
 - **Higher values** = More context but slower SessionStart and more tokens used
 - **Lower values** = Faster SessionStart but less historical awareness
 - Default of 50 observations from 10 sessions balances context richness with performance
@@ -253,6 +259,7 @@ Control how many observations are injected:
 Control which observation types and concepts are included:
 
 **Types** (select any combination):
+
 - `bugfix` - Bug fixes and error resolutions
 - `feature` - New functionality additions
 - `refactor` - Code restructuring
@@ -261,6 +268,7 @@ Control which observation types and concepts are included:
 - `change` - General code changes
 
 **Concepts** (select any combination):
+
 - `how-it-works` - System behavior explanations
 - `why-it-exists` - Rationale for code/design
 - `what-changed` - Change summaries
@@ -294,13 +302,13 @@ Token economics help you understand the value of cached observations vs. re-read
 
 ### Advanced Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| **Model** | sonnet | AI model for generating observations |
-| **Worker Port** | `37700 + (uid % 100)` | Port for background worker service (override with `CLAUDE_MEM_WORKER_PORT`) |
-| **MCP search server** | true | Enable Model Context Protocol search tools |
-| **Include last summary** | false | Add previous session's summary to context |
-| **Include last message** | false | Add previous session's final message |
+| Setting                  | Default               | Description                                                                 |
+| ------------------------ | --------------------- | --------------------------------------------------------------------------- |
+| **Model**                | sonnet                | AI model for generating observations                                        |
+| **Worker Port**          | `37700 + (uid % 100)` | Port for background worker service (override with `CLAUDE_MEM_WORKER_PORT`) |
+| **MCP search server**    | true                  | Enable Model Context Protocol search tools                                  |
+| **Include last summary** | false                 | Add previous session's summary to context                                   |
+| **Include last message** | false                 | Add previous session's final message                                        |
 
 ### Manual Configuration
 
@@ -331,6 +339,7 @@ Settings can be customized in `~/.claude-mem/settings.json`.
 ### Custom Data Directory
 
 Edit `~/.claude-mem/settings.json`:
+
 ```json
 {
   "CLAUDE_MEM_DATA_DIR": "/custom/path"
@@ -340,6 +349,7 @@ Edit `~/.claude-mem/settings.json`:
 ### Custom Worker Port
 
 Edit `~/.claude-mem/settings.json`:
+
 ```json
 {
   "CLAUDE_MEM_WORKER_PORT": "38000"
@@ -347,6 +357,7 @@ Edit `~/.claude-mem/settings.json`:
 ```
 
 Then restart the worker:
+
 ```bash
 npm run worker:restart
 ```
@@ -354,6 +365,7 @@ npm run worker:restart
 ### Custom Model
 
 Edit `~/.claude-mem/settings.json`:
+
 ```json
 {
   "CLAUDE_MEM_MODEL": "opus"
@@ -361,6 +373,7 @@ Edit `~/.claude-mem/settings.json`:
 ```
 
 Then restart the worker:
+
 ```bash
 export CLAUDE_MEM_MODEL=opus
 npm run worker:restart
@@ -369,6 +382,7 @@ npm run worker:restart
 ### Custom Skip Tools
 
 Control which tools are excluded from observations. Edit `~/.claude-mem/settings.json`:
+
 ```json
 {
   "CLAUDE_MEM_SKIP_TOOLS": "ListMcpResourcesTool,SlashCommand,Skill"
@@ -376,6 +390,7 @@ Control which tools are excluded from observations. Edit `~/.claude-mem/settings
 ```
 
 **Default excluded tools:**
+
 - `ListMcpResourcesTool`
 - `SlashCommand`
 - `Skill`
@@ -383,6 +398,7 @@ Control which tools are excluded from observations. Edit `~/.claude-mem/settings
 - `AskUserQuestion`
 
 **Common customizations:**
+
 - Include TodoWrite: Remove from skip list to track task planning
 - Include AskUserQuestion: Remove to capture decision-making conversations
 - Skip additional tools: Add tool names to reduce observation noise
@@ -431,11 +447,13 @@ npm run worker:logs
 ### Configuration Not Applied
 
 1. Restart worker after changes:
+
    ```bash
    npm run worker:restart
    ```
 
 2. Verify environment variables:
+
    ```bash
    echo $CLAUDE_MEM_MODEL
    echo $CLAUDE_MEM_WORKER_PORT
@@ -459,11 +477,13 @@ If you specify an invalid Claude model name, the worker logs a warning and uses 
 The default worker port is `37700 + (uid % 100)`, so different OS users on the same machine get different ports automatically. If you still hit a collision (e.g. running multiple profiles as the same UID), set a fixed port:
 
 1. Set custom port:
+
    ```bash
    export CLAUDE_MEM_WORKER_PORT=38000
    ```
 
 2. Restart worker:
+
    ```bash
    npm run worker:restart
    ```

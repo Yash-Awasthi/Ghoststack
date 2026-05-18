@@ -16,20 +16,24 @@
  *   - Falls back to el.evaluate() only when CDP is unavailable
  */
 
-import type { Page, Frame, ElementHandle, CDPSession } from 'playwright-core';
-import type { HumanConfig, HumanActionOptions } from './config.js';
-import { rand, randRange, sleep, mergeConfig } from './config.js';
-import { RawMouse, RawKeyboard, humanMove, humanClick, clickTarget, humanIdle } from './mouse.js';
-import { humanType } from './keyboard.js';
-import { humanScrollIntoView } from './scroll.js';
+import type { Page, Frame, ElementHandle, CDPSession } from "playwright-core";
+import type { HumanConfig, HumanActionOptions } from "./config.js";
+import { rand, randRange, sleep, mergeConfig } from "./config.js";
+import { RawMouse, RawKeyboard, humanMove, humanClick, clickTarget, humanIdle } from "./mouse.js";
+import { humanType } from "./keyboard.js";
+import { humanScrollIntoView } from "./scroll.js";
 import {
-  ensureActionableHandle, checkPointerEventsHandle,
-  CHECKS_CLICK, CHECKS_HOVER, CHECKS_INPUT, CHECKS_FOCUS, CHECKS_CHECK,
-} from './actionability.js';
+  ensureActionableHandle,
+  checkPointerEventsHandle,
+  CHECKS_CLICK,
+  CHECKS_HOVER,
+  CHECKS_INPUT,
+  CHECKS_FOCUS,
+  CHECKS_CHECK
+} from "./actionability.js";
 
 // --- Platform-aware select-all shortcut ---
-const SELECT_ALL = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
-
+const SELECT_ALL = process.platform === "darwin" ? "Meta+a" : "Control+a";
 
 // ============================================================================
 // Stealth ElementHandle input check — uses CDP DOM.describeNode
@@ -37,7 +41,7 @@ const SELECT_ALL = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
 
 async function isInputElementHandle(
   stealth: any, // StealthEval from index.ts
-  el: ElementHandle,
+  el: ElementHandle
 ): Promise<boolean> {
   // Try CDP DOM.describeNode first (no main-world JS execution)
   if (stealth) {
@@ -50,21 +54,21 @@ async function isInputElementHandle(
 
       // Use el.evaluate as a reliable fallback within stealth context
       // Playwright doesn't expose remoteObject directly like Puppeteer
-    } catch { /* fallthrough */ }
+    } catch {
+      /* fallthrough */
+    }
   }
 
   // Fallback: el.evaluate (works reliably in Playwright)
   try {
     return await el.evaluate((node: any) => {
       const tag = node.tagName?.toLowerCase();
-      return tag === 'input' || tag === 'textarea'
-        || node.getAttribute?.('contenteditable') === 'true';
+      return tag === "input" || tag === "textarea" || node.getAttribute?.("contenteditable") === "true";
     });
   } catch {
     return false;
   }
 }
-
 
 // ============================================================================
 // CursorState type (matches index.ts)
@@ -75,7 +79,6 @@ interface CursorState {
   y: number;
   initialized: boolean;
 }
-
 
 // ============================================================================
 // Patch a single Playwright ElementHandle
@@ -89,7 +92,7 @@ export function patchSingleElementHandle(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: any,
+  stealth: any
 ): void {
   if ((el as any)._humanPatched) return;
   (el as any)._humanPatched = true;
@@ -129,11 +132,14 @@ export function patchSingleElementHandle(
     return children;
   };
 
-  (el as any).waitForSelector = async (selector: string, options?: {
-    state?: 'attached' | 'detached' | 'visible' | 'hidden';
-    strict?: boolean;
-    timeout?: number;
-  }) => {
+  (el as any).waitForSelector = async (
+    selector: string,
+    options?: {
+      state?: "attached" | "detached" | "visible" | "hidden";
+      strict?: boolean;
+      timeout?: number;
+    }
+  ) => {
     const child = await origElWaitForSelector(selector, options ?? {});
     if (child) patchSingleElementHandle(child, page, cfg, cursor, raw, rawKb, originals, stealth);
     return child;
@@ -158,13 +164,18 @@ export function patchSingleElementHandle(
     // proceed or fall back to the original method.
     try {
       const { cursorX, cursorY } = await humanScrollIntoView(
-        page, raw,
+        page,
+        raw,
         () => el.boundingBox(),
-        cursor.x, cursor.y, callCfg,
+        cursor.x,
+        cursor.y,
+        callCfg
       );
       cursor.x = cursorX;
       cursor.y = cursorY;
-    } catch { /* let boundingBox() decide */ }
+    } catch {
+      /* let boundingBox() decide */
+    }
 
     const box = await el.boundingBox();
     if (!box) return null;
@@ -183,16 +194,18 @@ export function patchSingleElementHandle(
   };
 
   // --- el.click() ---
-  (el as any).click = async (options?: HumanActionOptions & {
-    button?: 'left' | 'right' | 'middle';
-    clickCount?: number;
-    delay?: number;
-    force?: boolean;
-    modifiers?: Array<'Alt' | 'Control' | 'ControlOrMeta' | 'Meta' | 'Shift'>;
-    noWaitAfter?: boolean;
-    position?: { x: number; y: number };
-    trial?: boolean;
-  }) => {
+  (el as any).click = async (
+    options?: HumanActionOptions & {
+      button?: "left" | "right" | "middle";
+      clickCount?: number;
+      delay?: number;
+      force?: boolean;
+      modifiers?: Array<"Alt" | "Control" | "ControlOrMeta" | "Meta" | "Shift">;
+      noWaitAfter?: boolean;
+      position?: { x: number; y: number };
+      trial?: boolean;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     const force = options?.force ?? false;
     const timeout = options?.timeout ?? 30000;
@@ -204,15 +217,17 @@ export function patchSingleElementHandle(
   };
 
   // --- el.dblclick() ---
-  (el as any).dblclick = async (options?: HumanActionOptions & {
-    button?: 'left' | 'right' | 'middle';
-    delay?: number;
-    force?: boolean;
-    modifiers?: Array<'Alt' | 'Control' | 'ControlOrMeta' | 'Meta' | 'Shift'>;
-    noWaitAfter?: boolean;
-    position?: { x: number; y: number };
-    trial?: boolean;
-  }) => {
+  (el as any).dblclick = async (
+    options?: HumanActionOptions & {
+      button?: "left" | "right" | "middle";
+      delay?: number;
+      force?: boolean;
+      modifiers?: Array<"Alt" | "Control" | "ControlOrMeta" | "Meta" | "Shift">;
+      noWaitAfter?: boolean;
+      position?: { x: number; y: number };
+      trial?: boolean;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     const force = options?.force ?? false;
     const timeout = options?.timeout ?? 30000;
@@ -226,12 +241,14 @@ export function patchSingleElementHandle(
   };
 
   // --- el.hover() ---
-  (el as any).hover = async (options?: HumanActionOptions & {
-    force?: boolean;
-    modifiers?: Array<'Alt' | 'Control' | 'ControlOrMeta' | 'Meta' | 'Shift'>;
-    position?: { x: number; y: number };
-    trial?: boolean;
-  }) => {
+  (el as any).hover = async (
+    options?: HumanActionOptions & {
+      force?: boolean;
+      modifiers?: Array<"Alt" | "Control" | "ControlOrMeta" | "Meta" | "Shift">;
+      position?: { x: number; y: number };
+      trial?: boolean;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     const force = options?.force ?? false;
     const timeout = options?.timeout ?? 30000;
@@ -241,10 +258,13 @@ export function patchSingleElementHandle(
   };
 
   // --- el.type() ---
-  (el as any).type = async (text: string, options?: HumanActionOptions & {
-    delay?: number;
-    noWaitAfter?: boolean;
-  }) => {
+  (el as any).type = async (
+    text: string,
+    options?: HumanActionOptions & {
+      delay?: number;
+      noWaitAfter?: boolean;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     const force = (options as any)?.force ?? false;
     const timeout = options?.timeout ?? 30000;
@@ -255,15 +275,20 @@ export function patchSingleElementHandle(
     await humanClick(raw, info.isInp, callCfg);
     await sleep(rand(100, 250));
     let cdpSession: CDPSession | null = null;
-    try { cdpSession = await stealth?.getCdpSession(); } catch {}
+    try {
+      cdpSession = await stealth?.getCdpSession();
+    } catch {}
     await humanType(page, rawKb, text, callCfg, cdpSession);
   };
 
   // --- el.fill() ---
-  (el as any).fill = async (value: string, options?: HumanActionOptions & {
-    force?: boolean;
-    noWaitAfter?: boolean;
-  }) => {
+  (el as any).fill = async (
+    value: string,
+    options?: HumanActionOptions & {
+      force?: boolean;
+      noWaitAfter?: boolean;
+    }
+  ) => {
     const callCfg = mergeConfig(cfg, options?.human_config ?? options);
     const force = options?.force ?? false;
     const timeout = options?.timeout ?? 30000;
@@ -275,10 +300,12 @@ export function patchSingleElementHandle(
     await sleep(rand(100, 250));
     await originals.keyboardPress(SELECT_ALL);
     await sleep(rand(30, 80));
-    await originals.keyboardPress('Backspace');
+    await originals.keyboardPress("Backspace");
     await sleep(rand(50, 150));
     let cdpSession: CDPSession | null = null;
-    try { cdpSession = await stealth?.getCdpSession(); } catch {}
+    try {
+      cdpSession = await stealth?.getCdpSession();
+    } catch {}
     await humanType(page, rawKb, value, callCfg, cdpSession);
   };
 
@@ -291,11 +318,14 @@ export function patchSingleElementHandle(
   };
 
   // --- el.selectOption() ---
-  (el as any).selectOption = async (values: any, options?: {
-    force?: boolean;
-    noWaitAfter?: boolean;
-    timeout?: number;
-  }) => {
+  (el as any).selectOption = async (
+    values: any,
+    options?: {
+      force?: boolean;
+      noWaitAfter?: boolean;
+      timeout?: number;
+    }
+  ) => {
     const force = options?.force ?? false;
     const timeout = options?.timeout ?? 30000;
     if (!force) await ensureActionableHandle(el, CHECKS_FOCUS, timeout, force);
@@ -350,13 +380,16 @@ export function patchSingleElementHandle(
 
   // --- el.setChecked() ---
   if (origElSetChecked) {
-    (el as any).setChecked = async (checked: boolean, options?: {
-      force?: boolean;
-      noWaitAfter?: boolean;
-      position?: { x: number; y: number };
-      timeout?: number;
-      trial?: boolean;
-    }) => {
+    (el as any).setChecked = async (
+      checked: boolean,
+      options?: {
+        force?: boolean;
+        noWaitAfter?: boolean;
+        position?: { x: number; y: number };
+        timeout?: number;
+        trial?: boolean;
+      }
+    ) => {
       const force = options?.force ?? false;
       const timeout = options?.timeout ?? 30000;
       if (!force) await ensureActionableHandle(el, CHECKS_CHECK, timeout, force);
@@ -374,7 +407,7 @@ export function patchSingleElementHandle(
   // --- el.tap() ---
   (el as any).tap = async (options?: {
     force?: boolean;
-    modifiers?: Array<'Alt' | 'Control' | 'ControlOrMeta' | 'Meta' | 'Shift'>;
+    modifiers?: Array<"Alt" | "Control" | "ControlOrMeta" | "Meta" | "Shift">;
     noWaitAfter?: boolean;
     position?: { x: number; y: number };
     timeout?: number;
@@ -390,8 +423,8 @@ export function patchSingleElementHandle(
   // Stock Playwright el.focus() never clicks — clicking would trigger onclick,
   // submit forms, navigate links, etc.
   (el as any).focus = async () => {
-    await moveToElement();  // human-like Bézier cursor movement
-    await origElFocus();    // programmatic focus, no click
+    await moveToElement(); // human-like Bézier cursor movement
+    await origElFocus(); // programmatic focus, no click
   };
 
   // --- el.scrollIntoViewIfNeeded() ---
@@ -406,9 +439,12 @@ export function patchSingleElementHandle(
       if (ensureCursorInit) await ensureCursorInit();
       try {
         const { cursorX, cursorY } = await humanScrollIntoView(
-          page, raw,
+          page,
+          raw,
           () => el.boundingBox(),
-          cursor.x, cursor.y, callCfg,
+          cursor.x,
+          cursor.y,
+          callCfg
         );
         cursor.x = cursorX;
         cursor.y = cursorY;
@@ -418,7 +454,6 @@ export function patchSingleElementHandle(
     };
   }
 }
-
 
 // ============================================================================
 // Page-level ElementHandle patching
@@ -431,10 +466,10 @@ export function patchPageElementHandles(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: any,
+  stealth: any
 ): void {
   // Patch page.$() — only if the method exists
-  if (typeof page.$ === 'function') {
+  if (typeof page.$ === "function") {
     const orig$ = page.$.bind(page);
     (page as any).$ = async (selector: string) => {
       const el = await orig$(selector);
@@ -444,7 +479,7 @@ export function patchPageElementHandles(
   }
 
   // Patch page.$$()
-  if (typeof page.$$ === 'function') {
+  if (typeof page.$$ === "function") {
     const orig$$ = page.$$.bind(page);
     (page as any).$$ = async (selector: string) => {
       const els = await orig$$(selector);
@@ -456,20 +491,22 @@ export function patchPageElementHandles(
   }
 
   // Patch page.waitForSelector()
-  if (typeof page.waitForSelector === 'function') {
+  if (typeof page.waitForSelector === "function") {
     const origWaitForSelector = page.waitForSelector.bind(page);
-    (page as any).waitForSelector = async (selector: string, options?: {
-      state?: 'attached' | 'detached' | 'visible' | 'hidden';
-      strict?: boolean;
-      timeout?: number;
-    }) => {
+    (page as any).waitForSelector = async (
+      selector: string,
+      options?: {
+        state?: "attached" | "detached" | "visible" | "hidden";
+        strict?: boolean;
+        timeout?: number;
+      }
+    ) => {
       const el = await origWaitForSelector(selector, options ?? {});
       if (el) patchSingleElementHandle(el, page, cfg, cursor, raw, rawKb, originals, stealth);
       return el;
     };
   }
 }
-
 
 // ============================================================================
 // Frame-level ElementHandle patching
@@ -483,10 +520,10 @@ export function patchFrameElementHandles(
   raw: RawMouse,
   rawKb: RawKeyboard,
   originals: any,
-  stealth: any,
+  stealth: any
 ): void {
   // Patch frame.$() — only if the method exists
-  if (typeof frame.$ === 'function') {
+  if (typeof frame.$ === "function") {
     const origFrame$ = frame.$.bind(frame);
     (frame as any).$ = async (selector: string) => {
       const el = await origFrame$(selector);
@@ -496,7 +533,7 @@ export function patchFrameElementHandles(
   }
 
   // Patch frame.$$()
-  if (typeof frame.$$ === 'function') {
+  if (typeof frame.$$ === "function") {
     const origFrame$$ = frame.$$.bind(frame);
     (frame as any).$$ = async (selector: string) => {
       const els = await origFrame$$(selector);
@@ -508,13 +545,16 @@ export function patchFrameElementHandles(
   }
 
   // Patch frame.waitForSelector()
-  if (typeof frame.waitForSelector === 'function') {
+  if (typeof frame.waitForSelector === "function") {
     const origFrameWaitForSelector = frame.waitForSelector.bind(frame);
-    (frame as any).waitForSelector = async (selector: string, options?: {
-      state?: 'attached' | 'detached' | 'visible' | 'hidden';
-      strict?: boolean;
-      timeout?: number;
-    }) => {
+    (frame as any).waitForSelector = async (
+      selector: string,
+      options?: {
+        state?: "attached" | "detached" | "visible" | "hidden";
+        strict?: boolean;
+        timeout?: number;
+      }
+    ) => {
       const el = await origFrameWaitForSelector(selector, options ?? {});
       if (el) patchSingleElementHandle(el, page, cfg, cursor, raw, rawKb, originals, stealth);
       return el;

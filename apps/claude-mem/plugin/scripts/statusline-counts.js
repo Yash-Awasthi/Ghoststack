@@ -15,7 +15,9 @@ try {
       try {
         const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
         if (settings.CLAUDE_MEM_DATA_DIR) dataDir = settings.CLAUDE_MEM_DATA_DIR;
-      } catch { /* use default */ }
+      } catch {
+        /* use default */
+      }
     }
   }
 
@@ -28,11 +30,13 @@ try {
   const db = new Database(dbPath, { readonly: true });
 
   const obs = db.query("SELECT COUNT(*) as c FROM observations WHERE project = ?").get(project);
-  const prompts = db.query(
-    `SELECT COUNT(*) as c FROM user_prompts up
+  const prompts = db
+    .query(
+      `SELECT COUNT(*) as c FROM user_prompts up
      JOIN sdk_sessions s ON s.content_session_id = up.content_session_id
      WHERE s.project = ?`
-  ).get(project);
+    )
+    .get(project);
   console.log(JSON.stringify({ observations: obs.c, prompts: prompts.c, project }));
   db.close();
 } catch (e) {

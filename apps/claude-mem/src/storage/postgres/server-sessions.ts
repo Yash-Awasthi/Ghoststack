@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsonObject, PostgresQueryable } from './utils.js';
-import { assertProjectOwnership, deterministicKey, newId, queryOne, toDate, toEpoch, toJsonObject } from './utils.js';
-import type { PostgresAgentEvent } from './agent-events.js';
+import type { JsonObject, PostgresQueryable } from "./utils.js";
+import { assertProjectOwnership, deterministicKey, newId, queryOne, toDate, toEpoch, toJsonObject } from "./utils.js";
+import type { PostgresAgentEvent } from "./agent-events.js";
 
 export interface PostgresServerSession {
   id: string;
@@ -89,7 +89,7 @@ export class PostgresServerSessionsRepository {
         input.agentId ?? null,
         input.agentType ?? null,
         input.platformSource ?? null,
-        input.generationStatus ?? 'idle',
+        input.generationStatus ?? "idle",
         JSON.stringify(input.metadata ?? {})
       ]
     );
@@ -103,7 +103,7 @@ export class PostgresServerSessionsRepository {
   }): Promise<PostgresServerSession | null> {
     const row = await queryOne<ServerSessionRow>(
       this.client,
-      'SELECT * FROM server_sessions WHERE id = $1 AND project_id = $2 AND team_id = $3',
+      "SELECT * FROM server_sessions WHERE id = $1 AND project_id = $2 AND team_id = $3",
       [input.id, input.projectId, input.teamId]
     );
     return row ? mapServerSessionRow(row) : null;
@@ -142,11 +142,7 @@ export class PostgresServerSessionsRepository {
    * Idempotent: if `ended_at` is already populated, returns the row unchanged.
    * Returns null if no row matches the (id, project_id, team_id) tuple.
    */
-  async endSession(input: {
-    id: string;
-    projectId: string;
-    teamId: string;
-  }): Promise<PostgresServerSession | null> {
+  async endSession(input: { id: string; projectId: string; teamId: string }): Promise<PostgresServerSession | null> {
     const updated = await queryOne<ServerSessionRow>(
       this.client,
       `
@@ -308,7 +304,7 @@ export function buildServerSessionIdempotencyKey(input: {
     return `server_session:v1:${deterministicKey([
       input.teamId,
       input.projectId,
-      'external',
+      "external",
       input.externalSessionId
     ])}`;
   }
@@ -317,7 +313,7 @@ export function buildServerSessionIdempotencyKey(input: {
     return `server_session:v1:${deterministicKey([
       input.teamId,
       input.projectId,
-      'content',
+      "content",
       input.platformSource ?? null,
       input.agentId ?? null,
       input.contentSessionId
@@ -328,7 +324,7 @@ export function buildServerSessionIdempotencyKey(input: {
     return `server_session:v1:${deterministicKey([
       input.teamId,
       input.projectId,
-      'agent',
+      "agent",
       input.platformSource,
       input.agentId,
       input.agentType ?? null

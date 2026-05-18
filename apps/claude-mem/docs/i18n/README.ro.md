@@ -1,6 +1,7 @@
 🌐 Aceasta este o traducere automată. Corecțiile din partea comunității sunt binevenite!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ Consultați [Prezentarea Generală a Arhitecturii](https://docs.claude-mem.ai/ar
 Claude-Mem oferă căutare inteligentă prin abilitatea mem-search care se invocă automat când întrebați despre lucrul trecut:
 
 **Cum Funcționează:**
-- Întrebați natural: *"Ce am făcut în sesiunea trecută?"* sau *"Am rezolvat acest bug înainte?"*
+
+- Întrebați natural: _"Ce am făcut în sesiunea trecută?"_ sau _"Am rezolvat acest bug înainte?"_
 - Claude invocă automat abilitatea mem-search pentru a găsi contextul relevant
 
 **Operații de Căutare Disponibile:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Suport
 

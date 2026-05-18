@@ -1,4 +1,3 @@
-
 import claudeMemPlugin from "./dist/index.js";
 
 let registeredService = null;
@@ -14,10 +13,18 @@ const mockApi = {
   config: {},
   pluginConfig: {},
   logger: {
-    info: (message) => { logs.push(message); },
-    warn: (message) => { logs.push(message); },
-    error: (message) => { logs.push(message); },
-    debug: (message) => { logs.push(message); },
+    info: (message) => {
+      logs.push(message);
+    },
+    warn: (message) => {
+      logs.push(message);
+    },
+    error: (message) => {
+      logs.push(message);
+    },
+    debug: (message) => {
+      logs.push(message);
+    }
   },
   registerService: (service) => {
     registeredService = service;
@@ -38,9 +45,9 @@ const mockApi = {
       signal: { sendMessageSignal: async () => {} },
       slack: { sendMessageSlack: async () => {} },
       whatsapp: { sendMessageWhatsApp: async () => {} },
-      line: { sendMessageLine: async () => {} },
-    },
-  },
+      line: { sendMessageLine: async () => {} }
+    }
+  }
 };
 
 claudeMemPlugin(mockApi);
@@ -51,9 +58,7 @@ if (!registeredService) {
   console.error("FAIL: No service was registered");
   failures++;
 } else if (registeredService.id !== "claude-mem-observation-feed") {
-  console.error(
-    `FAIL: Service ID is "${registeredService.id}", expected "claude-mem-observation-feed"`
-  );
+  console.error(`FAIL: Service ID is "${registeredService.id}", expected "claude-mem-observation-feed"`);
   failures++;
 } else {
   console.log("OK: Service registered with id 'claude-mem-observation-feed'");

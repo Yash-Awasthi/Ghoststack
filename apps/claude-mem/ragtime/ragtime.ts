@@ -6,11 +6,9 @@ import * as path from "path";
 import { homedir } from "os";
 
 const CONFIG = {
-  corpusPath: process.env.RAGTIME_CORPUS_PATH ||
-    path.join(process.cwd(), "datasets", "epstein-mode"),
+  corpusPath: process.env.RAGTIME_CORPUS_PATH || path.join(process.cwd(), "datasets", "epstein-mode"),
 
-  pluginPath: process.env.RAGTIME_PLUGIN_PATH ||
-    path.join(process.cwd(), "plugin"),
+  pluginPath: process.env.RAGTIME_PLUGIN_PATH || path.join(process.cwd(), "plugin"),
 
   workerPort: parseInt(process.env.CLAUDE_MEM_WORKER_PORT || "37777", 10),
 
@@ -20,7 +18,7 @@ const CONFIG = {
 
   fileLimit: parseInt(process.env.RAGTIME_FILE_LIMIT || "0", 10),
 
-  sessionDelayMs: parseInt(process.env.RAGTIME_SESSION_DELAY || "2000", 10),
+  sessionDelayMs: parseInt(process.env.RAGTIME_SESSION_DELAY || "2000", 10)
 };
 
 process.env.CLAUDE_MEM_MODE = "email-investigation";
@@ -113,15 +111,13 @@ async function cleanupOldTranscripts(): Promise<void> {
 }
 
 async function waitForQueueToEmpty(): Promise<void> {
-  const maxWaitTimeMs = 5 * 60 * 1000; 
+  const maxWaitTimeMs = 5 * 60 * 1000;
   const pollIntervalMs = 500;
   const startTime = Date.now();
 
   while (true) {
     try {
-      const response = await fetch(
-        `http://localhost:${CONFIG.workerPort}/api/processing-status`
-      );
+      const response = await fetch(`http://localhost:${CONFIG.workerPort}/api/processing-status`);
 
       if (!response.ok) {
         console.error(`Failed to get processing status: ${response.status}`);
@@ -150,24 +146,22 @@ async function waitForQueueToEmpty(): Promise<void> {
 
 async function processFile(file: string, index: number, total: number): Promise<void> {
   const filename = path.basename(file);
-  console.log(`\n[${ index + 1}/${total}] Processing: ${filename}`);
+  console.log(`\n[${index + 1}/${total}] Processing: ${filename}`);
 
   try {
     for await (const message of query({
       prompt: `Read ${file} and analyze it in the context of the investigation. Look for entities, relationships, timeline events, and any anomalies. Cross-reference with what you know from the injected context above.`,
       options: {
         cwd: CONFIG.corpusPath,
-        plugins: [{ type: "local", path: CONFIG.pluginPath }],
-      },
+        plugins: [{ type: "local", path: CONFIG.pluginPath }]
+      }
     })) {
       if (message.type === "assistant") {
         const content = message.message.content;
         if (Array.isArray(content)) {
           for (const block of content) {
             if (block.type === "text" && block.text) {
-              const text = block.text.length > 500
-                ? block.text.substring(0, 500) + "..."
-                : block.text;
+              const text = block.text.length > 500 ? block.text.substring(0, 500) + "..." : block.text;
               console.log("Assistant:", text);
             }
           }

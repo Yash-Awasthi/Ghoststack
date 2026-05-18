@@ -1,15 +1,15 @@
-import { inflateRawSync } from 'zlib';
-import { BANNER } from './banner-frames.js';
+import { inflateRawSync } from "zlib";
+import { BANNER } from "./banner-frames.js";
 
-const HIDE_CURSOR = '\x1b[?25l';
-const SHOW_CURSOR = '\x1b[?25h';
-const CLEAR_SCREEN = '\x1b[2J\x1b[3J\x1b[H';
-const RESET = '\x1b[0m';
+const HIDE_CURSOR = "\x1b[?25l";
+const SHOW_CURSOR = "\x1b[?25h";
+const CLEAR_SCREEN = "\x1b[2J\x1b[3J\x1b[H";
+const RESET = "\x1b[0m";
 
-const FRAME_SEP = '\x01';
+const FRAME_SEP = "\x01";
 
 function primaryColor(truecolor: boolean, brightness: number = 1.0): string {
-  if (!truecolor) return '\x1b[38;5;208m';
+  if (!truecolor) return "\x1b[38;5;208m";
   const r = Math.min(255, Math.round(230 * brightness));
   const g = Math.min(255, Math.round(115 * brightness));
   const b = Math.min(255, Math.round(70 * brightness));
@@ -17,7 +17,7 @@ function primaryColor(truecolor: boolean, brightness: number = 1.0): string {
 }
 
 function accentColor(truecolor: boolean, brightness: number = 1.0): string {
-  if (!truecolor) return '\x1b[38;5;215m';
+  if (!truecolor) return "\x1b[38;5;215m";
   const r = Math.min(255, Math.round(255 * brightness));
   const g = Math.min(255, Math.round(180 * brightness));
   const b = Math.min(255, Math.round(122 * brightness));
@@ -31,7 +31,7 @@ function getFrames(): string[] {
   // (corrupted bundle, mismatched zlib, etc.) we must not break the CLI.
   // Fail open by returning an empty frame list; playBanner() bails on empty.
   try {
-    const raw = inflateRawSync(Buffer.from(BANNER.compressed, 'base64')).toString('utf8');
+    const raw = inflateRawSync(Buffer.from(BANNER.compressed, "base64")).toString("utf8");
     frames = raw.split(FRAME_SEP).filter(Boolean);
   } catch {
     frames = [];
@@ -39,11 +39,7 @@ function getFrames(): string[] {
   return frames;
 }
 
-function styleFrame(
-  frame: string,
-  truecolor: boolean,
-  brightness: number = 1.0,
-): string {
+function styleFrame(frame: string, truecolor: boolean, brightness: number = 1.0): string {
   const primary = primaryColor(truecolor, brightness);
   const accent = accentColor(truecolor, brightness);
   let out = primary;
@@ -51,10 +47,10 @@ function styleFrame(
   let inSpan = false;
   while (i < frame.length) {
     const ch = frame[i];
-    if (ch === '<') {
-      const isClosing = frame[i + 1] === '/';
-      while (i < frame.length && frame[i] !== '>') i++;
-      i++; 
+    if (ch === "<") {
+      const isClosing = frame[i + 1] === "/";
+      while (i < frame.length && frame[i] !== ">") i++;
+      i++;
       inSpan = !isClosing;
       out += inSpan ? accent : primary;
       continue;
@@ -66,7 +62,7 @@ function styleFrame(
 }
 
 function detectTruecolor(): boolean {
-  return process.env.COLORTERM === 'truecolor' || process.env.COLORTERM === '24bit';
+  return process.env.COLORTERM === "truecolor" || process.env.COLORTERM === "24bit";
 }
 
 const WORDMARK_BUBBLE: readonly string[] = [
@@ -74,7 +70,7 @@ const WORDMARK_BUBBLE: readonly string[] = [
   "  ___| | __ _ _   _  __| | ___       _ __ ___   ___ _ __ ___  ",
   " / __| |/ _` | | | |/ _` |/ _ \\_____| '_ ` _ \\ / _ \\ '_ ` _ \\ ",
   "| (__| | (_| | |_| | (_| |  __/_____| | | | | |  __/ | | | | |",
-  " \\___|_|\\__,_|\\__,_|\\__,_|\\___|     |_| |_| |_|\\___|_| |_| |_|",
+  " \\___|_|\\__,_|\\__,_|\\__,_|\\___|     |_| |_| |_|\\___|_| |_| |_|"
 ] as const;
 const BUBBLE_HEIGHT = WORDMARK_BUBBLE.length;
 const BUBBLE_WIDTH = WORDMARK_BUBBLE[0].length;
@@ -85,15 +81,15 @@ const TOTAL_ROWS = BANNER.height + BUBBLE_HEIGHT + TAGLINE_GAP + 1;
 function writeBubbleRow(rowIdx: number, colsRevealed: number): string {
   const src = WORDMARK_BUBBLE[rowIdx];
   const W = BANNER.width;
-  const visible = src.slice(0, Math.min(BUBBLE_WIDTH, colsRevealed)).padEnd(BUBBLE_WIDTH, ' ');
+  const visible = src.slice(0, Math.min(BUBBLE_WIDTH, colsRevealed)).padEnd(BUBBLE_WIDTH, " ");
   const pad = Math.max(0, Math.floor((W - BUBBLE_WIDTH) / 2));
-  return ' '.repeat(pad) + `\x1b[1;97m${visible}\x1b[0m` + ' '.repeat(Math.max(0, W - pad - BUBBLE_WIDTH));
+  return " ".repeat(pad) + `\x1b[1;97m${visible}\x1b[0m` + " ".repeat(Math.max(0, W - pad - BUBBLE_WIDTH));
 }
 
 function writeTaglineRow(text: string): string {
   const W = BANNER.width;
   const pad = Math.max(0, Math.floor((W - text.length) / 2));
-  return ' '.repeat(pad) + `\x1b[2;37m${text}\x1b[0m` + ' '.repeat(Math.max(0, W - pad - text.length));
+  return " ".repeat(pad) + `\x1b[2;37m${text}\x1b[0m` + " ".repeat(Math.max(0, W - pad - text.length));
 }
 
 export function isBannerEnabled(): boolean {
@@ -113,28 +109,30 @@ export async function playBanner(): Promise<void> {
   const allFrames = getFrames();
   if (allFrames.length === 0) return;
   let aborted = false;
-  const onResize = () => { aborted = true; };
-  process.stdout.on('resize', onResize);
+  const onResize = () => {
+    aborted = true;
+  };
+  process.stdout.on("resize", onResize);
   process.stdout.write(CLEAR_SCREEN);
   process.stdout.write(HIDE_CURSOR);
 
-  process.stdout.write('\n'.repeat(TOTAL_ROWS));
+  process.stdout.write("\n".repeat(TOTAL_ROWS));
   process.stdout.write(`\x1b[${TOTAL_ROWS}A`);
-  process.stdout.write('\x1b[s');
+  process.stdout.write("\x1b[s");
 
-  const blankRow = ' '.repeat(BANNER.width);
+  const blankRow = " ".repeat(BANNER.width);
 
   const writeFrame = (frameText: string, colsRevealed: number, tagline: string, brightness: number = 1.0) => {
-    process.stdout.write('\x1b[u');
+    process.stdout.write("\x1b[u");
     process.stdout.write(styleFrame(frameText, truecolor, brightness));
-    process.stdout.write('\n');
+    process.stdout.write("\n");
     for (let i = 0; i < BUBBLE_HEIGHT; i++) {
       process.stdout.write(writeBubbleRow(i, colsRevealed));
-      process.stdout.write('\n');
+      process.stdout.write("\n");
     }
     for (let g = 0; g < TAGLINE_GAP; g++) {
       process.stdout.write(blankRow);
-      process.stdout.write('\n');
+      process.stdout.write("\n");
     }
     process.stdout.write(writeTaglineRow(tagline));
   };
@@ -142,18 +140,18 @@ export async function playBanner(): Promise<void> {
   try {
     for (let i = 0; i < allFrames.length; i++) {
       if (aborted) return;
-      writeFrame(allFrames[i], 0, '');
+      writeFrame(allFrames[i], 0, "");
       await sleep(BANNER.frameDelay);
     }
 
     const finalFrame = allFrames[allFrames.length - 1];
-    const TAGLINE = 'persistent memory across sessions';
+    const TAGLINE = "persistent memory across sessions";
 
     const REVEAL_STEPS = 14;
     for (let s = 1; s <= REVEAL_STEPS; s++) {
       if (aborted) return;
       const cols = Math.ceil(BUBBLE_WIDTH * (s / REVEAL_STEPS));
-      writeFrame(finalFrame, cols, '');
+      writeFrame(finalFrame, cols, "");
       await sleep(45);
     }
 
@@ -172,9 +170,9 @@ export async function playBanner(): Promise<void> {
 
     await sleep(150);
   } finally {
-    process.stdout.off('resize', onResize);
+    process.stdout.off("resize", onResize);
     process.stdout.write(RESET);
     process.stdout.write(SHOW_CURSOR);
-    process.stdout.write('\n');
+    process.stdout.write("\n");
   }
 }

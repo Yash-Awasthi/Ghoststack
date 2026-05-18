@@ -22,6 +22,7 @@ Pull the user toward this single moment: **open the viewer in a browser, do anyt
 Discovery already completed. Allowed APIs and signatures established:
 
 ### Install.ts patterns (`src/npx-cli/commands/install.ts`)
+
 - `log` helper at lines 41-46 — methods `info | success | warn | error`, conditionally routes to `p.log.*` (interactive) vs `console.log/warn/error` (non-interactive, 2-space indent).
 - `p` is `* as p from '@clack/prompts'`. Used: `p.note(body, title)`, `p.outro(msg)`, `p.intro`, `p.log.*`, `p.tasks`, `p.spinner`, `p.select/multiselect/confirm/password`, `p.isCancel`, `p.cancel`.
 - `pc` is `picocolors` default import. Available: `pc.cyan/green/yellow/red/bold/underline/dim/bgCyan/black`. **`pc.dim` exists** (already in use at line 663).
@@ -30,6 +31,7 @@ Discovery already completed. Allowed APIs and signatures established:
 - Existing `summaryLines` block (826-841) and `nextSteps` block (866-896) — both have parallel interactive (`p.note`) and non-interactive (`console.log`) branches.
 
 ### Settings (`src/shared/SettingsDefaultsManager.ts`)
+
 - `CLAUDE_MEM_WELCOME_HINT_ENABLED: 'true'` at line 104.
 - Merge: defaults first, then file overrides, then env overrides (lines 194-201).
 - Install does NOT pre-seed this key — only seeds prompted settings (provider, model). Existing users without explicit value automatically get the new default.
@@ -37,11 +39,13 @@ Discovery already completed. Allowed APIs and signatures established:
 - Test template: `tests/install-non-tty.test.ts` (regex over source); SettingsDefaultsManager has no dedicated test file — would be created if needed.
 
 ### SessionStart hint (`src/services/worker/http/routes/SearchRoutes.ts`)
+
 - `WELCOME_HINT_TEMPLATE` at lines 14-27. Used at line 301: `WELCOME_HINT_TEMPLATE.replace('{viewer_url}', viewerUrl)`.
 - Gating logic at lines 293-306. Only fires when `hintEnabled && !full && observationCount === 0`.
 - Output is plain text injected as SessionStart `additionalContext` via the SessionStart hook (`src/cli/handlers/context.ts`).
 
 ### Viewer (`src/ui/viewer/`)
+
 - `useSSE()` at `src/ui/viewer/hooks/useSSE.ts:1-148` exposes `{ observations, summaries, prompts, projects, sources, projectsBySource, isProcessing, queueDepth, isConnected }`. Auto-reconnects; new observations prepended via `'new_observation'` SSE event.
 - `WelcomeCard` mounted in `src/ui/viewer/App.tsx:128-130`, currently receives only `onDismiss`. App has access to all SSE state (lines 51-67).
 - All viewer CSS lives in `src/ui/viewer-template.html`; existing `.welcome-card*` styles at lines 1443-1561; existing `.status-dot` + `@keyframes pulse` at lines 754-764.
@@ -49,10 +53,12 @@ Discovery already completed. Allowed APIs and signatures established:
 - `/api/how-it-works` is NOT a static explainer — it queries observations tagged with the `'how-it-works'` concept (`SearchManager.ts:836-884`). Useless on a fresh install. Phase 1 adds a true static explainer.
 
 ### Skills (`plugin/skills/`)
+
 - 9 existing skills, each a directory with `SKILL.md` and YAML frontmatter (`name`, `description`). No central registry — discovered by directory convention.
 - Template to copy: `plugin/skills/mem-search/SKILL.md`.
 
 ### Anti-patterns to avoid
+
 - DO NOT call `/api/how-it-works` for an onboarding explainer — wrong endpoint.
 - DO NOT add new viewer CSS files — all styles in `src/ui/viewer-template.html`.
 - DO NOT add new viewer routes for stats unless strictly needed — extend `/api/stats` instead.
@@ -69,8 +75,8 @@ Discovery already completed. Allowed APIs and signatures established:
 
 1. Create `src/services/worker/onboarding-explainer.md` — single canonical content. ~150 words, three sections:
    - **What it does:** Every Read/Edit/Bash Claude makes turns into a compressed observation. Observations get summarized at session end. Relevant ones get auto-injected into future prompts.
-   - **When it kicks in:** Memory injection starts on your second session in a project. *(verbatim timing line)*
-   - **Where data lives:** Everything stays in ~/.claude-mem on this machine. *(verbatim privacy line)*
+   - **When it kicks in:** Memory injection starts on your second session in a project. _(verbatim timing line)_
+   - **Where data lives:** Everything stays in ~/.claude-mem on this machine. _(verbatim privacy line)_
 
 2. Add new route `GET /api/onboarding/explainer` in `src/services/worker/http/routes/SearchRoutes.ts`:
    - Read the markdown file at boot (cache like `cachedSkillMd` pattern in `Server.ts:18-33`).
@@ -232,6 +238,7 @@ Discovery already completed. Allowed APIs and signatures established:
 ### Tasks
 
 1. **App.tsx wiring** (`src/ui/viewer/App.tsx:128-130`). Pass new props to `WelcomeCard`:
+
    ```tsx
    <WelcomeCard
      onDismiss={...}
@@ -241,6 +248,7 @@ Discovery already completed. Allowed APIs and signatures established:
      firstObservationAt={stats.firstObservationAt}  // new — fetched from /api/stats
    />
    ```
+
    If a stats fetch hook doesn't already exist, add one (`useStats()` at `src/ui/viewer/hooks/useStats.ts`) that polls `/api/stats` on mount and on each new SSE observation.
 
 2. **WelcomeCard.tsx rewrite** (`src/ui/viewer/components/WelcomeCard.tsx`):
@@ -324,10 +332,12 @@ Discovery already completed. Allowed APIs and signatures established:
 ### Steps
 
 1. Fresh install:
+
    ```bash
    rm -rf ~/.claude-mem
    npx claude-mem install
    ```
+
    Verify: install Next Steps shows the new "Two paths" + first-success + timing + privacy + `/how-it-works` block.
 
 2. Open the viewer at the printed URL. Verify: empty state shows, dot is green (connected) or red+pulsing (disconnected briefly).

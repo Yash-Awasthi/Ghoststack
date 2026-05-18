@@ -179,7 +179,8 @@ Detaylar için [Mimari Genel Bakış](https://docs.claude-mem.ai/architecture/ov
 Claude-Mem, geçmiş çalışmalarınız hakkında sorduğunuzda otomatik olarak devreye giren mem-search becerisi aracılığıyla akıllı arama sağlar:
 
 **Nasıl Çalışır:**
-- Sadece doğal bir şekilde sorun: *"Geçen oturumda ne yaptık?"* veya *"Bu hatayı daha önce düzelttik mi?"*
+
+- Sadece doğal bir şekilde sorun: _"Geçen oturumda ne yaptık?"_ veya _"Bu hatayı daha önce düzelttik mi?"_
 - Claude, ilgili bağlamı bulmak için otomatik olarak mem-search becerisini çağırır
 
 **Mevcut Arama İşlemleri:**
@@ -285,7 +286,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Destek
 

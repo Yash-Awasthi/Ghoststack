@@ -17,15 +17,15 @@ export interface MatchRule {
 }
 
 export type EventAction =
-  | 'session_init'
-  | 'session_context'
-  | 'user_message'
-  | 'assistant_message'
-  | 'tool_use'
-  | 'tool_result'
-  | 'observation'
-  | 'file_edit'
-  | 'session_end';
+  | "session_init"
+  | "session_context"
+  | "user_message"
+  | "assistant_message"
+  | "tool_use"
+  | "tool_result"
+  | "observation"
+  | "file_edit"
+  | "session_end";
 
 export interface SchemaEvent {
   name: string;
@@ -46,9 +46,9 @@ export interface TranscriptSchema {
 }
 
 export interface WatchContextConfig {
-  mode: 'agents';
+  mode: "agents";
   path?: string;
-  updateOn?: Array<'session_start' | 'session_end'>;
+  updateOn?: Array<"session_start" | "session_end">;
 }
 
 export interface WatchTarget {

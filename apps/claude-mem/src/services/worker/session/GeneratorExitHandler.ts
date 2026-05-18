@@ -1,9 +1,9 @@
-import type { ActiveSession } from '../../worker-types.js';
-import type { SessionManager } from '../SessionManager.js';
-import type { SessionCompletionHandler } from './SessionCompletionHandler.js';
-import { logger } from '../../../utils/logger.js';
-import { getSdkProcessForSession, ensureSdkProcessExit } from '../../../supervisor/process-registry.js';
-import { RestartGuard } from '../RestartGuard.js';
+import type { ActiveSession } from "../../worker-types.js";
+import type { SessionManager } from "../SessionManager.js";
+import type { SessionCompletionHandler } from "./SessionCompletionHandler.js";
+import { logger } from "../../../utils/logger.js";
+import { getSdkProcessForSession, ensureSdkProcessExit } from "../../../supervisor/process-registry.js";
+import { RestartGuard } from "../RestartGuard.js";
 
 export interface GeneratorExitDependencies {
   sessionManager: SessionManager;
@@ -11,12 +11,14 @@ export interface GeneratorExitDependencies {
   restartGenerator: (session: ActiveSession, source: string) => void | Promise<void>;
 }
 
-function isHardStopReason(reason: ActiveSession['abortReason']): boolean {
-  return reason === 'shutdown' ||
-    reason === 'restart-guard' ||
-    reason === 'overflow' ||
-    reason === 'quota' ||
-    (typeof reason === 'string' && reason.startsWith('quota:'));
+function isHardStopReason(reason: ActiveSession["abortReason"]): boolean {
+  return (
+    reason === "shutdown" ||
+    reason === "restart-guard" ||
+    reason === "overflow" ||
+    reason === "quota" ||
+    (typeof reason === "string" && reason.startsWith("quota:"))
+  );
 }
 
 /**
@@ -34,7 +36,7 @@ function isHardStopReason(reason: ActiveSession['abortReason']): boolean {
  */
 export async function handleGeneratorExit(
   session: ActiveSession,
-  reason: ActiveSession['abortReason'],
+  reason: ActiveSession["abortReason"],
   deps: GeneratorExitDependencies
 ): Promise<void> {
   const { sessionManager, completionHandler, restartGenerator } = deps;
@@ -57,20 +59,30 @@ export async function handleGeneratorExit(
           await pendingStore.clearPendingForSession(sessionDbId);
         } catch (e) {
           const normalized = e instanceof Error ? e : new Error(String(e));
-          logger.error('SESSION', `${logPrefix} pending cleanup failed; continuing finalization`, {
-            sessionId: sessionDbId,
-            reason
-          }, normalized);
+          logger.error(
+            "SESSION",
+            `${logPrefix} pending cleanup failed; continuing finalization`,
+            {
+              sessionId: sessionDbId,
+              reason
+            },
+            normalized
+          );
         }
       }
       try {
         await completionHandler.finalizeSession(sessionDbId);
       } catch (e) {
         const normalized = e instanceof Error ? e : new Error(String(e));
-        logger.error('SESSION', `${logPrefix} finalization failed; forcing in-memory session removal`, {
-          sessionId: sessionDbId,
-          reason
-        }, normalized);
+        logger.error(
+          "SESSION",
+          `${logPrefix} finalization failed; forcing in-memory session removal`,
+          {
+            sessionId: sessionDbId,
+            reason
+          },
+          normalized
+        );
       }
     } finally {
       sessionManager.removeSessionImmediate(sessionDbId);
@@ -78,11 +90,11 @@ export async function handleGeneratorExit(
   };
 
   if (isHardStopReason(reason)) {
-    logger.info('SESSION', `Generator exited with hard-stop reason — clearing pending and finalizing`, {
+    logger.info("SESSION", `Generator exited with hard-stop reason — clearing pending and finalizing`, {
       sessionId: sessionDbId,
       reason
     });
-    await terminateSession('Hard-stop', true);
+    await terminateSession("Hard-stop", true);
     return;
   }
 
@@ -91,17 +103,22 @@ export async function handleGeneratorExit(
     pendingCount = await pendingStore.getPendingCount(sessionDbId);
   } catch (e) {
     const normalized = e instanceof Error ? e : new Error(String(e));
-    logger.error('SESSION', 'Error during recovery pending-count check; aborting to prevent leaks', {
-      sessionId: sessionDbId
-    }, normalized);
-    await terminateSession('Recovery abort', true);
+    logger.error(
+      "SESSION",
+      "Error during recovery pending-count check; aborting to prevent leaks",
+      {
+        sessionId: sessionDbId
+      },
+      normalized
+    );
+    await terminateSession("Recovery abort", true);
     return;
   }
 
   if (pendingCount === 0) {
     session.restartGuard?.recordSuccess();
     session.consecutiveRestarts = 0;
-    await terminateSession('Natural completion', false);
+    await terminateSession("Natural completion", false);
     return;
   }
 
@@ -110,26 +127,26 @@ export async function handleGeneratorExit(
   session.consecutiveRestarts = (session.consecutiveRestarts || 0) + 1;
 
   if (!restartAllowed) {
-    logger.error('SESSION', `CRITICAL: Restart guard tripped — session is dead, clearing pending and terminating`, {
+    logger.error("SESSION", `CRITICAL: Restart guard tripped — session is dead, clearing pending and terminating`, {
       sessionId: sessionDbId,
       pendingCount,
       restartsInWindow: session.restartGuard.restartsInWindow,
       windowMs: session.restartGuard.windowMs,
       maxRestarts: session.restartGuard.maxRestarts,
       consecutiveFailures: session.restartGuard.consecutiveFailuresSinceSuccess,
-      maxConsecutiveFailures: session.restartGuard.maxConsecutiveFailures,
+      maxConsecutiveFailures: session.restartGuard.maxConsecutiveFailures
     });
     session.consecutiveRestarts = 0;
-    await terminateSession('Restart guard', true);
+    await terminateSession("Restart guard", true);
     return;
   }
 
-  logger.info('SESSION', `Restarting generator after exit with pending work`, {
+  logger.info("SESSION", `Restarting generator after exit with pending work`, {
     sessionId: sessionDbId,
     pendingCount,
     consecutiveRestarts: session.consecutiveRestarts,
     restartsInWindow: session.restartGuard.restartsInWindow,
-    maxRestarts: session.restartGuard.maxRestarts,
+    maxRestarts: session.restartGuard.maxRestarts
   });
 
   const oldController = session.abortController;
@@ -145,7 +162,7 @@ export async function handleGeneratorExit(
     session.respawnTimer = undefined;
     const stillExists = deps.sessionManager.getSession(sessionDbId);
     if (stillExists && !stillExists.generatorPromise) {
-      void restartGenerator(stillExists, 'pending-work-restart');
+      void restartGenerator(stillExists, "pending-work-restart");
     }
   }, backoffMs);
 }

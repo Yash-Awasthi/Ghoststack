@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { ProjectCatalog, Settings } from '../types';
-import { authFetch } from '../utils/api';
+import { useState, useEffect, useCallback } from "react";
+import type { ProjectCatalog, Settings } from "../types";
+import { authFetch } from "../utils/api";
 
 interface UseContextPreviewResult {
   preview: string;
@@ -16,18 +16,18 @@ interface UseContextPreviewResult {
 }
 
 function getPreferredSource(sources: string[]): string | null {
-  if (sources.includes('claude')) return 'claude';
-  if (sources.includes('codex')) return 'codex';
+  if (sources.includes("claude")) return "claude";
+  if (sources.includes("codex")) return "codex";
   return sources[0] || null;
 }
 
 function withDefaultSources(sources: string[]): string[] {
-  const merged = ['claude', 'codex', ...sources];
+  const merged = ["claude", "codex", ...sources];
   return Array.from(new Set(merged));
 }
 
 export function useContextPreview(settings: Settings): UseContextPreviewResult {
-  const [preview, setPreview] = useState<string>('');
+  const [preview, setPreview] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<ProjectCatalog>({ projects: [], sources: [], projectsBySource: {} });
@@ -39,10 +39,10 @@ export function useContextPreview(settings: Settings): UseContextPreviewResult {
     async function fetchProjects() {
       let data: ProjectCatalog;
       try {
-        const response = await authFetch('/api/projects');
-        data = await response.json() as ProjectCatalog;
+        const response = await authFetch("/api/projects");
+        data = (await response.json()) as ProjectCatalog;
       } catch (err: unknown) {
-        console.error('Failed to fetch projects:', err instanceof Error ? err.message : String(err));
+        console.error("Failed to fetch projects:", err instanceof Error ? err.message : String(err));
         return;
       }
 
@@ -73,18 +73,18 @@ export function useContextPreview(settings: Settings): UseContextPreviewResult {
   useEffect(() => {
     if (!selectedSource) {
       setProjects(catalog.projects);
-      setSelectedProject(prev => (prev && catalog.projects.includes(prev) ? prev : catalog.projects[0] || null));
+      setSelectedProject((prev) => (prev && catalog.projects.includes(prev) ? prev : catalog.projects[0] || null));
       return;
     }
 
     const sourceProjects = catalog.projectsBySource[selectedSource] || [];
     setProjects(sourceProjects);
-    setSelectedProject(prev => (prev && sourceProjects.includes(prev) ? prev : sourceProjects[0] || null));
+    setSelectedProject((prev) => (prev && sourceProjects.includes(prev) ? prev : sourceProjects[0] || null));
   }, [catalog, selectedSource]);
 
   const refresh = useCallback(async () => {
     if (!selectedProject) {
-      setPreview('No project selected');
+      setPreview("No project selected");
       return;
     }
 
@@ -96,7 +96,7 @@ export function useContextPreview(settings: Settings): UseContextPreviewResult {
     });
 
     if (selectedSource) {
-      params.append('platformSource', selectedSource);
+      params.append("platformSource", selectedSource);
     }
 
     try {
@@ -106,11 +106,11 @@ export function useContextPreview(settings: Settings): UseContextPreviewResult {
       if (response.ok) {
         setPreview(text);
       } else {
-        setError('Failed to load preview');
+        setError("Failed to load preview");
       }
     } catch (error: unknown) {
-      console.error('Failed to load context preview:', error instanceof Error ? error.message : String(error));
-      setError('Failed to load preview');
+      console.error("Failed to load context preview:", error instanceof Error ? error.message : String(error));
+      setError("Failed to load preview");
     }
 
     setIsLoading(false);

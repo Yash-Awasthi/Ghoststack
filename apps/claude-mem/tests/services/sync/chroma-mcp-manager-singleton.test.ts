@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { describe, it, expect, beforeEach, mock } from "bun:test";
 
 // Singleton enforcement regression coverage for issue #2313.
 //
@@ -31,8 +31,12 @@ class FakeTransport {
     const pid = FakeTransport.nextPid++;
     const child: FakeChildProcess = {
       pid,
-      once: function (this: FakeChildProcess) { return this; },
-      on: function (this: FakeChildProcess) { return this; },
+      once: function (this: FakeChildProcess) {
+        return this;
+      },
+      on: function (this: FakeChildProcess) {
+        return this;
+      }
     };
     this._process = child;
     transportInstances.push(this);
@@ -43,13 +47,13 @@ class FakeTransport {
   }
 }
 
-mock.module('@modelcontextprotocol/sdk/client/stdio.js', () => ({
-  StdioClientTransport: FakeTransport,
+mock.module("@modelcontextprotocol/sdk/client/stdio.js", () => ({
+  StdioClientTransport: FakeTransport
 }));
 
 let connectImpl: () => Promise<void> = async () => {};
 let callToolImpl: () => Promise<unknown> = async () => ({
-  content: [{ type: 'text', text: '{}' }],
+  content: [{ type: "text", text: "{}" }]
 });
 
 class FakeClient {
@@ -65,56 +69,56 @@ class FakeClient {
   }
 }
 
-mock.module('@modelcontextprotocol/sdk/client/index.js', () => ({
-  Client: FakeClient,
+mock.module("@modelcontextprotocol/sdk/client/index.js", () => ({
+  Client: FakeClient
 }));
 
-mock.module('../../../src/shared/SettingsDefaultsManager.js', () => ({
+mock.module("../../../src/shared/SettingsDefaultsManager.js", () => ({
   SettingsDefaultsManager: {
-    get: () => '',
+    get: () => "",
     getInt: () => 0,
-    loadFromFile: () => ({}),
-  },
+    loadFromFile: () => ({})
+  }
 }));
 
-mock.module('../../../src/shared/paths.js', () => ({
-  USER_SETTINGS_PATH: '/tmp/fake-settings.json',
+mock.module("../../../src/shared/paths.js", () => ({
+  USER_SETTINGS_PATH: "/tmp/fake-settings.json",
   paths: {
-    chroma: () => '/tmp/fake-chroma',
-    combinedCerts: () => '/tmp/fake-combined-certs.pem',
-  },
+    chroma: () => "/tmp/fake-chroma",
+    combinedCerts: () => "/tmp/fake-combined-certs.pem"
+  }
 }));
 
-mock.module('../../../src/utils/logger.js', () => ({
+mock.module("../../../src/utils/logger.js", () => ({
   logger: {
     info: () => {},
     debug: () => {},
     warn: () => {},
     error: () => {},
-    failure: () => {},
-  },
+    failure: () => {}
+  }
 }));
 
 // Track tree-kill invocations and the transport whose subprocess was killed.
 const killTreeCalls: number[] = [];
 
-mock.module('../../../src/supervisor/index.ts', () => ({
+mock.module("../../../src/supervisor/index.ts", () => ({
   getSupervisor: () => ({
     assertCanSpawn: () => {},
     registerProcess: () => {},
-    unregisterProcess: () => {},
-  }),
+    unregisterProcess: () => {}
+  })
 }));
 
-mock.module('../../../src/supervisor/env-sanitizer.js', () => ({
-  sanitizeEnv: (env: NodeJS.ProcessEnv) => env,
+mock.module("../../../src/supervisor/env-sanitizer.js", () => ({
+  sanitizeEnv: (env: NodeJS.ProcessEnv) => env
 }));
 
 // Replace child_process.execFile so the static killProcessTree implementation
 // can be observed without actually shelling out. We feed pgrep an empty stdout
 // (no descendants) so the only signal target is the root pid.
-mock.module('child_process', () => {
-  const original = require('node:child_process');
+mock.module("child_process", () => {
+  const original = require("node:child_process");
   return {
     ...original,
     execFile: (
@@ -124,13 +128,13 @@ mock.module('child_process', () => {
       cb: (err: Error | null, stdout: { stdout: string; stderr: string }) => void
     ) => {
       // Bun's promisify path will call this as if it were a Node-style callback.
-      if (cmd === 'pgrep') {
-        cb(null, { stdout: '', stderr: '' } as any);
+      if (cmd === "pgrep") {
+        cb(null, { stdout: "", stderr: "" } as any);
       } else {
-        cb(null, { stdout: '', stderr: '' } as any);
+        cb(null, { stdout: "", stderr: "" } as any);
       }
     },
-    execSync: () => '',
+    execSync: () => ""
   };
 });
 
@@ -143,41 +147,37 @@ const stubbedProcessKill = ((pid: number, _signal?: string | number) => {
 }) as typeof process.kill;
 process.kill = stubbedProcessKill;
 
-import { ChromaMcpManager } from '../../../src/services/sync/ChromaMcpManager.js';
+import { ChromaMcpManager } from "../../../src/services/sync/ChromaMcpManager.js";
 
 function resetState(): void {
   transportCount = 0;
   transportInstances.length = 0;
   killTreeCalls.length = 0;
   connectImpl = async () => {};
-  callToolImpl = async () => ({ content: [{ type: 'text', text: '{}' }] });
+  callToolImpl = async () => ({ content: [{ type: "text", text: "{}" }] });
 }
 
-describe('ChromaMcpManager singleton enforcement (#2313)', () => {
+describe("ChromaMcpManager singleton enforcement (#2313)", () => {
   beforeEach(async () => {
     await ChromaMcpManager.reset();
     resetState();
   });
 
-  it('serializes concurrent ensureConnected() calls into one spawn', async () => {
+  it("serializes concurrent ensureConnected() calls into one spawn", async () => {
     const mgr = ChromaMcpManager.getInstance();
 
     // Five parallel callers race ensureConnected via callTool — only one
     // chroma-mcp subprocess (one transport) should be spawned.
-    await Promise.all(
-      Array.from({ length: 5 }, () =>
-        mgr.callTool('chroma_list_collections', { limit: 1 })
-      )
-    );
+    await Promise.all(Array.from({ length: 5 }, () => mgr.callTool("chroma_list_collections", { limit: 1 })));
 
     expect(transportCount).toBe(1);
   });
 
-  it('kills the prior subprocess tree before a reconnect spawn', async () => {
+  it("kills the prior subprocess tree before a reconnect spawn", async () => {
     const mgr = ChromaMcpManager.getInstance();
 
     // First call: opens transport #1.
-    await mgr.callTool('chroma_list_collections', { limit: 1 });
+    await mgr.callTool("chroma_list_collections", { limit: 1 });
     expect(transportInstances.length).toBe(1);
     const firstPid = transportInstances[0]._process.pid;
 
@@ -188,12 +188,12 @@ describe('ChromaMcpManager singleton enforcement (#2313)', () => {
     callToolImpl = async () => {
       invocations += 1;
       if (invocations === 1) {
-        throw new Error('Connection closed');
+        throw new Error("Connection closed");
       }
-      return { content: [{ type: 'text', text: '{}' }] };
+      return { content: [{ type: "text", text: "{}" }] };
     };
 
-    await mgr.callTool('chroma_list_collections', { limit: 1 });
+    await mgr.callTool("chroma_list_collections", { limit: 1 });
 
     expect(transportInstances.length).toBe(2);
     // The first transport's pid must have been signaled by killProcessTree
@@ -201,10 +201,10 @@ describe('ChromaMcpManager singleton enforcement (#2313)', () => {
     expect(killTreeCalls).toContain(firstPid);
   });
 
-  it('stop() disposes state including any pending connecting promise', async () => {
+  it("stop() disposes state including any pending connecting promise", async () => {
     const mgr = ChromaMcpManager.getInstance();
 
-    await mgr.callTool('chroma_list_collections', { limit: 1 });
+    await mgr.callTool("chroma_list_collections", { limit: 1 });
     expect(transportInstances.length).toBe(1);
     const subprocessPid = transportInstances[0]._process.pid;
 
@@ -216,13 +216,13 @@ describe('ChromaMcpManager singleton enforcement (#2313)', () => {
 
     // A subsequent ensureConnected must spawn a fresh transport (not reuse
     // a stale one).
-    await mgr.callTool('chroma_list_collections', { limit: 1 });
+    await mgr.callTool("chroma_list_collections", { limit: 1 });
     expect(transportInstances.length).toBe(2);
   });
 });
 
 // Restore the real process.kill once the test module finishes evaluating any
 // late-arriving microtasks.
-process.on('exit', () => {
+process.on("exit", () => {
   process.kill = realProcessKill;
 });

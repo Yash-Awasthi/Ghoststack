@@ -1,13 +1,5 @@
-import {
-  query,
-  type SDKMessage,
-  type SDKResultMessage,
-} from "@anthropic-ai/claude-agent-sdk";
-import {
-  collectDiagnostics,
-  formatDiagnostics,
-  type SystemDiagnostics,
-} from "./collector.ts";
+import { query, type SDKMessage, type SDKResultMessage } from "@anthropic-ai/claude-agent-sdk";
+import { collectDiagnostics, formatDiagnostics, type SystemDiagnostics } from "./collector.ts";
 
 export interface BugReportInput {
   issueDescription: string;
@@ -23,12 +15,10 @@ export interface BugReportResult {
   error?: string;
 }
 
-export async function generateBugReport(
-  input: BugReportInput
-): Promise<BugReportResult> {
+export async function generateBugReport(input: BugReportInput): Promise<BugReportResult> {
   try {
     const diagnostics = await collectDiagnostics({
-      includeLogs: input.includeLogs !== false,
+      includeLogs: input.includeLogs !== false
     });
 
     const formattedDiagnostics = formatDiagnostics(diagnostics);
@@ -51,8 +41,8 @@ export async function generateBugReport(
         systemPrompt: `You are a GitHub issue formatter. Format bug reports clearly and professionally.`,
         permissionMode: "bypassPermissions",
         allowDangerouslySkipPermissions: true,
-        includePartialMessages: true,
-      },
+        includePartialMessages: true
+      }
     });
 
     const spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -97,7 +87,7 @@ export async function generateBugReport(
     return {
       title,
       body: generatedMarkdown,
-      success: true,
+      success: true
     };
   } catch (error) {
     console.error("Agent SDK failed, using template fallback:", error);
@@ -153,11 +143,9 @@ All content must be in English for the GitHub issue.
   return prompt;
 }
 
-async function generateTemplateFallback(
-  input: BugReportInput
-): Promise<BugReportResult> {
+async function generateTemplateFallback(input: BugReportInput): Promise<BugReportResult> {
   const diagnostics = await collectDiagnostics({
-    includeLogs: input.includeLogs !== false,
+    includeLogs: input.includeLogs !== false
   });
   const formattedDiagnostics = formatDiagnostics(diagnostics);
 
@@ -180,6 +168,6 @@ async function generateTemplateFallback(
   return {
     title: "Bug Report",
     body,
-    success: true,
+    success: true
   };
 }

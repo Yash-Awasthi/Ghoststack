@@ -35,11 +35,11 @@ On first launch, the stealth Chromium binary auto-downloads (~200MB, cached at `
 ### Playwright (default)
 
 ```javascript
-import { launch } from 'cloakbrowser';
+import { launch } from "cloakbrowser";
 
 const browser = await launch();
 const page = await browser.newPage();
-await page.goto('https://protected-site.com');
+await page.goto("https://protected-site.com");
 console.log(await page.title());
 await browser.close();
 ```
@@ -49,11 +49,11 @@ await browser.close();
 > **Note:** Playwright is recommended for sites with reCAPTCHA Enterprise. Puppeteer's CDP protocol leaks automation signals that reCAPTCHA Enterprise can detect. This is a known Puppeteer limitation, not specific to CloakBrowser.
 
 ```javascript
-import { launch } from 'cloakbrowser/puppeteer';
+import { launch } from "cloakbrowser/puppeteer";
 
 const browser = await launch();
 const page = await browser.newPage();
-await page.goto('https://protected-site.com');
+await page.goto("https://protected-site.com");
 console.log(await page.title());
 await browser.close();
 ```
@@ -61,19 +61,19 @@ await browser.close();
 ### Options
 
 ```javascript
-import { launch, launchContext, launchPersistentContext } from 'cloakbrowser';
+import { launch, launchContext, launchPersistentContext } from "cloakbrowser";
 
 // With proxy (HTTP or SOCKS5)
 const browser = await launch({
-  proxy: 'http://user:pass@proxy:8080',
+  proxy: "http://user:pass@proxy:8080"
 });
 const browser = await launch({
-  proxy: 'socks5://user:pass@proxy:1080',
+  proxy: "socks5://user:pass@proxy:1080"
 });
 
 // With proxy object (bypass, separate auth fields)
 const browser = await launch({
-  proxy: { server: 'http://proxy:8080', bypass: '.google.com', username: 'user', password: 'pass' },
+  proxy: { server: "http://proxy:8080", bypass: ".google.com", username: "user", password: "pass" }
 });
 
 // Headed mode (visible browser window)
@@ -81,38 +81,38 @@ const browser = await launch({ headless: false });
 
 // Extra Chrome args
 const browser = await launch({
-  args: ['--fingerprint=12345'],
+  args: ["--fingerprint=12345"]
 });
 
 // With timezone and locale
 const browser = await launch({
-  timezone: 'America/New_York',
-  locale: 'en-US',
+  timezone: "America/New_York",
+  locale: "en-US"
 });
 
 // Auto-detect timezone/locale from proxy IP (requires: npm install mmdb-lib)
 const browser = await launch({
-  proxy: 'http://proxy:8080',
-  geoip: true,
+  proxy: "http://proxy:8080",
+  geoip: true
 });
 
 // Browser + context in one call (timezone/locale set via binary flags)
 const context = await launchContext({
-  userAgent: 'Custom UA',
+  userAgent: "Custom UA",
   viewport: { width: 1920, height: 1080 },
-  locale: 'en-US',
-  timezone: 'America/New_York',
+  locale: "en-US",
+  timezone: "America/New_York"
 });
 
 // Persistent profile — stay logged in, bypass incognito detection, load extensions
 const ctx = await launchPersistentContext({
-  userDataDir: './chrome-profile',
+  userDataDir: "./chrome-profile",
   headless: false,
-  proxy: 'http://user:pass@proxy:8080',
+  proxy: "http://user:pass@proxy:8080"
 });
-const page = ctx.pages()[0] || await ctx.newPage();
-await page.goto('https://example.com');
-await ctx.close();  // profile saved — reuse same path to restore state
+const page = ctx.pages()[0] || (await ctx.newPage());
+await page.goto("https://example.com");
+await ctx.close(); // profile saved — reuse same path to restore state
 ```
 
 ### Auto Timezone/Locale from Proxy IP
@@ -125,13 +125,13 @@ npm install mmdb-lib
 
 ```javascript
 // Auto-detect — timezone and locale set from proxy's IP geolocation
-const browser = await launch({ proxy: 'http://proxy:8080', geoip: true });
+const browser = await launch({ proxy: "http://proxy:8080", geoip: true });
 
 // Works with launchContext too
-const context = await launchContext({ proxy: 'http://proxy:8080', geoip: true });
+const context = await launchContext({ proxy: "http://proxy:8080", geoip: true });
 
 // Explicit values always win over auto-detection
-const browser = await launch({ proxy: 'http://proxy:8080', geoip: true, timezone: 'Europe/London' });
+const browser = await launch({ proxy: "http://proxy:8080", geoip: true, timezone: "Europe/London" });
 ```
 
 > **Note:** For rotating residential proxies, the DNS-resolved IP may differ from the exit IP. Pass explicit `timezone`/`locale` in those cases.
@@ -150,7 +150,7 @@ npx cloakbrowser clear-cache  # Remove cached binaries
 ### Utilities
 
 ```javascript
-import { ensureBinary, clearCache, binaryInfo, checkForUpdate } from 'cloakbrowser';
+import { ensureBinary, clearCache, binaryInfo, checkForUpdate } from "cloakbrowser";
 
 // Pre-download binary (e.g., during Docker build)
 await ensureBinary();
@@ -168,27 +168,27 @@ if (newVersion) console.log(`Updated to ${newVersion}`);
 
 ## Test Results
 
-| Detection Service | Stock Browser | CloakBrowser |
-|---|---|---|
-| **reCAPTCHA v3** | 0.1 (bot) | **0.9** (human) |
-| **Cloudflare Turnstile** | FAIL | **PASS** |
-| **FingerprintJS** | DETECTED | **PASS** |
-| **BrowserScan** | DETECTED | **NORMAL** (4/4) |
-| **bot.incolumitas.com** | 13 fails | **1 fail** |
-| `navigator.webdriver` | `true` | **`false`** |
-| CDP detection | Detected | **Not detected** |
-| TLS fingerprint | Mismatch | **Identical to Chrome** |
-| | | **Tested against 30+ detection sites** |
+| Detection Service        | Stock Browser | CloakBrowser                           |
+| ------------------------ | ------------- | -------------------------------------- |
+| **reCAPTCHA v3**         | 0.1 (bot)     | **0.9** (human)                        |
+| **Cloudflare Turnstile** | FAIL          | **PASS**                               |
+| **FingerprintJS**        | DETECTED      | **PASS**                               |
+| **BrowserScan**          | DETECTED      | **NORMAL** (4/4)                       |
+| **bot.incolumitas.com**  | 13 fails      | **1 fail**                             |
+| `navigator.webdriver`    | `true`        | **`false`**                            |
+| CDP detection            | Detected      | **Not detected**                       |
+| TLS fingerprint          | Mismatch      | **Identical to Chrome**                |
+|                          |               | **Tested against 30+ detection sites** |
 
 ## Configuration
 
-| Env Variable | Default | Description |
-|---|---|---|
-| `CLOAKBROWSER_BINARY_PATH` | — | Skip download, use a local Chromium binary |
-| `CLOAKBROWSER_CACHE_DIR` | `~/.cloakbrowser` | Binary cache directory |
-| `CLOAKBROWSER_DOWNLOAD_URL` | `cloakbrowser.dev` | Custom download URL |
-| `CLOAKBROWSER_AUTO_UPDATE` | `true` | Set to `false` to disable background update checks |
-| `CLOAKBROWSER_SKIP_CHECKSUM` | `false` | Set to `true` to skip SHA-256 verification after download |
+| Env Variable                 | Default            | Description                                               |
+| ---------------------------- | ------------------ | --------------------------------------------------------- |
+| `CLOAKBROWSER_BINARY_PATH`   | —                  | Skip download, use a local Chromium binary                |
+| `CLOAKBROWSER_CACHE_DIR`     | `~/.cloakbrowser`  | Binary cache directory                                    |
+| `CLOAKBROWSER_DOWNLOAD_URL`  | `cloakbrowser.dev` | Custom download URL                                       |
+| `CLOAKBROWSER_AUTO_UPDATE`   | `true`             | Set to `false` to disable background update checks        |
+| `CLOAKBROWSER_SKIP_CHECKSUM` | `false`            | Set to `true` to skip SHA-256 verification after download |
 
 ## Migrate From Playwright
 
@@ -204,13 +204,13 @@ const page = await browser.newPage();
 
 ## Platforms
 
-| Platform | Chromium | Patches | Status |
-|---|---|---|---|
-| Linux x86_64 | 145 | 48 | ✅ Latest |
-| Linux arm64 (RPi, Graviton) | 145 | 48 | ✅ Latest |
-| macOS arm64 (Apple Silicon) | 145 | 26 | ✅ Latest |
-| macOS x86_64 (Intel) | 145 | 26 | ✅ Latest |
-| Windows x86_64 | 145 | 48 | ✅ Latest |
+| Platform                    | Chromium | Patches | Status    |
+| --------------------------- | -------- | ------- | --------- |
+| Linux x86_64                | 145      | 48      | ✅ Latest |
+| Linux arm64 (RPi, Graviton) | 145      | 48      | ✅ Latest |
+| macOS arm64 (Apple Silicon) | 145      | 26      | ✅ Latest |
+| macOS x86_64 (Intel)        | 145      | 26      | ✅ Latest |
+| Windows x86_64              | 145      | 48      | ✅ Latest |
 
 ## Requirements
 
@@ -224,18 +224,18 @@ const page = await browser.newPage();
 By default, `launch()` opens an incognito context. Some sites (like BrowserScan) detect this. Use `launchPersistentContext()` instead — it runs with a real user profile:
 
 ```javascript
-import { launchPersistentContext } from 'cloakbrowser';
+import { launchPersistentContext } from "cloakbrowser";
 
 const ctx = await launchPersistentContext({
-  userDataDir: './my-profile',
-  headless: false,
+  userDataDir: "./my-profile",
+  headless: false
 });
 
 // Load Chrome extensions
 const ctx = await launchPersistentContext({
-  userDataDir: './my-profile',
+  userDataDir: "./my-profile",
   headless: false,
-  extensionPaths: ['./my-extension'],
+  extensionPaths: ["./my-extension"]
 });
 ```
 
@@ -250,10 +250,11 @@ Avoid `page.waitForTimeout()` — it sends CDP protocol commands that reCAPTCHA 
 await page.waitForTimeout(3000);
 
 // Good — invisible to the browser
-await new Promise(r => setTimeout(r, 3000));
+await new Promise((r) => setTimeout(r, 3000));
 ```
 
 Other tips for maximizing reCAPTCHA scores:
+
 - **Use Playwright, not Puppeteer** — Puppeteer sends more CDP protocol traffic that reCAPTCHA detects ([details](#puppeteer))
 - **Use residential proxies** — datacenter IPs are flagged by IP reputation, not browser fingerprint
 - **Spend 15+ seconds on the page** before triggering reCAPTCHA — short visits score lower
@@ -261,12 +262,13 @@ Other tips for maximizing reCAPTCHA scores:
 - **Use a fixed fingerprint seed** (`--fingerprint=12345`) for consistent device identity across sessions
 - **Use `page.type()` instead of `page.fill()`** for form filling — `fill()` sets values directly without keyboard events, which reCAPTCHA's behavioral analysis flags. `type()` with a delay simulates real keystrokes:
   ```javascript
-  await page.type('#email', 'user@example.com', { delay: 50 });
+  await page.type("#email", "user@example.com", { delay: 50 });
   ```
 - **Minimize `page.evaluate()` calls** before the reCAPTCHA check fires — each one sends CDP traffic
 
 **New update broke something? Roll back to the previous version**
 When auto-update downloads a newer binary, the previous version stays in `~/.cloakbrowser/`. Point `CLOAKBROWSER_BINARY_PATH` to the older cached binary:
+
 ```bash
 # Linux
 export CLOAKBROWSER_BINARY_PATH=~/.cloakbrowser/chromium-145.0.7632.159.2/chrome

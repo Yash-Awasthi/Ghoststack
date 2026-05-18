@@ -47,7 +47,7 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
     $: vi.fn(async () => null),
 
     $$: vi.fn(async () => []),
-    waitForSelector: vi.fn(async () => null),
+    waitForSelector: vi.fn(async () => null)
   };
 
   const page: any = {
@@ -58,16 +58,14 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
       up: vi.fn(async () => {}),
       click: vi.fn(async () => {}),
       wheel: vi.fn(async () => {}),
-      dragAndDrop: overrides.mouseDragAndDrop ?? vi.fn(async () => {}),
+      dragAndDrop: overrides.mouseDragAndDrop ?? vi.fn(async () => {})
     },
     keyboard: {
-      press: overrides.keyboardPress
-        ? vi.fn(overrides.keyboardPress)
-        : vi.fn(async () => {}),
+      press: overrides.keyboardPress ? vi.fn(overrides.keyboardPress) : vi.fn(async () => {}),
       type: vi.fn(async () => {}),
       down: vi.fn(async () => {}),
       up: vi.fn(async () => {}),
-      sendCharacter: vi.fn(async () => {}),
+      sendCharacter: vi.fn(async () => {})
     },
     click: vi.fn(async () => {}),
     hover: vi.fn(async () => {}),
@@ -91,25 +89,27 @@ function buildMockPage(overrides: Record<string, any> = {}): any {
     frames: vi.fn(() => []),
     // Puppeteer-specific: createCDPSession on page, not context
     createCDPSession: vi.fn(async () => buildMockCDP()),
-    url: vi.fn(() => "about:blank"),
+    url: vi.fn(() => "about:blank")
   };
   return page;
 }
 
 function buildMockCDP(overrides: Record<string, any> = {}): any {
   return {
-    send: overrides.send ?? vi.fn(async (method: string, params?: any) => {
-      if (method === "Page.getFrameTree") {
-        return { frameTree: { frame: { id: "F1" } } };
-      }
-      if (method === "Page.createIsolatedWorld") {
-        return { executionContextId: 42 };
-      }
-      if (method === "Runtime.evaluate") {
-        return { result: { value: false } };
-      }
-      return {};
-    }),
+    send:
+      overrides.send ??
+      vi.fn(async (method: string, params?: any) => {
+        if (method === "Page.getFrameTree") {
+          return { frameTree: { frame: { id: "F1" } } };
+        }
+        if (method === "Page.createIsolatedWorld") {
+          return { executionContextId: 42 };
+        }
+        if (method === "Runtime.evaluate") {
+          return { result: { value: false } };
+        }
+        return {};
+      })
   };
 }
 
@@ -118,10 +118,16 @@ function buildRawKeyboard() {
   const upKeys: string[] = [];
   const insertedChars: string[] = [];
   const raw = {
-    down: vi.fn(async (k: string) => { downKeys.push(k); }),
-    up: vi.fn(async (k: string) => { upKeys.push(k); }),
+    down: vi.fn(async (k: string) => {
+      downKeys.push(k);
+    }),
+    up: vi.fn(async (k: string) => {
+      upKeys.push(k);
+    }),
     type: vi.fn(async () => {}),
-    insertText: vi.fn(async (t: string) => { insertedChars.push(t); }),
+    insertText: vi.fn(async (t: string) => {
+      insertedChars.push(t);
+    })
   };
   return { raw, downKeys, upKeys, insertedChars };
 }
@@ -142,7 +148,7 @@ function buildMockElementHandle(overrides: Record<string, any> = {}): any {
     $: vi.fn(async () => null),
 
     $$: vi.fn(async () => []),
-    waitForSelector: vi.fn(async () => null),
+    waitForSelector: vi.fn(async () => null)
   };
 }
 
@@ -151,14 +157,13 @@ function buildMockBrowser(pages: any[] = []): any {
     pages: vi.fn(async () => pages),
     newPage: vi.fn(async () => buildMockPage()),
     createBrowserContext: vi.fn(async () => ({
-      newPage: vi.fn(async () => buildMockPage()),
+      newPage: vi.fn(async () => buildMockPage())
     })),
     on: vi.fn(),
-    close: vi.fn(async () => {}),
+    close: vi.fn(async () => {})
   };
   return browser;
 }
-
 
 // =========================================================================
 // SHIFT_SYMBOL_CODES / SHIFT_SYMBOL_KEYCODES completeness
@@ -166,22 +171,41 @@ function buildMockBrowser(pages: any[] = []): any {
 describe("Puppeteer: SHIFT_SYMBOL maps completeness", () => {
   it("every shift symbol has a code and keycode entry", async () => {
     const cfg = resolveConfig("default", { mistype_chance: 0 });
-    const SHIFT_SYMBOLS = ['@', '#', '!', '$', '%', '^', '&', '*', '(', ')',
-      '_', '+', '{', '}', '|', ':', '"', '<', '>', '?', '~'];
+    const SHIFT_SYMBOLS = [
+      "@",
+      "#",
+      "!",
+      "$",
+      "%",
+      "^",
+      "&",
+      "*",
+      "(",
+      ")",
+      "_",
+      "+",
+      "{",
+      "}",
+      "|",
+      ":",
+      '"',
+      "<",
+      ">",
+      "?",
+      "~"
+    ];
 
     for (const sym of SHIFT_SYMBOLS) {
       const { raw } = buildRawKeyboard();
       const page = buildMockPage();
       const mockCdp = {
-        send: vi.fn(async () => ({})),
+        send: vi.fn(async () => ({}))
       };
 
       await humanType(page, raw, sym, cfg, mockCdp as any);
 
       const cdpCalls = mockCdp.send.mock.calls;
-      const keyEvents = cdpCalls.filter(
-        (c: any[]) => c[0] === "Input.dispatchKeyEvent"
-      );
+      const keyEvents = cdpCalls.filter((c: any[]) => c[0] === "Input.dispatchKeyEvent");
       expect(keyEvents.length).toBe(2);
       expect(page.evaluate).not.toHaveBeenCalled();
     }
@@ -196,14 +220,12 @@ describe("Puppeteer: SHIFT_SYMBOL maps completeness", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!", cfg, mockCdp as any);
 
-    const keyDown = cdpCalls.find(
-      ([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown"
-    );
+    const keyDown = cdpCalls.find(([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown");
     expect(keyDown).toBeDefined();
     const params = keyDown![1];
 
@@ -226,14 +248,12 @@ describe("Puppeteer: SHIFT_SYMBOL maps completeness", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!", cfg, mockCdp as any);
 
-    const keyUp = cdpCalls.find(
-      ([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyUp"
-    );
+    const keyUp = cdpCalls.find(([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyUp");
     expect(keyUp).toBeDefined();
     const params = keyUp![1];
 
@@ -242,7 +262,7 @@ describe("Puppeteer: SHIFT_SYMBOL maps completeness", () => {
   });
 
   it("digit shift symbols have correct keycodes (49-57, 48)", async () => {
-    const digitSymbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'];
+    const digitSymbols = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"];
     const expectedKeycodes = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
     const cfg = resolveConfig("default", { mistype_chance: 0 });
 
@@ -254,20 +274,17 @@ describe("Puppeteer: SHIFT_SYMBOL maps completeness", () => {
         send: vi.fn(async (method: string, params: any) => {
           cdpCalls.push([method, params]);
           return {};
-        }),
+        })
       };
 
       await humanType(page, raw, digitSymbols[i], cfg, mockCdp as any);
 
-      const keyDown = cdpCalls.find(
-        ([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown"
-      );
+      const keyDown = cdpCalls.find(([m, p]) => m === "Input.dispatchKeyEvent" && p.type === "keyDown");
       expect(keyDown).toBeDefined();
       expect(keyDown![1].windowsVirtualKeyCode).toBe(expectedKeycodes[i]);
     }
   });
 });
-
 
 // =========================================================================
 // typeShiftSymbol — CDP path vs fallback (Puppeteer keyboard.ts)
@@ -311,13 +328,21 @@ describe("Puppeteer: typeShiftSymbol CDP vs fallback", () => {
     const cfg = resolveConfig("default", { mistype_chance: 0 });
     const callOrder: string[] = [];
     const raw = {
-      down: vi.fn(async () => { callOrder.push("raw.down"); }),
-      up: vi.fn(async () => { callOrder.push("raw.up"); }),
+      down: vi.fn(async () => {
+        callOrder.push("raw.down");
+      }),
+      up: vi.fn(async () => {
+        callOrder.push("raw.up");
+      }),
       type: vi.fn(async () => {}),
-      insertText: vi.fn(async () => { callOrder.push("raw.insertText"); }),
+      insertText: vi.fn(async () => {
+        callOrder.push("raw.insertText");
+      })
     };
     const page = buildMockPage({
-      evaluate: vi.fn(async () => { callOrder.push("page.evaluate"); }),
+      evaluate: vi.fn(async () => {
+        callOrder.push("page.evaluate");
+      })
     });
 
     await humanType(page, raw, "%", cfg, null);
@@ -332,17 +357,21 @@ describe("Puppeteer: typeShiftSymbol CDP vs fallback", () => {
     const callOrder: string[] = [];
 
     const raw = {
-      down: vi.fn(async (k: string) => { callOrder.push(`raw.down(${k})`); }),
-      up: vi.fn(async (k: string) => { callOrder.push(`raw.up(${k})`); }),
+      down: vi.fn(async (k: string) => {
+        callOrder.push(`raw.down(${k})`);
+      }),
+      up: vi.fn(async (k: string) => {
+        callOrder.push(`raw.up(${k})`);
+      }),
       type: vi.fn(async () => {}),
-      insertText: vi.fn(async () => {}),
+      insertText: vi.fn(async () => {})
     };
     const page = buildMockPage();
     const mockCdp = {
       send: vi.fn(async (method: string, params: any) => {
         callOrder.push(`cdp.${params.type || method}`);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!", cfg, mockCdp as any);
@@ -358,7 +387,6 @@ describe("Puppeteer: typeShiftSymbol CDP vs fallback", () => {
   });
 });
 
-
 // =========================================================================
 // humanType integration — mixed text with CDP (Puppeteer keyboard.ts)
 // =========================================================================
@@ -372,16 +400,14 @@ describe("Puppeteer: humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "a!", cfg, mockCdp as any);
 
     expect(downKeys).toContain("a");
 
-    const keyEvents = cdpCalls.filter(
-      ([m]) => m === "Input.dispatchKeyEvent"
-    );
+    const keyEvents = cdpCalls.filter(([m]) => m === "Input.dispatchKeyEvent");
     expect(keyEvents.length).toBe(2);
     expect(page.evaluate).not.toHaveBeenCalled();
   });
@@ -407,15 +433,13 @@ describe("Puppeteer: humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "!@#", cfg, mockCdp as any);
 
     expect(page.evaluate).not.toHaveBeenCalled();
-    const keyEvents = cdpCalls.filter(
-      ([m]) => m === "Input.dispatchKeyEvent"
-    );
+    const keyEvents = cdpCalls.filter(([m]) => m === "Input.dispatchKeyEvent");
     expect(keyEvents.length).toBe(6);
   });
 
@@ -439,14 +463,12 @@ describe("Puppeteer: humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "SecurePass!123", cfg, mockCdp as any);
 
-    const keyEvents = cdpCalls.filter(
-      ([m]) => m === "Input.dispatchKeyEvent"
-    );
+    const keyEvents = cdpCalls.filter(([m]) => m === "Input.dispatchKeyEvent");
     expect(keyEvents.length).toBe(2);
     expect(keyEvents[0][1].key).toBe("!");
     expect(page.evaluate).not.toHaveBeenCalled();
@@ -458,7 +480,7 @@ describe("Puppeteer: humanType mixed text with CDP", () => {
       typing_delay: 0,
       shift_down_delay: [0, 0],
       shift_up_delay: [0, 0],
-      key_hold: [0, 0],
+      key_hold: [0, 0]
     });
 
     const allSymbols = '@#!$%^&*()_+{}|:"<>?~';
@@ -469,7 +491,7 @@ describe("Puppeteer: humanType mixed text with CDP", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, allSymbols, cfg, mockCdp as any);
@@ -481,7 +503,6 @@ describe("Puppeteer: humanType mixed text with CDP", () => {
     }
   }, 30000);
 });
-
 
 // =========================================================================
 // Non-ASCII text does NOT go through CDP shift path
@@ -509,7 +530,7 @@ describe("Puppeteer: non-ASCII text avoids CDP shift path", () => {
       send: vi.fn(async (method: string, params: any) => {
         cdpCalls.push([method, params]);
         return {};
-      }),
+      })
     };
 
     await humanType(page, raw, "Hi! Мир", cfg, mockCdp as any);
@@ -531,7 +552,6 @@ describe("Puppeteer: non-ASCII text avoids CDP shift path", () => {
   });
 });
 
-
 // =========================================================================
 // Per-call human config override (Puppeteer page-level)
 // =========================================================================
@@ -542,21 +562,19 @@ describe("Puppeteer: page.type accepts per-call human config override", () => {
 
     const cfg = resolveConfig("default", {
       idle_between_actions: false,
-      field_switch_delay: [0, 1],
+      field_switch_delay: [0, 1]
     });
     expect(cfg.typing_delay).toBe(70);
 
     let captured: any = null;
-    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(
-      async (_page, _raw, _text, callCfg) => { captured = callCfg; },
-    );
-    const scrollSpy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(
-      async (_page, _raw, _sel, cx, cy) => ({
-        box: { x: 100, y: 100, width: 50, height: 30 },
-        cursorX: cx,
-        cursorY: cy,
-      }),
-    );
+    const typeSpy = vi.spyOn(keyboardMod, "humanType").mockImplementation(async (_page, _raw, _text, callCfg) => {
+      captured = callCfg;
+    });
+    const scrollSpy = vi.spyOn(scrollMod, "scrollToElement").mockImplementation(async (_page, _raw, _sel, cx, cy) => ({
+      box: { x: 100, y: 100, width: 50, height: 30 },
+      cursorX: cx,
+      cursorY: cy
+    }));
 
     const { patchPage } = await import("../src/human-puppeteer/index.js");
     const page = buildMockPage();
@@ -565,7 +583,7 @@ describe("Puppeteer: page.type accepts per-call human config override", () => {
 
     await (page as any).type("#email", "hi", {
       typing_delay: 30,
-      mistype_chance: 0,
+      mistype_chance: 0
     });
 
     expect(captured.typing_delay).toBe(30);
@@ -576,7 +594,6 @@ describe("Puppeteer: page.type accepts per-call human config override", () => {
     scrollSpy.mockRestore();
   });
 });
-
 
 // =========================================================================
 // patchPage stealth infrastructure (Puppeteer)
@@ -654,7 +671,6 @@ describe("Puppeteer: patchPage stealth infrastructure", () => {
   });
 });
 
-
 // =========================================================================
 // StealthEval lifecycle (Puppeteer — via page.createCDPSession)
 // =========================================================================
@@ -700,7 +716,7 @@ describe("Puppeteer: StealthEval lifecycle", () => {
           return { result: { value: true } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
@@ -735,7 +751,7 @@ describe("Puppeteer: StealthEval lifecycle", () => {
           return { result: { value: "recovered" } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
@@ -765,7 +781,7 @@ describe("Puppeteer: StealthEval lifecycle", () => {
           return { exceptionDetails: { text: "always broken" } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
@@ -780,7 +796,6 @@ describe("Puppeteer: StealthEval lifecycle", () => {
     expect(result).toBeUndefined();
   });
 });
-
 
 // =========================================================================
 // focus() — human-like click instead of programmatic focus
@@ -815,7 +830,7 @@ describe("Puppeteer: focus() humanization", () => {
           return { result: { value: false } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage();
@@ -845,7 +860,6 @@ describe("Puppeteer: focus() humanization", () => {
     expect(typeof page.focus).toBe("function");
   });
 });
-
 
 // =========================================================================
 // uncheck() — fallback behavior (assume checked on error)
@@ -878,7 +892,6 @@ describe("Puppeteer: select() humanization", () => {
   });
 });
 
-
 // =========================================================================
 // mouse.wheel() — smooth scroll
 // =========================================================================
@@ -900,7 +913,9 @@ describe("Puppeteer: mouse.wheel() smooth scroll", () => {
 
     const wheelCalls: any[] = [];
     const page = buildMockPage();
-    const origWheel = vi.fn(async (opts: any) => { wheelCalls.push(opts); });
+    const origWheel = vi.fn(async (opts: any) => {
+      wheelCalls.push(opts);
+    });
     page.mouse.wheel = origWheel;
 
     const cfg = resolveConfig("default");
@@ -919,7 +934,9 @@ describe("Puppeteer: mouse.wheel() smooth scroll", () => {
 
     const wheelCalls: any[] = [];
     const page = buildMockPage();
-    const origWheel = vi.fn(async (opts: any) => { wheelCalls.push(opts); });
+    const origWheel = vi.fn(async (opts: any) => {
+      wheelCalls.push(opts);
+    });
     page.mouse.wheel = origWheel;
 
     const cfg = resolveConfig("default");
@@ -936,7 +953,9 @@ describe("Puppeteer: mouse.wheel() smooth scroll", () => {
 
     const wheelCalls: any[] = [];
     const page = buildMockPage();
-    const origWheel = vi.fn(async (opts: any) => { wheelCalls.push(opts); });
+    const origWheel = vi.fn(async (opts: any) => {
+      wheelCalls.push(opts);
+    });
     page.mouse.wheel = origWheel;
 
     const cfg = resolveConfig("default");
@@ -948,7 +967,6 @@ describe("Puppeteer: mouse.wheel() smooth scroll", () => {
     expect(wheelCalls.length).toBe(0);
   });
 });
-
 
 // =========================================================================
 // mouse.dragAndDrop() — Bézier drag between coordinates
@@ -974,9 +992,15 @@ describe("Puppeteer: mouse.dragAndDrop() humanization", () => {
     const upCalls: any[] = [];
 
     const page = buildMockPage();
-    const origMove = vi.fn(async (x: number, y: number) => { moveCalls.push([x, y]); });
-    const origDown = vi.fn(async () => { downCalls.push(true); });
-    const origUp = vi.fn(async () => { upCalls.push(true); });
+    const origMove = vi.fn(async (x: number, y: number) => {
+      moveCalls.push([x, y]);
+    });
+    const origDown = vi.fn(async () => {
+      downCalls.push(true);
+    });
+    const origUp = vi.fn(async () => {
+      upCalls.push(true);
+    });
     page.mouse.move = origMove;
     page.mouse.down = origDown;
     page.mouse.up = origUp;
@@ -985,10 +1009,7 @@ describe("Puppeteer: mouse.dragAndDrop() humanization", () => {
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    await page.mouse.dragAndDrop(
-      { x: 100, y: 100 },
-      { x: 400, y: 400 },
-    );
+    await page.mouse.dragAndDrop({ x: 100, y: 100 }, { x: 400, y: 400 });
 
     // Bézier movement generates many intermediate points
     expect(moveCalls.length).toBeGreaterThan(10);
@@ -997,7 +1018,6 @@ describe("Puppeteer: mouse.dragAndDrop() humanization", () => {
     expect(upCalls.length).toBe(1);
   });
 });
-
 
 // =========================================================================
 // Keyboard patches — type, press, down, up
@@ -1033,7 +1053,9 @@ describe("Puppeteer: keyboard patches", () => {
     const downCalls: string[] = [];
     const page = buildMockPage();
     const origDown = page.keyboard.down;
-    page.keyboard.down = vi.fn(async (k: string) => { downCalls.push(k); });
+    page.keyboard.down = vi.fn(async (k: string) => {
+      downCalls.push(k);
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
@@ -1060,7 +1082,6 @@ describe("Puppeteer: keyboard patches", () => {
   });
 });
 
-
 // =========================================================================
 // Mouse patches — move, click with clickCount
 // =========================================================================
@@ -1070,7 +1091,9 @@ describe("Puppeteer: mouse patches", () => {
 
     const moveCalls: Array<[number, number]> = [];
     const page = buildMockPage();
-    page.mouse.move = vi.fn(async (x: number, y: number) => { moveCalls.push([x, y]); });
+    page.mouse.move = vi.fn(async (x: number, y: number) => {
+      moveCalls.push([x, y]);
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 50, y: 50, initialized: true };
@@ -1090,9 +1113,15 @@ describe("Puppeteer: mouse patches", () => {
     const upCalls: any[] = [];
 
     const page = buildMockPage();
-    page.mouse.move = vi.fn(async (x: number, y: number) => { moveCalls.push([x, y]); });
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts); });
-    page.mouse.up = vi.fn(async (opts?: any) => { upCalls.push(opts); });
+    page.mouse.move = vi.fn(async (x: number, y: number) => {
+      moveCalls.push([x, y]);
+    });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts);
+    });
+    page.mouse.up = vi.fn(async (opts?: any) => {
+      upCalls.push(opts);
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 50, y: 50, initialized: true };
@@ -1113,8 +1142,12 @@ describe("Puppeteer: mouse patches", () => {
 
     const page = buildMockPage();
     page.mouse.move = vi.fn(async () => {});
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts ?? {}); });
-    page.mouse.up = vi.fn(async (opts?: any) => { upCalls.push(opts ?? {}); });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts ?? {});
+    });
+    page.mouse.up = vi.fn(async (opts?: any) => {
+      upCalls.push(opts ?? {});
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 50, y: 50, initialized: true };
@@ -1134,7 +1167,6 @@ describe("Puppeteer: mouse patches", () => {
   });
 });
 
-
 // =========================================================================
 // select-all: Puppeteer uses down(modifier) → press('a') → up(modifier)
 // =========================================================================
@@ -1147,13 +1179,19 @@ describe("Puppeteer: select-all via modifier keys (not combo string)", () => {
     const keyPresses: string[] = [];
 
     const page = buildMockPage();
-    page.keyboard.down = vi.fn(async (k: string) => { keyDowns.push(k); });
-    page.keyboard.up = vi.fn(async (k: string) => { keyUps.push(k); });
-    page.keyboard.press = vi.fn(async (k: string) => { keyPresses.push(k); });
+    page.keyboard.down = vi.fn(async (k: string) => {
+      keyDowns.push(k);
+    });
+    page.keyboard.up = vi.fn(async (k: string) => {
+      keyUps.push(k);
+    });
+    page.keyboard.press = vi.fn(async (k: string) => {
+      keyPresses.push(k);
+    });
 
     const cfg = resolveConfig("default", {
       field_switch_delay: [0, 0],
-      idle_between_actions: false,
+      idle_between_actions: false
     });
     const cursor = { x: 100, y: 100, initialized: true };
     patchPage(page as any, cfg, cursor as any);
@@ -1167,19 +1205,18 @@ describe("Puppeteer: select-all via modifier keys (not combo string)", () => {
     expect(typeof originals.keyboardUp).toBe("function");
 
     // Verify the modifier is correct for the platform
-    const expectedModifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+    const expectedModifier = process.platform === "darwin" ? "Meta" : "Control";
 
     // Test by importing and calling pressSelectAll-equivalent logic
     await originals.keyboardDown(expectedModifier);
-    await originals.keyboardPress('a');
+    await originals.keyboardPress("a");
     await originals.keyboardUp(expectedModifier);
 
     expect(keyDowns).toContain(expectedModifier);
-    expect(keyPresses).toContain('a');
+    expect(keyPresses).toContain("a");
     expect(keyUps).toContain(expectedModifier);
   });
 });
-
 
 // =========================================================================
 // ElementHandle patching (Puppeteer-specific)
@@ -1190,14 +1227,14 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle();
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#test');
+    const el = await page.$("#test");
     expect(el).toBeDefined();
     expect((el as any)._humanPatched).toBe(true);
   });
@@ -1208,15 +1245,14 @@ describe("Puppeteer: ElementHandle patching", () => {
     const mockEl1 = buildMockElementHandle();
     const mockEl2 = buildMockElementHandle();
     const page = buildMockPage({
-
-      $$: vi.fn(async () => [mockEl1, mockEl2]),
+      $$: vi.fn(async () => [mockEl1, mockEl2])
     });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
     patchPage(page as any, cfg, cursor as any);
 
-    const els = await page.$$('.items');
+    const els = await page.$$(".items");
     expect(els.length).toBe(2);
     expect((els[0] as any)._humanPatched).toBe(true);
     expect((els[1] as any)._humanPatched).toBe(true);
@@ -1227,14 +1263,14 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle();
     const page = buildMockPage({
-      waitForSelector: vi.fn(async () => mockEl),
+      waitForSelector: vi.fn(async () => mockEl)
     });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.waitForSelector('#loading');
+    const el = await page.waitForSelector("#loading");
     expect(el).toBeDefined();
     expect((el as any)._humanPatched).toBe(true);
   });
@@ -1248,21 +1284,27 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle({
       boundingBox: vi.fn(async () => ({ x: 200, y: 300, width: 100, height: 30 })),
-      evaluate: vi.fn(async () => false), // not an input
+      evaluate: vi.fn(async () => false) // not an input
     });
 
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
-    page.mouse.move = vi.fn(async (x: number, y: number) => { moveCalls.push([x, y]); });
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts); });
-    page.mouse.up = vi.fn(async (opts?: any) => { upCalls.push(opts); });
+    page.mouse.move = vi.fn(async (x: number, y: number) => {
+      moveCalls.push([x, y]);
+    });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts);
+    });
+    page.mouse.up = vi.fn(async (opts?: any) => {
+      upCalls.push(opts);
+    });
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#btn');
+    const el = await page.$("#btn");
     await el.click();
 
     // Bézier movement → multiple move calls
@@ -1280,21 +1322,25 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle({
       boundingBox: vi.fn(async () => ({ x: 200, y: 300, width: 100, height: 30 })),
-      evaluate: vi.fn(async () => false),
+      evaluate: vi.fn(async () => false)
     });
 
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
     page.mouse.move = vi.fn(async () => {});
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts ?? {}); });
-    page.mouse.up = vi.fn(async (opts?: any) => { upCalls.push(opts ?? {}); });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts ?? {});
+    });
+    page.mouse.up = vi.fn(async (opts?: any) => {
+      upCalls.push(opts ?? {});
+    });
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#text');
+    const el = await page.$("#text");
     await el.click({ clickCount: 2 });
 
     // First click + second click with clickCount:2
@@ -1312,20 +1358,24 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle({
       boundingBox: vi.fn(async () => ({ x: 150, y: 250, width: 80, height: 25 })),
-      evaluate: vi.fn(async () => false),
+      evaluate: vi.fn(async () => false)
     });
 
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
-    page.mouse.move = vi.fn(async (x: number, y: number) => { moveCalls.push([x, y]); });
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts); });
+    page.mouse.move = vi.fn(async (x: number, y: number) => {
+      moveCalls.push([x, y]);
+    });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts);
+    });
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#link');
+    const el = await page.$("#link");
     await el.hover();
 
     expect(moveCalls.length).toBeGreaterThan(5);
@@ -1341,17 +1391,23 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle({
       boundingBox: vi.fn(async () => ({ x: 100, y: 200, width: 200, height: 30 })),
-      evaluate: vi.fn(async () => true), // is an input
+      evaluate: vi.fn(async () => true) // is an input
     });
 
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
     page.mouse.move = vi.fn(async () => {});
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts); });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts);
+    });
     page.mouse.up = vi.fn(async () => {});
-    page.keyboard.down = vi.fn(async (k: string) => { charCalls.push(`down:${k}`); });
-    page.keyboard.up = vi.fn(async (k: string) => { charCalls.push(`up:${k}`); });
+    page.keyboard.down = vi.fn(async (k: string) => {
+      charCalls.push(`down:${k}`);
+    });
+    page.keyboard.up = vi.fn(async (k: string) => {
+      charCalls.push(`up:${k}`);
+    });
     page.keyboard.sendCharacter = vi.fn(async () => {});
 
     const cfg = resolveConfig("default", {
@@ -1359,21 +1415,21 @@ describe("Puppeteer: ElementHandle patching", () => {
       idle_between_actions: false,
       typing_delay: 0,
       typing_delay_spread: 0,
-      key_hold: [0, 0],
+      key_hold: [0, 0]
     });
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#email');
-    await el.type('ab');
+    const el = await page.$("#email");
+    await el.type("ab");
 
     // Should have clicked first (mouseDown)
     expect(downCalls.length).toBe(1);
     // Should have typed 'a' and 'b' via keyboard.down/up
-    expect(charCalls).toContain('down:a');
-    expect(charCalls).toContain('up:a');
-    expect(charCalls).toContain('down:b');
-    expect(charCalls).toContain('up:b');
+    expect(charCalls).toContain("down:a");
+    expect(charCalls).toContain("up:a");
+    expect(charCalls).toContain("down:b");
+    expect(charCalls).toContain("up:b");
   });
 
   it("patched el.focus() clicks to focus instead of programmatic focus", async () => {
@@ -1383,21 +1439,23 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle({
       boundingBox: vi.fn(async () => ({ x: 100, y: 200, width: 200, height: 30 })),
-      evaluate: vi.fn(async () => true),
+      evaluate: vi.fn(async () => true)
     });
 
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
     page.mouse.move = vi.fn(async () => {});
-    page.mouse.down = vi.fn(async (opts?: any) => { downCalls.push(opts); });
+    page.mouse.down = vi.fn(async (opts?: any) => {
+      downCalls.push(opts);
+    });
     page.mouse.up = vi.fn(async () => {});
 
     const cfg = resolveConfig("default", { idle_between_actions: false });
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#input');
+    const el = await page.$("#input");
     await el.focus();
 
     // focus should trigger a click (mouseDown + mouseUp)
@@ -1409,20 +1467,22 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const originalClickCalled = { value: false };
     const mockEl = buildMockElementHandle({
-      boundingBox: vi.fn(async () => null), // not visible
+      boundingBox: vi.fn(async () => null) // not visible
     });
     // Override the original click to track it
-    mockEl.click = vi.fn(async () => { originalClickCalled.value = true; });
+    mockEl.click = vi.fn(async () => {
+      originalClickCalled.value = true;
+    });
 
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 50, y: 50, initialized: true };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await page.$('#hidden');
+    const el = await page.$("#hidden");
     await el.click();
 
     // Should have fallen back to original click
@@ -1437,15 +1497,15 @@ describe("Puppeteer: ElementHandle patching", () => {
     parentEl.$ = vi.fn(async () => childEl);
 
     const page = buildMockPage({
-      $: vi.fn(async () => parentEl),
+      $: vi.fn(async () => parentEl)
     });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
     patchPage(page as any, cfg, cursor as any);
 
-    const parent = await page.$('#parent');
-    const child = await parent.$('.child');
+    const parent = await page.$("#parent");
+    const child = await parent.$(".child");
 
     expect(child).toBeDefined();
     expect((child as any)._humanPatched).toBe(true);
@@ -1456,7 +1516,7 @@ describe("Puppeteer: ElementHandle patching", () => {
 
     const mockEl = buildMockElementHandle();
     const page = buildMockPage({
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
 
     const cfg = resolveConfig("default");
@@ -1464,18 +1524,17 @@ describe("Puppeteer: ElementHandle patching", () => {
     patchPage(page as any, cfg, cursor as any);
 
     // First call
-    const el1 = await page.$('#btn');
+    const el1 = await page.$("#btn");
     const clickFn1 = el1.click;
 
     // Second call — same element, should not re-patch
-    const el2 = await page.$('#btn');
+    const el2 = await page.$("#btn");
     const clickFn2 = el2.click;
 
     // Functions should be identical (not re-wrapped)
     expect(clickFn1).toBe(clickFn2);
   });
 });
-
 
 // =========================================================================
 // Frame-level patching
@@ -1502,12 +1561,12 @@ describe("Puppeteer: frame-level patching", () => {
 
       $$: vi.fn(async () => []),
       waitForSelector: vi.fn(async () => null),
-      childFrames: vi.fn(() => []),
+      childFrames: vi.fn(() => [])
     };
 
     const mainFrame = {
       ...childFrame,
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
 
     const page = buildMockPage({ mainFrameReturn: mainFrame });
@@ -1539,12 +1598,12 @@ describe("Puppeteer: frame-level patching", () => {
 
       $$: vi.fn(async () => []),
       waitForSelector: vi.fn(async () => null),
-      childFrames: vi.fn(() => []),
+      childFrames: vi.fn(() => [])
     };
 
     const mainFrame = {
       ...childFrame,
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
 
     const page = buildMockPage({ mainFrameReturn: mainFrame });
@@ -1580,12 +1639,12 @@ describe("Puppeteer: frame-level patching", () => {
 
       $$: vi.fn(async () => []),
       waitForSelector: vi.fn(async () => null),
-      childFrames: vi.fn(() => []),
+      childFrames: vi.fn(() => [])
     };
 
     const mainFrame = {
       ...childFrame,
-      childFrames: vi.fn(() => [childFrame]),
+      childFrames: vi.fn(() => [childFrame])
     };
 
     const page = buildMockPage({ mainFrameReturn: mainFrame });
@@ -1593,12 +1652,11 @@ describe("Puppeteer: frame-level patching", () => {
     const cursor = { x: 0, y: 0, initialized: false };
     patchPage(page as any, cfg, cursor as any);
 
-    const el = await childFrame.$('#in-frame');
+    const el = await childFrame.$("#in-frame");
     expect(el).toBeDefined();
     expect((el as any)._humanPatched).toBe(true);
   });
 });
-
 
 // =========================================================================
 // Browser-level patching
@@ -1608,11 +1666,11 @@ describe("Puppeteer: browser-level patching", () => {
     const { patchBrowser } = await import("../src/human-puppeteer/index.js");
 
     const browser = buildMockBrowser();
-    const origNewPage = browser.newPage; 
+    const origNewPage = browser.newPage;
     const cfg = resolveConfig("default");
     patchBrowser(browser as any, cfg);
 
-    expect(browser.newPage).not.toBe(origNewPage); 
+    expect(browser.newPage).not.toBe(origNewPage);
     expect(typeof browser.newPage).toBe("function");
   });
 
@@ -1623,10 +1681,10 @@ describe("Puppeteer: browser-level patching", () => {
       pages: vi.fn(async () => []),
       newPage: vi.fn(async () => buildMockPage()),
       createIncognitoBrowserContext: vi.fn(async () => ({
-        newPage: vi.fn(async () => buildMockPage()),
+        newPage: vi.fn(async () => buildMockPage())
       })),
       on: vi.fn(),
-      close: vi.fn(async () => {}),
+      close: vi.fn(async () => {})
     };
 
     const origCreateCtx = browser.createIncognitoBrowserContext;
@@ -1668,14 +1726,14 @@ describe("Puppeteer: browser-level patching", () => {
 
     const mockPage = buildMockPage();
     const mockCtx = {
-      newPage: vi.fn(async () => mockPage),
+      newPage: vi.fn(async () => mockPage)
     };
     const browser: any = {
       pages: vi.fn(async () => []),
       newPage: vi.fn(async () => buildMockPage()),
       createIncognitoBrowserContext: vi.fn(async () => mockCtx),
       on: vi.fn(),
-      close: vi.fn(async () => {}),
+      close: vi.fn(async () => {})
     };
 
     const cfg = resolveConfig("default");
@@ -1688,8 +1746,6 @@ describe("Puppeteer: browser-level patching", () => {
     expect((page as any)._humanCfg).toBe(cfg);
   });
 });
-
-
 
 // =========================================================================
 // isInputElement / isSelectorFocused — through patchPage click flow
@@ -1714,7 +1770,7 @@ describe("Puppeteer: isInputElement stealth integration via patchPage", () => {
           return { result: { value: false } };
         }
         return {};
-      }),
+      })
     });
 
     const mockEl = buildMockElementHandle();
@@ -1723,7 +1779,7 @@ describe("Puppeteer: isInputElement stealth integration via patchPage", () => {
         evaluateCalls.push(args);
         return false;
       }),
-      $: vi.fn(async () => mockEl),
+      $: vi.fn(async () => mockEl)
     });
     page.createCDPSession = vi.fn(async () => mockCdp);
 
@@ -1738,19 +1794,16 @@ describe("Puppeteer: isInputElement stealth integration via patchPage", () => {
     }
 
     const isInputCalls = stealthEvaluateCalls.filter(
-      expr => expr.includes("tagName") || expr.includes("querySelector")
+      (expr) => expr.includes("tagName") || expr.includes("querySelector")
     );
 
-    const qsCalls = evaluateCalls.filter(
-      args => typeof args[0] === "string" && args[0].includes("querySelector")
-    );
+    const qsCalls = evaluateCalls.filter((args) => typeof args[0] === "string" && args[0].includes("querySelector"));
 
     if (isInputCalls.length > 0) {
       expect(qsCalls.length).toBe(0);
     }
   });
 });
-
 
 // =========================================================================
 // isSelectorFocused stealth integration via patchPage press flow
@@ -1775,11 +1828,11 @@ describe("Puppeteer: isSelectorFocused stealth integration via patchPage", () =>
           return { result: { value: true } };
         }
         return {};
-      }),
+      })
     });
 
     const page = buildMockPage({
-      evaluate: vi.fn(async () => true),
+      evaluate: vi.fn(async () => true)
     });
     page.createCDPSession = vi.fn(async () => mockCdp);
 
@@ -1793,13 +1846,10 @@ describe("Puppeteer: isSelectorFocused stealth integration via patchPage", () =>
       // May throw with mocks — that's fine, we just need the stealth call
     }
 
-    const focusCalls = stealthEvaluateCalls.filter(
-      expr => expr.includes("activeElement")
-    );
+    const focusCalls = stealthEvaluateCalls.filter((expr) => expr.includes("activeElement"));
     expect(focusCalls.length).toBeGreaterThan(0);
   });
 });
-
 
 // =========================================================================
 // Puppeteer-specific: sendCharacter mapped to insertText
@@ -1810,7 +1860,9 @@ describe("Puppeteer: sendCharacter → insertText mapping", () => {
 
     const sentChars: string[] = [];
     const page = buildMockPage();
-    page.keyboard.sendCharacter = vi.fn(async (ch: string) => { sentChars.push(ch); });
+    page.keyboard.sendCharacter = vi.fn(async (ch: string) => {
+      sentChars.push(ch);
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
@@ -1824,7 +1876,6 @@ describe("Puppeteer: sendCharacter → insertText mapping", () => {
     expect(sentChars).toContain("€");
   });
 });
-
 
 // =========================================================================
 // Puppeteer-specific: viewport() vs viewportSize()
@@ -1846,7 +1897,6 @@ describe("Puppeteer: viewport() API (not viewportSize)", () => {
   });
 });
 
-
 // =========================================================================
 // Cursor initialization
 // =========================================================================
@@ -1856,7 +1906,9 @@ describe("Puppeteer: cursor initialization", () => {
 
     const moveCalls: Array<[number, number]> = [];
     const page = buildMockPage();
-    page.mouse.move = vi.fn(async (x: number, y: number) => { moveCalls.push([x, y]); });
+    page.mouse.move = vi.fn(async (x: number, y: number) => {
+      moveCalls.push([x, y]);
+    });
 
     const cfg = resolveConfig("default");
     const cursor = { x: 0, y: 0, initialized: false };
@@ -1873,7 +1925,6 @@ describe("Puppeteer: cursor initialization", () => {
     expect(cursor.initialized).toBe(true);
   });
 });
-
 
 // =========================================================================
 // Page-level method replacement verification
@@ -1897,7 +1948,7 @@ describe("Puppeteer: all page methods are replaced", () => {
       keyboardType: page.keyboard.type,
       keyboardPress: page.keyboard.press,
       keyboardDown: page.keyboard.down,
-      keyboardUp: page.keyboard.up,
+      keyboardUp: page.keyboard.up
     };
 
     const cfg = resolveConfig("default");
@@ -1920,13 +1971,12 @@ describe("Puppeteer: all page methods are replaced", () => {
   });
 });
 
-
 // =========================================================================
 // SLOW TESTS — require real browser (run with: vitest run --testTimeout=60000)
 // Only run when SLOW=1 env var is set
 // =========================================================================
 
-const SLOW = process.env.SLOW === '1';
+const SLOW = process.env.SLOW === "1";
 const describeIfSlow = SLOW ? describe : describe.skip;
 
 describeIfSlow("Puppeteer stealth browser: no evaluate leak on click", () => {
@@ -1936,7 +1986,7 @@ describeIfSlow("Puppeteer stealth browser: no evaluate leak on click", () => {
     const browser = await launch({ humanize: true, headless: true });
     const page = await browser.newPage();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     // Inject detection script
@@ -1944,8 +1994,10 @@ describeIfSlow("Puppeteer stealth browser: no evaluate leak on click", () => {
       (window as any).__evalLeaks = [];
       const origQS = document.querySelector.bind(document);
       document.querySelector = function (sel: string) {
-        try { throw new Error(); } catch (e: any) {
-          if (e.stack && e.stack.includes(':302:')) {
+        try {
+          throw new Error();
+        } catch (e: any) {
+          if (e.stack && e.stack.includes(":302:")) {
             (window as any).__evalLeaks.push(sel);
           }
         }
@@ -1953,7 +2005,7 @@ describeIfSlow("Puppeteer stealth browser: no evaluate leak on click", () => {
       } as any;
     });
 
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(500);
 
     const leaks = await page.evaluate(() => (window as any).__evalLeaks || []);
@@ -1970,34 +2022,38 @@ describeIfSlow("Puppeteer stealth browser: shift symbols isTrusted=true", () => 
     const browser = await launch({ humanize: true, headless: true });
     const page = await browser.newPage();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     await page.evaluate(() => {
       (window as any).__untrustedKeys = [];
       (window as any).__trustedKeys = [];
-      const input = document.querySelector('#searchInput');
+      const input = document.querySelector("#searchInput");
       if (input) {
-        input.addEventListener('keydown', (e) => {
-          if (!e.isTrusted) {
-            (window as any).__untrustedKeys.push((e as KeyboardEvent).key);
-          } else {
-            (window as any).__trustedKeys.push((e as KeyboardEvent).key);
-          }
-        }, true);
+        input.addEventListener(
+          "keydown",
+          (e) => {
+            if (!e.isTrusted) {
+              (window as any).__untrustedKeys.push((e as KeyboardEvent).key);
+            } else {
+              (window as any).__trustedKeys.push((e as KeyboardEvent).key);
+            }
+          },
+          true
+        );
       }
     });
 
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(300);
-    await page.keyboard.type('test!');
+    await page.keyboard.type("test!");
     await sleep(500);
 
     const untrusted = await page.evaluate(() => (window as any).__untrustedKeys || []);
     const trusted = await page.evaluate(() => (window as any).__trustedKeys || []);
 
-    expect(untrusted).not.toContain('!');
-    expect(trusted).toContain('!');
+    expect(untrusted).not.toContain("!");
+    expect(trusted).toContain("!");
 
     await browser.close();
   }, 30000);
@@ -2012,27 +2068,27 @@ describeIfSlow("Puppeteer stealth browser: navigation invalidation", () => {
 
     expect((page as any)._stealth).toBeDefined();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(300);
 
     // Second navigation
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     // Should still work
-    await page.click('#searchInput');
+    await page.click("#searchInput");
     await sleep(300);
-    await page.keyboard.type('after navigation');
+    await page.keyboard.type("after navigation");
     await sleep(500);
 
     // Puppeteer doesn't have locator().inputValue(), use evaluate instead
     const val = await page.evaluate(() => {
-      const el = document.querySelector('#searchInput') as HTMLInputElement;
-      return el ? el.value : '';
+      const el = document.querySelector("#searchInput") as HTMLInputElement;
+      return el ? el.value : "";
     });
-    expect(val).toContain('after navigation');
+    expect(val).toContain("after navigation");
 
     await browser.close();
   }, 60000);
@@ -2045,24 +2101,30 @@ describeIfSlow("Puppeteer stealth browser: ElementHandle humanization", () => {
     const browser = await launch({ humanize: true, headless: true });
     const page = await browser.newPage();
 
-    await page.goto('https://example.com', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://example.com", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     // Track mousemove events at document level
     await page.evaluate(() => {
       (window as any).__moveCounts = 0;
-      document.addEventListener('mousemove', () => {
-        (window as any).__moveCounts++;
-      }, true);
+      document.addEventListener(
+        "mousemove",
+        () => {
+          (window as any).__moveCounts++;
+        },
+        true
+      );
     });
 
     // <h1> on example.com — always present, clickable, no navigation
-    const el = await page.$('h1');
+    const el = await page.$("h1");
     expect(el).not.toBeNull();
     expect((el as any)._humanPatched).toBe(true);
 
     // Reset counter right before the click
-    await page.evaluate(() => { (window as any).__moveCounts = 0; });
+    await page.evaluate(() => {
+      (window as any).__moveCounts = 0;
+    });
 
     // Click via ElementHandle — should use Bézier curve
     await el!.click();
@@ -2085,7 +2147,7 @@ describeIfSlow("Puppeteer stealth browser: focus() uses click", () => {
     const browser = await launch({ humanize: true, headless: true });
     const page = await browser.newPage();
 
-    await page.goto('https://www.wikipedia.org', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://www.wikipedia.org", { waitUntil: "domcontentloaded" });
     await sleep(2000);
 
     // Click somewhere else first to ensure #searchInput is NOT focused
@@ -2095,23 +2157,27 @@ describeIfSlow("Puppeteer stealth browser: focus() uses click", () => {
     // Inject event tracking on #searchInput AFTER ensuring it's not focused
     await page.evaluate(() => {
       (window as any).__mouseEvents = [];
-      const input = document.querySelector('#searchInput');
+      const input = document.querySelector("#searchInput");
       if (input) {
-        for (const evt of ['mousedown', 'mouseup', 'click', 'mousemove']) {
-          input.addEventListener(evt, (e) => {
-            (window as any).__mouseEvents.push(evt);
-          }, true);
+        for (const evt of ["mousedown", "mouseup", "click", "mousemove"]) {
+          input.addEventListener(
+            evt,
+            (e) => {
+              (window as any).__mouseEvents.push(evt);
+            },
+            true
+          );
         }
       }
     });
 
     // Now focus — should trigger humanized click with mouse events
-    await page.focus('#searchInput');
+    await page.focus("#searchInput");
     await sleep(1000);
 
     const events = await page.evaluate(() => (window as any).__mouseEvents || []);
     expect(events.length).toBeGreaterThan(0);
-    expect(events).toContain('mousedown');
+    expect(events).toContain("mousedown");
 
     await browser.close();
   }, 30000);
@@ -2124,15 +2190,19 @@ describeIfSlow("Puppeteer stealth browser: mouse.wheel smooth scroll", () => {
     const browser = await launch({ humanize: true, headless: true });
     const page = await browser.newPage();
 
-    await page.goto('https://en.wikipedia.org/wiki/Main_Page', { waitUntil: 'domcontentloaded' });
+    await page.goto("https://en.wikipedia.org/wiki/Main_Page", { waitUntil: "domcontentloaded" });
     await sleep(1000);
 
     // Track scroll events
     await page.evaluate(() => {
       (window as any).__wheelEvents = 0;
-      window.addEventListener('wheel', () => {
-        (window as any).__wheelEvents++;
-      }, { passive: true });
+      window.addEventListener(
+        "wheel",
+        () => {
+          (window as any).__wheelEvents++;
+        },
+        { passive: true }
+      );
     });
 
     await page.mouse.wheel({ deltaY: 500 });

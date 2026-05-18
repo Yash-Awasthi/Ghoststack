@@ -18,28 +18,63 @@ import type { LaunchOptions } from "./types.js";
 import { ensureProxyScheme, isSocksProxy, reconstructSocksUrl, type ProxyDict } from "./proxy.js";
 
 // P3TERX mirror of MaxMind GeoLite2-City — no license key needed
-const GEOIP_DB_URL =
-  "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb";
+const GEOIP_DB_URL = "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb";
 const GEOIP_DB_FILENAME = "GeoLite2-City.mmdb";
 const GEOIP_UPDATE_INTERVAL_MS = 30 * 86_400_000; // 30 days
 const DEFAULT_GEOIP_TIMEOUT_MS = 5_000;
 
 /** Country ISO code → BCP 47 locale (covers ~90% of proxy traffic). */
 export const COUNTRY_LOCALE_MAP: Record<string, string> = {
-  US: "en-US", GB: "en-GB", AU: "en-AU", CA: "en-CA", NZ: "en-NZ",
-  IE: "en-IE", ZA: "en-ZA", SG: "en-SG",
-  DE: "de-DE", AT: "de-AT", CH: "de-CH",
-  FR: "fr-FR", BE: "fr-BE",
-  ES: "es-ES", MX: "es-MX", AR: "es-AR", CO: "es-CO", CL: "es-CL",
-  BR: "pt-BR", PT: "pt-PT",
-  IT: "it-IT", NL: "nl-NL",
-  JP: "ja-JP", KR: "ko-KR", CN: "zh-CN", TW: "zh-TW", HK: "zh-HK",
-  RU: "ru-RU", UA: "uk-UA", PL: "pl-PL", CZ: "cs-CZ", RO: "ro-RO",
-  IL: "he-IL", TR: "tr-TR", SA: "ar-SA", AE: "ar-AE", EG: "ar-EG",
-  IN: "hi-IN", ID: "id-ID", PH: "en-PH",
-  TH: "th-TH", VN: "vi-VN", MY: "ms-MY",
-  SE: "sv-SE", NO: "nb-NO", DK: "da-DK", FI: "fi-FI",
-  GR: "el-GR", HU: "hu-HU", BG: "bg-BG",
+  US: "en-US",
+  GB: "en-GB",
+  AU: "en-AU",
+  CA: "en-CA",
+  NZ: "en-NZ",
+  IE: "en-IE",
+  ZA: "en-ZA",
+  SG: "en-SG",
+  DE: "de-DE",
+  AT: "de-AT",
+  CH: "de-CH",
+  FR: "fr-FR",
+  BE: "fr-BE",
+  ES: "es-ES",
+  MX: "es-MX",
+  AR: "es-AR",
+  CO: "es-CO",
+  CL: "es-CL",
+  BR: "pt-BR",
+  PT: "pt-PT",
+  IT: "it-IT",
+  NL: "nl-NL",
+  JP: "ja-JP",
+  KR: "ko-KR",
+  CN: "zh-CN",
+  TW: "zh-TW",
+  HK: "zh-HK",
+  RU: "ru-RU",
+  UA: "uk-UA",
+  PL: "pl-PL",
+  CZ: "cs-CZ",
+  RO: "ro-RO",
+  IL: "he-IL",
+  TR: "tr-TR",
+  SA: "ar-SA",
+  AE: "ar-AE",
+  EG: "ar-EG",
+  IN: "hi-IN",
+  ID: "id-ID",
+  PH: "en-PH",
+  TH: "th-TH",
+  VN: "vi-VN",
+  MY: "ms-MY",
+  SE: "sv-SE",
+  NO: "nb-NO",
+  DK: "da-DK",
+  FI: "fi-FI",
+  GR: "el-GR",
+  HU: "hu-HU",
+  BG: "bg-BG"
 };
 
 export interface GeoResult {
@@ -53,17 +88,13 @@ export interface GeoResult {
  * Returns `{ timezone, locale }` — either may be null on failure.
  * Never throws.
  */
-export async function resolveProxyGeo(
-  proxyUrl: string
-): Promise<GeoResult> {
+export async function resolveProxyGeo(proxyUrl: string): Promise<GeoResult> {
   let Reader: any;
   try {
     const mmdb = await import("mmdb-lib");
     Reader = mmdb.default?.Reader ?? mmdb.Reader;
   } catch {
-    throw new Error(
-      "mmdb-lib is required for geoip: true. Install it with:\n  npm install mmdb-lib"
-    );
+    throw new Error("mmdb-lib is required for geoip: true. Install it with:\n  npm install mmdb-lib");
   }
 
   const dbPath = await ensureGeoipDb();
@@ -88,8 +119,7 @@ export async function resolveProxyGeo(
     const result = reader.get(ip) as any;
     const timezone: string | null = result?.location?.time_zone ?? null;
     const countryCode: string | null = result?.country?.iso_code ?? null;
-    const locale =
-      countryCode ? (COUNTRY_LOCALE_MAP[countryCode] ?? null) : null;
+    const locale = countryCode ? (COUNTRY_LOCALE_MAP[countryCode] ?? null) : null;
     return { timezone, locale, exitIp: ip };
   } catch {
     return { timezone: null, locale: null, exitIp: ip };
@@ -101,7 +131,9 @@ function getGeoipTimeoutMs(): number {
   if (!raw) return DEFAULT_GEOIP_TIMEOUT_MS;
   const timeoutSeconds = Number(raw);
   if (!Number.isFinite(timeoutSeconds)) {
-    console.warn(`[cloakbrowser] Invalid CLOAKBROWSER_GEOIP_TIMEOUT_SECONDS=${raw}; using ${DEFAULT_GEOIP_TIMEOUT_MS / 1000}s`);
+    console.warn(
+      `[cloakbrowser] Invalid CLOAKBROWSER_GEOIP_TIMEOUT_SECONDS=${raw}; using ${DEFAULT_GEOIP_TIMEOUT_MS / 1000}s`
+    );
     return DEFAULT_GEOIP_TIMEOUT_MS;
   }
   return Math.max(timeoutSeconds, 0) * 1000;
@@ -125,9 +157,7 @@ function deadlineExpired(deadline: number | null): boolean {
 // ---------------------------------------------------------------------------
 
 /** @internal Exported for testing. */
-export async function resolveProxyIp(
-  proxyUrl: string
-): Promise<string | null> {
+export async function resolveProxyIp(proxyUrl: string): Promise<string | null> {
   try {
     const url = new URL(proxyUrl);
     const hostname = url.hostname;
@@ -155,11 +185,7 @@ function isPrivateIp(ip: string): boolean {
   return false;
 }
 
-const IP_ECHO_URLS = [
-  "https://api.ipify.org",
-  "https://checkip.amazonaws.com",
-  "https://ifconfig.me/ip",
-];
+const IP_ECHO_URLS = ["https://api.ipify.org", "https://checkip.amazonaws.com", "https://ifconfig.me/ip"];
 
 async function resolveExitIp(proxyUrl: string, timeoutMs?: number): Promise<string | null> {
   const deadline = timeoutMs && timeoutMs > 0 ? performance.now() + timeoutMs : null;
@@ -171,7 +197,9 @@ async function resolveExitIp(proxyUrl: string, timeoutMs?: number): Promise<stri
     try {
       ({ SocksProxyAgent } = await import("socks-proxy-agent"));
     } catch {
-      console.warn("[cloakbrowser] socks-proxy-agent not installed — cannot resolve exit IP through SOCKS5 proxy. Install it: npm install socks-proxy-agent");
+      console.warn(
+        "[cloakbrowser] socks-proxy-agent not installed — cannot resolve exit IP through SOCKS5 proxy. Install it: npm install socks-proxy-agent"
+      );
       return null;
     }
     const { default: https } = await import("node:https");
@@ -191,7 +219,10 @@ async function resolveExitIp(proxyUrl: string, timeoutMs?: number): Promise<stri
             });
           });
           req.on("error", () => resolve(null));
-          req.on("timeout", () => { req.destroy(); resolve(null); });
+          req.on("timeout", () => {
+            req.destroy();
+            resolve(null);
+          });
           req.end();
         });
         if (ip) return ip;
@@ -225,10 +256,10 @@ async function resolveExitIp(proxyUrl: string, timeoutMs?: number): Promise<stri
                     "Basic " +
                     Buffer.from(
                       `${decodeURIComponent(proxyUrlObj.username)}:${decodeURIComponent(proxyUrlObj.password || "")}`
-                    ).toString("base64"),
+                    ).toString("base64")
                 }
               : {},
-            timeout: Math.min(10_000, remaining ?? 10_000),
+            timeout: Math.min(10_000, remaining ?? 10_000)
           });
 
           connectReq.on("connect", (_res, socket) => {
@@ -246,7 +277,10 @@ async function resolveExitIp(proxyUrl: string, timeoutMs?: number): Promise<stri
               }
             );
             req.on("error", () => resolve(null));
-            req.on("timeout", () => { req.destroy(); resolve(null); });
+            req.on("timeout", () => {
+              req.destroy();
+              resolve(null);
+            });
             req.end();
           });
 
@@ -302,7 +336,7 @@ async function downloadGeoipDb(dest: string): Promise<void> {
   const tmpPath = `${dest}.tmp.${Date.now()}`;
   try {
     const response = await fetch(GEOIP_DB_URL, {
-      redirect: "follow",
+      redirect: "follow"
     });
     if (!response.ok || !response.body) {
       throw new Error(`HTTP ${response.status}`);
@@ -372,7 +406,7 @@ export async function maybeResolveGeoip(
   // When both tz/locale are explicit, still resolve exit IP for WebRTC
   if (options.timezone && options.locale) {
     const timeoutMs = getGeoipTimeoutMs();
-    const exitIp = await resolveExitIp(proxyUrl, timeoutMs) ?? undefined;
+    const exitIp = (await resolveExitIp(proxyUrl, timeoutMs)) ?? undefined;
     return { timezone: options.timezone, locale: options.locale, exitIp };
   }
 
@@ -381,7 +415,7 @@ export async function maybeResolveGeoip(
   return {
     timezone: options.timezone ?? geoTz ?? undefined,
     locale: options.locale ?? geoLocale ?? undefined,
-    exitIp,
+    exitIp
   };
 }
 
@@ -389,12 +423,10 @@ export async function maybeResolveGeoip(
  * Replace --fingerprint-webrtc-ip=auto with the resolved proxy exit IP.
  * Returns args unchanged if no ``auto`` value is present.
  */
-export async function resolveWebrtcArgs(
-  options: LaunchOptions
-): Promise<string[] | undefined> {
+export async function resolveWebrtcArgs(options: LaunchOptions): Promise<string[] | undefined> {
   const args = options.args;
   if (!args) return args;
-  const idx = args.findIndex(a => a === "--fingerprint-webrtc-ip=auto");
+  const idx = args.findIndex((a) => a === "--fingerprint-webrtc-ip=auto");
   if (idx === -1) return args;
 
   const proxyUrl = extractProxyUrl(options.proxy);
@@ -411,12 +443,16 @@ export async function resolveWebrtcArgs(
     if (ip) {
       result[idx] = `--fingerprint-webrtc-ip=${ip}`;
     } else {
-      console.warn("[cloakbrowser] Could not resolve proxy exit IP for WebRTC spoofing; removing --fingerprint-webrtc-ip=auto");
+      console.warn(
+        "[cloakbrowser] Could not resolve proxy exit IP for WebRTC spoofing; removing --fingerprint-webrtc-ip=auto"
+      );
       result.splice(idx, 1);
     }
     return result;
   } catch {
-    console.warn("[cloakbrowser] Failed to resolve proxy exit IP for WebRTC spoofing; removing --fingerprint-webrtc-ip=auto");
+    console.warn(
+      "[cloakbrowser] Failed to resolve proxy exit IP for WebRTC spoofing; removing --fingerprint-webrtc-ip=auto"
+    );
     const result = [...args];
     result.splice(idx, 1);
     return result;

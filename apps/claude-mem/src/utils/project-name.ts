@@ -1,38 +1,38 @@
-import { homedir } from 'os'
-import path from 'path';
-import { logger } from './logger.js';
-import { detectWorktree } from './worktree.js';
+import { homedir } from "os";
+import path from "path";
+import { logger } from "./logger.js";
+import { detectWorktree } from "./worktree.js";
 
 function expandTilde(p: string): string {
-  if (p === '~' || p.startsWith('~/')) {
-    return p.replace(/^~/, homedir())
+  if (p === "~" || p.startsWith("~/")) {
+    return p.replace(/^~/, homedir());
   }
-  return p
+  return p;
 }
 
 export function getProjectName(cwd: string | null | undefined): string {
-  if (!cwd || cwd.trim() === '') {
-    logger.warn('PROJECT_NAME', 'Empty cwd provided, using fallback', { cwd });
-    return 'unknown-project';
+  if (!cwd || cwd.trim() === "") {
+    logger.warn("PROJECT_NAME", "Empty cwd provided, using fallback", { cwd });
+    return "unknown-project";
   }
 
-  const expanded = expandTilde(cwd)
+  const expanded = expandTilde(cwd);
 
   const basename = path.basename(expanded);
 
-  if (basename === '') {
-    const isWindows = process.platform === 'win32';
+  if (basename === "") {
+    const isWindows = process.platform === "win32";
     if (isWindows) {
       const driveMatch = cwd.match(/^([A-Z]):\\/i);
       if (driveMatch) {
         const driveLetter = driveMatch[1].toUpperCase();
         const projectName = `drive-${driveLetter}`;
-        logger.info('PROJECT_NAME', 'Drive root detected', { cwd, projectName });
+        logger.info("PROJECT_NAME", "Drive root detected", { cwd, projectName });
         return projectName;
       }
     }
-    logger.warn('PROJECT_NAME', 'Root directory detected, using fallback', { cwd });
-    return 'unknown-project';
+    logger.warn("PROJECT_NAME", "Root directory detected, using fallback", { cwd });
+    return "unknown-project";
   }
 
   return basename;

@@ -5,7 +5,7 @@ import type { LaunchOptions } from "../src/types.js";
 describe("parseProxyUrl", () => {
   it("passes through URL without credentials", () => {
     expect(parseProxyUrl("http://proxy:8080")).toEqual({
-      server: "http://proxy:8080",
+      server: "http://proxy:8080"
     });
   });
 
@@ -13,7 +13,7 @@ describe("parseProxyUrl", () => {
     expect(parseProxyUrl("http://user:pass@proxy:8080")).toEqual({
       server: "http://proxy:8080",
       username: "user",
-      password: "pass",
+      password: "pass"
     });
   });
 
@@ -57,7 +57,7 @@ describe("proxy dict type", () => {
 
   it("accepts dict proxy with bypass in LaunchOptions", () => {
     const opts: LaunchOptions = {
-      proxy: { server: "http://proxy:8080", bypass: ".google.com,localhost" },
+      proxy: { server: "http://proxy:8080", bypass: ".google.com,localhost" }
     };
     expect(typeof opts.proxy).toBe("object");
     if (typeof opts.proxy === "object") {
@@ -72,8 +72,8 @@ describe("proxy dict type", () => {
         server: "http://proxy:8080",
         username: "user",
         password: "pass",
-        bypass: ".example.com",
-      },
+        bypass: ".example.com"
+      }
     };
     if (typeof opts.proxy === "object") {
       expect(opts.proxy.username).toBe("user");
@@ -88,7 +88,7 @@ describe("bare proxy format (user:pass@host:port)", () => {
     expect(parseProxyUrl("user:pass@proxy:8080")).toEqual({
       server: "http://proxy:8080",
       username: "user",
-      password: "pass",
+      password: "pass"
     });
   });
 
@@ -188,7 +188,7 @@ describe("resolveProxyConfig", () => {
     const { proxyOption, proxyArgs } = resolveProxyConfig({
       server: "socks5://host:1080",
       username: "user",
-      password: "p@ss",
+      password: "p@ss"
     });
     expect(proxyOption).toBeUndefined();
     expect(proxyArgs).toEqual(["--proxy-server=socks5://user:p%40ss@host:1080"]);
@@ -197,7 +197,7 @@ describe("resolveProxyConfig", () => {
   it("includes bypass for socks5 dict", () => {
     const { proxyArgs } = resolveProxyConfig({
       server: "socks5://host:1080",
-      bypass: ".example.com",
+      bypass: ".example.com"
     });
     expect(proxyArgs).toContain("--proxy-server=socks5://host:1080");
     expect(proxyArgs).toContain("--proxy-bypass-list=.example.com");
@@ -269,9 +269,7 @@ describe("resolveProxyConfig", () => {
     const debugSpy = vi.spyOn(console, "info").mockImplementation(() => {});
     try {
       resolveProxyConfig("socks5://user:pass=123@host:1080");
-      expect(debugSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Auto URL-encoded SOCKS5"),
-      );
+      expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining("Auto URL-encoded SOCKS5"));
       // Credentials must not leak into the log.
       const calls = debugSpy.mock.calls.flat().join(" ");
       expect(calls).not.toContain("pass=123");

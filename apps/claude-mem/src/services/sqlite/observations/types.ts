@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger.js';
+import { logger } from "../../../utils/logger.js";
 
 export interface ObservationInput {
   type: string;
@@ -19,7 +19,7 @@ export interface StoreObservationResult {
 }
 
 export interface GetObservationsByIdsOptions {
-  orderBy?: 'date_desc' | 'date_asc';
+  orderBy?: "date_desc" | "date_asc";
   limit?: number;
   project?: string;
   type?: string | string[];

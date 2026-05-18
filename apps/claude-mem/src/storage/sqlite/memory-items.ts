@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { randomUUID } from 'crypto';
-import { Database } from 'bun:sqlite';
+import { randomUUID } from "crypto";
+import { Database } from "bun:sqlite";
 import {
   CreateMemoryItemSchema,
   CreateMemorySourceSchema,
@@ -13,9 +13,9 @@ import {
   type MemoryItemKind,
   type MemorySource,
   type MemorySourceType
-} from '../../core/schemas/memory-item.js';
-import { ensureServerStorageSchema } from './schema.js';
-import { parseJsonArray, parseJsonObject, stringifyJson } from './serde.js';
+} from "../../core/schemas/memory-item.js";
+import { ensureServerStorageSchema } from "./schema.js";
+import { parseJsonArray, parseJsonObject, stringifyJson } from "./serde.js";
 
 interface MemoryItemRow {
   id: string;
@@ -85,13 +85,13 @@ function mapMemorySourceRow(row: MemorySourceRow): MemorySource {
 
 function buildFtsQuery(query: string): string {
   return query
-    .normalize('NFKC')
+    .normalize("NFKC")
     .trim()
     .split(/\s+/)
-    .flatMap(token => token.split(/[^\p{L}\p{N}_]+/gu))
+    .flatMap((token) => token.split(/[^\p{L}\p{N}_]+/gu))
     .filter(Boolean)
-    .map(token => `"${token}"`)
-    .join(' ');
+    .map((token) => `"${token}"`)
+    .join(" ");
 }
 
 export class MemoryItemsRepository {
@@ -104,32 +104,36 @@ export class MemoryItemsRepository {
     const now = Date.now();
     const id = randomUUID();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO memory_items (
         id, project_id, server_session_id, legacy_observation_id, kind, type,
         title, subtitle, text, narrative, facts, concepts, files_read,
         files_modified, metadata, created_at_epoch, updated_at_epoch
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
-      item.projectId,
-      item.serverSessionId ?? null,
-      item.legacyObservationId ?? null,
-      item.kind,
-      item.type,
-      item.title ?? null,
-      item.subtitle ?? null,
-      item.text ?? null,
-      item.narrative ?? null,
-      stringifyJson(item.facts ?? []),
-      stringifyJson(item.concepts ?? []),
-      stringifyJson(item.filesRead ?? []),
-      stringifyJson(item.filesModified ?? []),
-      stringifyJson(item.metadata),
-      now,
-      now
-    );
+    `
+      )
+      .run(
+        id,
+        item.projectId,
+        item.serverSessionId ?? null,
+        item.legacyObservationId ?? null,
+        item.kind,
+        item.type,
+        item.title ?? null,
+        item.subtitle ?? null,
+        item.text ?? null,
+        item.narrative ?? null,
+        stringifyJson(item.facts ?? []),
+        stringifyJson(item.concepts ?? []),
+        stringifyJson(item.filesRead ?? []),
+        stringifyJson(item.filesModified ?? []),
+        stringifyJson(item.metadata),
+        now,
+        now
+      );
 
     return this.getById(id)!;
   }
@@ -139,33 +143,39 @@ export class MemoryItemsRepository {
     const now = Date.now();
     const id = randomUUID();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO memory_sources (
         id, memory_item_id, source_type, legacy_table, legacy_id, source_uri,
         metadata, created_at_epoch
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
-      source.memoryItemId,
-      source.sourceType,
-      source.legacyTable ?? null,
-      source.legacyId ?? null,
-      source.sourceUri ?? null,
-      stringifyJson(source.metadata),
-      now
-    );
+    `
+      )
+      .run(
+        id,
+        source.memoryItemId,
+        source.sourceType,
+        source.legacyTable ?? null,
+        source.legacyId ?? null,
+        source.sourceUri ?? null,
+        stringifyJson(source.metadata),
+        now
+      );
 
     return this.getSourceById(id)!;
   }
 
   getById(id: string): MemoryItem | null {
-    const row = this.db.prepare('SELECT * FROM memory_items WHERE id = ?').get(id) as MemoryItemRow | null;
+    const row = this.db.prepare("SELECT * FROM memory_items WHERE id = ?").get(id) as MemoryItemRow | null;
     return row ? mapMemoryItemRow(row) : null;
   }
 
   getByLegacyObservationId(legacyObservationId: number): MemoryItem | null {
-    const row = this.db.prepare('SELECT * FROM memory_items WHERE legacy_observation_id = ?').get(legacyObservationId) as MemoryItemRow | null;
+    const row = this.db
+      .prepare("SELECT * FROM memory_items WHERE legacy_observation_id = ?")
+      .get(legacyObservationId) as MemoryItemRow | null;
     return row ? mapMemoryItemRow(row) : null;
   }
 
@@ -188,11 +198,13 @@ export class MemoryItemsRepository {
       concepts: input.concepts ?? existing.concepts,
       filesRead: input.filesRead ?? existing.filesRead,
       filesModified: input.filesModified ?? existing.filesModified,
-      metadata: input.metadata ?? existing.metadata,
+      metadata: input.metadata ?? existing.metadata
     });
     const now = Date.now();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE memory_items
       SET
         project_id = ?,
@@ -211,40 +223,46 @@ export class MemoryItemsRepository {
         metadata = ?,
         updated_at_epoch = ?
       WHERE id = ?
-    `).run(
-      next.projectId,
-      next.serverSessionId ?? null,
-      next.legacyObservationId ?? null,
-      next.kind,
-      next.type,
-      next.title ?? null,
-      next.subtitle ?? null,
-      next.text ?? null,
-      next.narrative ?? null,
-      stringifyJson(next.facts ?? []),
-      stringifyJson(next.concepts ?? []),
-      stringifyJson(next.filesRead ?? []),
-      stringifyJson(next.filesModified ?? []),
-      stringifyJson(next.metadata),
-      now,
-      id,
-    );
+    `
+      )
+      .run(
+        next.projectId,
+        next.serverSessionId ?? null,
+        next.legacyObservationId ?? null,
+        next.kind,
+        next.type,
+        next.title ?? null,
+        next.subtitle ?? null,
+        next.text ?? null,
+        next.narrative ?? null,
+        stringifyJson(next.facts ?? []),
+        stringifyJson(next.concepts ?? []),
+        stringifyJson(next.filesRead ?? []),
+        stringifyJson(next.filesModified ?? []),
+        stringifyJson(next.metadata),
+        now,
+        id
+      );
 
     return this.getById(id);
   }
 
   getSourceById(id: string): MemorySource | null {
-    const row = this.db.prepare('SELECT * FROM memory_sources WHERE id = ?').get(id) as MemorySourceRow | null;
+    const row = this.db.prepare("SELECT * FROM memory_sources WHERE id = ?").get(id) as MemorySourceRow | null;
     return row ? mapMemorySourceRow(row) : null;
   }
 
   listByProject(projectId: string, limit = 100): MemoryItem[] {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT * FROM memory_items
       WHERE project_id = ?
       ORDER BY created_at_epoch DESC
       LIMIT ?
-    `).all(projectId, limit) as MemoryItemRow[];
+    `
+      )
+      .all(projectId, limit) as MemoryItemRow[];
     return rows.map(mapMemoryItemRow);
   }
 
@@ -252,7 +270,9 @@ export class MemoryItemsRepository {
     const ftsQuery = buildFtsQuery(query);
     if (!ftsQuery) return [];
 
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT memory_items.*
       FROM memory_items
       JOIN memory_items_fts ON memory_items_fts.memory_item_id = memory_items.id
@@ -260,16 +280,22 @@ export class MemoryItemsRepository {
         AND memory_items_fts MATCH ?
       ORDER BY memory_items.updated_at_epoch DESC
       LIMIT ?
-    `).all(projectId, ftsQuery, limit) as MemoryItemRow[];
+    `
+      )
+      .all(projectId, ftsQuery, limit) as MemoryItemRow[];
     return rows.map(mapMemoryItemRow);
   }
 
   listSources(memoryItemId: string): MemorySource[] {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT * FROM memory_sources
       WHERE memory_item_id = ?
       ORDER BY created_at_epoch ASC
-    `).all(memoryItemId) as MemorySourceRow[];
+    `
+      )
+      .all(memoryItemId) as MemorySourceRow[];
     return rows.map(mapMemorySourceRow);
   }
 }

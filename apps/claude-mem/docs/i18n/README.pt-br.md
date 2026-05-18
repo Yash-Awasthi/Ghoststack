@@ -1,6 +1,7 @@
 🌐 Esta é uma tradução automatizada. Correções da comunidade são bem-vindas!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ Veja [Visão Geral da Arquitetura](https://docs.claude-mem.ai/architecture/overv
 Claude-Mem fornece busca inteligente através da skill mem-search que se auto-invoca quando você pergunta sobre trabalhos anteriores:
 
 **Como Funciona:**
-- Apenas pergunte naturalmente: *"O que fizemos na última sessão?"* ou *"Já corrigimos esse bug antes?"*
+
+- Apenas pergunte naturalmente: _"O que fizemos na última sessão?"_ ou _"Já corrigimos esse bug antes?"_
 - Claude invoca automaticamente a skill mem-search para encontrar contexto relevante
 
 **Operações de Busca Disponíveis:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Suporte
 

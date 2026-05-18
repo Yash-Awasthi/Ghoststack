@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { randomUUID } from 'crypto';
-import { Database } from 'bun:sqlite';
+import { randomUUID } from "crypto";
+import { Database } from "bun:sqlite";
 import {
   ApiKeySchema,
   AuditLogSchema,
@@ -13,9 +13,9 @@ import {
   type AuditLog,
   type CreateApiKey,
   type CreateAuditLog
-} from '../../core/schemas/auth.js';
-import { ensureServerStorageSchema } from './schema.js';
-import { parseJsonArray, parseJsonObject, stringifyJson } from './serde.js';
+} from "../../core/schemas/auth.js";
+import { ensureServerStorageSchema } from "./schema.js";
+import { parseJsonArray, parseJsonObject, stringifyJson } from "./serde.js";
 
 interface ApiKeyRow {
   id: string;
@@ -89,45 +89,57 @@ export class AuthRepository {
     const now = Date.now();
     const id = randomUUID();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO api_keys (
         id, team_id, project_id, name, key_hash, prefix, scopes, status,
         last_used_at_epoch, expires_at_epoch, metadata, created_at_epoch, updated_at_epoch
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, 'active', NULL, ?, ?, ?, ?)
-    `).run(
-      id,
-      key.teamId ?? null,
-      key.projectId ?? null,
-      key.name,
-      key.keyHash,
-      key.prefix ?? null,
-      stringifyJson(key.scopes ?? []),
-      key.expiresAtEpoch ?? null,
-      stringifyJson(key.metadata),
-      now,
-      now
-    );
+    `
+      )
+      .run(
+        id,
+        key.teamId ?? null,
+        key.projectId ?? null,
+        key.name,
+        key.keyHash,
+        key.prefix ?? null,
+        stringifyJson(key.scopes ?? []),
+        key.expiresAtEpoch ?? null,
+        stringifyJson(key.metadata),
+        now,
+        now
+      );
 
     return this.getApiKeyById(id)!;
   }
 
   revokeApiKey(id: string, updatedAtEpoch = Date.now()): ApiKey | null {
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE api_keys
       SET status = 'revoked', updated_at_epoch = ?
       WHERE id = ?
-    `).run(updatedAtEpoch, id);
+    `
+      )
+      .run(updatedAtEpoch, id);
 
     return this.getApiKeyById(id);
   }
 
   markApiKeyUsed(id: string, usedAtEpoch = Date.now()): ApiKey | null {
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       UPDATE api_keys
       SET last_used_at_epoch = ?, updated_at_epoch = ?
       WHERE id = ?
-    `).run(usedAtEpoch, usedAtEpoch, id);
+    `
+      )
+      .run(usedAtEpoch, usedAtEpoch, id);
 
     return this.getApiKeyById(id);
   }
@@ -137,59 +149,71 @@ export class AuthRepository {
     const now = Date.now();
     const id = randomUUID();
 
-    this.db.prepare(`
+    this.db
+      .prepare(
+        `
       INSERT INTO audit_log (
         id, team_id, project_id, actor_type, actor_id, action, target_type,
         target_id, metadata, created_at_epoch
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
-      log.teamId ?? null,
-      log.projectId ?? null,
-      log.actorType,
-      log.actorId ?? null,
-      log.action,
-      log.targetType ?? null,
-      log.targetId ?? null,
-      stringifyJson(log.metadata),
-      now
-    );
+    `
+      )
+      .run(
+        id,
+        log.teamId ?? null,
+        log.projectId ?? null,
+        log.actorType,
+        log.actorId ?? null,
+        log.action,
+        log.targetType ?? null,
+        log.targetId ?? null,
+        stringifyJson(log.metadata),
+        now
+      );
 
     return this.getAuditLogById(id)!;
   }
 
   getApiKeyById(id: string): ApiKey | null {
-    const row = this.db.prepare('SELECT * FROM api_keys WHERE id = ?').get(id) as ApiKeyRow | null;
+    const row = this.db.prepare("SELECT * FROM api_keys WHERE id = ?").get(id) as ApiKeyRow | null;
     return row ? mapApiKeyRow(row) : null;
   }
 
   getApiKeyByHash(keyHash: string): ApiKey | null {
-    const row = this.db.prepare('SELECT * FROM api_keys WHERE key_hash = ?').get(keyHash) as ApiKeyRow | null;
+    const row = this.db.prepare("SELECT * FROM api_keys WHERE key_hash = ?").get(keyHash) as ApiKeyRow | null;
     return row ? mapApiKeyRow(row) : null;
   }
 
   listApiKeys(limit = 100): ApiKey[] {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT * FROM api_keys
       ORDER BY created_at_epoch DESC
       LIMIT ?
-    `).all(limit) as ApiKeyRow[];
+    `
+      )
+      .all(limit) as ApiKeyRow[];
     return rows.map(mapApiKeyRow);
   }
 
   getAuditLogById(id: string): AuditLog | null {
-    const row = this.db.prepare('SELECT * FROM audit_log WHERE id = ?').get(id) as AuditLogRow | null;
+    const row = this.db.prepare("SELECT * FROM audit_log WHERE id = ?").get(id) as AuditLogRow | null;
     return row ? mapAuditLogRow(row) : null;
   }
 
   listAuditLogByProject(projectId: string, limit = 100): AuditLog[] {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT * FROM audit_log
       WHERE project_id = ?
       ORDER BY created_at_epoch DESC
       LIMIT ?
-    `).all(projectId, limit) as AuditLogRow[];
+    `
+      )
+      .all(projectId, limit) as AuditLogRow[];
     return rows.map(mapAuditLogRow);
   }
 }

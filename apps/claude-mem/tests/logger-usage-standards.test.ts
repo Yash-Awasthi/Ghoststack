@@ -7,35 +7,35 @@ const PROJECT_ROOT = join(import.meta.dir, "..");
 const SRC_DIR = join(PROJECT_ROOT, "src");
 
 const EXCLUDED_PATTERNS = [
-  /types\//,             // Type definition files
-  /constants\//,         // Pure constants
-  /\.d\.ts$/,            // Type declaration files
-  /^ui\//,               // UI components (separate logging context)
-  /^bin\//,              // CLI utilities (may use console.log for output)
-  /index\.ts$/,          // Re-export files
-  /logger\.ts$/,         // Logger itself
-  /hook-response\.ts$/,  // Pure data structure
+  /types\//, // Type definition files
+  /constants\//, // Pure constants
+  /\.d\.ts$/, // Type declaration files
+  /^ui\//, // UI components (separate logging context)
+  /^bin\//, // CLI utilities (may use console.log for output)
+  /index\.ts$/, // Re-export files
+  /logger\.ts$/, // Logger itself
+  /hook-response\.ts$/, // Pure data structure
   /hook-constants\.ts$/, // Pure constants
-  /paths\.ts$/,          // Path utilities
-  /bun-path\.ts$/,       // Path utilities
-  /migrations\.ts$/,     // Database migrations (console.log for migration output)
+  /paths\.ts$/, // Path utilities
+  /bun-path\.ts$/, // Path utilities
+  /migrations\.ts$/, // Database migrations (console.log for migration output)
   /worker-service\.ts$/, // CLI entry point with interactive setup wizard (console.log for user prompts)
   /integrations\/.*Installer\.ts$/, // CLI installer commands (console.log for interactive installation output)
-  /SettingsDefaultsManager\.ts$/,  // Must use console.log to avoid circular dependency with logger
-  /user-message-hook\.ts$/,  // Deprecated - kept for reference only, not registered in hooks.json
-  /cli\/hook-command\.ts$/,  // CLI hook command uses console.log/error for hook protocol output
-  /cli\/handlers\/user-message\.ts$/,  // User message handler uses console.error for user-visible context
-  /services\/transcripts\/cli\.ts$/,  // CLI transcript subcommands use console.log for user-visible interactive output
+  /SettingsDefaultsManager\.ts$/, // Must use console.log to avoid circular dependency with logger
+  /user-message-hook\.ts$/, // Deprecated - kept for reference only, not registered in hooks.json
+  /cli\/hook-command\.ts$/, // CLI hook command uses console.log/error for hook protocol output
+  /cli\/handlers\/user-message\.ts$/, // User message handler uses console.error for user-visible context
+  /services\/transcripts\/cli\.ts$/ // CLI transcript subcommands use console.log for user-visible interactive output
 ];
 
 const HIGH_PRIORITY_PATTERNS = [
-  /^services\/worker\/(?!.*types\.ts$)/,  // Worker services (not type files)
-  /^services\/sqlite\/(?!types\.ts$|index\.ts$)/,  // SQLite services
+  /^services\/worker\/(?!.*types\.ts$)/, // Worker services (not type files)
+  /^services\/sqlite\/(?!types\.ts$|index\.ts$)/, // SQLite services
   /^services\/sync\//,
   /^services\/context-generator\.ts$/,
-  /^hooks\/(?!hook-response\.ts$)/,  // All src/hooks/* except hook-response.ts (NOT ui/hooks)
-  /^sdk\/(?!.*types?\.ts$)/,  // SDK files (not type files)
-  /^servers\/(?!.*types?\.ts$)/,  // Server files (not type files)
+  /^hooks\/(?!hook-response\.ts$)/, // All src/hooks/* except hook-response.ts (NOT ui/hooks)
+  /^sdk\/(?!.*types?\.ts$)/, // SDK files (not type files)
+  /^servers\/(?!.*types?\.ts$)/ // Server files (not type files)
 ];
 
 const isUIFile = (path: string) => /^ui\//.test(path);
@@ -69,7 +69,7 @@ async function findTypeScriptFiles(dir: string): Promise<string[]> {
 
 function shouldExclude(filePath: string): boolean {
   const relativePath = relative(SRC_DIR, filePath);
-  return EXCLUDED_PATTERNS.some(pattern => pattern.test(relativePath));
+  return EXCLUDED_PATTERNS.some((pattern) => pattern.test(relativePath));
 }
 
 function isHighPriority(filePath: string): boolean {
@@ -79,7 +79,7 @@ function isHighPriority(filePath: string): boolean {
     return false;
   }
 
-  return HIGH_PRIORITY_PATTERNS.some(pattern => pattern.test(relativePath));
+  return HIGH_PRIORITY_PATTERNS.some((pattern) => pattern.test(relativePath));
 }
 
 function analyzeFile(filePath: string): FileAnalysis {
@@ -96,7 +96,9 @@ function analyzeFile(filePath: string): FileAnalysis {
     }
   });
 
-  const loggerCallMatches = content.match(/logger\.(debug|info|warn|error|success|failure|timing|dataIn|dataOut|happyPathError)\(/g);
+  const loggerCallMatches = content.match(
+    /logger\.(debug|info|warn|error|success|failure|timing|dataIn|dataOut|happyPathError)\(/g
+  );
   const loggerCallCount = loggerCallMatches ? loggerCallMatches.length : 0;
 
   return {
@@ -106,7 +108,7 @@ function analyzeFile(filePath: string): FileAnalysis {
     usesConsoleLog: consoleLogLines.length > 0,
     consoleLogLines,
     loggerCallCount,
-    isHighPriority: isHighPriority(filePath),
+    isHighPriority: isHighPriority(filePath)
   };
 }
 
@@ -117,51 +119,47 @@ describe("Logger Usage Standards", () => {
   it("should scan all TypeScript files in src/", async () => {
     const files = await findTypeScriptFiles(SRC_DIR);
     allFiles = files.map(analyzeFile);
-    relevantFiles = allFiles.filter(f => !shouldExclude(f.path));
+    relevantFiles = allFiles.filter((f) => !shouldExclude(f.path));
 
     expect(allFiles.length).toBeGreaterThan(0);
     expect(relevantFiles.length).toBeGreaterThan(0);
   });
 
   it("should NOT use console.log/console.error (these logs are invisible in background services)", () => {
-    const filesWithConsole = relevantFiles.filter(f => {
+    const filesWithConsole = relevantFiles.filter((f) => {
       const isHookFile = /^src\/hooks\//.test(f.relativePath);
       return f.usesConsoleLog && !isHookFile;
     });
 
     if (filesWithConsole.length > 0) {
-      const report = filesWithConsole
-        .map(f => `  ${f.relativePath}:${f.consoleLogLines.join(",")}`)
-        .join("\n");
+      const report = filesWithConsole.map((f) => `  ${f.relativePath}:${f.consoleLogLines.join(",")}`).join("\n");
 
       throw new Error(
         `❌ CRITICAL: Found console.log/console.error in ${filesWithConsole.length} background service file(s):\n${report}\n\n` +
-        `These logs are INVISIBLE - they run in background processes where console output goes nowhere.\n` +
-        `Replace with logger.debug/info/warn/error calls immediately.\n\n` +
-        `Only hook files (src/hooks/*) should use console.log for their output response.`
+          `These logs are INVISIBLE - they run in background processes where console output goes nowhere.\n` +
+          `Replace with logger.debug/info/warn/error calls immediately.\n\n` +
+          `Only hook files (src/hooks/*) should use console.log for their output response.`
       );
     }
   });
 
   it("should have logger coverage in high-priority files", () => {
-    const highPriorityFiles = relevantFiles.filter(f => f.isHighPriority);
-    const withoutLogger = highPriorityFiles.filter(f => !f.hasLoggerImport);
+    const highPriorityFiles = relevantFiles.filter((f) => f.isHighPriority);
+    const withoutLogger = highPriorityFiles.filter((f) => !f.hasLoggerImport);
 
     if (withoutLogger.length > 0) {
-      const report = withoutLogger
-        .map(f => `  ${f.relativePath}`)
-        .join("\n");
+      const report = withoutLogger.map((f) => `  ${f.relativePath}`).join("\n");
 
       throw new Error(
         `High-priority files missing logger import (${withoutLogger.length}):\n${report}\n\n` +
-        `These files should import and use logger for debugging and observability.`
+          `These files should import and use logger for debugging and observability.`
       );
     }
   });
 
   it("should report logger coverage statistics", () => {
-    const withLogger = relevantFiles.filter(f => f.hasLoggerImport);
-    const withoutLogger = relevantFiles.filter(f => !f.hasLoggerImport);
+    const withLogger = relevantFiles.filter((f) => f.hasLoggerImport);
+    const withoutLogger = relevantFiles.filter((f) => !f.hasLoggerImport);
     const totalCalls = relevantFiles.reduce((sum, f) => sum + f.loggerCallCount, 0);
 
     const coverage = ((withLogger.length / relevantFiles.length) * 100).toFixed(1);
@@ -175,7 +173,7 @@ describe("Logger Usage Standards", () => {
 
     if (withoutLogger.length > 0) {
       console.log("\n📝 Files without logger:");
-      withoutLogger.forEach(f => {
+      withoutLogger.forEach((f) => {
         const priority = f.isHighPriority ? "🔴 HIGH" : "  ";
         console.log(`  ${priority} ${f.relativePath}`);
       });

@@ -13,7 +13,6 @@ import { shouldTrackAnalyticsEvent } from '@codebuff/common/util/analytics-sampl
 
 import type { AnalyticsEvent } from '@codebuff/common/constants/analytics-events'
 
-
 // Re-export types from core for backwards compatibility
 export type { AnalyticsClientWithIdentify as AnalyticsClient } from '@codebuff/common/analytics-core'
 
@@ -74,9 +73,9 @@ function resolveDeps(): ResolvedAnalyticsDeps {
   }
 }
 
-let loggerModulePromise:
-  | Promise<{ logger: { debug: (data: any, msg?: string, ...args: any[]) => void } }>
-  | null = null
+let loggerModulePromise: Promise<{
+  logger: { debug: (data: any, msg?: string, ...args: any[]) => void }
+}> | null = null
 
 const loadLogger = () => {
   if (!loggerModulePromise) {

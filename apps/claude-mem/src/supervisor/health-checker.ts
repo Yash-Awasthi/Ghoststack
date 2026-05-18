@@ -1,6 +1,5 @@
-
-import { logger } from '../utils/logger.js';
-import { getProcessRegistry } from './process-registry.js';
+import { logger } from "../utils/logger.js";
+import { getProcessRegistry } from "./process-registry.js";
 
 const HEALTH_CHECK_INTERVAL_MS = 30_000;
 
@@ -11,7 +10,7 @@ function runHealthCheck(): void {
 
   const removedProcessCount = registry.pruneDeadEntries();
   if (removedProcessCount > 0) {
-    logger.info('SYSTEM', `Health check: pruned ${removedProcessCount} dead process(es) from registry`);
+    logger.info("SYSTEM", `Health check: pruned ${removedProcessCount} dead process(es) from registry`);
   }
 }
 
@@ -21,7 +20,7 @@ export function startHealthChecker(): void {
   healthCheckInterval = setInterval(runHealthCheck, HEALTH_CHECK_INTERVAL_MS);
   healthCheckInterval.unref();
 
-  logger.debug('SYSTEM', 'Health checker started', { intervalMs: HEALTH_CHECK_INTERVAL_MS });
+  logger.debug("SYSTEM", "Health checker started", { intervalMs: HEALTH_CHECK_INTERVAL_MS });
 }
 
 export function stopHealthChecker(): void {
@@ -30,5 +29,5 @@ export function stopHealthChecker(): void {
   clearInterval(healthCheckInterval);
   healthCheckInterval = null;
 
-  logger.debug('SYSTEM', 'Health checker stopped');
+  logger.debug("SYSTEM", "Health checker stopped");
 }

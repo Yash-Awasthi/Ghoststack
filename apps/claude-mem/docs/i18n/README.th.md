@@ -179,7 +179,8 @@
 Claude-Mem ให้บริการการค้นหาอัจฉริยะผ่านทักษะ mem-search ที่เรียกใช้อัตโนมัติเมื่อคุณถามเกี่ยวกับงานที่ผ่านมา:
 
 **วิธีการทำงาน:**
-- เพียงถามตามธรรมชาติ: *"เราทำอะไรในเซสชันที่แล้ว?"* หรือ *"เราแก้บั๊กนี้ไปแล้วหรือยัง?"*
+
+- เพียงถามตามธรรมชาติ: _"เราทำอะไรในเซสชันที่แล้ว?"_ หรือ _"เราแก้บั๊กนี้ไปแล้วหรือยัง?"_
 - Claude เรียกใช้ทักษะ mem-search โดยอัตโนมัติเพื่อค้นหาบริบทที่เกี่ยวข้อง
 
 **การดำเนินการค้นหาที่มี:**
@@ -285,7 +286,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## การสนับสนุน
 

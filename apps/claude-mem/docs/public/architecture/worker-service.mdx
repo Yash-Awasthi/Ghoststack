@@ -24,6 +24,7 @@ The worker service exposes 22 HTTP endpoints organized into six categories:
 ### Viewer & Health Endpoints
 
 #### 1. Viewer UI
+
 ```
 GET /
 ```
@@ -33,6 +34,7 @@ GET /
 **Response**: HTML page with embedded React application
 
 **Features**:
+
 - Real-time memory stream visualization
 - Infinite scroll pagination
 - Project filtering
@@ -40,6 +42,7 @@ GET /
 - Theme toggle (light/dark mode) as of v5.1.2
 
 #### 2. Health Check
+
 ```
 GET /health
 ```
@@ -47,6 +50,7 @@ GET /health
 **Purpose**: Worker health status check
 
 **Response**:
+
 ```json
 {
   "status": "ok",
@@ -58,6 +62,7 @@ GET /health
 The `port` value is the actual worker port for the current user — per-user default `37700 + (uid % 100)`, or whatever `CLAUDE_MEM_WORKER_PORT` is set to. The example above is illustrative; your value will differ.
 
 #### 3. Server-Sent Events Stream
+
 ```
 GET /stream
 ```
@@ -65,11 +70,13 @@ GET /stream
 **Purpose**: Real-time updates for viewer UI
 
 **Response**: SSE stream with events:
+
 - `observation-created`: New observation added
 - `session-summary-created`: New summary generated
 - `user-prompt-created`: New prompt recorded
 
 **Event Format**:
+
 ```
 event: observation-created
 data: {"id": 123, "title": "...", ...}
@@ -78,6 +85,7 @@ data: {"id": 123, "title": "...", ...}
 ### Data Retrieval Endpoints
 
 #### 4. Get Prompts
+
 ```
 GET /api/prompts?project=my-project&limit=20&offset=0
 ```
@@ -85,26 +93,31 @@ GET /api/prompts?project=my-project&limit=20&offset=0
 **Purpose**: Retrieve paginated user prompts
 
 **Query Parameters**:
+
 - `project` (optional): Filter by project name
 - `limit` (default: 20): Number of results
 - `offset` (default: 0): Pagination offset
 
 **Response**:
+
 ```json
 {
-  "prompts": [{
-    "id": 1,
-    "session_id": "abc123",
-    "prompt": "User's prompt text",
-    "prompt_number": 1,
-    "created_at": "2025-11-06T10:30:00Z"
-  }],
+  "prompts": [
+    {
+      "id": 1,
+      "session_id": "abc123",
+      "prompt": "User's prompt text",
+      "prompt_number": 1,
+      "created_at": "2025-11-06T10:30:00Z"
+    }
+  ],
   "total": 150,
   "hasMore": true
 }
 ```
 
 #### 5. Get Observations
+
 ```
 GET /api/observations?project=my-project&limit=20&offset=0
 ```
@@ -112,26 +125,31 @@ GET /api/observations?project=my-project&limit=20&offset=0
 **Purpose**: Retrieve paginated observations
 
 **Query Parameters**:
+
 - `project` (optional): Filter by project name
 - `limit` (default: 20): Number of results
 - `offset` (default: 0): Pagination offset
 
 **Response**:
+
 ```json
 {
-  "observations": [{
-    "id": 123,
-    "title": "Fix authentication bug",
-    "type": "bugfix",
-    "narrative": "...",
-    "created_at": "2025-11-06T10:30:00Z"
-  }],
+  "observations": [
+    {
+      "id": 123,
+      "title": "Fix authentication bug",
+      "type": "bugfix",
+      "narrative": "...",
+      "created_at": "2025-11-06T10:30:00Z"
+    }
+  ],
   "total": 500,
   "hasMore": true
 }
 ```
 
 #### 6. Get Summaries
+
 ```
 GET /api/summaries?project=my-project&limit=20&offset=0
 ```
@@ -139,26 +157,31 @@ GET /api/summaries?project=my-project&limit=20&offset=0
 **Purpose**: Retrieve paginated session summaries
 
 **Query Parameters**:
+
 - `project` (optional): Filter by project name
 - `limit` (default: 20): Number of results
 - `offset` (default: 0): Pagination offset
 
 **Response**:
+
 ```json
 {
-  "summaries": [{
-    "id": 456,
-    "session_id": "abc123",
-    "request": "User's original request",
-    "completed": "Work finished",
-    "created_at": "2025-11-06T10:30:00Z"
-  }],
+  "summaries": [
+    {
+      "id": 456,
+      "session_id": "abc123",
+      "request": "User's original request",
+      "completed": "Work finished",
+      "created_at": "2025-11-06T10:30:00Z"
+    }
+  ],
   "total": 100,
   "hasMore": true
 }
 ```
 
 #### 7. Get Observation by ID
+
 ```
 GET /api/observation/:id
 ```
@@ -166,9 +189,11 @@ GET /api/observation/:id
 **Purpose**: Retrieve a single observation by its ID
 
 **Path Parameters**:
+
 - `id` (required): Observation ID
 
 **Response**:
+
 ```json
 {
   "id": 123,
@@ -183,6 +208,7 @@ GET /api/observation/:id
 ```
 
 **Error Response** (404):
+
 ```json
 {
   "error": "Observation #123 not found"
@@ -190,6 +216,7 @@ GET /api/observation/:id
 ```
 
 #### 8. Get Observations by IDs (Batch)
+
 ```
 POST /api/observations/batch
 ```
@@ -197,6 +224,7 @@ POST /api/observations/batch
 **Purpose**: Retrieve multiple observations by their IDs in a single request
 
 **Request Body**:
+
 ```json
 {
   "ids": [123, 456, 789],
@@ -207,12 +235,14 @@ POST /api/observations/batch
 ```
 
 **Body Parameters**:
+
 - `ids` (required): Array of observation IDs
 - `orderBy` (optional): Sort order - `date_desc` or `date_asc` (default: `date_desc`)
 - `limit` (optional): Maximum number of results to return
 - `project` (optional): Filter by project name
 
 **Response**:
+
 ```json
 [
   {
@@ -239,12 +269,14 @@ POST /api/observations/batch
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: `{"error": "ids must be an array of numbers"}`
 - `400 Bad Request`: `{"error": "All ids must be integers"}`
 
 **Use Case**: This endpoint is used by the `get_observations` MCP tool to efficiently retrieve multiple observations in a single request, avoiding the overhead of multiple individual requests.
 
 #### 9. Get Session by ID
+
 ```
 GET /api/session/:id
 ```
@@ -252,9 +284,11 @@ GET /api/session/:id
 **Purpose**: Retrieve a single session by its ID
 
 **Path Parameters**:
+
 - `id` (required): Session ID
 
 **Response**:
+
 ```json
 {
   "id": 456,
@@ -267,6 +301,7 @@ GET /api/session/:id
 ```
 
 **Error Response** (404):
+
 ```json
 {
   "error": "Session #456 not found"
@@ -274,6 +309,7 @@ GET /api/session/:id
 ```
 
 #### 10. Get Prompt by ID
+
 ```
 GET /api/prompt/:id
 ```
@@ -281,9 +317,11 @@ GET /api/prompt/:id
 **Purpose**: Retrieve a single user prompt by its ID
 
 **Path Parameters**:
+
 - `id` (required): Prompt ID
 
 **Response**:
+
 ```json
 {
   "id": 1,
@@ -295,6 +333,7 @@ GET /api/prompt/:id
 ```
 
 **Error Response** (404):
+
 ```json
 {
   "error": "Prompt #1 not found"
@@ -302,6 +341,7 @@ GET /api/prompt/:id
 ```
 
 #### 12. Get Stats
+
 ```
 GET /api/stats
 ```
@@ -309,6 +349,7 @@ GET /api/stats
 **Purpose**: Get database statistics by project
 
 **Response**:
+
 ```json
 {
   "byProject": {
@@ -333,6 +374,7 @@ GET /api/stats
 ```
 
 #### 13. Get Projects
+
 ```
 GET /api/projects
 ```
@@ -340,6 +382,7 @@ GET /api/projects
 **Purpose**: Get list of distinct projects from observations
 
 **Response**:
+
 ```json
 {
   "projects": ["my-project", "other-project", "test-project"]
@@ -349,6 +392,7 @@ GET /api/projects
 ### Settings Endpoints
 
 #### 14. Get Settings
+
 ```
 GET /api/settings
 ```
@@ -356,6 +400,7 @@ GET /api/settings
 **Purpose**: Retrieve user settings
 
 **Response**:
+
 ```json
 {
   "sidebarOpen": true,
@@ -365,6 +410,7 @@ GET /api/settings
 ```
 
 #### 15. Save Settings
+
 ```
 POST /api/settings
 ```
@@ -372,6 +418,7 @@ POST /api/settings
 **Purpose**: Persist user settings
 
 **Request Body**:
+
 ```json
 {
   "sidebarOpen": false,
@@ -381,6 +428,7 @@ POST /api/settings
 ```
 
 **Response**:
+
 ```json
 {
   "success": true
@@ -390,6 +438,7 @@ POST /api/settings
 ### Queue Management Endpoints
 
 #### 16. Get Pending Queue Status
+
 ```
 GET /api/pending-queue
 ```
@@ -397,6 +446,7 @@ GET /api/pending-queue
 **Purpose**: View current processing queue status and identify stuck messages
 
 **Response**:
+
 ```json
 {
   "queue": {
@@ -431,6 +481,7 @@ GET /api/pending-queue
 ```
 
 **Status Definitions**:
+
 - `pending`: Message queued, not yet processed
 - `processing`: Message currently being processed by SDK agent
 - `processed`: Message completed successfully
@@ -441,6 +492,7 @@ GET /api/pending-queue
 **Use Case**: Check queue health after worker crashes or restarts to identify unprocessed observations
 
 #### 17. Trigger Manual Recovery
+
 ```
 POST /api/pending-queue/process
 ```
@@ -448,6 +500,7 @@ POST /api/pending-queue/process
 **Purpose**: Manually trigger processing of pending queues (replaces automatic recovery in v5.x+)
 
 **Request Body**:
+
 ```json
 {
   "sessionLimit": 10
@@ -455,9 +508,11 @@ POST /api/pending-queue/process
 ```
 
 **Body Parameters**:
+
 - `sessionLimit` (optional): Maximum number of sessions to process (default: 10, max: 100)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -469,12 +524,14 @@ POST /api/pending-queue/process
 ```
 
 **Response Fields**:
+
 - `totalPendingSessions`: Total sessions with pending messages in database
 - `sessionsStarted`: Number of sessions we started processing this request
 - `sessionsSkipped`: Sessions already actively processing (not restarted)
 - `startedSessionIds`: Database IDs of sessions started
 
 **Behavior**:
+
 - Processes up to `sessionLimit` sessions with pending work
 - Skips sessions already actively processing (prevents duplicate agents)
 - Starts non-blocking SDK agents for each session
@@ -487,11 +544,13 @@ POST /api/pending-queue/process
 ### Session Management Endpoints
 
 #### 19. Initialize Session
+
 ```
 POST /sessions/:sessionDbId/init
 ```
 
 **Request Body**:
+
 ```json
 {
   "sdk_session_id": "abc-123",
@@ -500,6 +559,7 @@ POST /sessions/:sessionDbId/init
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -508,11 +568,13 @@ POST /sessions/:sessionDbId/init
 ```
 
 #### 20. Add Observation
+
 ```
 POST /sessions/:sessionDbId/observations
 ```
 
 **Request Body**:
+
 ```json
 {
   "tool_name": "Read",
@@ -523,6 +585,7 @@ POST /sessions/:sessionDbId/observations
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -531,11 +594,13 @@ POST /sessions/:sessionDbId/observations
 ```
 
 #### 21. Generate Summary
+
 ```
 POST /sessions/:sessionDbId/summarize
 ```
 
 **Request Body**:
+
 ```json
 {
   "trigger": "stop"
@@ -543,6 +608,7 @@ POST /sessions/:sessionDbId/summarize
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -551,11 +617,13 @@ POST /sessions/:sessionDbId/summarize
 ```
 
 #### 22. Session Status
+
 ```
 GET /sessions/:sessionDbId/status
 ```
 
 **Response**:
+
 ```json
 {
   "session_id": "abc-123",
@@ -566,11 +634,13 @@ GET /sessions/:sessionDbId/status
 ```
 
 #### 23. Delete Session
+
 ```
 DELETE /sessions/:sessionDbId
 ```
 
 **Response**:
+
 ```json
 {
   "success": true
@@ -584,6 +654,7 @@ DELETE /sessions/:sessionDbId
 ### Overview
 
 The worker is managed by the native `ProcessManager` class which handles:
+
 - Process spawning with Bun runtime
 - PID file tracking at `~/.claude-mem/worker.pid`
 - Health checks with automatic retry
@@ -620,6 +691,7 @@ Bun is required to run the worker service. If Bun is not installed, `npx claude-
 - **macOS/Linux**: `curl -fsSL https://bun.sh/install | bash`
 
 You can also install manually via:
+
 - `winget install Oven-sh.Bun` (Windows)
 - `brew install oven-sh/bun/bun` (macOS)
 
@@ -649,6 +721,7 @@ export CLAUDE_MEM_MODEL=claude-haiku-4-5-20251001
 ```
 
 Allowed values:
+
 - `claude-haiku-4-5-20251001` - default, fast and cheap (best for compression)
 - `claude-sonnet-4-6` - balanced quality and cost
 - `claude-opus-4-7` - highest quality, most expensive

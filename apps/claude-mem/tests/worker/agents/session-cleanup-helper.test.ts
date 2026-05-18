@@ -1,19 +1,17 @@
-import { describe, it, expect, mock } from 'bun:test';
+import { describe, it, expect, mock } from "bun:test";
 
-import { cleanupProcessedMessages } from '../../../src/services/worker/agents/SessionCleanupHelper.js';
-import type { WorkerRef } from '../../../src/services/worker/agents/types.js';
-import type { ActiveSession } from '../../../src/services/worker-types.js';
+import { cleanupProcessedMessages } from "../../../src/services/worker/agents/SessionCleanupHelper.js";
+import type { WorkerRef } from "../../../src/services/worker/agents/types.js";
+import type { ActiveSession } from "../../../src/services/worker-types.js";
 
-describe('SessionCleanupHelper', () => {
-  function createMockSession(
-    overrides: Partial<ActiveSession> = {}
-  ): ActiveSession {
+describe("SessionCleanupHelper", () => {
+  function createMockSession(overrides: Partial<ActiveSession> = {}): ActiveSession {
     return {
       sessionDbId: 1,
-      contentSessionId: 'content-session-123',
-      memorySessionId: 'memory-session-456',
-      project: 'test-project',
-      userPrompt: 'Test prompt',
+      contentSessionId: "content-session-123",
+      memorySessionId: "memory-session-456",
+      project: "test-project",
+      userPrompt: "Test prompt",
       pendingMessages: [],
       abortController: new AbortController(),
       generatorPromise: null,
@@ -24,8 +22,8 @@ describe('SessionCleanupHelper', () => {
       earliestPendingTimestamp: Date.now() - 10000, // 10 seconds ago
       claimedMessageIds: [],
       conversationHistory: [],
-      currentProvider: 'claude',
-      ...overrides,
+      currentProvider: "claude",
+      ...overrides
     };
   }
 
@@ -33,17 +31,17 @@ describe('SessionCleanupHelper', () => {
     const broadcastProcessingStatusMock = mock(() => {});
     const worker: WorkerRef = {
       sseBroadcaster: {
-        broadcast: mock(() => {}),
+        broadcast: mock(() => {})
       },
-      broadcastProcessingStatus: broadcastProcessingStatusMock,
+      broadcastProcessingStatus: broadcastProcessingStatusMock
     };
     return { worker, broadcastProcessingStatusMock };
   }
 
-  describe('cleanupProcessedMessages', () => {
-    it('should reset session.earliestPendingTimestamp to null', () => {
+  describe("cleanupProcessedMessages", () => {
+    it("should reset session.earliestPendingTimestamp to null", () => {
       const session = createMockSession({
-        earliestPendingTimestamp: 1700000000000,
+        earliestPendingTimestamp: 1700000000000
       });
       const { worker } = createMockWorker();
 
@@ -54,9 +52,9 @@ describe('SessionCleanupHelper', () => {
       expect(session.earliestPendingTimestamp).toBeNull();
     });
 
-    it('should reset earliestPendingTimestamp even when already null', () => {
+    it("should reset earliestPendingTimestamp even when already null", () => {
       const session = createMockSession({
-        earliestPendingTimestamp: null,
+        earliestPendingTimestamp: null
       });
       const { worker } = createMockWorker();
 
@@ -65,7 +63,7 @@ describe('SessionCleanupHelper', () => {
       expect(session.earliestPendingTimestamp).toBeNull();
     });
 
-    it('should call worker.broadcastProcessingStatus() if available', () => {
+    it("should call worker.broadcastProcessingStatus() if available", () => {
       const session = createMockSession();
       const { worker, broadcastProcessingStatusMock } = createMockWorker();
 
@@ -74,9 +72,9 @@ describe('SessionCleanupHelper', () => {
       expect(broadcastProcessingStatusMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle missing worker gracefully (no crash)', () => {
+    it("should handle missing worker gracefully (no crash)", () => {
       const session = createMockSession({
-        earliestPendingTimestamp: 1700000000000,
+        earliestPendingTimestamp: 1700000000000
       });
 
       expect(() => {
@@ -86,14 +84,14 @@ describe('SessionCleanupHelper', () => {
       expect(session.earliestPendingTimestamp).toBeNull();
     });
 
-    it('should handle worker without broadcastProcessingStatus', () => {
+    it("should handle worker without broadcastProcessingStatus", () => {
       const session = createMockSession({
-        earliestPendingTimestamp: 1700000000000,
+        earliestPendingTimestamp: 1700000000000
       });
       const worker: WorkerRef = {
         sseBroadcaster: {
-          broadcast: mock(() => {}),
-        },
+          broadcast: mock(() => {})
+        }
         // No broadcastProcessingStatus
       };
 
@@ -104,9 +102,9 @@ describe('SessionCleanupHelper', () => {
       expect(session.earliestPendingTimestamp).toBeNull();
     });
 
-    it('should handle empty worker object', () => {
+    it("should handle empty worker object", () => {
       const session = createMockSession({
-        earliestPendingTimestamp: 1700000000000,
+        earliestPendingTimestamp: 1700000000000
       });
       const worker: WorkerRef = {};
 
@@ -117,12 +115,12 @@ describe('SessionCleanupHelper', () => {
       expect(session.earliestPendingTimestamp).toBeNull();
     });
 
-    it('should handle worker with null broadcastProcessingStatus', () => {
+    it("should handle worker with null broadcastProcessingStatus", () => {
       const session = createMockSession({
-        earliestPendingTimestamp: 1700000000000,
+        earliestPendingTimestamp: 1700000000000
       });
       const worker: WorkerRef = {
-        broadcastProcessingStatus: undefined,
+        broadcastProcessingStatus: undefined
       };
 
       expect(() => {
@@ -132,13 +130,13 @@ describe('SessionCleanupHelper', () => {
       expect(session.earliestPendingTimestamp).toBeNull();
     });
 
-    it('should not modify other session properties', () => {
+    it("should not modify other session properties", () => {
       const session = createMockSession({
         earliestPendingTimestamp: 1700000000000,
         lastPromptNumber: 10,
         cumulativeInputTokens: 500,
         cumulativeOutputTokens: 250,
-        project: 'my-project',
+        project: "my-project"
       });
       const { worker } = createMockWorker();
 
@@ -148,7 +146,7 @@ describe('SessionCleanupHelper', () => {
       expect(session.lastPromptNumber).toBe(10);
       expect(session.cumulativeInputTokens).toBe(500);
       expect(session.cumulativeOutputTokens).toBe(250);
-      expect(session.project).toBe('my-project');
+      expect(session.project).toBe("my-project");
     });
   });
 });

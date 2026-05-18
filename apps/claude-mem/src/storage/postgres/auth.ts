@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsonObject, PostgresQueryable } from './utils.js';
-import { assertProjectOwnership, newId, queryOne, toDate, toEpoch, toJsonArray, toJsonObject } from './utils.js';
+import type { JsonObject, PostgresQueryable } from "./utils.js";
+import { assertProjectOwnership, newId, queryOne, toDate, toEpoch, toJsonArray, toJsonObject } from "./utils.js";
 
 export interface PostgresApiKey {
   id: string;
@@ -132,7 +132,7 @@ export class PostgresAuthRepository {
   }
 
   async getApiKeyByHash(keyHash: string): Promise<PostgresApiKey | null> {
-    const row = await queryOne<ApiKeyRow>(this.client, 'SELECT * FROM api_keys WHERE key_hash = $1', [keyHash]);
+    const row = await queryOne<ApiKeyRow>(this.client, "SELECT * FROM api_keys WHERE key_hash = $1", [keyHash]);
     return row ? mapApiKeyRow(row) : null;
   }
 }

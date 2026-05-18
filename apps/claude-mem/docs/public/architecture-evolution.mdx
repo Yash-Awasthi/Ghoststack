@@ -24,12 +24,14 @@ After establishing the solid v4 architecture, v5.x focused on user experience, v
 **What Changed**: Added light/dark mode theme toggle to viewer UI
 
 **New Features**:
+
 - User-selectable theme preference (light, dark, system)
 - Persistent theme settings in localStorage
 - Smooth theme transitions
 - System preference detection
 
 **Implementation**:
+
 ```typescript
 // Theme context with persistence
 const ThemeProvider = ({ children }) => {
@@ -68,6 +70,7 @@ const ThemeProvider = ({ children }) => {
 **The Breakthrough**: Real-time visualization of memory stream
 
 **What We Built**:
+
 - React-based web UI at http://localhost:37777
 - Server-Sent Events (SSE) for real-time updates
 - Infinite scroll pagination
@@ -77,6 +80,7 @@ const ThemeProvider = ({ children }) => {
 - GPU-accelerated animations
 
 **New Worker Endpoints** (8 additions):
+
 ```
 GET /                    # Serves viewer HTML
 GET /stream              # SSE real-time updates
@@ -89,6 +93,7 @@ POST /api/settings       # Save settings
 ```
 
 **Database Enhancements**:
+
 ```typescript
 // New SessionStore methods for viewer
 getRecentPrompts(limit, offset, project?)
@@ -99,6 +104,7 @@ getUniqueProjects()
 ```
 
 **React Architecture**:
+
 ```
 src/ui/viewer/
 ├── components/
@@ -121,14 +127,15 @@ src/ui/viewer/
 ```
 
 **Build Process**:
+
 ```typescript
 // esbuild bundles everything into single HTML file
 esbuild.build({
-  entryPoints: ['src/ui/viewer/index.tsx'],
+  entryPoints: ["src/ui/viewer/index.tsx"],
   bundle: true,
-  outfile: 'plugin/ui/viewer.html',
-  loader: { '.tsx': 'tsx', '.woff2': 'dataurl' },
-  define: { 'process.env.NODE_ENV': '"production"' },
+  outfile: "plugin/ui/viewer.html",
+  loader: { ".tsx": "tsx", ".woff2": "dataurl" },
+  define: { "process.env.NODE_ENV": '"production"' }
 });
 ```
 
@@ -141,24 +148,27 @@ esbuild.build({
 **The Insight**: Dependencies rarely change between sessions
 
 **The Solution**: Version-based caching
+
 ```typescript
 // Check version marker before installing
 const currentVersion = getPackageVersion();
-const installedVersion = readFileSync('.install-version', 'utf-8');
+const installedVersion = readFileSync(".install-version", "utf-8");
 
 if (currentVersion !== installedVersion) {
   // Only install if version changed
   await runNpmInstall();
-  writeFileSync('.install-version', currentVersion);
+  writeFileSync(".install-version", currentVersion);
 }
 ```
 
 **Cached Check Logic**:
+
 1. Does `node_modules` exist?
 2. Does `.install-version` match `package.json` version?
 3. Is `better-sqlite3` present? (Legacy: now uses bun:sqlite which requires no installation)
 
 **Impact**:
+
 - SessionStart hook: 2-5 seconds → 10ms (99.5% faster)
 - Only installs on: first run, version change, missing deps
 - Better Windows error messages with build tool help
@@ -168,14 +178,15 @@ if (currentVersion !== installedVersion) {
 **What Changed**: More robust worker startup and monitoring
 
 **New Features**:
+
 ```typescript
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
-    status: 'ok',
+    status: "ok",
     uptime: process.uptime(),
     port: WORKER_PORT,
-    memory: process.memoryUsage(),
+    memory: process.memoryUsage()
   });
 });
 
@@ -190,6 +201,7 @@ async function ensureWorkerHealthy() {
 ```
 
 **Benefits**:
+
 - Graceful degradation when worker is down
 - Auto-recovery from crashes
 - Better error messages for debugging
@@ -199,6 +211,7 @@ async function ensureWorkerHealthy() {
 **What Changed**: Various bug fixes and stability enhancements
 
 **Key Fixes**:
+
 - Fixed race conditions in observation queue processing
 - Improved error handling in SDK worker
 - Better cleanup of stale worker processes
@@ -209,6 +222,7 @@ async function ensureWorkerHealthy() {
 **The Evolution**: SQLite FTS5 + Chroma vector search
 
 **What We Added**:
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    HYBRID SEARCH                         │
@@ -222,26 +236,30 @@ async function ensureWorkerHealthy() {
 ```
 
 **New Dependencies**:
+
 - `chromadb` - Vector database for semantic search
 - Python 3.8+ - Required by chromadb
 
 **MCP Tools Enhancement**:
+
 ```typescript
 // Chroma-backed semantic search
 search_observations({
   query: "authentication bug",
-  useSemanticSearch: true  // Uses Chroma
+  useSemanticSearch: true // Uses Chroma
 });
 
 // Falls back to FTS5 if Chroma unavailable
 ```
 
 **Why Hybrid**:
+
 - FTS5: Fast keyword matching, no dependencies
 - Chroma: Semantic understanding, finds related concepts
 - Graceful degradation: Works without Chroma (FTS5 only)
 
 **Trade-offs**:
+
 - Added Python dependency (optional)
 - Increased installation complexity
 - Better search relevance
@@ -253,6 +271,7 @@ search_observations({
 ### The Problem: Complex MCP Implementation
 
 **Before:**
+
 ```
 9+ MCP tools registered at session start:
 - search_observations
@@ -278,6 +297,7 @@ Problems:
 ### The Solution: 3-Layer Workflow
 
 **After:**
+
 ```
 4 MCP tools following 3-layer workflow:
 
@@ -304,12 +324,14 @@ Benefits:
 ### Migration: Skill-Based Search Removed
 
 **Previously:** Used skill-based search
+
 - mem-search skill invoked via natural language
 - HTTP API called directly via curl
 - Progressive disclosure through skill loading
 - 17 skill documentation files
 
 **Now:** Removed skill-based approach
+
 - MCP-only architecture
 - Native MCP protocol (better Claude integration)
 - Works with both Claude Desktop and Claude Code
@@ -321,6 +343,7 @@ Benefits:
 **MCP Server Refactor:**
 
 Before:
+
 ```typescript
 // Complex parameter schemas
 {
@@ -339,6 +362,7 @@ Before:
 ```
 
 After:
+
 ```typescript
 // Simple schemas with workflow guidance
 {
@@ -357,13 +381,15 @@ After:
 Before: Claude had to remember progressive disclosure pattern
 
 After: Tool structure makes it impossible to skip steps
+
 - Can't get details without IDs from search
-- Can't search without seeing __IMPORTANT reminder
+- Can't search without seeing \_\_IMPORTANT reminder
 - Timeline provides middle ground (context without full details)
 
 ### Impact
 
 **Token Efficiency:**
+
 ```
 Traditional: Fetch 20 observations upfront
 → 10,000-20,000 tokens
@@ -377,11 +403,13 @@ Traditional: Fetch 20 observations upfront
 ```
 
 **Code Simplicity:**
+
 - MCP server: 2,718 lines → 312 lines (88% reduction)
 - Removed: 19 skill files (~2,744 lines)
 - Net reduction: ~5,150 lines of code removed
 
 **User Experience:**
+
 - Same natural language interaction
 - Better token efficiency
 - Clearer architecture
@@ -398,6 +426,7 @@ The 3-layer workflow embodies progressive disclosure at the architectural level:
 3. **Layer 3 (Details)** - "Tell me everything" - Full details only when justified
 
 Each layer provides a decision point where Claude can:
+
 - Stop if irrelevant
 - Get more context if uncertain
 - Dive deep if confident
@@ -411,17 +440,20 @@ This makes it structurally difficult to waste tokens.
 ### The First Attempt: Dump Everything
 
 **Architecture:**
+
 ```
 PostToolUse Hook → Save raw tool outputs → Retrieve everything on startup
 ```
 
 **What we learned:**
+
 - ❌ Context pollution (thousands of tokens of irrelevant data)
 - ❌ No compression (raw tool outputs are verbose)
 - ❌ No search (had to scan everything linearly)
 - ✅ Proved the concept: Memory across sessions is valuable
 
 **Example of what went wrong:**
+
 ```
 SessionStart loaded:
 - 150 file read operations
@@ -440,23 +472,27 @@ SessionStart loaded:
 **New idea:** Use Claude itself to compress observations
 
 **Architecture:**
+
 ```
 PostToolUse Hook → Queue observation → SDK Worker → AI compression → Store insights
 ```
 
 **What we added:**
+
 1. **Claude Agent SDK integration** - Use AI to compress observations
 2. **Background worker** - Don't block main session
 3. **Structured observations** - Extract facts, decisions, insights
 4. **Session summaries** - Generate comprehensive summaries
 
 **What worked:**
+
 - ✅ Compression ratio: 10:1 to 100:1
 - ✅ Semantic understanding (not just keyword matching)
 - ✅ Background processing (hooks stayed fast)
 - ✅ Search became useful
 
 **What didn't work:**
+
 - ❌ Still loaded everything upfront
 - ❌ Session ID management was broken
 - ❌ Aggressive cleanup interrupted summaries
@@ -482,6 +518,7 @@ PostToolUse Hook → Queue observation → SDK Worker → AI compression → Sto
 ```
 
 **Impact:**
+
 - 87% reduction in context usage
 - 100% relevance (only fetch what's needed)
 - Agent autonomy (decides what's relevant)
@@ -491,12 +528,14 @@ PostToolUse Hook → Queue observation → SDK Worker → AI compression → Sto
 **Problem:** SDK session IDs change on every turn.
 
 **What we thought:**
+
 ```typescript
 // ❌ Wrong assumption
 UserPromptSubmit → Capture session ID once → Use forever
 ```
 
 **Reality:**
+
 ```typescript
 // ✅ Actual behavior
 Turn 1: session_abc123
@@ -505,15 +544,17 @@ Turn 3: session_ghi789
 ```
 
 **Why this matters:**
+
 - Can't resume sessions without tracking ID updates
 - Session state gets lost between turns
 - Observations get orphaned
 
 **Solution:**
+
 ```typescript
 // Capture from system init message
 for await (const msg of response) {
-  if (msg.type === 'system' && msg.subtype === 'init') {
+  if (msg.type === "system" && msg.subtype === "init") {
     sdkSessionId = msg.session_id;
     await updateSessionId(sessionId, sdkSessionId);
   }
@@ -523,42 +564,44 @@ for await (const msg of response) {
 ### Realization 3: Graceful vs Aggressive Cleanup
 
 **v3 approach:**
+
 ```typescript
 // ❌ Aggressive: Kill worker immediately
 SessionEnd → DELETE /worker/session → Worker stops
 ```
 
 **Problems:**
+
 - Summary generation interrupted mid-process
 - Pending observations lost
 - Race conditions everywhere
 
 **v4 approach:**
+
 ```typescript
 // ✅ Graceful: Let worker finish
 SessionEnd → Mark session complete → Worker finishes → Exit naturally
 ```
 
 **Benefits:**
+
 - Summaries complete successfully
 - No lost observations
 - Clean state transitions
 
 **Code:**
+
 ```typescript
 // v3: Aggressive
 async function sessionEnd(sessionId: string) {
   await fetch(`http://localhost:37777/sessions/${sessionId}`, {
-    method: 'DELETE'
+    method: "DELETE"
   });
 }
 
 // v4: Graceful
 async function sessionEnd(sessionId: string) {
-  await db.run(
-    'UPDATE sdk_sessions SET completed_at = ? WHERE id = ?',
-    [Date.now(), sessionId]
-  );
+  await db.run("UPDATE sdk_sessions SET completed_at = ? WHERE id = ?", [Date.now(), sessionId]);
 }
 ```
 
@@ -567,21 +610,25 @@ async function sessionEnd(sessionId: string) {
 **Problem:** We were creating multiple SDK sessions per Claude Code session.
 
 **What we thought:**
+
 ```
 Claude Code session → Create SDK session per observation → 100+ SDK sessions
 ```
 
 **Reality should be:**
+
 ```
 Claude Code session → ONE long-running SDK session → Streaming input
 ```
 
 **Why this matters:**
+
 - SDK maintains conversation state
 - Context accumulates naturally
 - Much more efficient
 
 **Implementation:**
+
 ```typescript
 // ✅ Streaming Input Mode
 async function* messageGenerator(): AsyncIterable<UserMessage> {
@@ -592,7 +639,7 @@ async function* messageGenerator(): AsyncIterable<UserMessage> {
   };
 
   // Then continuously yield observations
-  while (session.status === 'active') {
+  while (session.status === "active") {
     const observations = await pollQueue();
     for (const obs of observations) {
       yield {
@@ -662,6 +709,7 @@ const response = query({
     - ✅ Index format (not full details)
     - ✅ Token counts visible
     - ✅ MCP search instructions included
+
   </Tab>
 
   <Tab title="UserPromptSubmit">
@@ -677,6 +725,7 @@ const response = query({
     **Key change from v3:**
     - ✅ Stores raw prompts for search
     - ✅ Auto-starts worker service
+
   </Tab>
 
   <Tab title="PostToolUse">
@@ -691,6 +740,7 @@ const response = query({
     **Key change from v3:**
     - ✅ Just enqueues (doesn't process)
     - ✅ Worker handles all AI calls
+
   </Tab>
 
   <Tab title="Summary">
@@ -706,6 +756,7 @@ const response = query({
     **Key change from v3:**
     - ✅ Multiple summaries per session
     - ✅ Summaries are checkpoints, not endings
+
   </Tab>
 
   <Tab title="SessionEnd">
@@ -721,12 +772,14 @@ const response = query({
     - ✅ Graceful (not aggressive)
     - ✅ No DELETE requests
     - ✅ Worker finishes naturally
+
   </Tab>
 </Tabs>
 
 ### Database Schema Evolution
 
 **v3 schema:**
+
 ```sql
 -- Simple, flat structure
 CREATE TABLE observations (
@@ -738,6 +791,7 @@ CREATE TABLE observations (
 ```
 
 **v4 schema:**
+
 ```sql
 -- Rich, structured schema
 CREATE TABLE observations (
@@ -780,6 +834,7 @@ END;
 ```
 
 **What changed:**
+
 - ✅ Structured fields (title, subtitle, type)
 - ✅ FTS5 full-text search
 - ✅ Project-scoped queries
@@ -788,9 +843,10 @@ END;
 ### Worker Service Redesign
 
 **v3 worker:**
+
 ```typescript
 // Multiple short SDK sessions
-app.post('/process', async (req, res) => {
+app.post("/process", async (req, res) => {
   const response = await query({
     prompt: buildPrompt(req.body),
     options: { maxTurns: 1 }
@@ -805,16 +861,17 @@ app.post('/process', async (req, res) => {
 ```
 
 **v4 worker:**
+
 ```typescript
 // ONE long-running SDK session
 async function runWorker(sessionId: string) {
   const response = query({
-    prompt: messageGenerator(),  // AsyncIterable
+    prompt: messageGenerator(), // AsyncIterable
     options: { maxTurns: 1000 }
   });
 
   for await (const msg of response) {
-    if (msg.type === 'text') {
+    if (msg.type === "text") {
       parseObservations(msg.content);
       parseSummaries(msg.content);
     }
@@ -823,6 +880,7 @@ async function runWorker(sessionId: string) {
 ```
 
 **Benefits:**
+
 - Maintains conversation state
 - SDK handles context automatically
 - More efficient (fewer API calls)
@@ -844,11 +902,13 @@ npm WARN deprecated ...
 ```
 
 **Why it broke:**
+
 - Claude Code expects clean JSON or plain text
 - stderr/stdout from npm install mixed with hook output
 - Context didn't inject properly
 
 **Solution:**
+
 ```json
 {
   "command": "npm install --loglevel=silent && node context-hook.js"
@@ -869,10 +929,12 @@ npm WARN deprecated ...
 ```
 
 **Why it happened:**
+
 - Source files had shebang
 - esbuild added another shebang during build
 
 **Solution:**
+
 ```typescript
 // Remove shebangs from source files
 // Let esbuild add them during build
@@ -886,23 +948,20 @@ npm WARN deprecated ...
 
 ```typescript
 // ❌ Vulnerable
-const results = db.query(
-  `SELECT * FROM observations_fts WHERE observations_fts MATCH '${userQuery}'`
-);
+const results = db.query(`SELECT * FROM observations_fts WHERE observations_fts MATCH '${userQuery}'`);
 ```
 
 **Attack:**
+
 ```typescript
-userQuery = "'; DROP TABLE observations; --"
+userQuery = "'; DROP TABLE observations; --";
 ```
 
 **Solution:**
+
 ```typescript
 // ✅ Safe: Use parameterized queries
-const results = db.query(
-  'SELECT * FROM observations_fts WHERE observations_fts MATCH ?',
-  [userQuery]
-);
+const results = db.query("SELECT * FROM observations_fts WHERE observations_fts MATCH ?", [userQuery]);
 ```
 
 ### Fix 4: NOT NULL Constraint Violation (v4.2.8)
@@ -915,12 +974,14 @@ VALUES ('abc123', NULL, ...)  -- ❌ user_prompt is NOT NULL
 ```
 
 **Solution:**
+
 ```typescript
 // Allow NULL user_prompts
-user_prompt: input.prompt ?? null
+user_prompt: input.prompt ?? null;
 ```
 
 **Schema change:**
+
 ```sql
 -- Before
 user_prompt TEXT NOT NULL
@@ -936,6 +997,7 @@ user_prompt TEXT  -- Nullable
 ### Optimization 1: Prepared Statements
 
 **Before:**
+
 ```typescript
 for (const obs of observations) {
   db.run(`INSERT INTO observations (...) VALUES (?, ?, ...)`, [obs.id, obs.text, ...]);
@@ -943,6 +1005,7 @@ for (const obs of observations) {
 ```
 
 **After:**
+
 ```typescript
 const stmt = db.prepare(`INSERT INTO observations (...) VALUES (?, ?, ...)`);
 for (const obs of observations) {
@@ -956,20 +1019,17 @@ stmt.finalize();
 ### Optimization 2: FTS5 Indexing
 
 **Before:**
+
 ```typescript
 // Manual full-text search
-const results = db.query(
-  `SELECT * FROM observations WHERE text LIKE '%${query}%'`
-);
+const results = db.query(`SELECT * FROM observations WHERE text LIKE '%${query}%'`);
 ```
 
 **After:**
+
 ```typescript
 // FTS5 virtual table
-const results = db.query(
-  `SELECT * FROM observations_fts WHERE observations_fts MATCH ?`,
-  [query]
-);
+const results = db.query(`SELECT * FROM observations_fts WHERE observations_fts MATCH ?`, [query]);
 ```
 
 **Impact:** 100x faster searches on large datasets
@@ -977,6 +1037,7 @@ const results = db.query(
 ### Optimization 3: Index Format Default
 
 **Before:**
+
 ```typescript
 // Always return full observations
 search_observations({ query: "hooks" });
@@ -984,6 +1045,7 @@ search_observations({ query: "hooks" });
 ```
 
 **After:**
+
 ```typescript
 // Default to index format
 search_observations({ query: "hooks", format: "index" });
@@ -1005,6 +1067,7 @@ search_observations({ query: "hooks", format: "full", limit: 1 });
 **Principle:** Every token you put in context window costs attention.
 
 **Application:**
+
 - Progressive disclosure reduces waste by 87%
 - Index-first approach gives agent control
 - Token counts make costs visible
@@ -1014,6 +1077,7 @@ search_observations({ query: "hooks", format: "full", limit: 1 });
 **Principle:** Distributed state is hard. SDK handles it better than we can.
 
 **Application:**
+
 - Use SDK's built-in session resumption
 - Don't try to manually reconstruct state
 - Track session IDs from init messages
@@ -1023,6 +1087,7 @@ search_observations({ query: "hooks", format: "full", limit: 1 });
 **Principle:** Let processes finish their work before terminating.
 
 **Application:**
+
 - Graceful cleanup prevents data loss
 - Workers finish important operations
 - Clean state transitions reduce bugs
@@ -1032,6 +1097,7 @@ search_observations({ query: "hooks", format: "full", limit: 1 });
 **Principle:** Don't compress manually. Let AI do semantic compression.
 
 **Application:**
+
 - 10:1 to 100:1 compression ratios
 - Semantic understanding, not keyword extraction
 - Structured outputs (XML parsing)
@@ -1041,6 +1107,7 @@ search_observations({ query: "hooks", format: "full", limit: 1 });
 **Principle:** Show metadata first, fetch details on-demand.
 
 **Application:**
+
 - Progressive disclosure in context injection
 - Index format in search results
 - Layer 1 (titles) → Layer 2 (summaries) → Layer 3 (full details)
@@ -1068,7 +1135,7 @@ SessionStart({ source: "compact" }):
 // Use embeddings to pre-sort index by semantic relevance
 search_observations({
   query: "authentication bug",
-  sort: "relevance"  // Based on embeddings
+  sort: "relevance" // Based on embeddings
 });
 ```
 
@@ -1088,7 +1155,7 @@ search_observations({
 // Team-shared observations (optional)
 createObservation({
   title: "Rate limit: 100 req/min",
-  scope: "team"  // vs "user"
+  scope: "team" // vs "user"
 });
 ```
 
@@ -1116,6 +1183,7 @@ git pull
 ```
 
 **What happens automatically:**
+
 - Dependencies update (including new ones like chromadb for v5.0.0+)
 - Database schema migrations run automatically
 - Worker service restarts with new code
@@ -1156,40 +1224,42 @@ curl http://localhost:37777/health
 
 ### v3 Performance
 
-| Metric | Value |
-|--------|-------|
-| Context usage per session | ~25,000 tokens |
-| Relevant context | ~2,000 tokens (8%) |
-| Hook execution time | ~200ms |
-| Search latency | ~500ms (LIKE queries) |
+| Metric                    | Value                 |
+| ------------------------- | --------------------- |
+| Context usage per session | ~25,000 tokens        |
+| Relevant context          | ~2,000 tokens (8%)    |
+| Hook execution time       | ~200ms                |
+| Search latency            | ~500ms (LIKE queries) |
 
 ### v4 Performance
 
-| Metric | Value |
-|--------|-------|
-| Context usage per session | ~1,100 tokens |
-| Relevant context | ~1,100 tokens (100%) |
-| Hook execution time | ~45ms |
-| Search latency | ~15ms (FTS5) |
+| Metric                    | Value                |
+| ------------------------- | -------------------- |
+| Context usage per session | ~1,100 tokens        |
+| Relevant context          | ~1,100 tokens (100%) |
+| Hook execution time       | ~45ms                |
+| Search latency            | ~15ms (FTS5)         |
 
 ### v5 Performance
 
-| Metric | Value |
-|--------|-------|
-| Context usage per session | ~1,100 tokens |
-| Relevant context | ~1,100 tokens (100%) |
-| Hook execution time | ~10ms (cached install) |
-| Search latency | ~12ms (FTS5) or ~25ms (hybrid) |
-| Viewer UI load time | ~50ms (bundled HTML) |
-| SSE update latency | ~5ms (real-time) |
+| Metric                    | Value                          |
+| ------------------------- | ------------------------------ |
+| Context usage per session | ~1,100 tokens                  |
+| Relevant context          | ~1,100 tokens (100%)           |
+| Hook execution time       | ~10ms (cached install)         |
+| Search latency            | ~12ms (FTS5) or ~25ms (hybrid) |
+| Viewer UI load time       | ~50ms (bundled HTML)           |
+| SSE update latency        | ~5ms (real-time)               |
 
 **v3 → v4 Improvements:**
+
 - 96% reduction in context waste
 - 12x increase in relevance
 - 4x faster hooks
 - 33x faster search
 
 **v4 → v5 Improvements:**
+
 - 78% faster hooks (smart caching)
 - Real-time visualization (viewer UI)
 - Better search relevance (hybrid)
@@ -1222,4 +1292,4 @@ The result is a memory system that's both powerful and invisible. Users never no
 
 ---
 
-*This architecture evolution reflects hundreds of hours of experimentation, dozens of dead ends, and the invaluable experience of real-world usage. v5 is the architecture that emerged from understanding what actually works - and making it visible to users.*
+_This architecture evolution reflects hundreds of hours of experimentation, dozens of dead ends, and the invaluable experience of real-world usage. v5 is the architecture that emerged from understanding what actually works - and making it visible to users._

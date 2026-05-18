@@ -3,6 +3,7 @@
 > **Goal:** Stop host-side environment variables from contaminating the worker's Anthropic SDK subprocess. Two confirmed bugs anchor this plan: `ANTHROPIC_BASE_URL` leaks from the parent shell while `ANTHROPIC_AUTH_TOKEN` is blocked, breaking proxy/gateway auth (#2375); and `CLAUDE_CODE_EFFORT_LEVEL` propagates from host CLI settings into the SDK subprocess where it triggers a permanent HTTP 400 that the retry classifier mistakes for transient (#2357). Adjacent feature #2289 (`$TIER` alias syntax) is in scope where it shares the same env/model-resolution surface.
 >
 > **Net effect:**
+>
 > - The OAuth-skip predicate requires a real credential (`ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN`), not a bare `ANTHROPIC_BASE_URL`. Proxy/gateway users put credentials in `~/.claude-mem/.env`; nothing relies on parent-shell leaks.
 > - `BLOCKED_ENV_VARS` adds `ANTHROPIC_BASE_URL` and the `CLAUDE_CODE_EFFORT_LEVEL` / `CLAUDE_CODE_ALWAYS_ENABLE_EFFORT` pair (defense in depth alongside the existing `env-sanitizer.ts` `CLAUDE_CODE_*` prefix filter).
 > - The Claude provider's error classifier explicitly handles HTTP 400 as `unrecoverable`, matching `GeminiProvider`/`OpenRouterProvider`. No more unbounded retry loop on permanent-error responses.
@@ -10,6 +11,7 @@
 > - `~/.claude-mem/.env` becomes the single source of truth for non-OAuth Anthropic credentials. The loader's whitelist documents this contract.
 >
 > **Out of scope:**
+>
 > - Hook-side env handling (Plan 01 / 02 territory).
 > - Worker daemon lifecycle, DB bloat, and chroma-mcp leaks (Plan 03).
 > - Observer/Knowledge SDK tool enforcement (Plan 05).
@@ -26,10 +28,10 @@
 
 ```ts
 const BLOCKED_ENV_VARS = [
-  'ANTHROPIC_API_KEY',       // #733
-  'ANTHROPIC_AUTH_TOKEN',    // added 5edf1557 (2026-05-04) — leak prevention
-  'CLAUDECODE',
-  'CLAUDE_CODE_OAUTH_TOKEN', // #2215
+  "ANTHROPIC_API_KEY", // #733
+  "ANTHROPIC_AUTH_TOKEN", // added 5edf1557 (2026-05-04) — leak prevention
+  "CLAUDECODE",
+  "CLAUDE_CODE_OAUTH_TOKEN" // #2215
 ];
 ```
 
@@ -38,11 +40,7 @@ const BLOCKED_ENV_VARS = [
 `buildIsolatedEnvWithFreshOAuth()` lines 222–288 then runs the OAuth-skip predicate at lines 237–244:
 
 ```ts
-if (
-  isolatedEnv.ANTHROPIC_API_KEY ||
-  isolatedEnv.ANTHROPIC_BASE_URL ||
-  isolatedEnv.ANTHROPIC_AUTH_TOKEN
-) {
+if (isolatedEnv.ANTHROPIC_API_KEY || isolatedEnv.ANTHROPIC_BASE_URL || isolatedEnv.ANTHROPIC_AUTH_TOKEN) {
   clearStaleMarker();
   return isolatedEnv;
 }
@@ -70,7 +68,7 @@ The Anthropic SDK subprocess reads `CLAUDE_CODE_EFFORT_LEVEL` from its env and f
 
 ### Adjacent — `$TIER` alias syntax (#2289)
 
-`src/shared/SettingsDefaultsManager.ts` line 116 already implements a *portable* `'haiku'` alias for `CLAUDE_MEM_TIER_SIMPLE_MODEL` (per #1463). What's missing is the user-facing `$TIER` *syntax* in the `CLAUDE_MEM_MODEL` field that resolves to a provider-appropriate model at request time. Same code surface (model resolution in `ClaudeProvider.getModelId` at lines 442–446); minimal extension.
+`src/shared/SettingsDefaultsManager.ts` line 116 already implements a _portable_ `'haiku'` alias for `CLAUDE_MEM_TIER_SIMPLE_MODEL` (per #1463). What's missing is the user-facing `$TIER` _syntax_ in the `CLAUDE_MEM_MODEL` field that resolves to a provider-appropriate model at request time. Same code surface (model resolution in `ClaudeProvider.getModelId` at lines 442–446); minimal extension.
 
 ---
 
@@ -80,19 +78,19 @@ Findings below are direct file reads dated 2026-05-08. Each implementation phase
 
 ### Allowed APIs / patterns to copy
 
-| Item | Location | What to copy |
-|---|---|---|
-| `BLOCKED_ENV_VARS` array | `src/shared/EnvManager.ts:14–24` | Add new entries; keep the comment-per-entry convention |
-| `buildIsolatedEnv` filter pattern | `src/shared/EnvManager.ts:166–205` | Filter on `BLOCKED_ENV_VARS.includes(key)`; defensive `delete isolatedEnv.X` post-filter |
-| `buildIsolatedEnvWithFreshOAuth` skip-check | `src/shared/EnvManager.ts:237–244` | Restrict predicate to real credentials only |
-| `loadClaudeMemEnv` whitelist + `ClaudeMemEnv` interface | `src/shared/EnvManager.ts:26–32, 79–100` | Single source of truth for what `~/.claude-mem/.env` accepts |
-| `ENV_PRESERVE` / `ENV_EXACT_MATCHES` / `ENV_PREFIXES` | `src/supervisor/env-sanitizer.ts:1–51` | Whitelist-based env stripping; do NOT add `CLAUDE_CODE_EFFORT_LEVEL` to `ENV_PRESERVE` |
-| Provider error classifier (HTTP 400 → unrecoverable) | `src/services/worker/GeminiProvider.ts:89–94`, `src/services/worker/OpenRouterProvider.ts:82–87` | Identical pattern to apply in `ClaudeProvider` |
-| `ClassifiedProviderError` constructor + `kind: 'unrecoverable' \| 'auth_invalid' \| 'transient' \| 'rate_limit' \| 'quota_exhausted'` | `src/services/worker/retry.ts` | Use existing `kind` enum; do not invent `permanent` |
-| `isRetryableKind` predicate | `src/services/worker/retry.ts:37–44` | Used by all retry sites; no edit needed once classifier is correct |
-| Tier model resolution + `'haiku'` alias | `src/services/worker/http/routes/SessionRoutes.ts:503–521`, `src/shared/SettingsDefaultsManager.ts:51–53, 115–117` | Pattern for extending `$TIER` syntax |
-| Settings flat-key + `loadFromFile` | `src/shared/SettingsDefaultsManager.ts:6–67, 70–131, 137–139, 161–206` | New keys MUST be added to interface AND `DEFAULTS` block |
-| Plan format (phase numbering, line-cited edits, anti-patterns block) | `plans/01-hook-io-discipline.md`, `plans/05-observer-tool-enforcement.md` | Reuse layout |
+| Item                                                                                                                                  | Location                                                                                                           | What to copy                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `BLOCKED_ENV_VARS` array                                                                                                              | `src/shared/EnvManager.ts:14–24`                                                                                   | Add new entries; keep the comment-per-entry convention                                   |
+| `buildIsolatedEnv` filter pattern                                                                                                     | `src/shared/EnvManager.ts:166–205`                                                                                 | Filter on `BLOCKED_ENV_VARS.includes(key)`; defensive `delete isolatedEnv.X` post-filter |
+| `buildIsolatedEnvWithFreshOAuth` skip-check                                                                                           | `src/shared/EnvManager.ts:237–244`                                                                                 | Restrict predicate to real credentials only                                              |
+| `loadClaudeMemEnv` whitelist + `ClaudeMemEnv` interface                                                                               | `src/shared/EnvManager.ts:26–32, 79–100`                                                                           | Single source of truth for what `~/.claude-mem/.env` accepts                             |
+| `ENV_PRESERVE` / `ENV_EXACT_MATCHES` / `ENV_PREFIXES`                                                                                 | `src/supervisor/env-sanitizer.ts:1–51`                                                                             | Whitelist-based env stripping; do NOT add `CLAUDE_CODE_EFFORT_LEVEL` to `ENV_PRESERVE`   |
+| Provider error classifier (HTTP 400 → unrecoverable)                                                                                  | `src/services/worker/GeminiProvider.ts:89–94`, `src/services/worker/OpenRouterProvider.ts:82–87`                   | Identical pattern to apply in `ClaudeProvider`                                           |
+| `ClassifiedProviderError` constructor + `kind: 'unrecoverable' \| 'auth_invalid' \| 'transient' \| 'rate_limit' \| 'quota_exhausted'` | `src/services/worker/retry.ts`                                                                                     | Use existing `kind` enum; do not invent `permanent`                                      |
+| `isRetryableKind` predicate                                                                                                           | `src/services/worker/retry.ts:37–44`                                                                               | Used by all retry sites; no edit needed once classifier is correct                       |
+| Tier model resolution + `'haiku'` alias                                                                                               | `src/services/worker/http/routes/SessionRoutes.ts:503–521`, `src/shared/SettingsDefaultsManager.ts:51–53, 115–117` | Pattern for extending `$TIER` syntax                                                     |
+| Settings flat-key + `loadFromFile`                                                                                                    | `src/shared/SettingsDefaultsManager.ts:6–67, 70–131, 137–139, 161–206`                                             | New keys MUST be added to interface AND `DEFAULTS` block                                 |
+| Plan format (phase numbering, line-cited edits, anti-patterns block)                                                                  | `plans/01-hook-io-discipline.md`, `plans/05-observer-tool-enforcement.md`                                          | Reuse layout                                                                             |
 
 ### Anti-patterns / methods that DO NOT exist (avoid inventing)
 
@@ -106,24 +104,24 @@ Findings below are direct file reads dated 2026-05-08. Each implementation phase
 
 ### File inventory used by this plan
 
-| File | Lines | Disposition |
-|---|---|---|
-| `src/shared/EnvManager.ts` | 319 | Edited heavily (Phase 2, Phase 5) |
-| `src/supervisor/env-sanitizer.ts` | 51 | Light edit (Phase 3 — comment change only; `CLAUDE_CODE_*` prefix already filters EFFORT_LEVEL) |
-| `src/services/worker/ClaudeProvider.ts` | 448 | Edited (Phase 3 — error classifier on `query()` rejection path) |
-| `src/services/worker/retry.ts` | small | Confirm-only (Phase 3 — `isRetryableKind` already correct) |
-| `src/services/worker/GeminiProvider.ts` | reference only | Read for pattern (Phase 3) |
-| `src/services/worker/OpenRouterProvider.ts` | reference only | Read for pattern (Phase 3) |
-| `src/shared/SettingsDefaultsManager.ts` | 209 | Edited (Phase 4 — `$TIER` alias resolution) |
-| `src/services/worker/http/routes/SessionRoutes.ts` | reference | Read tier-routing pattern (Phase 4) |
-| `src/services/infrastructure/ProcessManager.ts` | line 415 | Audit (Phase 5) — confirm `sanitizeEnv` chain is sufficient |
-| `src/services/sync/ChromaMcpManager.ts` | line 585 | Audit (Phase 5) |
-| `src/supervisor/process-registry.ts` | line 539 | Audit (Phase 5) |
-| `src/services/worker-service.ts` | line 412 | Audit (Phase 5) |
-| `src/services/worker/knowledge/KnowledgeAgent.ts` | lines 54, 149 | Confirm-only (Phase 5) |
-| `tests/env-isolation.test.ts` | NEW | CREATED (Phase 6) |
-| `scripts/check-spawn-env-discipline.cjs` | NEW | CREATED (Phase 7) |
-| `CLAUDE.md` | small | Edited (Phase 7 — document `~/.claude-mem/.env` contract) |
+| File                                               | Lines          | Disposition                                                                                     |
+| -------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| `src/shared/EnvManager.ts`                         | 319            | Edited heavily (Phase 2, Phase 5)                                                               |
+| `src/supervisor/env-sanitizer.ts`                  | 51             | Light edit (Phase 3 — comment change only; `CLAUDE_CODE_*` prefix already filters EFFORT_LEVEL) |
+| `src/services/worker/ClaudeProvider.ts`            | 448            | Edited (Phase 3 — error classifier on `query()` rejection path)                                 |
+| `src/services/worker/retry.ts`                     | small          | Confirm-only (Phase 3 — `isRetryableKind` already correct)                                      |
+| `src/services/worker/GeminiProvider.ts`            | reference only | Read for pattern (Phase 3)                                                                      |
+| `src/services/worker/OpenRouterProvider.ts`        | reference only | Read for pattern (Phase 3)                                                                      |
+| `src/shared/SettingsDefaultsManager.ts`            | 209            | Edited (Phase 4 — `$TIER` alias resolution)                                                     |
+| `src/services/worker/http/routes/SessionRoutes.ts` | reference      | Read tier-routing pattern (Phase 4)                                                             |
+| `src/services/infrastructure/ProcessManager.ts`    | line 415       | Audit (Phase 5) — confirm `sanitizeEnv` chain is sufficient                                     |
+| `src/services/sync/ChromaMcpManager.ts`            | line 585       | Audit (Phase 5)                                                                                 |
+| `src/supervisor/process-registry.ts`               | line 539       | Audit (Phase 5)                                                                                 |
+| `src/services/worker-service.ts`                   | line 412       | Audit (Phase 5)                                                                                 |
+| `src/services/worker/knowledge/KnowledgeAgent.ts`  | lines 54, 149  | Confirm-only (Phase 5)                                                                          |
+| `tests/env-isolation.test.ts`                      | NEW            | CREATED (Phase 6)                                                                               |
+| `scripts/check-spawn-env-discipline.cjs`           | NEW            | CREATED (Phase 7)                                                                               |
+| `CLAUDE.md`                                        | small          | Edited (Phase 7 — document `~/.claude-mem/.env` contract)                                       |
 
 ---
 
@@ -178,41 +176,36 @@ Use `bun:test` per `package.json` `"test": "bun test"`. Pattern from `tests/clau
 ### 2.1 Edit `src/shared/EnvManager.ts:14–24` — extend `BLOCKED_ENV_VARS`
 
 **Before:**
+
 ```ts
-const BLOCKED_ENV_VARS = [
-  'ANTHROPIC_API_KEY',
-  'ANTHROPIC_AUTH_TOKEN',
-  'CLAUDECODE',
-  'CLAUDE_CODE_OAUTH_TOKEN',
-];
+const BLOCKED_ENV_VARS = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDECODE", "CLAUDE_CODE_OAUTH_TOKEN"];
 ```
 
 **After (add `ANTHROPIC_BASE_URL`):**
+
 ```ts
 const BLOCKED_ENV_VARS = [
-  'ANTHROPIC_API_KEY',       // #733
-  'ANTHROPIC_AUTH_TOKEN',    // 5edf1557 — leak prevention; re-injected from ~/.claude-mem/.env when configured
-  'ANTHROPIC_BASE_URL',      // #2375 — same leak class as AUTH_TOKEN; re-injected from ~/.claude-mem/.env. Without this entry, a leaked BASE_URL alone triggered the OAuth-skip while no auth credential reached the subprocess.
-  'CLAUDECODE',
-  'CLAUDE_CODE_OAUTH_TOKEN', // #2215
+  "ANTHROPIC_API_KEY", // #733
+  "ANTHROPIC_AUTH_TOKEN", // 5edf1557 — leak prevention; re-injected from ~/.claude-mem/.env when configured
+  "ANTHROPIC_BASE_URL", // #2375 — same leak class as AUTH_TOKEN; re-injected from ~/.claude-mem/.env. Without this entry, a leaked BASE_URL alone triggered the OAuth-skip while no auth credential reached the subprocess.
+  "CLAUDECODE",
+  "CLAUDE_CODE_OAUTH_TOKEN" // #2215
 ];
 ```
 
 ### 2.2 Edit `src/shared/EnvManager.ts:237–244` — restrict OAuth-skip to real credentials
 
 **Before:**
+
 ```ts
-if (
-  isolatedEnv.ANTHROPIC_API_KEY ||
-  isolatedEnv.ANTHROPIC_BASE_URL ||
-  isolatedEnv.ANTHROPIC_AUTH_TOKEN
-) {
+if (isolatedEnv.ANTHROPIC_API_KEY || isolatedEnv.ANTHROPIC_BASE_URL || isolatedEnv.ANTHROPIC_AUTH_TOKEN) {
   clearStaleMarker();
   return isolatedEnv;
 }
 ```
 
 **After:**
+
 ```ts
 // Skip OAuth lookup ONLY when a real credential is configured. A bare
 // ANTHROPIC_BASE_URL is not a credential — every documented gateway needs
@@ -260,17 +253,17 @@ After the Phase 2 edit, the list is:
 
 ```ts
 const BLOCKED_ENV_VARS = [
-  'ANTHROPIC_API_KEY',
-  'ANTHROPIC_AUTH_TOKEN',
-  'ANTHROPIC_BASE_URL',
-  'CLAUDECODE',
-  'CLAUDE_CODE_OAUTH_TOKEN',
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_AUTH_TOKEN",
+  "ANTHROPIC_BASE_URL",
+  "CLAUDECODE",
+  "CLAUDE_CODE_OAUTH_TOKEN",
   // #2357 — host CLI config, not part of the plugin's contract. The
   // env-sanitizer's CLAUDE_CODE_* prefix filter strips these for spawn paths
   // that go through it, but BLOCKED_ENV_VARS is the canonical deny-list and
   // belongs in defense-in-depth.
-  'CLAUDE_CODE_EFFORT_LEVEL',
-  'CLAUDE_CODE_ALWAYS_ENABLE_EFFORT',
+  "CLAUDE_CODE_EFFORT_LEVEL",
+  "CLAUDE_CODE_ALWAYS_ENABLE_EFFORT"
 ];
 ```
 
@@ -280,10 +273,7 @@ Locate the existing error-classification path. The Anthropic SDK raises errors w
 
 ```ts
 if (status === 400) {
-  return new ClassifiedProviderError(
-    `Gemini bad request (status 400)`,
-    { kind: 'unrecoverable', cause: input.cause },
-  );
+  return new ClassifiedProviderError(`Gemini bad request (status 400)`, { kind: "unrecoverable", cause: input.cause });
 }
 ```
 
@@ -293,7 +283,7 @@ Add the equivalent in `ClaudeProvider`'s error classifier (new function or exist
 function classifyClaudeProviderError(input: { cause: unknown }): ClassifiedProviderError {
   const err = input.cause;
   const status = (err as { status?: number })?.status;
-  const bodyText = String((err as { message?: string })?.message ?? '');
+  const bodyText = String((err as { message?: string })?.message ?? "");
 
   // Permanent: SDK rejected the request itself. Most common cause in the wild
   // is a leaked CLAUDE_CODE_EFFORT_LEVEL the SDK subprocess forwarded as
@@ -303,38 +293,32 @@ function classifyClaudeProviderError(input: { cause: unknown }): ClassifiedProvi
   if (status === 400) {
     if (/effort parameter/i.test(bodyText)) {
       logger.warn(
-        'SDK',
-        'Claude API rejected effort parameter — likely CLAUDE_CODE_EFFORT_LEVEL leaked into SDK env (issue #2357). Configure CLAUDE_MEM_MODEL or set credentials in ~/.claude-mem/.env.',
-        { status, bodyText },
+        "SDK",
+        "Claude API rejected effort parameter — likely CLAUDE_CODE_EFFORT_LEVEL leaked into SDK env (issue #2357). Configure CLAUDE_MEM_MODEL or set credentials in ~/.claude-mem/.env.",
+        { status, bodyText }
       );
     }
-    return new ClassifiedProviderError(
-      `Claude bad request (status 400): ${bodyText}`,
-      { kind: 'unrecoverable', cause: input.cause },
-    );
+    return new ClassifiedProviderError(`Claude bad request (status 400): ${bodyText}`, {
+      kind: "unrecoverable",
+      cause: input.cause
+    });
   }
 
   // 401 / 403 → auth_invalid (existing pattern from GeminiProvider:96-103)
   if (status === 401 || status === 403) {
-    return new ClassifiedProviderError(
-      `Claude auth rejected (status ${status})`,
-      { kind: 'auth_invalid', cause: input.cause },
-    );
+    return new ClassifiedProviderError(`Claude auth rejected (status ${status})`, {
+      kind: "auth_invalid",
+      cause: input.cause
+    });
   }
 
   // 429 → rate_limit
   if (status === 429) {
-    return new ClassifiedProviderError(
-      `Claude rate limited (status 429)`,
-      { kind: 'rate_limit', cause: input.cause },
-    );
+    return new ClassifiedProviderError(`Claude rate limited (status 429)`, { kind: "rate_limit", cause: input.cause });
   }
 
   // Default: transient (preserves the existing fall-through behavior).
-  return new ClassifiedProviderError(
-    `Claude SDK error: ${bodyText}`,
-    { kind: 'transient', cause: input.cause },
-  );
+  return new ClassifiedProviderError(`Claude SDK error: ${bodyText}`, { kind: "transient", cause: input.cause });
 }
 ```
 
@@ -343,6 +327,7 @@ Wire this classifier into the existing `try { ... } catch` around `query(...)` i
 ### 3.3 Confirm `src/supervisor/env-sanitizer.ts` already strips `CLAUDE_CODE_EFFORT_LEVEL`
 
 Read lines 1–51. Verify:
+
 - `ENV_PREFIXES` includes `'CLAUDE_CODE_'`.
 - `ENV_PRESERVE` does NOT include `CLAUDE_CODE_EFFORT_LEVEL`, `CLAUDE_CODE_ALWAYS_ENABLE_EFFORT`.
 
@@ -385,8 +370,8 @@ No code change to behavior here.
 Add to the `SettingsDefaults` interface near lines 51–53:
 
 ```ts
-CLAUDE_MEM_TIER_FAST_MODEL: string;     // for $TIER:fast — defaults to 'haiku'
-CLAUDE_MEM_TIER_SMART_MODEL: string;    // for $TIER:smart — defaults to 'sonnet' (or provider-equivalent)
+CLAUDE_MEM_TIER_FAST_MODEL: string; // for $TIER:fast — defaults to 'haiku'
+CLAUDE_MEM_TIER_SMART_MODEL: string; // for $TIER:smart — defaults to 'sonnet' (or provider-equivalent)
 ```
 
 Add to the `DEFAULTS` block near lines 115–117:
@@ -411,7 +396,7 @@ private getModelId(): string {
 Add `resolveTierAlias` to a shared util (`src/services/worker/model-aliases.ts`, NEW):
 
 ```ts
-import type { SettingsDefaults } from '../../shared/SettingsDefaultsManager';
+import type { SettingsDefaults } from "../../shared/SettingsDefaultsManager";
 
 const TIER_PATTERN = /^\$TIER:(fast|smart|simple|summary)$/;
 
@@ -420,11 +405,16 @@ export function resolveTierAlias(model: string, settings: SettingsDefaults): str
   if (!match) return model;
 
   switch (match[1]) {
-    case 'fast':    return settings.CLAUDE_MEM_TIER_FAST_MODEL || 'haiku';
-    case 'smart':   return settings.CLAUDE_MEM_TIER_SMART_MODEL || 'sonnet';
-    case 'simple':  return settings.CLAUDE_MEM_TIER_SIMPLE_MODEL || 'haiku';
-    case 'summary': return settings.CLAUDE_MEM_TIER_SUMMARY_MODEL || settings.CLAUDE_MEM_MODEL;
-    default:        return model;
+    case "fast":
+      return settings.CLAUDE_MEM_TIER_FAST_MODEL || "haiku";
+    case "smart":
+      return settings.CLAUDE_MEM_TIER_SMART_MODEL || "sonnet";
+    case "simple":
+      return settings.CLAUDE_MEM_TIER_SIMPLE_MODEL || "haiku";
+    case "summary":
+      return settings.CLAUDE_MEM_TIER_SUMMARY_MODEL || settings.CLAUDE_MEM_MODEL;
+    default:
+      return model;
   }
 }
 ```
@@ -445,7 +435,7 @@ Apply the same `resolveTierAlias` wrap. Knowledge agent uses the same settings p
 - Do NOT match `$TIER:*` greedily — the regex is anchored.
 - Do NOT add `$PROVIDER:` or `$MODEL:` aliases in this phase — out of scope; one syntax at a time.
 - Do NOT mutate `settings` inside `resolveTierAlias`; pure function only.
-- Do NOT resolve the alias at settings-load time — resolve at *request* time so users can edit settings without restarting the worker.
+- Do NOT resolve the alias at settings-load time — resolve at _request_ time so users can edit settings without restarting the worker.
 
 ---
 
@@ -455,14 +445,14 @@ Apply the same `resolveTierAlias` wrap. Knowledge agent uses the same settings p
 
 ### 5.1 Audit table — current state per call site
 
-| File | Line | Spawn target | Env construction | Sufficient? |
-|---|---|---|---|---|
-| `src/services/worker/ClaudeProvider.ts` | 155 | Anthropic SDK subprocess | `sanitizeEnv(await buildIsolatedEnvWithFreshOAuth())` | ✅ |
-| `src/services/worker/knowledge/KnowledgeAgent.ts` | 54, 149 | Knowledge SDK subprocess | `sanitizeEnv(await buildIsolatedEnvWithFreshOAuth())` | ✅ |
-| `src/services/infrastructure/ProcessManager.ts` | 415 | Worker daemon | `sanitizeEnv({...process.env, CLAUDE_MEM_WORKER_PORT, ...extraEnv})` | ⚠️ daemon inherits parent env then sanitizes — does not pass through `buildIsolatedEnv`. **Document why this is OK**: daemon is the trust boundary; parent env IS the truth. But it should still strip `CLAUDE_CODE_EFFORT_LEVEL` via the prefix filter. Confirm. |
-| `src/services/sync/ChromaMcpManager.ts` | 585 | chroma-mcp subprocess | `sanitizeEnv(process.env)` | ⚠️ same as above. |
-| `src/supervisor/process-registry.ts` | 539 | Generic spawn factory | `sanitizeEnv(options.env ?? process.env)` | ⚠️ same. |
-| `src/services/worker-service.ts` | 412 | MCP server subprocess | `sanitizeEnv(process.env)` | ⚠️ same. |
+| File                                              | Line    | Spawn target             | Env construction                                                     | Sufficient?                                                                                                                                                                                                                                                       |
+| ------------------------------------------------- | ------- | ------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/worker/ClaudeProvider.ts`           | 155     | Anthropic SDK subprocess | `sanitizeEnv(await buildIsolatedEnvWithFreshOAuth())`                | ✅                                                                                                                                                                                                                                                                |
+| `src/services/worker/knowledge/KnowledgeAgent.ts` | 54, 149 | Knowledge SDK subprocess | `sanitizeEnv(await buildIsolatedEnvWithFreshOAuth())`                | ✅                                                                                                                                                                                                                                                                |
+| `src/services/infrastructure/ProcessManager.ts`   | 415     | Worker daemon            | `sanitizeEnv({...process.env, CLAUDE_MEM_WORKER_PORT, ...extraEnv})` | ⚠️ daemon inherits parent env then sanitizes — does not pass through `buildIsolatedEnv`. **Document why this is OK**: daemon is the trust boundary; parent env IS the truth. But it should still strip `CLAUDE_CODE_EFFORT_LEVEL` via the prefix filter. Confirm. |
+| `src/services/sync/ChromaMcpManager.ts`           | 585     | chroma-mcp subprocess    | `sanitizeEnv(process.env)`                                           | ⚠️ same as above.                                                                                                                                                                                                                                                 |
+| `src/supervisor/process-registry.ts`              | 539     | Generic spawn factory    | `sanitizeEnv(options.env ?? process.env)`                            | ⚠️ same.                                                                                                                                                                                                                                                          |
+| `src/services/worker-service.ts`                  | 412     | MCP server subprocess    | `sanitizeEnv(process.env)`                                           | ⚠️ same.                                                                                                                                                                                                                                                          |
 
 For the worker-daemon and downstream MCP/chroma spawns, parent-process env IS the source of truth — they are pre-credential paths. As long as `CLAUDE_CODE_EFFORT_LEVEL` and the Anthropic credentials are stripped (which `sanitizeEnv` does via `CLAUDE_CODE_*` prefix and the existing `ANTHROPIC_AUTH_TOKEN` block), behavior is correct. The plan does not change these paths — it adds tests that prove they stay correct.
 
@@ -550,34 +540,33 @@ Pattern from `plans/01-hook-io-discipline.md` Phase 6 (`scripts/check-hook-io-di
 // Forbid raw process.env in subprocess spawn calls. Every spawn must use
 // sanitizeEnv(...) and (where credentials are involved) buildIsolatedEnv*.
 
-const { execSync } = require('node:child_process');
+const { execSync } = require("node:child_process");
 
 const VIOLATIONS = [];
 
 // Find every `spawn(` / `spawnSync(` / `child_process.spawn(` call in src/
-const grep = execSync(
-  `grep -rEn "spawn(Sync)?\\(" src/ | grep -v "node_modules" | grep -v "\\.test\\."`,
-  { encoding: 'utf8' },
-);
+const grep = execSync(`grep -rEn "spawn(Sync)?\\(" src/ | grep -v "node_modules" | grep -v "\\.test\\."`, {
+  encoding: "utf8"
+});
 
-for (const line of grep.split('\n').filter(Boolean)) {
+for (const line of grep.split("\n").filter(Boolean)) {
   // Allow if the same logical block contains sanitizeEnv
   // (heuristic: read 5 lines after the match in the source file)
-  const [filePath, lineNumStr] = line.split(':', 2);
+  const [filePath, lineNumStr] = line.split(":", 2);
   const lineNum = Number.parseInt(lineNumStr, 10);
-  const src = require('node:fs').readFileSync(filePath, 'utf8').split('\n');
-  const window = src.slice(lineNum - 1, lineNum + 8).join('\n');
+  const src = require("node:fs").readFileSync(filePath, "utf8").split("\n");
+  const window = src.slice(lineNum - 1, lineNum + 8).join("\n");
   if (!/sanitizeEnv\s*\(/.test(window)) {
     VIOLATIONS.push(`${filePath}:${lineNum} — spawn without sanitizeEnv`);
   }
 }
 
 if (VIOLATIONS.length > 0) {
-  console.error('Spawn-env discipline check FAILED:');
-  VIOLATIONS.forEach(v => console.error('  ' + v));
+  console.error("Spawn-env discipline check FAILED:");
+  VIOLATIONS.forEach((v) => console.error("  " + v));
   process.exit(1);
 }
-console.log('Spawn-env discipline check passed.');
+console.log("Spawn-env discipline check passed.");
 ```
 
 Wire to `package.json` `scripts.test:env-discipline`. Add to CI alongside existing hook checks.
@@ -586,7 +575,7 @@ Wire to `package.json` `scripts.test:env-discipline`. Add to CI alongside existi
 
 Add a section under "Configuration":
 
-```markdown
+````markdown
 ### Anthropic Credentials (proxies, gateways, BigModel, etc.)
 
 For non-OAuth Anthropic credentials (proxies / gateways / `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_API_KEY`), put them in `~/.claude-mem/.env`:
@@ -599,7 +588,7 @@ ANTHROPIC_AUTH_TOKEN=your-token
 The file is read at worker spawn time and re-injected into the SDK subprocess. **Parent-shell exports of these variables are intentionally ignored** — they are in `BLOCKED_ENV_VARS` to prevent host-config bleed-through (#2375).
 
 If you only have an OAuth subscription, no `.env` is needed; the worker reads the token from your keychain at spawn time.
-```
+````
 
 ### 7.3 Verification checklist (Phase 7)
 

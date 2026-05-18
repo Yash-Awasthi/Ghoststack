@@ -5,6 +5,7 @@
 **Approach**: Add a nullable `merged_into_project` column to observations and session_summaries, extend query predicates with `OR merged_into_project = :parent`, propagate the same metadata to Chroma embeddings for semantic-search consistency, detect merges via git (authoritative), run adoption automatically on worker startup, and offer a CLI escape hatch for squash-merges.
 
 **Key design decisions**:
+
 - `observations.project` is **immutable provenance** — never overwritten.
 - Merged-status is a **virtual pointer**, not a data move.
 - **Chroma metadata stays in lockstep with SQLite** (full consistent sync, not lazy SQL expansion). Single source of truth per row.
@@ -18,28 +19,28 @@ Findings consolidated from three parallel discovery subagents. The following are
 
 ### Allowed APIs (copy from these locations)
 
-| Need | File | Lines | What to copy |
-|---|---|---|---|
-| Migration idempotency via marker file | `src/services/infrastructure/ProcessManager.ts` | 680–830 | `runOneTimeCwdRemap` structure, marker file pattern `.cwd-remap-applied-v1` |
-| Worker startup wiring | `src/services/worker-service.ts` | 363–365 | Call site inside `initializeBackground()`, invoked before `dbManager.initialize()` |
-| `ALTER TABLE ADD COLUMN` idempotency | `src/services/sqlite/migrations/runner.ts` | 131–141 | `PRAGMA table_info(<table>)` guard before `ALTER TABLE ... ADD COLUMN` |
-| Column addition example | `src/services/sqlite/migrations/runner.ts` | 495 | `db.run('ALTER TABLE observations ADD COLUMN discovery_tokens INTEGER DEFAULT 0')` |
-| Observations schema | `src/services/sqlite/migrations/runner.ts` | 82–96 | Existing columns + indices (do not duplicate) |
-| `schema_versions` marker table | `src/services/sqlite/migrations/runner.ts` | 51–58 | `INSERT OR IGNORE INTO schema_versions ...` — used only when numbered migration |
-| Logger | `src/utils/logger.ts` | 18 | Components: `SYSTEM`, `DB`, `CHROMA_SYNC`. Use `logger.info/warn/error('SYSTEM', ...)` |
-| Worktree detection | `src/utils/worktree.ts` | 1–84 | `detectWorktree(cwd): WorktreeInfo { isWorktree, worktreeName, parentRepoPath, parentProjectName }` |
-| Project-name derivation | `src/utils/project-name.ts` | 73–119 | `getProjectContext(cwd): ProjectContext { primary, parent, isWorktree, allProjects }` |
-| Multi-project read (WHERE to extend) | `src/services/context/ObservationCompiler.ts` | 111–160 | `queryObservationsMulti` — `WHERE o.project IN (${projectPlaceholders})` |
-| Same, for summaries | `src/services/context/ObservationCompiler.ts` | 168–196 | Parallel summary-fetching query with `ss.project IN (...)` |
-| Context injection endpoint | `src/services/worker/http/routes/SearchRoutes.ts` | 211–253 | `handleContextInject` wires `projects` comma-separated query param into `generateContext` |
-| Context entry point | `src/services/context/ContextBuilder.ts` | 126–183 | `generateContext()` picks `queryObservationsMulti` when `projects.length > 1` |
-| Chroma metadata attach (observations) | `src/services/sync/ChromaSync.ts` | 132–140 | `baseMetadata` object — includes `project`, `sqlite_id`, etc. This is where `merged_into_project` is added. |
-| Chroma collection architecture | `src/services/sync/ChromaSync.ts` | 806 (comment) | **Single shared collection `cm__claude-mem`**, scoped by metadata. Do NOT create a per-merged collection. |
-| Chroma filter build (read side) | `src/services/sync/SearchManager.ts` | 174–177 | `whereFilter = { project: options.project }` — extended with `$or` in Phase 3 |
-| Chroma update API | `src/services/sync/ChromaSync.ts` (grep) | — | `chroma_update_documents` via MCP — used by existing sync flows |
-| CLI entrypoint switch | `src/npx-cli/index.ts` | 28–169 | Plain `switch (command)`, dynamic `import()` of `./commands/<name>.ts`. No commander/cac. |
-| Admin-script template | `scripts/cwd-remap.ts` | 1–186 | Bun shebang, argv parsing, `--apply` gate, dry-run default |
-| UI observation card | `src/ui/viewer/components/ObservationCard.tsx` | 58 | `<span className="card-project">{observation.project}</span>` — where the merged badge is added |
+| Need                                  | File                                              | Lines         | What to copy                                                                                                |
+| ------------------------------------- | ------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
+| Migration idempotency via marker file | `src/services/infrastructure/ProcessManager.ts`   | 680–830       | `runOneTimeCwdRemap` structure, marker file pattern `.cwd-remap-applied-v1`                                 |
+| Worker startup wiring                 | `src/services/worker-service.ts`                  | 363–365       | Call site inside `initializeBackground()`, invoked before `dbManager.initialize()`                          |
+| `ALTER TABLE ADD COLUMN` idempotency  | `src/services/sqlite/migrations/runner.ts`        | 131–141       | `PRAGMA table_info(<table>)` guard before `ALTER TABLE ... ADD COLUMN`                                      |
+| Column addition example               | `src/services/sqlite/migrations/runner.ts`        | 495           | `db.run('ALTER TABLE observations ADD COLUMN discovery_tokens INTEGER DEFAULT 0')`                          |
+| Observations schema                   | `src/services/sqlite/migrations/runner.ts`        | 82–96         | Existing columns + indices (do not duplicate)                                                               |
+| `schema_versions` marker table        | `src/services/sqlite/migrations/runner.ts`        | 51–58         | `INSERT OR IGNORE INTO schema_versions ...` — used only when numbered migration                             |
+| Logger                                | `src/utils/logger.ts`                             | 18            | Components: `SYSTEM`, `DB`, `CHROMA_SYNC`. Use `logger.info/warn/error('SYSTEM', ...)`                      |
+| Worktree detection                    | `src/utils/worktree.ts`                           | 1–84          | `detectWorktree(cwd): WorktreeInfo { isWorktree, worktreeName, parentRepoPath, parentProjectName }`         |
+| Project-name derivation               | `src/utils/project-name.ts`                       | 73–119        | `getProjectContext(cwd): ProjectContext { primary, parent, isWorktree, allProjects }`                       |
+| Multi-project read (WHERE to extend)  | `src/services/context/ObservationCompiler.ts`     | 111–160       | `queryObservationsMulti` — `WHERE o.project IN (${projectPlaceholders})`                                    |
+| Same, for summaries                   | `src/services/context/ObservationCompiler.ts`     | 168–196       | Parallel summary-fetching query with `ss.project IN (...)`                                                  |
+| Context injection endpoint            | `src/services/worker/http/routes/SearchRoutes.ts` | 211–253       | `handleContextInject` wires `projects` comma-separated query param into `generateContext`                   |
+| Context entry point                   | `src/services/context/ContextBuilder.ts`          | 126–183       | `generateContext()` picks `queryObservationsMulti` when `projects.length > 1`                               |
+| Chroma metadata attach (observations) | `src/services/sync/ChromaSync.ts`                 | 132–140       | `baseMetadata` object — includes `project`, `sqlite_id`, etc. This is where `merged_into_project` is added. |
+| Chroma collection architecture        | `src/services/sync/ChromaSync.ts`                 | 806 (comment) | **Single shared collection `cm__claude-mem`**, scoped by metadata. Do NOT create a per-merged collection.   |
+| Chroma filter build (read side)       | `src/services/sync/SearchManager.ts`              | 174–177       | `whereFilter = { project: options.project }` — extended with `$or` in Phase 3                               |
+| Chroma update API                     | `src/services/sync/ChromaSync.ts` (grep)          | —             | `chroma_update_documents` via MCP — used by existing sync flows                                             |
+| CLI entrypoint switch                 | `src/npx-cli/index.ts`                            | 28–169        | Plain `switch (command)`, dynamic `import()` of `./commands/<name>.ts`. No commander/cac.                   |
+| Admin-script template                 | `scripts/cwd-remap.ts`                            | 1–186         | Bun shebang, argv parsing, `--apply` gate, dry-run default                                                  |
+| UI observation card                   | `src/ui/viewer/components/ObservationCard.tsx`    | 58            | `<span className="card-project">{observation.project}</span>` — where the merged badge is added             |
 
 ### Anti-patterns (do NOT do these)
 
@@ -122,20 +123,20 @@ export interface AdoptionResult {
   repoPath: string;
   parentProject: string;
   scannedWorktrees: number;
-  mergedBranches: string[];          // branches classified as merged
-  adoptedObservations: number;        // SQLite rows stamped
+  mergedBranches: string[]; // branches classified as merged
+  adoptedObservations: number; // SQLite rows stamped
   adoptedSummaries: number;
-  chromaUpdates: number;              // Chroma docs patched
+  chromaUpdates: number; // Chroma docs patched
   chromaFailed: number;
   dryRun: boolean;
   errors: Array<{ worktree: string; error: string }>;
 }
 
 export async function adoptMergedWorktrees(opts: {
-  repoPath?: string;       // defaults to process.cwd()
-  dataDirectory?: string;  // defaults to DATA_DIR
+  repoPath?: string; // defaults to process.cwd()
+  dataDirectory?: string; // defaults to DATA_DIR
   dryRun?: boolean;
-  onlyBranch?: string;     // manual override for squash-merge case
+  onlyBranch?: string; // manual override for squash-merge case
 }): Promise<AdoptionResult>;
 ```
 
@@ -270,14 +271,9 @@ Double-bind the `projects` array:
 ```typescript
 if (options.project) {
   const projectFilter = {
-    $or: [
-      { project: options.project },
-      { merged_into_project: options.project }
-    ]
+    $or: [{ project: options.project }, { merged_into_project: options.project }]
   };
-  whereFilter = whereFilter
-    ? { $and: [whereFilter, projectFilter] }
-    : projectFilter;
+  whereFilter = whereFilter ? { $and: [whereFilter, projectFilter] } : projectFilter;
 }
 ```
 
@@ -290,13 +286,13 @@ When `options.project` is an array (if that path exists — grep first), build a
 ```typescript
 const baseMetadata: Record<string, string | number | null> = {
   sqlite_id: obs.id,
-  doc_type: 'observation',
+  doc_type: "observation",
   memory_session_id: obs.memory_session_id,
   project: obs.project,
-  merged_into_project: obs.merged_into_project ?? null,  // NEW
+  merged_into_project: obs.merged_into_project ?? null, // NEW
   created_at_epoch: obs.created_at_epoch,
-  type: obs.type || 'discovery',
-  title: obs.title || 'Untitled'
+  type: obs.type || "discovery",
+  title: obs.title || "Untitled"
 };
 ```
 
@@ -338,7 +334,7 @@ This makes every new observation Chroma-compatible with the Phase 3b filter from
 Import alongside existing `ProcessManager` imports at lines 41–53:
 
 ```typescript
-import { adoptMergedWorktrees } from './infrastructure/WorktreeAdoption.js';
+import { adoptMergedWorktrees } from "./infrastructure/WorktreeAdoption.js";
 ```
 
 Insert immediately after the existing `runOneTimeCwdRemap()` call at lines 363–365:
@@ -349,13 +345,13 @@ runOneTimeCwdRemap();
 try {
   const result = await adoptMergedWorktrees({});
   if (result.adoptedObservations > 0 || result.chromaUpdates > 0) {
-    logger.info('SYSTEM', 'Merged worktrees adopted on startup', result);
+    logger.info("SYSTEM", "Merged worktrees adopted on startup", result);
   }
   if (result.errors.length > 0) {
-    logger.warn('SYSTEM', 'Worktree adoption had per-branch errors', { errors: result.errors });
+    logger.warn("SYSTEM", "Worktree adoption had per-branch errors", { errors: result.errors });
   }
 } catch (err) {
-  logger.error('SYSTEM', 'Worktree adoption failed (non-fatal)', {}, err as Error);
+  logger.error("SYSTEM", "Worktree adoption failed (non-fatal)", {}, err as Error);
 }
 ```
 
@@ -391,8 +387,8 @@ try {
 `src/npx-cli/commands/adopt.ts` — follow shape of sibling commands (dynamic-imported by the switch):
 
 ```typescript
-import pc from 'picocolors';
-import { adoptMergedWorktrees } from '../../services/infrastructure/WorktreeAdoption.js';
+import pc from "picocolors";
+import { adoptMergedWorktrees } from "../../services/infrastructure/WorktreeAdoption.js";
 
 export interface AdoptCommandOptions {
   dryRun?: boolean;
@@ -405,10 +401,10 @@ export async function runAdoptCommand(opts: AdoptCommandOptions): Promise<void> 
     onlyBranch: opts.onlyBranch
   });
 
-  console.log(pc.bold(`\nWorktree adoption ${result.dryRun ? pc.yellow('(dry-run)') : pc.green('(applied)')}`));
+  console.log(pc.bold(`\nWorktree adoption ${result.dryRun ? pc.yellow("(dry-run)") : pc.green("(applied)")}`));
   console.log(`  Parent project:         ${result.parentProject}`);
   console.log(`  Worktrees scanned:      ${result.scannedWorktrees}`);
-  console.log(`  Merged branches:        ${result.mergedBranches.join(', ') || '(none)'}`);
+  console.log(`  Merged branches:        ${result.mergedBranches.join(", ") || "(none)"}`);
   console.log(`  Observations adopted:   ${result.adoptedObservations}`);
   console.log(`  Summaries adopted:      ${result.adoptedSummaries}`);
   console.log(`  Chroma docs updated:    ${result.chromaUpdates}`);
@@ -478,12 +474,14 @@ Locate the current label render at `src/ui/viewer/components/ObservationCard.tsx
 Extend to:
 
 ```tsx
-<span className="card-project">{observation.project}</span>
-{observation.merged_into_project && (
-  <span className="card-merged-badge" title={`Merged into ${observation.merged_into_project}`}>
-    merged → {observation.merged_into_project}
-  </span>
-)}
+<span className="card-project">{observation.project}</span>;
+{
+  observation.merged_into_project && (
+    <span className="card-merged-badge" title={`Merged into ${observation.merged_into_project}`}>
+      merged → {observation.merged_into_project}
+    </span>
+  );
+}
 ```
 
 Add CSS for `.card-merged-badge` — subtle secondary chip style (muted color, smaller font). Match existing `.card-source` / `.card-project` aesthetics.
@@ -552,16 +550,16 @@ rg "\\bgh\\s+(pr|issue|api)" src/ scripts/
 
 ## Summary
 
-| Phase | Files touched | New LOC (approx.) |
-|---|---|---|
-| 1. Schema | `src/services/sqlite/migrations/runner.ts` | ~25 |
-| 2. Adoption engine | `src/services/infrastructure/WorktreeAdoption.ts` (new), `src/services/sync/ChromaSync.ts` (new method) | ~200 |
-| 3. Query plumbing | `src/services/context/ObservationCompiler.ts`, `src/services/sync/SearchManager.ts`, `src/services/sync/ChromaSync.ts` | ~40 |
-| 4. Auto-trigger | `src/services/worker-service.ts` | ~15 |
-| 5. CLI | `src/npx-cli/commands/adopt.ts` (new), `src/npx-cli/index.ts`, `scripts/adopt-worktrees.ts` (new) | ~100 |
-| 6. UI | `src/ui/viewer/components/ObservationCard.tsx`, Observation type, serializer, CSS | ~20 |
-| 7. Tests + verification | scattered | — |
-| **Total** | | **~400 LOC** |
+| Phase                   | Files touched                                                                                                          | New LOC (approx.) |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| 1. Schema               | `src/services/sqlite/migrations/runner.ts`                                                                             | ~25               |
+| 2. Adoption engine      | `src/services/infrastructure/WorktreeAdoption.ts` (new), `src/services/sync/ChromaSync.ts` (new method)                | ~200              |
+| 3. Query plumbing       | `src/services/context/ObservationCompiler.ts`, `src/services/sync/SearchManager.ts`, `src/services/sync/ChromaSync.ts` | ~40               |
+| 4. Auto-trigger         | `src/services/worker-service.ts`                                                                                       | ~15               |
+| 5. CLI                  | `src/npx-cli/commands/adopt.ts` (new), `src/npx-cli/index.ts`, `scripts/adopt-worktrees.ts` (new)                      | ~100              |
+| 6. UI                   | `src/ui/viewer/components/ObservationCard.tsx`, Observation type, serializer, CSS                                      | ~20               |
+| 7. Tests + verification | scattered                                                                                                              | —                 |
+| **Total**               |                                                                                                                        | **~400 LOC**      |
 
 **Reversibility**: `UPDATE observations SET merged_into_project = NULL` + a Chroma `update_documents` call with the field omitted restores pre-adoption state completely. Nothing is destroyed.
 

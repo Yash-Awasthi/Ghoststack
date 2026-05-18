@@ -19,9 +19,7 @@ describe("resolveProxyIp", () => {
   });
 
   it("handles proxy URL with credentials", async () => {
-    expect(await resolveProxyIp("http://user:pass@10.50.96.5:8888")).toBe(
-      "10.50.96.5"
-    );
+    expect(await resolveProxyIp("http://user:pass@10.50.96.5:8888")).toBe("10.50.96.5");
   });
 
   it("resolves localhost", async () => {
@@ -63,8 +61,8 @@ describe("maybeResolveGeoip", () => {
         start(controller) {
           controller.enqueue(new Uint8Array([1, 2, 3]));
           controller.close();
-        },
-      }),
+        }
+      })
     } as Response);
 
     const result = await resolveProxyGeo("http://203.0.113.10:8080");
@@ -85,7 +83,7 @@ describe("maybeResolveGeoip", () => {
       geoip: true,
       proxy: "http://203.0.113.10:8080",
       timezone: "Europe/Paris",
-      locale: "fr-FR",
+      locale: "fr-FR"
     });
     const elapsed = performance.now() - start;
 
@@ -93,7 +91,6 @@ describe("maybeResolveGeoip", () => {
     expect(elapsed).toBeLessThan(500);
   });
 });
-
 
 describe("COUNTRY_LOCALE_MAP", () => {
   it("contains common countries", () => {

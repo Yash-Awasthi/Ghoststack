@@ -183,14 +183,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package:
-          [
-            cli,
-            common,
-            packages/agent-runtime,
-            sdk,
-            web,
-          ]
+        package: [cli, common, packages/agent-runtime, sdk, web]
     name: test-integration-${{ matrix.package }}
     runs-on: ubuntu-latest
     steps:

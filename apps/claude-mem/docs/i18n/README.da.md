@@ -1,6 +1,7 @@
 🌐 Dette er en automatisk oversættelse. Fællesskabsrettelser er velkomne!
 
 ---
+
 <h1 align="center">
   <br>
   <a href="https://github.com/thedotmack/claude-mem">
@@ -180,7 +181,8 @@ Se [Arkitekturoversigt](https://docs.claude-mem.ai/architecture/overview) for de
 Claude-Mem leverer intelligent søgning gennem mem-search-færdigheden, der automatisk aktiveres, når du spørger om tidligere arbejde:
 
 **Sådan Virker Det:**
-- Spørg bare naturligt: *"Hvad lavede vi sidste session?"* eller *"Har vi løst denne fejl før?"*
+
+- Spørg bare naturligt: _"Hvad lavede vi sidste session?"_ eller _"Har vi løst denne fejl før?"_
 - Claude aktiverer automatisk mem-search-færdigheden for at finde relevant kontekst
 
 **Tilgængelige Søgeoperationer:**
@@ -286,7 +288,6 @@ Apache-2.0 allows broad use, modification, distribution, and commercial use, sub
 **Ragtime note**: The ragtime/ directory is licensed under the **Apache License 2.0**. See [ragtime/LICENSE](ragtime/LICENSE) for details.
 
 ---
-
 
 ## Support
 

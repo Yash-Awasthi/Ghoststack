@@ -8,11 +8,11 @@
  * Closes #2222.
  */
 
-import { execSync, execFileSync } from 'child_process';
-import { existsSync } from 'fs';
-import { SettingsDefaultsManager } from './SettingsDefaultsManager.js';
-import { USER_SETTINGS_PATH } from './paths.js';
-import { logger } from '../utils/logger.js';
+import { execSync, execFileSync } from "child_process";
+import { existsSync } from "fs";
+import { SettingsDefaultsManager } from "./SettingsDefaultsManager.js";
+import { USER_SETTINGS_PATH } from "./paths.js";
+import { logger } from "../utils/logger.js";
 
 /** How long to wait for `claude --version` before giving up (ms). */
 const VERSION_CHECK_TIMEOUT_MS = 3_000;
@@ -22,11 +22,9 @@ const VERSION_CHECK_TIMEOUT_MS = 3_000;
  * (AppData or Program Files) rather than a CLI installed via npm/volta/etc.
  */
 function looksLikeDesktopAppPath(candidatePath: string): boolean {
-  const normalized = candidatePath.replace(/\\/g, '/').toLowerCase();
+  const normalized = candidatePath.replace(/\\/g, "/").toLowerCase();
   return (
-    normalized.includes('appdata') ||
-    normalized.includes('program files') ||
-    normalized.includes('program files (x86)')
+    normalized.includes("appdata") || normalized.includes("program files") || normalized.includes("program files (x86)")
   );
 }
 
@@ -41,11 +39,11 @@ function looksLikeDesktopAppPath(candidatePath: string): boolean {
  */
 function verifyClaudeVersion(candidate: string): string | null {
   try {
-    const versionOutput = execFileSync(candidate, ['--version'], {
-      encoding: 'utf8',
+    const versionOutput = execFileSync(candidate, ["--version"], {
+      encoding: "utf8",
       timeout: VERSION_CHECK_TIMEOUT_MS,
       windowsHide: true,
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ["ignore", "pipe", "ignore"]
     }).trim();
     return versionOutput || null;
   } catch {
@@ -69,15 +67,13 @@ function verifyClaudeVersion(candidate: string): string | null {
  * @param logComponent  Logger component tag (e.g. 'SDK', 'WORKER')
  * @throws {Error} when no valid Claude CLI can be found
  */
-export function findClaudeExecutable(logComponent: string = 'SDK'): string {
+export function findClaudeExecutable(logComponent: string = "SDK"): string {
   const settings = SettingsDefaultsManager.loadFromFile(USER_SETTINGS_PATH);
 
   // --- 1. Explicit configured path ----------------------------------------
   if (settings.CLAUDE_CODE_PATH) {
     if (!existsSync(settings.CLAUDE_CODE_PATH)) {
-      throw new Error(
-        `CLAUDE_CODE_PATH is set to "${settings.CLAUDE_CODE_PATH}" but the file does not exist.`
-      );
+      throw new Error(`CLAUDE_CODE_PATH is set to "${settings.CLAUDE_CODE_PATH}" but the file does not exist.`);
     }
 
     const version = verifyClaudeVersion(settings.CLAUDE_CODE_PATH);
@@ -86,12 +82,12 @@ export function findClaudeExecutable(logComponent: string = 'SDK'): string {
       if (isDesktopApp) {
         throw new Error(
           `Found desktop app at "${settings.CLAUDE_CODE_PATH}" but it doesn't support headless mode. ` +
-          `Install Claude Code CLI: npm install -g @anthropic-ai/claude-code`
+            `Install Claude Code CLI: npm install -g @anthropic-ai/claude-code`
         );
       }
       throw new Error(
         `CLAUDE_CODE_PATH is set to "${settings.CLAUDE_CODE_PATH}" but it failed the --version check. ` +
-        `Ensure this is a working Claude Code CLI binary.`
+          `Ensure this is a working Claude Code CLI binary.`
       );
     }
     logger.debug(logComponent, `Using configured CLAUDE_CODE_PATH: ${settings.CLAUDE_CODE_PATH} (${version})`);
@@ -99,20 +95,20 @@ export function findClaudeExecutable(logComponent: string = 'SDK'): string {
   }
 
   // --- 2. Windows: prefer claude.cmd via PATH ------------------------------
-  if (process.platform === 'win32') {
+  if (process.platform === "win32") {
     try {
-      execSync('where claude.cmd', {
-        encoding: 'utf8',
+      execSync("where claude.cmd", {
+        encoding: "utf8",
         windowsHide: true,
-        stdio: ['ignore', 'pipe', 'ignore'],
+        stdio: ["ignore", "pipe", "ignore"]
       });
       // claude.cmd is a wrapper — verify it can actually produce --version
-      const version = verifyClaudeVersion('claude.cmd');
+      const version = verifyClaudeVersion("claude.cmd");
       if (version) {
         logger.debug(logComponent, `Using claude.cmd from PATH (${version})`);
-        return 'claude.cmd';
+        return "claude.cmd";
       }
-      logger.warn(logComponent, 'claude.cmd found in PATH but failed --version check, trying next candidate');
+      logger.warn(logComponent, "claude.cmd found in PATH but failed --version check, trying next candidate");
     } catch {
       // Fall through to generic detection
     }
@@ -120,13 +116,17 @@ export function findClaudeExecutable(logComponent: string = 'SDK'): string {
 
   // --- 3. Auto-detection via which/where -----------------------------------
   try {
-    const rawOutput = execSync(
-      process.platform === 'win32' ? 'where claude' : 'which claude',
-      { encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] }
-    ).trim();
+    const rawOutput = execSync(process.platform === "win32" ? "where claude" : "which claude", {
+      encoding: "utf8",
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
 
     // `where` on Windows can return multiple lines; try each candidate
-    const candidates = rawOutput.split('\n').map((line) => line.trim()).filter(Boolean);
+    const candidates = rawOutput
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
 
     for (const candidate of candidates) {
       const version = verifyClaudeVersion(candidate);
@@ -140,27 +140,29 @@ export function findClaudeExecutable(logComponent: string = 'SDK'): string {
         logger.warn(
           logComponent,
           `Skipping desktop app at "${candidate}" — it doesn't support headless mode. ` +
-          `Install Claude Code CLI: npm install -g @anthropic-ai/claude-code`
+            `Install Claude Code CLI: npm install -g @anthropic-ai/claude-code`
         );
       } else {
-        logger.warn(
-          logComponent,
-          `Skipping "${candidate}" — failed --version check`
-        );
+        logger.warn(logComponent, `Skipping "${candidate}" — failed --version check`);
       }
     }
   } catch (error) {
     // [ANTI-PATTERN IGNORED]: Fallback behavior — which/where failed, continue to throw clear error
     if (error instanceof Error) {
-      logger.debug(logComponent, 'Claude executable auto-detection failed', {}, error);
+      logger.debug(logComponent, "Claude executable auto-detection failed", {}, error);
     } else {
-      logger.debug(logComponent, 'Claude executable auto-detection failed with non-Error', {}, new Error(String(error)));
+      logger.debug(
+        logComponent,
+        "Claude executable auto-detection failed with non-Error",
+        {},
+        new Error(String(error))
+      );
     }
   }
 
   throw new Error(
-    'Claude executable not found. Please either:\n' +
-    '1. Add "claude" to your system PATH, or\n' +
-    '2. Set CLAUDE_CODE_PATH in ~/.claude-mem/settings.json'
+    "Claude executable not found. Please either:\n" +
+      '1. Add "claude" to your system PATH, or\n' +
+      "2. Set CLAUDE_CODE_PATH in ~/.claude-mem/settings.json"
   );
 }

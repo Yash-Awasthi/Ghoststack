@@ -138,6 +138,7 @@ Or install for Gemini CLI (auto-detects `~/.gemini`):
 ```bash
 npx claude-mem install --ide gemini-cli
 ```
+
 Or install for OpenCode:
 
 ```bash
@@ -242,6 +243,7 @@ Claude-Mem provides intelligent memory search through **4 MCP tools** following 
 3. **`get_observations`** - Fetch full details ONLY for filtered IDs (~500-1,000 tokens/result)
 
 **How It Works:**
+
 - Claude uses MCP tools to search your memory
 - Start with `search` to get an index of results
 - Use `timeline` to see what was happening around specific observations
@@ -258,12 +260,12 @@ Claude-Mem provides intelligent memory search through **4 MCP tools** following 
 
 ```typescript
 // Step 1: Search for index
-search(query="authentication bug", type="bugfix", limit=10)
+search((query = "authentication bug"), (type = "bugfix"), (limit = 10));
 
 // Step 2: Review index, identify relevant IDs (e.g., #123, #456)
 
 // Step 3: Fetch full details
-get_observations(ids=[123, 456])
+get_observations((ids = [123, 456]));
 ```
 
 See [Search Tools Guide](https://docs.claude-mem.ai/usage/search-tools) for detailed examples.
@@ -287,6 +289,7 @@ See **[Beta Features Documentation](https://docs.claude-mem.ai/beta-features)** 
 - **SQLite 3**: For persistent storage (bundled)
 
 ---
+
 ### Windows Setup Notes
 
 If you see an error like:
@@ -310,6 +313,7 @@ See the **[Configuration Guide](https://docs.claude-mem.ai/configuration)** for 
 Claude-Mem supports multiple workflow modes and languages via the `CLAUDE_MEM_MODE` setting.
 
 This option controls both:
+
 - The workflow behavior (e.g. code, chill, investigation)
 - The language used in generated observations
 
@@ -331,11 +335,11 @@ ls ~/.claude/plugins/marketplaces/thedotmack/plugin/modes/
 
 #### Available Modes
 
-| Mode | Description |
-|------------|-------------------------|
-| `code` | Default English mode |
+| Mode       | Description             |
+| ---------- | ----------------------- |
+| `code`     | Default English mode    |
 | `code--zh` | Simplified Chinese mode |
-| `code--ja` | Japanese mode |
+| `code--ja` | Japanese mode           |
 
 Language-specific modes follow the pattern `code--[lang]` where `[lang]` is the ISO 639-1 language code (e.g., `zh` for Chinese, `ja` for Japanese, `es` for Spanish).
 
@@ -343,8 +347,7 @@ Language-specific modes follow the pattern `code--[lang]` where `[lang]` is the 
 
 #### After Changing Mode
 
-Restart Claude Code to apply the new mode configuration.
----
+## Restart Claude Code to apply the new mode configuration.
 
 ## Development
 

@@ -1,33 +1,31 @@
-import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 
-mock.module('../../src/services/domain/ModeManager.js', () => ({
+mock.module("../../src/services/domain/ModeManager.js", () => ({
   ModeManager: {
     getInstance: () => ({
       getActiveMode: () => ({
-        name: 'code',
+        name: "code",
         prompts: {},
-        observation_types: [
-          { id: 'discovery', icon: 'I' },
-        ],
-        observation_concepts: [],
+        observation_types: [{ id: "discovery", icon: "I" }],
+        observation_concepts: []
       }),
-      getObservationTypes: () => [{ id: 'discovery', icon: 'I' }],
-      getTypeIcon: (_type: string) => 'I',
-      getWorkEmoji: () => 'W',
-    }),
-  },
+      getObservationTypes: () => [{ id: "discovery", icon: "I" }],
+      getTypeIcon: (_type: string) => "I",
+      getWorkEmoji: () => "W"
+    })
+  }
 }));
 
-import { Database } from 'bun:sqlite';
-import { SessionStore } from '../../src/services/sqlite/SessionStore.js';
-import { SessionSearch } from '../../src/services/sqlite/SessionSearch.js';
-import { FormattingService } from '../../src/services/worker/FormattingService.js';
-import { TimelineService } from '../../src/services/worker/TimelineService.js';
-import { SearchManager } from '../../src/services/worker/SearchManager.js';
+import { Database } from "bun:sqlite";
+import { SessionStore } from "../../src/services/sqlite/SessionStore.js";
+import { SessionSearch } from "../../src/services/sqlite/SessionSearch.js";
+import { FormattingService } from "../../src/services/worker/FormattingService.js";
+import { TimelineService } from "../../src/services/worker/TimelineService.js";
+import { SearchManager } from "../../src/services/worker/SearchManager.js";
 
-const PROJECT = 'timeline-anchor-test';
-const MEMORY_SESSION_ID = 'mem-session-timeline-anchor';
-const CONTENT_SESSION_ID = 'content-timeline-anchor';
+const PROJECT = "timeline-anchor-test";
+const MEMORY_SESSION_ID = "mem-session-timeline-anchor";
+const CONTENT_SESSION_ID = "content-timeline-anchor";
 
 interface SeededObservation {
   id: number;
@@ -35,11 +33,11 @@ interface SeededObservation {
 }
 
 function seedObservations(store: SessionStore, count: number): SeededObservation[] {
-  const sdkId = store.createSDKSession(CONTENT_SESSION_ID, PROJECT, 'initial prompt');
+  const sdkId = store.createSDKSession(CONTENT_SESSION_ID, PROJECT, "initial prompt");
   store.updateMemorySessionId(sdkId, MEMORY_SESSION_ID);
 
-  const baseEpoch = Date.UTC(2024, 0, 1, 0, 0, 0); 
-  const stepMs = 60_000; 
+  const baseEpoch = Date.UTC(2024, 0, 1, 0, 0, 0);
+  const stepMs = 60_000;
 
   const seeded: SeededObservation[] = [];
   for (let i = 0; i < count; i++) {
@@ -48,14 +46,14 @@ function seedObservations(store: SessionStore, count: number): SeededObservation
       MEMORY_SESSION_ID,
       PROJECT,
       {
-        type: 'discovery',
+        type: "discovery",
         title: `Synthetic observation #${i + 1}`,
         subtitle: null,
         facts: [],
         narrative: `Narrative for synthetic observation ${i + 1}`,
         concepts: [],
         files_read: [],
-        files_modified: [],
+        files_modified: []
       },
       i + 1,
       0,
@@ -78,14 +76,12 @@ function extractObservationIds(formattedText: string): number[] {
 
 function expectAnchorRendered(text: string, anchorId: number): void {
   expect(text).toContain(`# Timeline around anchor: ${anchorId}`);
-  const anchorRow = text
-    .split('\n')
-    .find((line) => line.startsWith(`| #${anchorId} `));
+  const anchorRow = text.split("\n").find((line) => line.startsWith(`| #${anchorId} `));
   expect(anchorRow).toBeDefined();
-  expect(anchorRow).toContain('<- **ANCHOR**');
+  expect(anchorRow).toContain("<- **ANCHOR**");
 }
 
-describe('SearchManager.timeline() anchor dispatch', () => {
+describe("SearchManager.timeline() anchor dispatch", () => {
   let db: Database;
   let store: SessionStore;
   let search: SessionSearch;
@@ -93,8 +89,8 @@ describe('SearchManager.timeline() anchor dispatch', () => {
   let seeded: SeededObservation[];
 
   beforeEach(() => {
-    db = new Database(':memory:');
-    db.run('PRAGMA foreign_keys = ON');
+    db = new Database(":memory:");
+    db.run("PRAGMA foreign_keys = ON");
     store = new SessionStore(db);
     search = new SessionSearch(db);
 
@@ -112,14 +108,14 @@ describe('SearchManager.timeline() anchor dispatch', () => {
     db.close();
   });
 
-  it('(a) numeric anchor passed as JS number returns the 7-id window around the anchor', async () => {
-    const middle = seeded[24]; 
+  it("(a) numeric anchor passed as JS number returns the 7-id window around the anchor", async () => {
+    const middle = seeded[24];
     const expectedIds = seeded.slice(21, 28).map((o) => o.id);
 
     const response = await manager.timeline({
       anchor: middle.id, // pass as JS number
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).not.toBe(true);
@@ -129,14 +125,14 @@ describe('SearchManager.timeline() anchor dispatch', () => {
     expectAnchorRendered(text, middle.id);
   });
 
-  it('(b) numeric anchor passed as STRING returns the 7-id window around the anchor (THE bug case)', async () => {
+  it("(b) numeric anchor passed as STRING returns the 7-id window around the anchor (THE bug case)", async () => {
     const middle = seeded[24];
     const expectedIds = seeded.slice(21, 28).map((o) => o.id);
 
     const response = await manager.timeline({
       anchor: String(middle.id), // pass as STRING — what HTTP layer always sends
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).not.toBe(true);
@@ -146,14 +142,14 @@ describe('SearchManager.timeline() anchor dispatch', () => {
     expectAnchorRendered(text, middle.id);
   });
 
-  it('(b2) numeric anchor with surrounding whitespace is coerced and returns the same window', async () => {
+  it("(b2) numeric anchor with surrounding whitespace is coerced and returns the same window", async () => {
     const middle = seeded[24];
     const expectedIds = seeded.slice(21, 28).map((o) => o.id);
 
     const response = await manager.timeline({
       anchor: `  ${middle.id}  `,
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).not.toBe(true);
@@ -169,12 +165,12 @@ describe('SearchManager.timeline() anchor dispatch', () => {
       MEMORY_SESSION_ID,
       PROJECT,
       {
-        request: 'Synthetic session for timeline anchor test',
-        investigated: '',
-        learned: '',
-        completed: '',
-        next_steps: '',
-        notes: null,
+        request: "Synthetic session for timeline anchor test",
+        investigated: "",
+        learned: "",
+        completed: "",
+        next_steps: "",
+        notes: null
       },
       undefined,
       0,
@@ -185,23 +181,23 @@ describe('SearchManager.timeline() anchor dispatch', () => {
     const response = await manager.timeline({
       anchor: `S${sessionDbId}`,
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).not.toBe(true);
     const text: string = response.content[0].text;
-    expect(typeof text).toBe('string');
+    expect(typeof text).toBe("string");
     expect(text.length).toBeGreaterThan(0);
   });
 
-  it('(d) ISO-timestamp anchor routes to the timestamp branch and returns a non-error response', async () => {
+  it("(d) ISO-timestamp anchor routes to the timestamp branch and returns a non-error response", async () => {
     const middle = seeded[24];
     const isoAnchor = new Date(middle.epoch).toISOString();
 
     const response = await manager.timeline({
       anchor: isoAnchor,
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).not.toBe(true);
@@ -212,25 +208,25 @@ describe('SearchManager.timeline() anchor dispatch', () => {
 
   it('(e) garbage anchor "123abc" returns isError: true (does NOT swallow as numeric)', async () => {
     const response = await manager.timeline({
-      anchor: '123abc',
+      anchor: "123abc",
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).toBe(true);
     const text: string = response.content[0].text;
-    expect(text).toBe('Invalid timestamp: 123abc');
+    expect(text).toBe("Invalid timestamp: 123abc");
   });
 
-  it('(f) numeric anchor not found returns Observation #... not found with isError', async () => {
+  it("(f) numeric anchor not found returns Observation #... not found with isError", async () => {
     const response = await manager.timeline({
-      anchor: '99999999',
+      anchor: "99999999",
       depth_before: 3,
-      depth_after: 3,
+      depth_after: 3
     });
 
     expect(response.isError).toBe(true);
     const text: string = response.content[0].text;
-    expect(text).toContain('Observation #99999999 not found');
+    expect(text).toContain("Observation #99999999 not found");
   });
 });

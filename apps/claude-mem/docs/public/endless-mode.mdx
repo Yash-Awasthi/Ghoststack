@@ -21,6 +21,7 @@ Endless Mode is a **biomimetic memory architecture** that solves Claude's contex
 **Current Branch**: `beta/endless-mode` (ahead of main)
 
 **Recent Activity**:
+
 - Merged main branch changes
 - Resolved merge conflicts in save-hook, SessionStore, SessionRoutes
 - Updated documentation to remove misleading token reduction claims
@@ -38,8 +39,8 @@ Endless Mode is a **biomimetic memory architecture** that solves Claude's contex
 
 ```json
 {
-  "CLAUDE_MEM_ENDLESS_MODE": "false",  // Default: disabled
-  "CLAUDE_MEM_ENDLESS_WAIT_TIMEOUT_MS": "90000"  // 90 second timeout
+  "CLAUDE_MEM_ENDLESS_MODE": "false", // Default: disabled
+  "CLAUDE_MEM_ENDLESS_WAIT_TIMEOUT_MS": "90000" // 90 second timeout
 }
 ```
 
@@ -57,6 +58,7 @@ Clears input → Context reduced
 ## Known Limitations
 
 From the documentation:
+
 - ⚠️ **Slower than standard mode** - Blocking adds latency
 - ⚠️ **Still in development** - May have bugs
 - ⚠️ **Not battle-tested** - New architecture

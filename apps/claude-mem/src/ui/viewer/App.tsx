@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Header } from './components/Header';
-import { Feed } from './components/Feed';
-import { ContextSettingsModal } from './components/ContextSettingsModal';
-import { LogsDrawer } from './components/LogsModal';
-import { WelcomeCard, getStoredWelcomeDismissed, setStoredWelcomeDismissed } from './components/WelcomeCard';
-import { useSSE } from './hooks/useSSE';
-import { useSettings } from './hooks/useSettings';
-import { useStats } from './hooks/useStats';
-import { usePagination } from './hooks/usePagination';
-import { useTheme } from './hooks/useTheme';
-import { Observation, Summary, UserPrompt } from './types';
-import { mergeAndDeduplicateByProject } from './utils/data';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Header } from "./components/Header";
+import { Feed } from "./components/Feed";
+import { ContextSettingsModal } from "./components/ContextSettingsModal";
+import { LogsDrawer } from "./components/LogsModal";
+import { WelcomeCard, getStoredWelcomeDismissed, setStoredWelcomeDismissed } from "./components/WelcomeCard";
+import { useSSE } from "./hooks/useSSE";
+import { useSettings } from "./hooks/useSettings";
+import { useStats } from "./hooks/useStats";
+import { usePagination } from "./hooks/usePagination";
+import { useTheme } from "./hooks/useTheme";
+import { Observation, Summary, UserPrompt } from "./types";
+import { mergeAndDeduplicateByProject } from "./utils/data";
 
 export function App() {
-  const [currentFilter, setCurrentFilter] = useState('');
+  const [currentFilter, setCurrentFilter] = useState("");
   const [contextPreviewOpen, setContextPreviewOpen] = useState(false);
   const [logsModalOpen, setLogsModalOpen] = useState(false);
   const [welcomeDismissed, setWelcomeDismissed] = useState<boolean>(getStoredWelcomeDismissed);
@@ -27,13 +27,16 @@ export function App() {
   const { preference, setThemePreference } = useTheme();
   const pagination = usePagination(currentFilter);
 
-  const matchesSelection = useCallback((item: { project: string }) => {
-    return !currentFilter || item.project === currentFilter;
-  }, [currentFilter]);
+  const matchesSelection = useCallback(
+    (item: { project: string }) => {
+      return !currentFilter || item.project === currentFilter;
+    },
+    [currentFilter]
+  );
 
   useEffect(() => {
     if (currentFilter && !projects.includes(currentFilter)) {
-      setCurrentFilter('');
+      setCurrentFilter("");
     }
   }, [projects, currentFilter]);
 
@@ -56,11 +59,11 @@ export function App() {
   }, [prompts, paginatedPrompts, matchesSelection]);
 
   const toggleContextPreview = useCallback(() => {
-    setContextPreviewOpen(prev => !prev);
+    setContextPreviewOpen((prev) => !prev);
   }, []);
 
   const toggleLogsModal = useCallback(() => {
-    setLogsModalOpen(prev => !prev);
+    setLogsModalOpen((prev) => !prev);
   }, []);
 
   const handleLoadMore = useCallback(async () => {
@@ -72,16 +75,16 @@ export function App() {
       ]);
 
       if (newObservations.length > 0) {
-        setPaginatedObservations(prev => [...prev, ...newObservations]);
+        setPaginatedObservations((prev) => [...prev, ...newObservations]);
       }
       if (newSummaries.length > 0) {
-        setPaginatedSummaries(prev => [...prev, ...newSummaries]);
+        setPaginatedSummaries((prev) => [...prev, ...newSummaries]);
       }
       if (newPrompts.length > 0) {
-        setPaginatedPrompts(prev => [...prev, ...newPrompts]);
+        setPaginatedPrompts((prev) => [...prev, ...newPrompts]);
       }
     } catch (error) {
-      console.error('Failed to load more data:', error);
+      console.error("Failed to load more data:", error);
     }
   }, [pagination.observations, pagination.summaries, pagination.prompts]);
 
@@ -125,9 +128,7 @@ export function App() {
         hasMore={pagination.observations.hasMore || pagination.summaries.hasMore || pagination.prompts.hasMore}
       />
 
-      {!welcomeDismissed && (
-        <WelcomeCard onDismiss={() => setWelcomeDismissed(true)} />
-      )}
+      {!welcomeDismissed && <WelcomeCard onDismiss={() => setWelcomeDismissed(true)} />}
 
       <ContextSettingsModal
         isOpen={contextPreviewOpen}
@@ -138,21 +139,21 @@ export function App() {
         saveStatus={saveStatus}
       />
 
-      <button
-        className="console-toggle-btn"
-        onClick={toggleLogsModal}
-        title="Toggle Console"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <button className="console-toggle-btn" onClick={toggleLogsModal} title="Toggle Console">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="4 17 10 11 4 5"></polyline>
           <line x1="12" y1="19" x2="20" y2="19"></line>
         </svg>
       </button>
 
-      <LogsDrawer
-        isOpen={logsModalOpen}
-        onClose={toggleLogsModal}
-      />
+      <LogsDrawer isOpen={logsModalOpen} onClose={toggleLogsModal} />
     </>
   );
 }

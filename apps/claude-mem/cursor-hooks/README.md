@@ -35,6 +35,7 @@ bun run cursor:setup
 ## Overview
 
 The hooks bridge Cursor's hook system to claude-mem's worker API, allowing:
+
 - **Session Management**: Initialize sessions and generate summaries
 - **Observation Capture**: Record MCP tool usage, shell commands, and file edits
 - **Worker Readiness**: Ensure the worker is running before prompt submission
@@ -75,6 +76,7 @@ claude-mem cursor install
 <summary>Click to expand manual installation steps</summary>
 
 **User-level** (recommended - applies to all projects):
+
 ```bash
 # Copy hooks.json to your home directory
 cp cursor-hooks/hooks.json ~/.cursor/hooks.json
@@ -86,6 +88,7 @@ chmod +x ~/.cursor/hooks/*.sh
 ```
 
 **Project-level** (for per-project hooks):
+
 ```bash
 # Copy hooks.json to your project
 mkdir -p .cursor
@@ -102,6 +105,7 @@ chmod +x .cursor/hooks/*.sh
 ### After Installation
 
 1. **Start the worker**:
+
    ```bash
    claude-mem start
    ```
@@ -115,39 +119,44 @@ chmod +x .cursor/hooks/*.sh
 
 ## Hook Mappings
 
-| Cursor Hook | Script | Purpose |
-|-------------|--------|---------|
-| `beforeSubmitPrompt` | `session-init.sh` | Initialize claude-mem session |
-| `beforeSubmitPrompt` | `context-inject.sh` | Ensure worker is running |
-| `afterMCPExecution` | `save-observation.sh` | Capture MCP tool usage |
-| `afterShellExecution` | `save-observation.sh` | Capture shell command execution |
-| `afterFileEdit` | `save-file-edit.sh` | Capture file edits |
-| `stop` | `session-summary.sh` | Generate summary + update context file |
+| Cursor Hook           | Script                | Purpose                                |
+| --------------------- | --------------------- | -------------------------------------- |
+| `beforeSubmitPrompt`  | `session-init.sh`     | Initialize claude-mem session          |
+| `beforeSubmitPrompt`  | `context-inject.sh`   | Ensure worker is running               |
+| `afterMCPExecution`   | `save-observation.sh` | Capture MCP tool usage                 |
+| `afterShellExecution` | `save-observation.sh` | Capture shell command execution        |
+| `afterFileEdit`       | `save-file-edit.sh`   | Capture file edits                     |
+| `stop`                | `session-summary.sh`  | Generate summary + update context file |
 
 ## How It Works
 
 ### Session Initialization (`session-init.sh`)
+
 - Called before each prompt submission
 - Initializes a new session in claude-mem using `conversation_id` as the session ID
 - Extracts project name from workspace root
 - Outputs `{"continue": true}` to allow prompt submission
 
 ### Context Hook (`context-inject.sh`)
+
 - Ensures claude-mem worker is running before session
 - Outputs `{"continue": true}` to allow prompt submission
 - Note: Context file is updated by `session-summary.sh` (stop hook), not here
 
 ### Observation Capture (`save-observation.sh`)
+
 - Captures MCP tool executions and shell commands
 - Maps them to claude-mem's observation format
 - Sends to `/api/sessions/observations` endpoint (fire-and-forget)
 
 ### File Edit Capture (`save-file-edit.sh`)
+
 - Captures file edits made by the agent
 - Treats edits as "write_file" tool usage
 - Includes edit summaries in observations
 
 ### Session Summary (`session-summary.sh`)
+
 - Called when agent loop ends (stop hook)
 - Requests summary generation from claude-mem
 - **Updates context file** in `.cursor/rules/claude-mem-context.mdc` for next session
@@ -162,6 +171,7 @@ The hooks read configuration from `~/.claude-mem/settings.json`:
 ## Dependencies
 
 The hook scripts require:
+
 - `jq` - JSON processing
 - `curl` - HTTP requests
 - `bash` - Shell interpreter
@@ -174,12 +184,14 @@ Install on Ubuntu: `apt-get install jq curl`
 ### Hooks not executing
 
 1. Check hooks are in the correct location:
+
    ```bash
    ls .cursor/hooks.json  # Project-level
    ls ~/.cursor/hooks.json  # User-level
    ```
 
 2. Verify scripts are executable:
+
    ```bash
    chmod +x ~/.cursor/hooks/*.sh
    ```
@@ -191,11 +203,13 @@ Install on Ubuntu: `apt-get install jq curl`
 ### Worker not responding
 
 1. Verify worker is running:
+
    ```bash
    curl http://127.0.0.1:37777/api/readiness
    ```
 
 2. Check worker logs:
+
    ```bash
    tail -f ~/.claude-mem/logs/worker-$(date +%Y-%m-%d).log
    ```
@@ -220,13 +234,13 @@ Install on Ubuntu: `apt-get install jq curl`
 
 ## Comparison with Claude Code Integration
 
-| Feature | Claude Code | Cursor |
-|---------|-------------|--------|
-| Session Initialization | ✅ `SessionStart` hook | ✅ `beforeSubmitPrompt` hook |
-| Context Injection | ✅ `additionalContext` field | ✅ Auto-updated `.cursor/rules/` file |
-| Observation Capture | ✅ `PostToolUse` hook | ✅ `afterMCPExecution`, `afterShellExecution`, `afterFileEdit` |
-| Session Summary | ✅ `Stop` hook with transcript | ⚠️ `stop` hook (no transcript) |
-| MCP Search Tools | ✅ Full support | ✅ Full support (if MCP configured) |
+| Feature                | Claude Code                    | Cursor                                                         |
+| ---------------------- | ------------------------------ | -------------------------------------------------------------- |
+| Session Initialization | ✅ `SessionStart` hook         | ✅ `beforeSubmitPrompt` hook                                   |
+| Context Injection      | ✅ `additionalContext` field   | ✅ Auto-updated `.cursor/rules/` file                          |
+| Observation Capture    | ✅ `PostToolUse` hook          | ✅ `afterMCPExecution`, `afterShellExecution`, `afterFileEdit` |
+| Session Summary        | ✅ `Stop` hook with transcript | ⚠️ `stop` hook (no transcript)                                 |
+| MCP Search Tools       | ✅ Full support                | ✅ Full support (if MCP configured)                            |
 
 ## Files
 

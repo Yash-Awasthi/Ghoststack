@@ -19,13 +19,6 @@
     "types": ["node", "bun"],
     "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests",
-    "src/ui/viewer"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests", "src/ui/viewer"]
 }

@@ -82,17 +82,12 @@ const hasRealMemorySessionId = !!session.memorySessionId;
 
 ```typescript
 // ❌ FORBIDDEN - Would resume user's session instead of memory session!
-query({ resume: contentSessionId })
+query({ resume: contentSessionId });
 
 // ✅ CORRECT - Only resume for a continuation prompt in a valid runtime
 query({
-  ...(
-    !!memorySessionId &&
-    lastPromptNumber > 1 &&
-    !forceInit &&
-    { resume: memorySessionId }
-  )
-})
+  ...(!!memorySessionId && lastPromptNumber > 1 && !forceInit && { resume: memorySessionId })
+});
 ```
 
 `memorySessionId` is necessary but not sufficient.
@@ -157,7 +152,7 @@ storeObservation(session.contentSessionId, ...)
 ```typescript
 // WRONG - memorySessionId alone is not enough
 if (session.memorySessionId) {
-  query({ resume: session.memorySessionId })
+  query({ resume: session.memorySessionId });
 }
 ```
 
@@ -165,7 +160,7 @@ if (session.memorySessionId) {
 
 ```typescript
 // WRONG - Can be NULL before SDK session is captured
-const resumeId = session.memorySessionId
+const resumeId = session.memorySessionId;
 ```
 
 ## Correct Usage Patterns
@@ -189,15 +184,12 @@ const hasRealMemorySessionId = !!session.memorySessionId;
 query({
   prompt: messageGenerator,
   options: {
-    ...(
-      hasRealMemorySessionId &&
+    ...(hasRealMemorySessionId &&
       session.lastPromptNumber > 1 &&
-      !session.forceInit &&
-      { resume: session.memorySessionId }
-    ),
+      !session.forceInit && { resume: session.memorySessionId })
     // ... other options
   }
-})
+});
 ```
 
 ## Debugging Tips

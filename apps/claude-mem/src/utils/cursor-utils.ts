@@ -1,7 +1,6 @@
-
-import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync } from 'fs';
-import { join, basename } from 'path';
-import { logger } from './logger.js';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync } from "fs";
+import { join, basename } from "path";
+import { logger } from "./logger.js";
 
 export interface CursorProjectRegistry {
   [projectName: string]: {
@@ -23,9 +22,9 @@ export interface CursorMcpConfig {
 export function readCursorRegistry(registryFile: string): CursorProjectRegistry {
   try {
     if (!existsSync(registryFile)) return {};
-    return JSON.parse(readFileSync(registryFile, 'utf-8'));
+    return JSON.parse(readFileSync(registryFile, "utf-8"));
   } catch (error) {
-    logger.error('CONFIG', 'Failed to read Cursor registry, using empty registry', {
+    logger.error("CONFIG", "Failed to read Cursor registry, using empty registry", {
       file: registryFile,
       error: error instanceof Error ? error.message : String(error)
     });
@@ -34,16 +33,12 @@ export function readCursorRegistry(registryFile: string): CursorProjectRegistry 
 }
 
 export function writeCursorRegistry(registryFile: string, registry: CursorProjectRegistry): void {
-  const dir = join(registryFile, '..');
+  const dir = join(registryFile, "..");
   mkdirSync(dir, { recursive: true });
   writeFileSync(registryFile, JSON.stringify(registry, null, 2));
 }
 
-export function registerCursorProject(
-  registryFile: string,
-  projectName: string,
-  workspacePath: string
-): void {
+export function registerCursorProject(registryFile: string, projectName: string, workspacePath: string): void {
   const registry = readCursorRegistry(registryFile);
   registry[projectName] = {
     workspacePath,
@@ -61,8 +56,8 @@ export function unregisterCursorProject(registryFile: string, projectName: strin
 }
 
 export function writeContextFile(workspacePath: string, context: string): void {
-  const rulesDir = join(workspacePath, '.cursor', 'rules');
-  const rulesFile = join(rulesDir, 'claude-mem-context.mdc');
+  const rulesDir = join(workspacePath, ".cursor", "rules");
+  const rulesFile = join(rulesDir, "claude-mem-context.mdc");
   const tempFile = `${rulesFile}.tmp`;
 
   mkdirSync(rulesDir, { recursive: true });
@@ -87,24 +82,24 @@ ${context}
 }
 
 export function readContextFile(workspacePath: string): string | null {
-  const rulesFile = join(workspacePath, '.cursor', 'rules', 'claude-mem-context.mdc');
+  const rulesFile = join(workspacePath, ".cursor", "rules", "claude-mem-context.mdc");
   if (!existsSync(rulesFile)) return null;
-  return readFileSync(rulesFile, 'utf-8');
+  return readFileSync(rulesFile, "utf-8");
 }
 
 export function configureCursorMcp(mcpJsonPath: string, mcpServerScriptPath: string): void {
-  const dir = join(mcpJsonPath, '..');
+  const dir = join(mcpJsonPath, "..");
   mkdirSync(dir, { recursive: true });
 
   let config: CursorMcpConfig = { mcpServers: {} };
   if (existsSync(mcpJsonPath)) {
     try {
-      config = JSON.parse(readFileSync(mcpJsonPath, 'utf-8'));
+      config = JSON.parse(readFileSync(mcpJsonPath, "utf-8"));
       if (!config.mcpServers) {
         config.mcpServers = {};
       }
     } catch (error) {
-      logger.error('CONFIG', 'Failed to read MCP config, starting fresh', {
+      logger.error("CONFIG", "Failed to read MCP config, starting fresh", {
         file: mcpJsonPath,
         error: error instanceof Error ? error.message : String(error)
       });
@@ -112,8 +107,8 @@ export function configureCursorMcp(mcpJsonPath: string, mcpServerScriptPath: str
     }
   }
 
-  config.mcpServers['claude-mem'] = {
-    command: 'node',
+  config.mcpServers["claude-mem"] = {
+    command: "node",
     args: [mcpServerScriptPath]
   };
 
@@ -124,13 +119,13 @@ export function removeMcpConfig(mcpJsonPath: string): void {
   if (!existsSync(mcpJsonPath)) return;
 
   try {
-    const config: CursorMcpConfig = JSON.parse(readFileSync(mcpJsonPath, 'utf-8'));
-    if (config.mcpServers && config.mcpServers['claude-mem']) {
-      delete config.mcpServers['claude-mem'];
+    const config: CursorMcpConfig = JSON.parse(readFileSync(mcpJsonPath, "utf-8"));
+    if (config.mcpServers && config.mcpServers["claude-mem"]) {
+      delete config.mcpServers["claude-mem"];
       writeFileSync(mcpJsonPath, JSON.stringify(config, null, 2));
     }
   } catch (e) {
-    logger.warn('CURSOR', 'Failed to remove MCP config during cleanup', {
+    logger.warn("CURSOR", "Failed to remove MCP config during cleanup", {
       mcpJsonPath,
       error: e instanceof Error ? e.message : String(e)
     });
@@ -146,7 +141,7 @@ export function parseArrayField(field: string): { field: string; index: number }
   };
 }
 
-export function jsonGet(json: Record<string, unknown>, field: string, fallback: string = ''): string {
+export function jsonGet(json: Record<string, unknown>, field: string, fallback: string = ""): string {
   const arrayAccess = parseArrayField(field);
 
   if (arrayAccess) {
@@ -163,18 +158,18 @@ export function jsonGet(json: Record<string, unknown>, field: string, fallback: 
 }
 
 export function getProjectName(workspacePath: string): string {
-  if (!workspacePath) return 'unknown-project';
+  if (!workspacePath) return "unknown-project";
 
   const driveMatch = workspacePath.match(/^([A-Za-z]):[\\\/]?$/);
   if (driveMatch) {
     return `drive-${driveMatch[1].toUpperCase()}`;
   }
 
-  const normalized = workspacePath.replace(/\\/g, '/');
+  const normalized = workspacePath.replace(/\\/g, "/");
   const name = basename(normalized);
 
   if (!name) {
-    return 'unknown-project';
+    return "unknown-project";
   }
 
   return name;
@@ -182,9 +177,9 @@ export function getProjectName(workspacePath: string): string {
 
 export function isEmpty(str: string | null | undefined): boolean {
   if (str === null || str === undefined) return true;
-  if (str === '') return true;
-  if (str === 'null') return true;
-  if (str === 'empty') return true;
+  if (str === "") return true;
+  if (str === "null") return true;
+  if (str === "empty") return true;
   return false;
 }
 

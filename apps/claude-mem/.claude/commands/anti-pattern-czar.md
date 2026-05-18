@@ -9,6 +9,7 @@ Help the user systematically fix error handling anti-patterns detected by the au
 ## Process
 
 1. **Run the detector:**
+
    ```bash
    bun run scripts/anti-pattern-test/detect-error-handling-antipatterns.ts
    ```
@@ -23,15 +24,15 @@ Help the user systematically fix error handling anti-patterns detected by the au
    a. **Read the problematic code** using the Read tool
 
    b. **Explain the problem:**
-      - Why is this dangerous?
-      - What debugging nightmare could this cause?
-      - What specific error is being swallowed?
+   - Why is this dangerous?
+   - What debugging nightmare could this cause?
+   - What specific error is being swallowed?
 
    c. **Determine the right fix:**
-      - **Option 1: Add proper logging** - If this is a real error that should be visible
-      - **Option 2: Add [APPROVED OVERRIDE]** - If this is expected/documented behavior
-      - **Option 3: Remove the try-catch entirely** - If the error should propagate
-      - **Option 4: Add specific error type checking** - If only certain errors should be caught
+   - **Option 1: Add proper logging** - If this is a real error that should be visible
+   - **Option 2: Add [APPROVED OVERRIDE]** - If this is expected/documented behavior
+   - **Option 3: Remove the try-catch entirely** - If the error should propagate
+   - **Option 4: Add specific error type checking** - If only certain errors should be caught
 
    d. **Propose the fix** and ask for approval
 
@@ -45,6 +46,7 @@ Help the user systematically fix error handling anti-patterns detected by the au
 ## Guidelines for Approved Overrides
 
 Only approve overrides when ALL of these are true:
+
 - The error is **expected and frequent** (e.g., JSON parse on optional fields)
 - Logging would create **too much noise** (high-frequency operations)
 - There's **explicit recovery logic** (fallback value, retry, graceful degradation)
@@ -53,12 +55,14 @@ Only approve overrides when ALL of these are true:
 ## Valid Override Examples:
 
 ✅ **GOOD:**
+
 - "Expected JSON parse failures for optional data fields, too frequent to log"
 - "Logger can't log its own failures, using stderr as last resort"
 - "Health check port scan, expected connection failures on free port detection"
 - "Git repo detection, expected failures when not in a git directory"
 
 ❌ **BAD:**
+
 - "Error is not important" (why catch it then?)
 - "Happens sometimes" (when? why?)
 - "Works fine without logging" (works until it doesn't)
@@ -76,6 +80,7 @@ For files in the CRITICAL_PATHS list (SDKAgent.ts, GeminiAgent.ts, OpenRouterAge
 ## Output Format
 
 After each fix:
+
 ```
 ✅ Fixed: src/utils/example.ts:42
    Pattern: NO_LOGGING_IN_CATCH
@@ -85,6 +90,7 @@ Progress: 3/28 critical issues remaining
 ```
 
 After completing a batch:
+
 ```
 🎯 Batch complete! Re-running detector...
 [shows new results]
@@ -101,6 +107,7 @@ After completing a batch:
 ## When Complete
 
 Report final statistics:
+
 ```
 🎉 Anti-pattern cleanup complete!
 

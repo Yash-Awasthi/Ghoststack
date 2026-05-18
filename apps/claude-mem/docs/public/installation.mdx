@@ -16,6 +16,7 @@ npx claude-mem install
 ```
 
 The interactive installer will:
+
 - Run a runtime check (auto-installs Bun and uv if missing)
 - Detect your installed IDEs (Claude Code, Cursor, Gemini CLI, Windsurf, OpenCode, Codex CLI) and let you multi-select which ones to wire up
 - Offer to install Claude Code if it isn't found
@@ -81,6 +82,7 @@ Dependencies are installed automatically by `npx claude-mem install` and `npx cl
 #### 2. Verify Plugin Installation
 
 Check that hooks are configured in Claude Code:
+
 ```bash
 cat plugin/hooks/hooks.json
 ```
@@ -88,6 +90,7 @@ cat plugin/hooks/hooks.json
 #### 3. Data Directory Location
 
 Data is stored in `~/.claude-mem/`:
+
 - Database: `~/.claude-mem/claude-mem.db`
 - PID file: `~/.claude-mem/.worker.pid`
 - Port file: `~/.claude-mem/.worker.port`
@@ -95,6 +98,7 @@ Data is stored in `~/.claude-mem/`:
 - Settings: `~/.claude-mem/settings.json`
 
 Override with environment variable:
+
 ```bash
 export CLAUDE_MEM_DATA_DIR=/custom/path
 ```

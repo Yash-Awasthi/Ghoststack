@@ -31,10 +31,7 @@
     "longDescription": "claude-mem captures coding-session activity, compresses it into reusable observations, and injects relevant context back into future Claude Code and Codex-compatible sessions.",
     "developerName": "Alex Newman",
     "category": "Productivity",
-    "capabilities": [
-      "Interactive",
-      "Write"
-    ],
+    "capabilities": ["Interactive", "Write"],
     "websiteURL": "https://github.com/thedotmack/claude-mem",
     "defaultPrompt": [
       "Find what I already learned about this codebase before I start a new task.",

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsonObject, PostgresQueryable } from './utils.js';
-import { newId, queryOne, toEpoch, toJsonObject } from './utils.js';
+import type { JsonObject, PostgresQueryable } from "./utils.js";
+import { newId, queryOne, toEpoch, toJsonObject } from "./utils.js";
 
 export interface PostgresProject {
   id: string;
@@ -24,12 +24,7 @@ interface ProjectRow {
 export class PostgresProjectsRepository {
   constructor(private client: PostgresQueryable) {}
 
-  async create(input: {
-    id?: string;
-    teamId: string;
-    name: string;
-    metadata?: JsonObject;
-  }): Promise<PostgresProject> {
+  async create(input: { id?: string; teamId: string; name: string; metadata?: JsonObject }): Promise<PostgresProject> {
     const id = input.id ?? newId();
     const row = await queryOne<ProjectRow>(
       this.client,
@@ -44,11 +39,10 @@ export class PostgresProjectsRepository {
   }
 
   async getByIdForTeam(id: string, teamId: string): Promise<PostgresProject | null> {
-    const row = await queryOne<ProjectRow>(
-      this.client,
-      'SELECT * FROM projects WHERE id = $1 AND team_id = $2',
-      [id, teamId]
-    );
+    const row = await queryOne<ProjectRow>(this.client, "SELECT * FROM projects WHERE id = $1 AND team_id = $2", [
+      id,
+      teamId
+    ]);
     return row ? mapProjectRow(row) : null;
   }
 }

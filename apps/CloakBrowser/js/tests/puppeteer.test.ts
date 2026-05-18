@@ -3,18 +3,18 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 // Mock puppeteer-core and download before importing the module under test
 vi.mock("puppeteer-core", () => ({
   default: {
-    launch: vi.fn(),
-  },
+    launch: vi.fn()
+  }
 }));
 
 vi.mock("../src/download.js", () => ({
-  ensureBinary: vi.fn().mockResolvedValue("/fake/chrome"),
+  ensureBinary: vi.fn().mockResolvedValue("/fake/chrome")
 }));
 
 vi.mock("../src/geoip.js", () => ({
   resolveProxyGeo: vi.fn().mockResolvedValue({ timezone: null, locale: null }),
   maybeResolveGeoip: vi.fn().mockResolvedValue({}),
-  resolveWebrtcArgs: vi.fn().mockImplementation((opts: any) => Promise.resolve(opts.args)),
+  resolveWebrtcArgs: vi.fn().mockImplementation((opts: any) => Promise.resolve(opts.args))
 }));
 
 describe("puppeteer launch", () => {
@@ -26,9 +26,9 @@ describe("puppeteer launch", () => {
     puppeteerMock = await import("puppeteer-core");
     mockBrowser = {
       newPage: vi.fn().mockResolvedValue({
-        authenticate: vi.fn(),
+        authenticate: vi.fn()
       }),
-      close: vi.fn(),
+      close: vi.fn()
     };
     vi.mocked(puppeteerMock.default.launch).mockResolvedValue(mockBrowser);
   });
@@ -43,7 +43,7 @@ describe("puppeteer launch", () => {
 
     expect(puppeteerMock.default.launch).toHaveBeenCalledWith(
       expect.objectContaining({
-        executablePath: "/fake/chrome",
+        executablePath: "/fake/chrome"
       })
     );
   });
@@ -76,7 +76,7 @@ describe("puppeteer launch", () => {
   it("adds --proxy-bypass-list for dict proxy with bypass", async () => {
     const { launch } = await import("../src/puppeteer.js");
     await launch({
-      proxy: { server: "http://proxy:8080", bypass: ".google.com,localhost" },
+      proxy: { server: "http://proxy:8080", bypass: ".google.com,localhost" }
     });
 
     const callArgs = vi.mocked(puppeteerMock.default.launch).mock.calls[0][0];
@@ -92,7 +92,7 @@ describe("puppeteer launch", () => {
     const page = await browser.newPage();
     expect(page.authenticate).toHaveBeenCalledWith({
       username: "user",
-      password: "pass",
+      password: "pass"
     });
   });
 
@@ -129,7 +129,7 @@ describe("puppeteer launch", () => {
   it("reconstructs SOCKS5 dict with auth into --proxy-server URL", async () => {
     const { launch } = await import("../src/puppeteer.js");
     const browser = await launch({
-      proxy: { server: "socks5://proxy:1080", username: "user", password: "p@ss" },
+      proxy: { server: "socks5://proxy:1080", username: "user", password: "p@ss" }
     });
 
     const callArgs = vi.mocked(puppeteerMock.default.launch).mock.calls[0][0];

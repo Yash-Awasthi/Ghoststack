@@ -1,14 +1,9 @@
+import type { Database } from "bun:sqlite";
+import { logger } from "../../../utils/logger.js";
+import type { UserPromptRecord, LatestPromptResult } from "../../../types/database.js";
+import type { RecentUserPromptResult, PromptWithProject, GetPromptsByIdsOptions } from "./types.js";
 
-import type { Database } from 'bun:sqlite';
-import { logger } from '../../../utils/logger.js';
-import type { UserPromptRecord, LatestPromptResult } from '../../../types/database.js';
-import type { RecentUserPromptResult, PromptWithProject, GetPromptsByIdsOptions } from './types.js';
-
-export function getUserPrompt(
-  db: Database,
-  contentSessionId: string,
-  promptNumber: number
-): string | null {
+export function getUserPrompt(db: Database, contentSessionId: string, promptNumber: number): string | null {
   const stmt = db.prepare(`
     SELECT prompt_text
     FROM user_prompts
@@ -21,16 +16,17 @@ export function getUserPrompt(
 }
 
 export function getPromptNumberFromUserPrompts(db: Database, contentSessionId: string): number {
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM user_prompts WHERE content_session_id = ?
-  `).get(contentSessionId) as { count: number };
+  `
+    )
+    .get(contentSessionId) as { count: number };
   return result.count;
 }
 
-export function getLatestUserPrompt(
-  db: Database,
-  contentSessionId: string
-): LatestPromptResult | undefined {
+export function getLatestUserPrompt(db: Database, contentSessionId: string): LatestPromptResult | undefined {
   const stmt = db.prepare(`
     SELECT
       up.*,
@@ -46,10 +42,7 @@ export function getLatestUserPrompt(
   return stmt.get(contentSessionId) as LatestPromptResult | undefined;
 }
 
-export function getAllRecentUserPrompts(
-  db: Database,
-  limit: number = 100
-): RecentUserPromptResult[] {
+export function getAllRecentUserPrompts(db: Database, limit: number = 100): RecentUserPromptResult[] {
   const stmt = db.prepare(`
     SELECT
       up.id,
@@ -90,7 +83,7 @@ export function getPromptById(db: Database, id: number): PromptWithProject | nul
 export function getPromptsByIds(db: Database, ids: number[]): PromptWithProject[] {
   if (ids.length === 0) return [];
 
-  const placeholders = ids.map(() => '?').join(',');
+  const placeholders = ids.map(() => "?").join(",");
   const stmt = db.prepare(`
     SELECT
       p.id,
@@ -116,13 +109,13 @@ export function getUserPromptsByIds(
 ): UserPromptRecord[] {
   if (ids.length === 0) return [];
 
-  const { orderBy = 'date_desc', limit, project } = options;
-  const orderClause = orderBy === 'date_asc' ? 'ASC' : 'DESC';
-  const limitClause = limit ? `LIMIT ${limit}` : '';
-  const placeholders = ids.map(() => '?').join(',');
+  const { orderBy = "date_desc", limit, project } = options;
+  const orderClause = orderBy === "date_asc" ? "ASC" : "DESC";
+  const limitClause = limit ? `LIMIT ${limit}` : "";
+  const placeholders = ids.map(() => "?").join(",");
   const params: (number | string)[] = [...ids];
 
-  const projectFilter = project ? 'AND s.project = ?' : '';
+  const projectFilter = project ? "AND s.project = ?" : "";
   if (project) params.push(project);
 
   const stmt = db.prepare(`

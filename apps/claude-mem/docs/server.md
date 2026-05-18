@@ -49,17 +49,17 @@ container entrypoint runs `bun server-beta-service.cjs --daemon` (or
 `validateServerBetaEnv()` runs at startup and refuses to boot when any of
 the following are missing or invalid in Docker:
 
-| Variable                          | Required | Notes                                                        |
-|-----------------------------------|----------|--------------------------------------------------------------|
-| `CLAUDE_MEM_RUNTIME`              | Docker   | Must be `server-beta` in Docker (warned otherwise).          |
-| `CLAUDE_MEM_QUEUE_ENGINE`         | Docker   | Must be `bullmq`. In-process queues are rejected in Docker.  |
-| `CLAUDE_MEM_SERVER_DATABASE_URL`  | Always   | Postgres connection string. Fails fast at startup.           |
-| `CLAUDE_MEM_REDIS_URL`            | bullmq   | Required when queue engine is `bullmq`.                      |
-| `CLAUDE_MEM_AUTH_MODE`            | Always   | Must NOT be `local-dev` in Docker.                           |
-| `CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS` | Docker | Must NOT be `1`/`true` in Docker.                            |
-| `CLAUDE_MEM_GENERATION_DISABLED`  | Optional | Set to `true` on the HTTP service when running a separate worker. |
-| `CLAUDE_MEM_SERVER_PROVIDER`      | Worker   | One of `claude`, `gemini`, `openrouter`. Worker only.        |
-| `ANTHROPIC_API_KEY` (or alt)      | Worker   | Required by the chosen provider.                             |
+| Variable                            | Required | Notes                                                             |
+| ----------------------------------- | -------- | ----------------------------------------------------------------- |
+| `CLAUDE_MEM_RUNTIME`                | Docker   | Must be `server-beta` in Docker (warned otherwise).               |
+| `CLAUDE_MEM_QUEUE_ENGINE`           | Docker   | Must be `bullmq`. In-process queues are rejected in Docker.       |
+| `CLAUDE_MEM_SERVER_DATABASE_URL`    | Always   | Postgres connection string. Fails fast at startup.                |
+| `CLAUDE_MEM_REDIS_URL`              | bullmq   | Required when queue engine is `bullmq`.                           |
+| `CLAUDE_MEM_AUTH_MODE`              | Always   | Must NOT be `local-dev` in Docker.                                |
+| `CLAUDE_MEM_ALLOW_LOCAL_DEV_BYPASS` | Docker   | Must NOT be `1`/`true` in Docker.                                 |
+| `CLAUDE_MEM_GENERATION_DISABLED`    | Optional | Set to `true` on the HTTP service when running a separate worker. |
+| `CLAUDE_MEM_SERVER_PROVIDER`        | Worker   | One of `claude`, `gemini`, `openrouter`. Worker only.             |
+| `ANTHROPIC_API_KEY` (or alt)        | Worker   | Required by the chosen provider.                                  |
 
 Local development can still use SQLite + `local-dev` auth bypass **outside
 Docker only**. Deployable mode must use the table above.
@@ -74,12 +74,12 @@ claude-mem server worker start
 
 This starts a process that:
 
-* Connects to Postgres and Valkey using the same configuration as the HTTP
+- Connects to Postgres and Valkey using the same configuration as the HTTP
   service.
-* Attaches BullMQ Workers to the `event` and `summary` queues.
-* Never opens an HTTP listener.
-* Blocks in the foreground (good for `docker run`, `kubectl run`, systemd).
-* Forces generation enabled even if `CLAUDE_MEM_GENERATION_DISABLED=true`
+- Attaches BullMQ Workers to the `event` and `summary` queues.
+- Never opens an HTTP listener.
+- Blocks in the foreground (good for `docker run`, `kubectl run`, systemd).
+- Forces generation enabled even if `CLAUDE_MEM_GENERATION_DISABLED=true`
   is inherited from the shared compose file. The worker IS the generation
   process.
 
@@ -129,14 +129,14 @@ poison.
 
 `docker-compose.yml` ships four services:
 
-* `postgres` — canonical storage. Schema is bootstrapped at startup by
+- `postgres` — canonical storage. Schema is bootstrapped at startup by
   `bootstrapServerBetaPostgresSchema()`.
-* `valkey` — BullMQ queue, configured with `appendonly yes`,
+- `valkey` — BullMQ queue, configured with `appendonly yes`,
   `appendfsync everysec`, `maxmemory-policy noeviction`.
-* `claude-mem-server` — HTTP runtime.
+- `claude-mem-server` — HTTP runtime.
   `CLAUDE_MEM_GENERATION_DISABLED=true` so the BullMQ Worker is **not**
   attached here.
-* `claude-mem-worker` — generation worker. Scale horizontally.
+- `claude-mem-worker` — generation worker. Scale horizontally.
 
 Bring it up:
 
@@ -154,9 +154,9 @@ docker compose down -v
 
 `scripts/e2e-server-beta-docker.sh` brings up the full stack and verifies:
 
-* `POST /v1/events?wait=true` returns a `generationJob` descriptor.
-* Restart of `claude-mem-server` and `claude-mem-worker` mid-stream does
+- `POST /v1/events?wait=true` returns a `generationJob` descriptor.
+- Restart of `claude-mem-server` and `claude-mem-worker` mid-stream does
   not lose data.
-* Revoking an API key denies subsequent reads and writes (401/403).
-* No `worker-service.cjs` process runs in any container.
-* `CLAUDE_MEM_AUTH_MODE=local-dev` is rejected inside Docker.
+- Revoking an API key denies subsequent reads and writes (401/403).
+- No `worker-service.cjs` process runs in any container.
+- `CLAUDE_MEM_AUTH_MODE=local-dev` is rejected inside Docker.

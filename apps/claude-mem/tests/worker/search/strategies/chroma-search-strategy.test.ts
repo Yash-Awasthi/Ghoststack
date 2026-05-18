@@ -1,71 +1,78 @@
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
-import { ChromaSearchStrategy } from '../../../../src/services/worker/search/strategies/ChromaSearchStrategy.js';
-import type { StrategySearchOptions, ObservationSearchResult, SessionSummarySearchResult, UserPromptSearchResult } from '../../../../src/services/worker/search/types.js';
+import { describe, it, expect, mock, beforeEach } from "bun:test";
+import { ChromaSearchStrategy } from "../../../../src/services/worker/search/strategies/ChromaSearchStrategy.js";
+import type {
+  StrategySearchOptions,
+  ObservationSearchResult,
+  SessionSummarySearchResult,
+  UserPromptSearchResult
+} from "../../../../src/services/worker/search/types.js";
 
 const mockObservation: ObservationSearchResult = {
   id: 1,
-  memory_session_id: 'session-123',
-  project: 'test-project',
-  text: 'Test observation text',
-  type: 'decision',
-  title: 'Test Decision',
-  subtitle: 'A test subtitle',
+  memory_session_id: "session-123",
+  project: "test-project",
+  text: "Test observation text",
+  type: "decision",
+  title: "Test Decision",
+  subtitle: "A test subtitle",
   facts: '["fact1", "fact2"]',
-  narrative: 'Test narrative',
+  narrative: "Test narrative",
   concepts: '["concept1", "concept2"]',
   files_read: '["file1.ts"]',
   files_modified: '["file2.ts"]',
   prompt_number: 1,
   discovery_tokens: 100,
-  created_at: '2025-01-01T12:00:00.000Z',
-  created_at_epoch: Date.now() - 1000 * 60 * 60 * 24 
+  created_at: "2025-01-01T12:00:00.000Z",
+  created_at_epoch: Date.now() - 1000 * 60 * 60 * 24
 };
 
 const mockSession: SessionSummarySearchResult = {
   id: 2,
-  memory_session_id: 'session-123',
-  project: 'test-project',
-  request: 'Test request',
-  investigated: 'Test investigated',
-  learned: 'Test learned',
-  completed: 'Test completed',
-  next_steps: 'Test next steps',
+  memory_session_id: "session-123",
+  project: "test-project",
+  request: "Test request",
+  investigated: "Test investigated",
+  learned: "Test learned",
+  completed: "Test completed",
+  next_steps: "Test next steps",
   files_read: '["file1.ts"]',
   files_edited: '["file2.ts"]',
-  notes: 'Test notes',
+  notes: "Test notes",
   prompt_number: 1,
   discovery_tokens: 500,
-  created_at: '2025-01-01T12:00:00.000Z',
+  created_at: "2025-01-01T12:00:00.000Z",
   created_at_epoch: Date.now() - 1000 * 60 * 60 * 24
 };
 
 const mockPrompt: UserPromptSearchResult = {
   id: 3,
-  content_session_id: 'content-session-123',
+  content_session_id: "content-session-123",
   prompt_number: 1,
-  prompt_text: 'Test prompt text',
-  created_at: '2025-01-01T12:00:00.000Z',
+  prompt_text: "Test prompt text",
+  created_at: "2025-01-01T12:00:00.000Z",
   created_at_epoch: Date.now() - 1000 * 60 * 60 * 24
 };
 
-describe('ChromaSearchStrategy', () => {
+describe("ChromaSearchStrategy", () => {
   let strategy: ChromaSearchStrategy;
   let mockChromaSync: any;
   let mockSessionStore: any;
 
   beforeEach(() => {
-    const recentEpoch = Date.now() - 1000 * 60 * 60 * 24; 
+    const recentEpoch = Date.now() - 1000 * 60 * 60 * 24;
 
     mockChromaSync = {
-      queryChroma: mock(() => Promise.resolve({
-        ids: [1, 2, 3],
-        distances: [0.1, 0.2, 0.3],
-        metadatas: [
-          { sqlite_id: 1, doc_type: 'observation', created_at_epoch: recentEpoch },
-          { sqlite_id: 2, doc_type: 'session_summary', created_at_epoch: recentEpoch },
-          { sqlite_id: 3, doc_type: 'user_prompt', created_at_epoch: recentEpoch }
-        ]
-      }))
+      queryChroma: mock(() =>
+        Promise.resolve({
+          ids: [1, 2, 3],
+          distances: [0.1, 0.2, 0.3],
+          metadatas: [
+            { sqlite_id: 1, doc_type: "observation", created_at_epoch: recentEpoch },
+            { sqlite_id: 2, doc_type: "session_summary", created_at_epoch: recentEpoch },
+            { sqlite_id: 3, doc_type: "user_prompt", created_at_epoch: recentEpoch }
+          ]
+        })
+      )
     };
 
     mockSessionStore = {
@@ -77,65 +84,65 @@ describe('ChromaSearchStrategy', () => {
     strategy = new ChromaSearchStrategy(mockChromaSync, mockSessionStore);
   });
 
-  describe('canHandle', () => {
-    it('should return true when query text is present', () => {
+  describe("canHandle", () => {
+    it("should return true when query text is present", () => {
       const options: StrategySearchOptions = {
-        query: 'semantic search query'
+        query: "semantic search query"
       };
       expect(strategy.canHandle(options)).toBe(true);
     });
 
-    it('should return false for filter-only (no query)', () => {
+    it("should return false for filter-only (no query)", () => {
       const options: StrategySearchOptions = {
-        project: 'test-project'
+        project: "test-project"
       };
       expect(strategy.canHandle(options)).toBe(false);
     });
 
-    it('should return false when query is empty string', () => {
+    it("should return false when query is empty string", () => {
       const options: StrategySearchOptions = {
-        query: ''
+        query: ""
       };
       expect(strategy.canHandle(options)).toBe(false);
     });
 
-    it('should return false when query is undefined', () => {
+    it("should return false when query is undefined", () => {
       const options: StrategySearchOptions = {};
       expect(strategy.canHandle(options)).toBe(false);
     });
   });
 
-  describe('search', () => {
-    it('should call Chroma with query text', async () => {
+  describe("search", () => {
+    it("should call Chroma with query text", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
+        query: "test query",
         limit: 10
       };
 
       await strategy.search(options);
 
       expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
+        "test query",
         100, // CHROMA_BATCH_SIZE
-        undefined 
+        undefined
       );
     });
 
-    it('should return usedChroma: true on success', async () => {
+    it("should return usedChroma: true on success", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query'
+        query: "test query"
       };
 
       const result = await strategy.search(options);
 
       expect(result.usedChroma).toBe(true);
-      expect(result.strategy).toBe('chroma');
+      expect(result.strategy).toBe("chroma");
     });
 
-    it('should hydrate observations from SQLite', async () => {
+    it("should hydrate observations from SQLite", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations'
+        query: "test query",
+        searchType: "observations"
       };
 
       const result = await strategy.search(options);
@@ -144,10 +151,10 @@ describe('ChromaSearchStrategy', () => {
       expect(result.results.observations).toHaveLength(1);
     });
 
-    it('should hydrate sessions from SQLite', async () => {
+    it("should hydrate sessions from SQLite", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'sessions'
+        query: "test query",
+        searchType: "sessions"
       };
 
       await strategy.search(options);
@@ -155,10 +162,10 @@ describe('ChromaSearchStrategy', () => {
       expect(mockSessionStore.getSessionSummariesByIds).toHaveBeenCalled();
     });
 
-    it('should hydrate prompts from SQLite', async () => {
+    it("should hydrate prompts from SQLite", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'prompts'
+        query: "test query",
+        searchType: "prompts"
       };
 
       await strategy.search(options);
@@ -166,98 +173,76 @@ describe('ChromaSearchStrategy', () => {
       expect(mockSessionStore.getUserPromptsByIds).toHaveBeenCalled();
     });
 
-    it('should filter by doc_type when searchType is observations', async () => {
+    it("should filter by doc_type when searchType is observations", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations'
+        query: "test query",
+        searchType: "observations"
       };
 
       await strategy.search(options);
 
-      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
-        100,
-        { doc_type: 'observation' }
-      );
+      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith("test query", 100, { doc_type: "observation" });
     });
 
-    it('should filter by doc_type when searchType is sessions', async () => {
+    it("should filter by doc_type when searchType is sessions", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'sessions'
+        query: "test query",
+        searchType: "sessions"
       };
 
       await strategy.search(options);
 
-      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
-        100,
-        { doc_type: 'session_summary' }
-      );
+      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith("test query", 100, { doc_type: "session_summary" });
     });
 
-    it('should filter by doc_type when searchType is prompts', async () => {
+    it("should filter by doc_type when searchType is prompts", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'prompts'
+        query: "test query",
+        searchType: "prompts"
       };
 
       await strategy.search(options);
 
-      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
-        100,
-        { doc_type: 'user_prompt' }
-      );
+      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith("test query", 100, { doc_type: "user_prompt" });
     });
 
-    it('should include project in Chroma where clause when specified', async () => {
+    it("should include project in Chroma where clause when specified", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        project: 'my-project'
+        query: "test query",
+        project: "my-project"
       };
 
       await strategy.search(options);
 
-      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
-        100,
-        { project: 'my-project' }
-      );
+      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith("test query", 100, { project: "my-project" });
     });
 
-    it('should combine doc_type and project with $and when both specified', async () => {
+    it("should combine doc_type and project with $and when both specified", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations',
-        project: 'my-project'
+        query: "test query",
+        searchType: "observations",
+        project: "my-project"
       };
 
       await strategy.search(options);
 
-      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
-        100,
-        { $and: [{ doc_type: 'observation' }, { project: 'my-project' }] }
-      );
+      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith("test query", 100, {
+        $and: [{ doc_type: "observation" }, { project: "my-project" }]
+      });
     });
 
-    it('should not include project filter when project is not specified', async () => {
+    it("should not include project filter when project is not specified", async () => {
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations'
+        query: "test query",
+        searchType: "observations"
       };
 
       await strategy.search(options);
 
-      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith(
-        'test query',
-        100,
-        { doc_type: 'observation' }
-      );
+      expect(mockChromaSync.queryChroma).toHaveBeenCalledWith("test query", 100, { doc_type: "observation" });
     });
 
-    it('should return empty result when no query provided', async () => {
+    it("should return empty result when no query provided", async () => {
       const options: StrategySearchOptions = {
         query: undefined
       };
@@ -270,36 +255,38 @@ describe('ChromaSearchStrategy', () => {
       expect(mockChromaSync.queryChroma).not.toHaveBeenCalled();
     });
 
-    it('should return empty result when Chroma returns no matches', async () => {
-      mockChromaSync.queryChroma = mock(() => Promise.resolve({
-        ids: [],
-        distances: [],
-        metadatas: []
-      }));
+    it("should return empty result when Chroma returns no matches", async () => {
+      mockChromaSync.queryChroma = mock(() =>
+        Promise.resolve({
+          ids: [],
+          distances: [],
+          metadatas: []
+        })
+      );
 
       const options: StrategySearchOptions = {
-        query: 'no matches query'
+        query: "no matches query"
       };
 
       const result = await strategy.search(options);
 
       expect(result.results.observations).toHaveLength(0);
-      expect(result.usedChroma).toBe(true); 
+      expect(result.usedChroma).toBe(true);
     });
 
-    it('should filter out old results (beyond 90-day window)', async () => {
-      const oldEpoch = Date.now() - 1000 * 60 * 60 * 24 * 100; 
+    it("should filter out old results (beyond 90-day window)", async () => {
+      const oldEpoch = Date.now() - 1000 * 60 * 60 * 24 * 100;
 
-      mockChromaSync.queryChroma = mock(() => Promise.resolve({
-        ids: [1],
-        distances: [0.1],
-        metadatas: [
-          { sqlite_id: 1, doc_type: 'observation', created_at_epoch: oldEpoch }
-        ]
-      }));
+      mockChromaSync.queryChroma = mock(() =>
+        Promise.resolve({
+          ids: [1],
+          distances: [0.1],
+          metadatas: [{ sqlite_id: 1, doc_type: "observation", created_at_epoch: oldEpoch }]
+        })
+      );
 
       const options: StrategySearchOptions = {
-        query: 'old data query'
+        query: "old data query"
       };
 
       const result = await strategy.search(options);
@@ -307,52 +294,54 @@ describe('ChromaSearchStrategy', () => {
       expect(mockSessionStore.getObservationsByIds).not.toHaveBeenCalled();
     });
 
-    it('should propagate Chroma errors (fail-fast, no silent fallback)', async () => {
-      mockChromaSync.queryChroma = mock(() => Promise.reject(new Error('Chroma connection failed')));
+    it("should propagate Chroma errors (fail-fast, no silent fallback)", async () => {
+      mockChromaSync.queryChroma = mock(() => Promise.reject(new Error("Chroma connection failed")));
 
       const options: StrategySearchOptions = {
-        query: 'test query'
+        query: "test query"
       };
 
-      await expect(strategy.search(options)).rejects.toThrow('Chroma connection failed');
+      await expect(strategy.search(options)).rejects.toThrow("Chroma connection failed");
     });
 
-    it('should propagate SQLite hydration errors (fail-fast)', async () => {
+    it("should propagate SQLite hydration errors (fail-fast)", async () => {
       mockSessionStore.getObservationsByIds = mock(() => {
-        throw new Error('SQLite error');
+        throw new Error("SQLite error");
       });
 
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations'
+        query: "test query",
+        searchType: "observations"
       };
 
-      await expect(strategy.search(options)).rejects.toThrow('SQLite error');
+      await expect(strategy.search(options)).rejects.toThrow("SQLite error");
     });
 
-    it('should correctly align IDs with metadatas when Chroma returns duplicate sqlite_ids (multiple docs per observation)', async () => {
-      const recentEpoch = Date.now() - 1000 * 60 * 60 * 24; 
+    it("should correctly align IDs with metadatas when Chroma returns duplicate sqlite_ids (multiple docs per observation)", async () => {
+      const recentEpoch = Date.now() - 1000 * 60 * 60 * 24;
 
-      mockChromaSync.queryChroma = mock(() => Promise.resolve({
-        ids: [100, 200],  // Deduplicated
-        distances: [0.3, 0.4, 0.5, 0.6],  // Original 4 distances
-        metadatas: [
-          { sqlite_id: 100, doc_type: 'observation', created_at_epoch: recentEpoch },
-          { sqlite_id: 100, doc_type: 'observation', created_at_epoch: recentEpoch },
-          { sqlite_id: 100, doc_type: 'observation', created_at_epoch: recentEpoch },
-          { sqlite_id: 200, doc_type: 'observation', created_at_epoch: recentEpoch }
-        ]
-      }));
+      mockChromaSync.queryChroma = mock(() =>
+        Promise.resolve({
+          ids: [100, 200], // Deduplicated
+          distances: [0.3, 0.4, 0.5, 0.6], // Original 4 distances
+          metadatas: [
+            { sqlite_id: 100, doc_type: "observation", created_at_epoch: recentEpoch },
+            { sqlite_id: 100, doc_type: "observation", created_at_epoch: recentEpoch },
+            { sqlite_id: 100, doc_type: "observation", created_at_epoch: recentEpoch },
+            { sqlite_id: 200, doc_type: "observation", created_at_epoch: recentEpoch }
+          ]
+        })
+      );
 
       const mockObs100 = { ...mockObservation, id: 100 };
-      const mockObs200 = { ...mockObservation, id: 200, title: 'Second observation' };
+      const mockObs200 = { ...mockObservation, id: 200, title: "Second observation" };
       mockSessionStore.getObservationsByIds = mock((ids: number[]) => {
-        return ids.map(id => id === 100 ? mockObs100 : mockObs200);
+        return ids.map((id) => (id === 100 ? mockObs100 : mockObs200));
       });
 
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations'
+        query: "test query",
+        searchType: "observations"
       };
 
       const result = await strategy.search(options);
@@ -363,27 +352,29 @@ describe('ChromaSearchStrategy', () => {
       const calledWith = mockSessionStore.getObservationsByIds.mock.calls[0][0];
       expect(calledWith).toContain(100);
       expect(calledWith).toContain(200);
-      expect(calledWith.length).toBe(2); 
+      expect(calledWith.length).toBe(2);
     });
 
-    it('should handle misaligned arrays gracefully without undefined access', async () => {
+    it("should handle misaligned arrays gracefully without undefined access", async () => {
       const recentEpoch = Date.now() - 1000 * 60 * 60 * 24;
 
-      mockChromaSync.queryChroma = mock(() => Promise.resolve({
-        ids: [100],  // Only 1 ID after deduplication
-        distances: [0.3, 0.4, 0.5],  // 3 distances
-        metadatas: [
-          { sqlite_id: 100, doc_type: 'observation', created_at_epoch: recentEpoch },
-          { sqlite_id: 100, doc_type: 'observation', created_at_epoch: recentEpoch },
-          { sqlite_id: 100, doc_type: 'observation', created_at_epoch: recentEpoch }
-        ]  
-      }));
+      mockChromaSync.queryChroma = mock(() =>
+        Promise.resolve({
+          ids: [100], // Only 1 ID after deduplication
+          distances: [0.3, 0.4, 0.5], // 3 distances
+          metadatas: [
+            { sqlite_id: 100, doc_type: "observation", created_at_epoch: recentEpoch },
+            { sqlite_id: 100, doc_type: "observation", created_at_epoch: recentEpoch },
+            { sqlite_id: 100, doc_type: "observation", created_at_epoch: recentEpoch }
+          ]
+        })
+      );
 
       mockSessionStore.getObservationsByIds = mock(() => [mockObservation]);
 
       const options: StrategySearchOptions = {
-        query: 'test query',
-        searchType: 'observations'
+        query: "test query",
+        searchType: "observations"
       };
 
       const result = await strategy.search(options);
@@ -395,9 +386,9 @@ describe('ChromaSearchStrategy', () => {
     });
   });
 
-  describe('strategy name', () => {
+  describe("strategy name", () => {
     it('should have name "chroma"', () => {
-      expect(strategy.name).toBe('chroma');
+      expect(strategy.name).toBe("chroma");
     });
   });
 });

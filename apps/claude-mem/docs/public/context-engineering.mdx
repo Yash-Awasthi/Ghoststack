@@ -6,6 +6,7 @@ description: "Best practices for curating optimal token sets for AI agents"
 # Context Engineering for AI Agents
 
 ## Core Principle
+
 **Find the smallest possible set of high-signal tokens that maximize the likelihood of your desired outcome.**
 
 ---
@@ -17,6 +18,7 @@ description: "Best practices for curating optimal token sets for AI agents"
 **Context Engineering**: Curating and maintaining the optimal set of tokens during inference across multiple turns (iterative process)
 
 Context engineering manages:
+
 - System instructions
 - Tools
 - Model Context Protocol (MCP)
@@ -42,21 +44,25 @@ Context engineering manages:
 ### The Goldilocks Zone
 
 **Too Prescriptive** ❌
+
 - Hardcoded if-else logic
 - Brittle and fragile
 - High maintenance complexity
 
 **Too Vague** ❌
+
 - High-level guidance without concrete signals
 - Falsely assumes shared context
 - Lacks actionable direction
 
 **Just Right** ✅
+
 - Specific enough to guide behavior effectively
 - Flexible enough to provide strong heuristics
 - Minimal set of information that fully outlines expected behavior
 
 ### Best Practices
+
 - Use simple, direct language
 - Organize into distinct sections (`<background_information>`, `<instructions>`, `## Tool guidance`, etc.)
 - Use XML tags or Markdown headers for structure
@@ -68,6 +74,7 @@ Context engineering manages:
 ## Tools: Minimal and Clear
 
 ### Design Principles
+
 - **Self-contained**: Each tool has a single, clear purpose
 - **Robust to error**: Handle edge cases gracefully
 - **Extremely clear**: Intended use is unambiguous
@@ -75,9 +82,11 @@ Context engineering manages:
 - **Descriptive parameters**: Unambiguous input names (e.g., `user_id` not `user`)
 
 ### Critical Rule
+
 **If a human engineer can't definitively say which tool to use in a given situation, an AI agent can't be expected to do better.**
 
 ### Common Failure Modes to Avoid
+
 - Bloated tool sets covering too much functionality
 - Tools with overlapping purposes
 - Ambiguous decision points about which tool to use
@@ -87,11 +96,13 @@ Context engineering manages:
 ## Examples: Diverse, Not Exhaustive
 
 **Do** ✅
+
 - Curate a set of diverse, canonical examples
 - Show expected behavior effectively
 - Think "pictures worth a thousand words"
 
 **Don't** ❌
+
 - Stuff in a laundry list of edge cases
 - Try to articulate every possible rule
 - Overwhelm with exhaustive scenarios
@@ -101,9 +112,11 @@ Context engineering manages:
 ## Context Retrieval Strategies
 
 ### Just-In-Time Context (Recommended for Agents)
+
 **Approach**: Maintain lightweight identifiers (file paths, queries, links) and dynamically load data at runtime
 
 **Benefits**:
+
 - Avoids context pollution
 - Enables progressive disclosure
 - Mirrors human cognition (we don't memorize everything)
@@ -111,15 +124,18 @@ Context engineering manages:
 - Agents discover context incrementally
 
 **Trade-offs**:
+
 - Slower than pre-computed retrieval
 - Requires proper tool guidance to avoid dead-ends
 
 ### Pre-Inference Retrieval (Traditional RAG)
+
 **Approach**: Use embedding-based retrieval to surface context before inference
 
 **When to Use**: Static content that won't change during interaction
 
 ### Hybrid Strategy (Best of Both)
+
 **Approach**: Retrieve some data upfront, enable autonomous exploration as needed
 
 **Example**: Claude Code loads CLAUDE.md files upfront, uses glob/grep for just-in-time retrieval
@@ -131,15 +147,18 @@ Context engineering manages:
 ## Long-Horizon Tasks: Three Techniques
 
 ### 1. Compaction
+
 **What**: Summarize conversation nearing context limit, reinitiate with summary
 
 **Implementation**:
+
 - Pass message history to model for compression
 - Preserve critical details (architectural decisions, bugs, implementation)
 - Discard redundant outputs
 - Continue with compressed context + recently accessed files
 
 **Tuning Process**:
+
 1. **First**: Maximize recall (capture all relevant information)
 2. **Then**: Improve precision (eliminate superfluous content)
 
@@ -148,15 +167,18 @@ Context engineering manages:
 **Best For**: Tasks requiring extensive back-and-forth
 
 ### 2. Structured Note-Taking (Agentic Memory)
+
 **What**: Agent writes notes persisted outside context window, retrieved later
 
 **Examples**:
+
 - To-do lists
 - NOTES.md files
 - Game state tracking (Pokémon example: tracking 1,234 steps of training)
 - Project progress logs
 
 **Benefits**:
+
 - Persistent memory with minimal overhead
 - Maintains critical context across tool calls
 - Enables multi-hour coherent strategies
@@ -164,15 +186,18 @@ Context engineering manages:
 **Best For**: Iterative development with clear milestones
 
 ### 3. Sub-Agent Architectures
+
 **What**: Specialized sub-agents handle focused tasks with clean context windows
 
 **How It Works**:
+
 - Main agent coordinates high-level plan
 - Sub-agents perform deep technical work
 - Sub-agents explore extensively (tens of thousands of tokens)
 - Return condensed summaries (1,000-2,000 tokens)
 
 **Benefits**:
+
 - Clear separation of concerns
 - Parallel exploration
 - Detailed context remains isolated
@@ -183,14 +208,14 @@ Context engineering manages:
 
 ## Quick Decision Framework
 
-| Scenario | Recommended Approach |
-|----------|---------------------|
-| Static content | Pre-inference retrieval or hybrid |
-| Dynamic exploration needed | Just-in-time context |
-| Extended back-and-forth | Compaction |
-| Iterative development | Structured note-taking |
-| Complex research | Sub-agent architectures |
-| Rapid model improvement | "Do the simplest thing that works" |
+| Scenario                   | Recommended Approach               |
+| -------------------------- | ---------------------------------- |
+| Static content             | Pre-inference retrieval or hybrid  |
+| Dynamic exploration needed | Just-in-time context               |
+| Extended back-and-forth    | Compaction                         |
+| Iterative development      | Structured note-taking             |
+| Complex research           | Sub-agent architectures            |
+| Rapid model improvement    | "Do the simplest thing that works" |
 
 ---
 
@@ -224,4 +249,4 @@ Context engineering will evolve, but the core principle stays the same: **optimi
 
 ---
 
-*Based on Anthropic's "Effective context engineering for AI agents" (September 2025)*
+_Based on Anthropic's "Effective context engineering for AI agents" (September 2025)_

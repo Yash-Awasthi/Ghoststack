@@ -48,21 +48,36 @@ describe('commander agent', () => {
     test('requires command parameter', () => {
       const schema = commander.inputSchema
       const commandProp = schema?.params?.properties?.command
-      expect(commandProp && typeof commandProp === 'object' && 'type' in commandProp && commandProp.type).toBe('string')
+      expect(
+        commandProp &&
+          typeof commandProp === 'object' &&
+          'type' in commandProp &&
+          commandProp.type,
+      ).toBe('string')
       expect(schema?.params?.required).toContain('command')
     })
 
     test('has optional timeout_seconds parameter', () => {
       const schema = commander.inputSchema
       const timeoutProp = schema?.params?.properties?.timeout_seconds
-      expect(timeoutProp && typeof timeoutProp === 'object' && 'type' in timeoutProp && timeoutProp.type).toBe('number')
+      expect(
+        timeoutProp &&
+          typeof timeoutProp === 'object' &&
+          'type' in timeoutProp &&
+          timeoutProp.type,
+      ).toBe('number')
       expect(schema?.params?.required).not.toContain('timeout_seconds')
     })
 
     test('has optional what_to_summarize parameter', () => {
       const schema = commander.inputSchema
       const summarizeProp = schema?.params?.properties?.what_to_summarize
-      expect(summarizeProp && typeof summarizeProp === 'object' && 'type' in summarizeProp && summarizeProp.type).toBe('string')
+      expect(
+        summarizeProp &&
+          typeof summarizeProp === 'object' &&
+          'type' in summarizeProp &&
+          summarizeProp.type,
+      ).toBe('string')
       expect(schema?.params?.required).not.toContain('what_to_summarize')
     })
   })

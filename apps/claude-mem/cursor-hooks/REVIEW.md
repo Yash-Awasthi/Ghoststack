@@ -27,6 +27,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 **Purpose**: Shared utilities for all hook scripts
 
 **Functions**:
+
 - ✅ `check_dependencies()` - Validates jq and curl exist
 - ✅ `read_json_input()` - Safely reads and validates JSON from stdin
 - ✅ `get_worker_port()` - Reads port from settings with validation
@@ -37,6 +38,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 - ✅ `is_empty()` - Null/empty string detection
 
 **Edge Cases Handled**:
+
 - ✅ Empty stdin
 - ✅ Malformed JSON
 - ✅ Missing settings file
@@ -46,6 +48,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 - ✅ Array field access (`workspace_roots[0]`)
 
 **Potential Issues**:
+
 - ⚠️ `url_encode()` uses jq - if jq fails, encoding fails silently
 - ✅ **Fixed**: Falls back to original string if encoding fails
 
@@ -54,6 +57,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 **Purpose**: Initialize claude-mem session when prompt is submitted
 
 **Flow**:
+
 1. Read and validate JSON input
 2. Extract session_id, project, prompt
 3. Ensure worker is running
@@ -62,6 +66,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 6. Handle privacy checks
 
 **Edge Cases Handled**:
+
 - ✅ Empty conversation_id → fallback to generation_id
 - ✅ Empty workspace_root → fallback to pwd
 - ✅ Empty prompt → still initializes session
@@ -70,11 +75,13 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 - ✅ Invalid JSON → graceful exit
 
 **Potential Issues**:
+
 - ✅ **Fixed**: String slicing now checks for empty strings
 - ✅ **Fixed**: All jq operations have error handling
 - ✅ **Fixed**: Worker health check with proper retries
 
 **Parity with Claude Code**:
+
 - ✅ Session initialization
 - ✅ Privacy check handling
 - ✅ Slash stripping
@@ -85,6 +92,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 **Purpose**: Capture MCP tool usage and shell commands
 
 **Flow**:
+
 1. Read and validate JSON input
 2. Determine hook type (MCP vs Shell)
 3. Extract tool data
@@ -93,6 +101,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 6. Send observation (fire-and-forget)
 
 **Edge Cases Handled**:
+
 - ✅ Empty tool_name → exit gracefully
 - ✅ Invalid tool_input/tool_response → default to {}
 - ✅ Malformed JSON in tool data → validated and sanitized
@@ -100,11 +109,13 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 - ✅ Worker unavailable → exit gracefully
 
 **Potential Issues**:
+
 - ✅ **Fixed**: JSON validation for tool_input and tool_response
 - ✅ **Fixed**: Proper handling of empty/null values
 - ✅ **Fixed**: Error handling for all jq operations
 
 **Parity with Claude Code**:
+
 - ✅ Tool observation capture
 - ✅ Privacy tag stripping (handled by worker)
 - ✅ Fire-and-forget pattern
@@ -115,6 +126,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 **Purpose**: Capture file edits as observations
 
 **Flow**:
+
 1. Read and validate JSON input
 2. Extract file_path and edits array
 3. Validate edits array
@@ -123,6 +135,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 6. Send observation (fire-and-forget)
 
 **Edge Cases Handled**:
+
 - ✅ Empty file_path → exit gracefully
 - ✅ Empty edits array → exit gracefully
 - ✅ Invalid edits JSON → default to []
@@ -130,11 +143,13 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 - ✅ Empty session_id → exit gracefully
 
 **Potential Issues**:
+
 - ✅ **Fixed**: Edit summary generation with error handling
 - ✅ **Fixed**: Array validation before processing
 - ✅ **Fixed**: Safe string slicing in summary generation
 
 **Parity with Claude Code**:
+
 - ✅ File edit capture (new feature for Cursor)
 - ✅ Observation format matches claude-mem structure
 
@@ -143,6 +158,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 **Purpose**: Generate session summary when agent loop ends
 
 **Flow**:
+
 1. Read and validate JSON input
 2. Extract session_id
 3. Ensure worker is running
@@ -150,15 +166,18 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 5. Output empty JSON (required by Cursor)
 
 **Edge Cases Handled**:
+
 - ✅ Empty session_id → exit gracefully
 - ✅ Worker unavailable → exit gracefully
 - ✅ Missing transcript → empty messages (worker handles gracefully)
 
 **Potential Issues**:
+
 - ✅ **Fixed**: Proper JSON output for Cursor stop hook
 - ✅ **Fixed**: Worker handles empty messages (verified in codebase)
 
 **Parity with Claude Code**:
+
 - ⚠️ Partial: No transcript access, so no last_user_message/last_assistant_message
 - ✅ Summary generation still works (based on observations)
 
@@ -167,12 +186,14 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 **Purpose**: Fetch context and write to `.cursor/rules/` for auto-injection
 
 **How It Works**:
+
 1. Fetches context from claude-mem worker
 2. Writes to `.cursor/rules/claude-mem-context.mdc` with `alwaysApply: true`
 3. Cursor auto-includes this rule in all chat sessions
 4. Context refreshes on every prompt submission
 
 **Flow**:
+
 1. Read and validate JSON input
 2. Extract workspace root
 3. Get project name
@@ -182,6 +203,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 7. Output `{"continue": true}`
 
 **Edge Cases Handled**:
+
 - ✅ Empty workspace_root → fallback to pwd
 - ✅ Worker unavailable → allow prompt to continue
 - ✅ Context fetch failure → allow prompt to continue (no file written)
@@ -189,6 +211,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 - ✅ Missing `.cursor/rules/` directory → created automatically
 
 **Parity with Claude Code**:
+
 - ✅ Context injection achieved via rules file workaround
 - ✅ Worker readiness check matches Claude Code
 - ✅ Context available immediately in next prompt
@@ -317,6 +340,7 @@ This document provides a thorough review of the Cursor hooks integration, coveri
 ## Conclusion
 
 The Cursor hooks integration is **production-ready** with:
+
 - ✅ Comprehensive error handling
 - ✅ Input validation and sanitization
 - ✅ Graceful degradation
@@ -324,4 +348,3 @@ The Cursor hooks integration is **production-ready** with:
 - ✅ Enhanced features (shell/file edit capture)
 
 The implementation handles edge cases well and follows best practices for reliability and maintainability.
-

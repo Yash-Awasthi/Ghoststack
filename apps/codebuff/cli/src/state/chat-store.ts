@@ -151,10 +151,14 @@ type ChatStoreActions = {
   addPendingImage: (image: Omit<PendingImageAttachment, 'kind'>) => void
   removePendingImage: (path: string) => void
   clearPendingImages: () => void
-  addPendingTextAttachment: (attachment: Omit<PendingTextAttachment, 'kind'>) => void
+  addPendingTextAttachment: (
+    attachment: Omit<PendingTextAttachment, 'kind'>,
+  ) => void
   removePendingTextAttachment: (id: string) => void
   clearPendingTextAttachments: () => void
-  addPendingFileAttachment: (attachment: Omit<PendingFileAttachment, 'kind'>) => void
+  addPendingFileAttachment: (
+    attachment: Omit<PendingFileAttachment, 'kind'>,
+  ) => void
   addPendingBashMessage: (message: PendingBashMessage) => void
   updatePendingBashMessage: (
     id: string,
@@ -381,7 +385,9 @@ export const useChatStore = create<ChatStore>()(
       }),
 
     addPendingTextAttachment: (attachment) => {
-      useChatStore.getState().addPendingAttachment({ ...attachment, kind: 'text' })
+      useChatStore
+        .getState()
+        .addPendingAttachment({ ...attachment, kind: 'text' })
     },
 
     removePendingTextAttachment: (id) => {
@@ -396,7 +402,9 @@ export const useChatStore = create<ChatStore>()(
       }),
 
     addPendingFileAttachment: (attachment) => {
-      useChatStore.getState().addPendingAttachment({ ...attachment, kind: 'file' })
+      useChatStore
+        .getState()
+        .addPendingAttachment({ ...attachment, kind: 'file' })
     },
 
     updateAskUserAnswer: (questionIndex, optionIndex) =>

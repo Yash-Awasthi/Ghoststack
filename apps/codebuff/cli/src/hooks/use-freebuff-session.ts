@@ -637,15 +637,15 @@ export function useFreebuffSession(): UseFreebuffSessionResult {
               if (response.status === 'none' || response.status === 'queued') {
                 apply({
                   status: 'none',
-                  accessTier:
-                    response.accessTier ?? landingSession.accessTier,
+                  accessTier: response.accessTier ?? landingSession.accessTier,
                   queueDepthByModel:
                     response.queueDepthByModel ??
                     landingSession.queueDepthByModel,
                   rateLimitsByModel:
                     response.rateLimitsByModel ??
                     landingSession.rateLimitsByModel,
-                  countryCode: response.countryCode ?? landingSession.countryCode,
+                  countryCode:
+                    response.countryCode ?? landingSession.countryCode,
                   countryBlockReason:
                     response.countryBlockReason ??
                     landingSession.countryBlockReason,

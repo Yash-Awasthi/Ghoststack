@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { EventEmitter } from 'events';
-import type { Database } from 'bun:sqlite';
-import { SessionQueueProcessor, type CreateIteratorOptions } from '../../services/queue/SessionQueueProcessor.js';
-import { PendingMessageStore } from '../../services/sqlite/PendingMessageStore.js';
-import type { PendingMessage, PendingMessageWithId } from '../../services/worker-types.js';
+import { EventEmitter } from "events";
+import type { Database } from "bun:sqlite";
+import { SessionQueueProcessor, type CreateIteratorOptions } from "../../services/queue/SessionQueueProcessor.js";
+import { PendingMessageStore } from "../../services/sqlite/PendingMessageStore.js";
+import type { PendingMessage, PendingMessageWithId } from "../../services/worker-types.js";
 
 export interface ObservationQueueEngine {
   enqueue(sessionDbId: number, contentSessionId: string, message: PendingMessage): Promise<number>;
@@ -35,9 +35,9 @@ export interface ObservationQueueHealthLaneSnapshot {
 }
 
 export interface ObservationQueueHealth {
-  engine: 'bullmq';
+  engine: "bullmq";
   redis: {
-    status: 'ok' | 'error';
+    status: "ok" | "error";
     mode: string;
     host: string;
     port: number;
@@ -127,6 +127,6 @@ export class SqliteObservationQueueEngine implements InspectableObservationQueue
   }
 
   private emit(sessionDbId: number): void {
-    this.eventsBySession.get(sessionDbId)?.emit('message');
+    this.eventsBySession.get(sessionDbId)?.emit("message");
   }
 }

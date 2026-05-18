@@ -4,7 +4,6 @@ import { getChatGptOAuthStatus } from '../utils/chatgpt-oauth'
 
 import type { SkillsMap } from '@codebuff/common/types/skill'
 
-
 export interface SlashCommand {
   id: string
   label: string
@@ -43,11 +42,7 @@ const FREEBUFF_REMOVED_COMMAND_IDS = new Set([
   'init',
 ])
 
-const FREEBUFF_ONLY_COMMAND_IDS = new Set([
-  'connect',
-  'plan',
-  'end-session',
-])
+const FREEBUFF_ONLY_COMMAND_IDS = new Set(['connect', 'plan', 'end-session'])
 
 const ALL_SLASH_COMMANDS: SlashCommand[] = [
   {
@@ -109,7 +104,8 @@ const ALL_SLASH_COMMANDS: SlashCommand[] = [
   {
     id: 'interview',
     label: 'interview',
-    description: 'AI asks a series of questions to flesh out request into a spec',
+    description:
+      'AI asks a series of questions to flesh out request into a spec',
   },
   {
     id: 'plan',
@@ -149,7 +145,9 @@ const ALL_SLASH_COMMANDS: SlashCommand[] = [
   {
     id: 'feedback',
     label: 'feedback',
-    description: IS_FREEBUFF ? 'Share general feedback about Freebuff' : 'Share general feedback about Codebuff',
+    description: IS_FREEBUFF
+      ? 'Share general feedback about Freebuff'
+      : 'Share general feedback about Codebuff',
   },
   {
     id: 'bash',
@@ -200,9 +198,7 @@ export const SLASH_COMMANDS = IS_FREEBUFF
   ? ALL_SLASH_COMMANDS.filter(
       (cmd) => !FREEBUFF_REMOVED_COMMAND_IDS.has(cmd.id),
     )
-  : ALL_SLASH_COMMANDS.filter(
-      (cmd) => !FREEBUFF_ONLY_COMMAND_IDS.has(cmd.id),
-    )
+  : ALL_SLASH_COMMANDS.filter((cmd) => !FREEBUFF_ONLY_COMMAND_IDS.has(cmd.id))
 
 export const SLASHLESS_COMMAND_IDS = new Set(
   SLASH_COMMANDS.filter((cmd) => cmd.implicitCommand).map((cmd) =>
