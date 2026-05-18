@@ -12,6 +12,22 @@ export class RuntimeDiagnosticAPI {
       throw new Error(`Unsupported method: ${method}`);
     }
 
+    // Dynamic Parameter Route Resolution: /runtime/workflows/:id
+    if (path.startsWith('/runtime/workflows/')) {
+      const parts = path.split('/');
+      const last = parts[parts.length - 1];
+      if (last === 'replays') {
+        return (this.inspector as any).getWorkflowReplays ? (this.inspector as any).getWorkflowReplays() : [];
+      }
+      if (last === 'templates') {
+        return (this.inspector as any).getWorkflowTemplates ? (this.inspector as any).getWorkflowTemplates() : [];
+      }
+      if (last === 'telemetry') {
+        return (this.inspector as any).getWorkflowTelemetryStats ? (this.inspector as any).getWorkflowTelemetryStats() : {};
+      }
+      return (this.inspector as any).getWorkflowExecution ? (this.inspector as any).getWorkflowExecution(last) : null;
+    }
+
     switch (path) {
       case '/health':
         return this.inspector.getHealth();
@@ -57,6 +73,10 @@ export class RuntimeDiagnosticAPI {
         return (this.inspector as any).getSandboxMetrics ? (this.inspector as any).getSandboxMetrics() : {};
       case '/runtime/environments':
         return (this.inspector as any).getEnvironmentsList ? (this.inspector as any).getEnvironmentsList() : [];
+
+      // Phase 8 Workflow Observability Endpoints
+      case '/runtime/workflows':
+        return (this.inspector as any).getWorkflowsList ? (this.inspector as any).getWorkflowsList() : [];
 
       default:
         throw new Error(`Not Found: ${path}`);

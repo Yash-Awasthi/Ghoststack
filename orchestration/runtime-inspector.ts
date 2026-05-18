@@ -6,6 +6,7 @@ import { IEventStore } from './interfaces/persistence.interface';
 import { IMCPRuntime, IMCPServerRegistry } from './interfaces/mcp.interface';
 import { IGovernanceEngine, IApprovalWorkflow, ICognitiveTrace } from './interfaces/governance.interface';
 import { IEnvironmentTelemetry, IFilesystemSandbox, IExecutionEnvironment } from './interfaces/environment.interface';
+import { IWorkflowRegistry, IWorkflowTelemetry } from './interfaces/workflow.interface';
 
 export class RuntimeInspector implements IRuntimeInspector {
   private metrics: IMetricsCollector;
@@ -25,6 +26,11 @@ export class RuntimeInspector implements IRuntimeInspector {
   private fsSandbox?: IFilesystemSandbox;
   private envsList?: IExecutionEnvironment[];
 
+  // Phase 8 Workflow Core Abstractions Context
+  private workflowRegistry?: IWorkflowRegistry;
+  private workflowTelemetry?: IWorkflowTelemetry;
+  private workflowEngine?: any;
+
   constructor(
     metrics: IMetricsCollector,
     queue: IQueueBackend,
@@ -37,7 +43,10 @@ export class RuntimeInspector implements IRuntimeInspector {
     browserTelemetry?: IEnvironmentTelemetry,
     scrapingTelemetry?: IEnvironmentTelemetry,
     fsSandbox?: IFilesystemSandbox,
-    envsList?: IExecutionEnvironment[]
+    envsList?: IExecutionEnvironment[],
+    workflowRegistry?: IWorkflowRegistry,
+    workflowTelemetry?: IWorkflowTelemetry,
+    workflowEngine?: any
   ) {
     this.metrics = metrics;
     this.queue = queue;
@@ -52,6 +61,10 @@ export class RuntimeInspector implements IRuntimeInspector {
     this.scrapingTelemetry = scrapingTelemetry;
     this.fsSandbox = fsSandbox;
     this.envsList = envsList;
+
+    this.workflowRegistry = workflowRegistry;
+    this.workflowTelemetry = workflowTelemetry;
+    this.workflowEngine = workflowEngine;
   }
 
   async getHealth(): Promise<any> {
@@ -227,6 +240,50 @@ export class RuntimeInspector implements IRuntimeInspector {
       name: e.name,
       capabilities: e.capabilities
     }));
+  }
+
+  // Phase 8 Workflow Diagnostics Observability APIs
+  getWorkflowsList(): any[] {
+    if (!this.workflowRegistry) return [];
+    return this.workflowRegistry.listWorkflows().map(w => ({
+      id: w.id,
+      name: w.name,
+      description: w.description,
+      tasksCount: w.tasks.length
+    }));
+  }
+
+  getWorkflowExecution(executionId: string): any {
+    if (!this.workflowTelemetry) return null;
+    const history = this.workflowTelemetry.getExecutionHistory();
+    return history.find(e => e.id === executionId) || null;
+  }
+
+  getWorkflowReplays(): any[] {
+    if (!this.workflowTelemetry) return [];
+    // Filter executions that have replay patterns
+    return this.workflowTelemetry.getExecutionHistory().filter(e => e.id.includes("replay"));
+  }
+
+  getWorkflowTemplates(): any[] {
+    if (!this.workflowRegistry) return [];
+    return this.workflowRegistry.listTemplates().map(t => ({
+      templateId: t.templateId,
+      name: t.name,
+      description: t.description
+    }));
+  }
+
+  getWorkflowTelemetryStats(): any {
+    if (!this.workflowTelemetry) return {};
+    const history = this.workflowTelemetry.getExecutionHistory();
+    return {
+      totalExecutions: history.length,
+      succeededCount: history.filter(h => h.status === 'succeeded').length,
+      failedCount: history.filter(h => h.status === 'failed').length,
+      rejectedCount: history.filter(h => h.status === 'rejected').length,
+      pendingCount: history.filter(h => h.status === 'pending').length
+    };
   }
 
   recordPlan(plan: ICognitiveTrace): void {
