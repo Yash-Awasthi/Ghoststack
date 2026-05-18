@@ -1,0 +1,16 @@
+services:
+  floci:
+    image: floci/floci:latest
+    type: docker
+    port: 4566
+  fcc:
+    cmd: fcc-server
+    type: process
+    port: 8082
+  mcp:
+    cmd: fastmcp run server.py
+    type: process
+    port: 8000
+  ollama:
+    type: external
+    port: 11434

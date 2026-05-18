@@ -1,0 +1,10 @@
+healthchecks:
+  floci:
+    path: /_floci/health
+    interval: 5000
+  fcc:
+    path: /admin
+    interval: 2000
+  mcp:
+    path: /mcp
+    interval: 2000

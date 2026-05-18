@@ -1,0 +1,7 @@
+version: "1.0.0"
+environment: development
+primary_llm: remote
+local_backup: qwen2.5:7b
+storage:
+  mode: hybrid
+  interval_sec: 5
