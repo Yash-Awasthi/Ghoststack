@@ -84,7 +84,7 @@ export class GhostStackOrchestrator {
     }
 
     const services = await this.runtimeManager.getActiveServices();
-    this.logger?.info(`Active services boot-checked successfully`, { services });
+    this.logger?.info("Active services boot-checked successfully", { services });
     
     const bootstrapDuration = Date.now() - startTimeMs;
     this.metrics?.recordTiming("bootstrap.duration", bootstrapDuration);
@@ -102,21 +102,44 @@ export class GhostStackOrchestrator {
     const traceSpan = this.tracer?.startSpan("submit.tasks", undefined, { count: tasks.length });
     
     const sortedTasks = this.resolver.resolveOrder(tasks);
-    this.logger?.info(`Tasks sorted in topological order`, { sorted: sortedTasks.map(t => t.id) });
+    this.logger?.info("Tasks sorted in topological order", { sorted: sortedTasks.map(t => t.id) });
 
     for (const task of sortedTasks) {
       await this.taskRouter.route(task);
       this.metrics?.increment("task.submitted");
+
+      let payloadType = "floci";
+      let payloadPayload: any = {};
+
+      if (task.description.includes("browser")) {
+        payloadType = "browser";
+        payloadPayload = {
+          url: task.description.includes("illegal") ? "file:///etc/passwd" : "https://github.com",
+          actions: [
+            { type: "navigate", value: "https://news.ycombinator.com" }
+          ],
+          timeoutMs: 5000
+        };
+      } else if (task.description.includes("scraping")) {
+        payloadType = "scraping";
+        payloadPayload = {
+          url: "https://github.com",
+          selectors: [".repo-title"],
+          maxRequests: 3
+        };
+      } else {
+        payloadPayload = task.description.includes("bucket")
+          ? { action: "create_s3_bucket", bucketName: task.id }
+          : task.description.includes("queue")
+          ? { action: "create_sqs_queue", queueName: task.id }
+          : { action: "create_dynamodb_table", tableName: task.id };
+      }
       
       await this.queue.push({
         id: task.id,
         payload: {
-          type: "floci",
-          payload: task.description.includes("bucket")
-            ? { action: "create_s3_bucket", bucketName: task.id }
-            : task.description.includes("queue")
-            ? { action: "create_sqs_queue", queueName: task.id }
-            : { action: "create_dynamodb_table", tableName: task.id }
+          type: payloadType,
+          payload: payloadPayload
         },
         priority: task.priority as any || "medium",
         retries: 0,

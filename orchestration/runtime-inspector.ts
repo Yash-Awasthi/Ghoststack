@@ -5,6 +5,7 @@ import { IServiceDiscovery } from './interfaces/discovery.interface';
 import { IEventStore } from './interfaces/persistence.interface';
 import { IMCPRuntime, IMCPServerRegistry } from './interfaces/mcp.interface';
 import { IGovernanceEngine, IApprovalWorkflow, ICognitiveTrace } from './interfaces/governance.interface';
+import { IEnvironmentTelemetry, IFilesystemSandbox, IExecutionEnvironment } from './interfaces/environment.interface';
 
 export class RuntimeInspector implements IRuntimeInspector {
   private metrics: IMetricsCollector;
@@ -18,6 +19,12 @@ export class RuntimeInspector implements IRuntimeInspector {
   private plansLog: ICognitiveTrace[] = [];
   private bootTime = new Date();
 
+  // Environment Telemetry Context
+  private browserTelemetry?: IEnvironmentTelemetry;
+  private scrapingTelemetry?: IEnvironmentTelemetry;
+  private fsSandbox?: IFilesystemSandbox;
+  private envsList?: IExecutionEnvironment[];
+
   constructor(
     metrics: IMetricsCollector,
     queue: IQueueBackend,
@@ -26,7 +33,11 @@ export class RuntimeInspector implements IRuntimeInspector {
     mcpRuntime?: IMCPRuntime,
     mcpRegistry?: IMCPServerRegistry,
     governanceEngine?: IGovernanceEngine,
-    approvalWorkflow?: IApprovalWorkflow
+    approvalWorkflow?: IApprovalWorkflow,
+    browserTelemetry?: IEnvironmentTelemetry,
+    scrapingTelemetry?: IEnvironmentTelemetry,
+    fsSandbox?: IFilesystemSandbox,
+    envsList?: IExecutionEnvironment[]
   ) {
     this.metrics = metrics;
     this.queue = queue;
@@ -36,6 +47,11 @@ export class RuntimeInspector implements IRuntimeInspector {
     this.mcpRegistry = mcpRegistry;
     this.governanceEngine = governanceEngine;
     this.approvalWorkflow = approvalWorkflow;
+    
+    this.browserTelemetry = browserTelemetry;
+    this.scrapingTelemetry = scrapingTelemetry;
+    this.fsSandbox = fsSandbox;
+    this.envsList = envsList;
   }
 
   async getHealth(): Promise<any> {
@@ -178,6 +194,39 @@ export class RuntimeInspector implements IRuntimeInspector {
       activeGuardrailsCount: guardrails.length,
       stormThreshold: 5
     };
+  }
+
+  // Phase 7 Environment Inspection APIs
+  getBrowserMetrics(): any {
+    if (!this.browserTelemetry) return {};
+    return {
+      activeSessions: this.browserTelemetry.browserSessionsActive,
+      navigationHistory: this.browserTelemetry.navigationHistory,
+      totalBytesWritten: this.browserTelemetry.totalBytesWritten
+    };
+  }
+
+  getScrapingMetrics(): any {
+    if (!this.scrapingTelemetry) return {};
+    return {
+      totalBytesFetched: this.scrapingTelemetry.totalBytesFetched,
+      navigationHistory: this.scrapingTelemetry.navigationHistory
+    };
+  }
+
+  getSandboxMetrics(): any {
+    if (!this.fsSandbox) return {};
+    return {
+      writeLog: this.fsSandbox.getWriteLog()
+    };
+  }
+
+  getEnvironmentsList(): any[] {
+    if (!this.envsList) return [];
+    return this.envsList.map(e => ({
+      name: e.name,
+      capabilities: e.capabilities
+    }));
   }
 
   recordPlan(plan: ICognitiveTrace): void {

@@ -48,6 +48,16 @@ export class RuntimeDiagnosticAPI {
       case '/runtime/guardrails':
         return (this.inspector as any).getGuardrailsInfo ? (this.inspector as any).getGuardrailsInfo() : {};
 
+      // Phase 7 Controlled Execution Subsystem Endpoints
+      case '/runtime/browser':
+        return (this.inspector as any).getBrowserMetrics ? (this.inspector as any).getBrowserMetrics() : {};
+      case '/runtime/scraping':
+        return (this.inspector as any).getScrapingMetrics ? (this.inspector as any).getScrapingMetrics() : {};
+      case '/runtime/sandbox':
+        return (this.inspector as any).getSandboxMetrics ? (this.inspector as any).getSandboxMetrics() : {};
+      case '/runtime/environments':
+        return (this.inspector as any).getEnvironmentsList ? (this.inspector as any).getEnvironmentsList() : [];
+
       default:
         throw new Error(`Not Found: ${path}`);
     }
