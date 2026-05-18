@@ -29,6 +29,14 @@ export class RuntimeDiagnosticAPI {
         return this.inspector.getServices();
       case '/runtime/snapshots':
         return this.inspector.getSnapshots();
+      case '/runtime/mcp':
+        return (this.inspector as any).getMCPSummary ? (this.inspector as any).getMCPSummary() : {};
+      case '/runtime/mcp/servers':
+        return (this.inspector as any).getMCPServers ? (this.inspector as any).getMCPServers() : [];
+      case '/runtime/mcp/tools':
+        return (this.inspector as any).getMCPTools ? (this.inspector as any).getMCPTools() : [];
+      case '/runtime/mcp/executions':
+        return (this.inspector as any).getMCPExecutions ? (this.inspector as any).getMCPExecutions() : [];
       default:
         throw new Error(`Not Found: ${path}`);
     }

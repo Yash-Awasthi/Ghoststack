@@ -3,24 +3,31 @@ import { IMetricsCollector } from './interfaces/observability.interface';
 import { IQueueBackend } from './interfaces/queue.interface';
 import { IServiceDiscovery } from './interfaces/discovery.interface';
 import { IEventStore } from './interfaces/persistence.interface';
+import { IMCPRuntime, IMCPServerRegistry } from './interfaces/mcp.interface';
 
 export class RuntimeInspector implements IRuntimeInspector {
   private metrics: IMetricsCollector;
   private queue: IQueueBackend;
   private discovery: IServiceDiscovery;
   private eventStore: IEventStore;
+  private mcpRuntime?: IMCPRuntime;
+  private mcpRegistry?: IMCPServerRegistry;
   private bootTime = new Date();
 
   constructor(
     metrics: IMetricsCollector,
     queue: IQueueBackend,
     discovery: IServiceDiscovery,
-    eventStore: IEventStore
+    eventStore: IEventStore,
+    mcpRuntime?: IMCPRuntime,
+    mcpRegistry?: IMCPServerRegistry
   ) {
     this.metrics = metrics;
     this.queue = queue;
     this.discovery = discovery;
     this.eventStore = eventStore;
+    this.mcpRuntime = mcpRuntime;
+    this.mcpRegistry = mcpRegistry;
   }
 
   async getHealth(): Promise<any> {
@@ -106,6 +113,36 @@ export class RuntimeInspector implements IRuntimeInspector {
     }));
   }
 
+  async getMCPSummary(): Promise<any> {
+    const metrics = this.mcpRuntime ? await this.mcpRuntime.getMetrics() : null;
+    const list = this.mcpRegistry ? await this.mcpRegistry.listServers() : [];
+    const logs = this.mcpRuntime ? await this.mcpRuntime.getExecutionsLog() : [];
+    
+    return {
+      metrics,
+      serversCount: list.length,
+      executionsCount: logs.length
+    };
+  }
+
+  async getMCPServers(): Promise<any[]> {
+    return this.mcpRegistry ? await this.mcpRegistry.listServers() : [];
+  }
+
+  async getMCPTools(): Promise<string[]> {
+    if (!this.mcpRegistry) return [];
+    const servers = await this.mcpRegistry.listServers();
+    const tools: string[] = [];
+    for (const s of servers) {
+      tools.push(...s.tools.map(t => `${s.name}:${t}`));
+    }
+    return tools;
+  }
+
+  async getMCPExecutions(): Promise<any[]> {
+    return this.mcpRuntime ? await this.mcpRuntime.getExecutionsLog() : [];
+  }
+
   async getSnapshots(): Promise<any> {
     return {
       timestamp: new Date(),
@@ -114,7 +151,8 @@ export class RuntimeInspector implements IRuntimeInspector {
       queues: await this.getQueues(),
       services: await this.getServices(),
       events: await this.getEvents(),
-      tasks: await this.getTasks()
+      tasks: await this.getTasks(),
+      mcp: await this.getMCPSummary()
     };
   }
 }
