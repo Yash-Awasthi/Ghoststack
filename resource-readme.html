@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 Core Repos — Reference Sheet</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-soft: #161b22;
+    --bg-code: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #79c0ff;
+    --green: #7ee787;
+    --yellow: #ffa657;
+    --pink: #ff7b72;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  header.top {
+    background: linear-gradient(135deg, #1f6feb 0%, #8957e5 100%);
+    padding: 32px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  header.top h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.top p { margin: 0; opacity: 0.92; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  nav.toc {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-bottom: 32px;
+  }
+  nav.toc h2 { margin: 0 0 12px; font-size: 1rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  nav.toc ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 16px; }
+  nav.toc a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  nav.toc a:hover { text-decoration: underline; }
+  section.repo {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+  section.repo h2 {
+    margin: 0 0 4px;
+    font-size: 1.7rem;
+    color: var(--accent-2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section.repo h2 .badge {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #1f6feb33;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  section.repo .source { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 16px; }
+  section.repo .source a { color: var(--accent); text-decoration: none; }
+  section.repo .source a:hover { text-decoration: underline; }
+  section.repo h3 {
+    margin: 26px 0 10px;
+    font-size: 1.15rem;
+    color: var(--green);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  section.repo h4 { margin: 20px 0 8px; font-size: 1rem; color: var(--yellow); }
+  section.repo p { margin: 10px 0; }
+  section.repo ul, section.repo ol { margin: 10px 0; padding-left: 24px; }
+  section.repo li { margin: 4px 0; }
+  section.repo a { color: var(--accent); }
+  section.repo code {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    color: var(--pink);
+  }
+  section.repo pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  section.repo pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 0.88rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--bg-code); color: var(--accent-2); }
+  td code { font-size: 0.85em; }
+  blockquote {
+    border-left: 3px solid var(--accent);
+    margin: 12px 0;
+    padding: 8px 16px;
+    background: #1f6feb14;
+    color: var(--text);
+    border-radius: 0 6px 6px 0;
+  }
+  .note {
+    background: #1f6feb1a;
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.92rem;
+  }
+  .warn {
+    background: #ffa6571a;
+    border-left: 3px solid var(--yellow);
+    padding: 10px 14px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.92rem;
+  }
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 32px 24px;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>📚 6 Core Repos — Reference Sheet</h1>
+  <p>Verbatim README content + key configuration for project use</p>
+</header>
+
+<div class="container">
+
+<nav class="toc">
+  <h2>Repositories</h2>
+  <ul>
+    <li><a href="#floci">1. floci — Local AWS emulator</a></li>
+    <li><a href="#codebuff">2. codebuff — AI coding agent</a></li>
+    <li><a href="#spec-kit">3. spec-kit — Spec-driven dev</a></li>
+    <li><a href="#free-claude-code">4. free-claude-code — Proxy router</a></li>
+    <li><a href="#cloakbrowser">5. CloakBrowser — Stealth Chromium</a></li>
+    <li><a href="#fastmcp">6. fastmcp — MCP framework</a></li>
+  </ul>
+</nav>
+
+<!-- ============================================== -->
+<!-- 1. FLOCI -->
+<!-- ============================================== -->
+<section class="repo" id="floci">
+  <h2>🌤️ floci <span class="badge">Local AWS Emulator</span></h2>
+  <div class="source">Source: <a href="https://github.com/floci-io/floci">github.com/floci-io/floci</a> · README.md (main branch)</div>
+
+  <p><strong>A free, open-source local AWS emulator.</strong><br>
+  No account. No feature gates. Just <code>docker compose up</code>.</p>
+
+  <p><em>Named after <a href="https://en.wikipedia.org/wiki/Cirrocumulus_floccus">floccus</a> — the cloud formation that looks exactly like popcorn.</em></p>
+
+  <div class="warn">
+    <strong>IMPORTANT:</strong> Image moved to <code>floci/floci</code>. Update your <code>docker-compose.yml</code> and <code>docker run</code> commands:
+    <pre><code># Before
+image: hectorvent/floci:latest
+# After
+image: floci/floci:latest</code></pre>
+    The old <code>hectorvent/floci</code> repository will no longer receive updates.
+  </div>
+
+  <h3>Why Floci?</h3>
+  <blockquote>LocalStack's community edition sunset in March 2026, requiring auth tokens and freezing security updates. Floci is the no-strings-attached alternative.</blockquote>
+
+  <table>
+    <tr><th></th><th>Floci</th><th>LocalStack Community</th></tr>
+    <tr><td>Auth token required</td><td>❌ No</td><td>✅ Yes (since March 2026)</td></tr>
+    <tr><td>Security updates</td><td>✅ Yes</td><td>❌ Frozen</td></tr>
+    <tr><td>Startup time</td><td><strong>~24 ms</strong></td><td>~3.3 s</td></tr>
+    <tr><td>Idle memory</td><td><strong>~13 MiB</strong></td><td>~143 MiB</td></tr>
+    <tr><td>Docker image size</td><td><strong>~90 MB</strong></td><td>~1.0 GB</td></tr>
+    <tr><td>License</td><td><strong>MIT</strong></td><td>Restricted</td></tr>
+    <tr><td>API Gateway v2 / HTTP API</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Cognito</td><td>✅</td><td>❌</td></tr>
+    <tr><td>ElastiCache (Redis + IAM auth)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>RDS (PostgreSQL + MySQL + IAM auth)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>MSK (Kafka + Redpanda)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Athena (DuckDB sidecar + Glue views)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Glue Data Catalog + Schema Registry</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Data Firehose (NDJSON delivery)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>S3 Object Lock (COMPLIANCE / GOVERNANCE)</td><td>✅</td><td>⚠️ Partial</td></tr>
+    <tr><td>DynamoDB Streams</td><td>✅</td><td>⚠️ Partial</td></tr>
+    <tr><td>IAM (users, roles, policies, groups)</td><td>✅</td><td>⚠️ Partial</td></tr>
+    <tr><td>STS (all 7 operations)</td><td>✅</td><td>⚠️ Partial</td></tr>
+    <tr><td>Kinesis (streams, shards, fan-out)</td><td>✅</td><td>⚠️ Partial</td></tr>
+    <tr><td>KMS (sign, verify, re-encrypt)</td><td>✅</td><td>⚠️ Partial</td></tr>
+    <tr><td>ECS (clusters, services, tasks)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>EKS (mock + real k3s)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>EC2 (real Docker, IMDS, SSH, UserData)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>CodeBuild (real Docker build execution)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>CodeDeploy (Lambda traffic shifting)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Auto Scaling (groups, launch configs, reconciler)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>SSM Run Command (real agent polling)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Transfer Family (SFTP)</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Native binary</td><td>✅ ~40 MB</td><td>❌</td></tr>
+  </table>
+
+  <p><strong>47 AWS services. Broad coverage. Free forever.</strong></p>
+
+  <h3>Quick Start</h3>
+  <pre><code># docker-compose.yml
+services:
+  floci:
+    image: floci/floci:latest
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./data:/app/data</code></pre>
+
+  <pre><code>docker compose up</code></pre>
+
+  <p>Or run directly with Docker:</p>
+  <pre><code>docker run -d --name floci \
+  -p 4566:4566 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e FLOCI_DEFAULT_REGION=us-east-1 \
+  -u root \
+  floci/floci:latest</code></pre>
+
+  <p>All services are available at <code>http://localhost:4566</code>. Any region works. Credentials can be anything.</p>
+  <pre><code>export AWS_ENDPOINT_URL=http://localhost:4566
+export AWS_DEFAULT_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+
+aws s3 mb s3://my-bucket
+aws sqs create-queue --queue-name my-queue
+aws dynamodb list-tables</code></pre>
+
+  <h3>Real Docker Integration</h3>
+  <p>Unlike mock-only emulators, Floci runs <strong>real Docker containers</strong> for services where in-process emulation would compromise fidelity — stateful databases, connection-heavy protocols, and runtimes that require native execution.</p>
+
+  <table>
+    <tr><th>Service</th><th>Default Image</th><th>What's real</th></tr>
+    <tr><td><strong>Lambda</strong></td><td><code>public.ecr.aws/lambda/&lt;runtime&gt;</code></td><td>AWS runtime environment, execution model, warm container pool</td></tr>
+    <tr><td><strong>ElastiCache</strong></td><td><code>valkey/valkey:8</code></td><td>Full Redis/Valkey protocol, ACL-based IAM auth, SigV4 validation</td></tr>
+    <tr><td><strong>RDS (PostgreSQL)</strong></td><td><code>postgres:16-alpine</code></td><td>Real PostgreSQL engine, IAM auth via token, JDBC-compatible</td></tr>
+    <tr><td><strong>RDS (MySQL / Aurora)</strong></td><td><code>mysql:8.0</code></td><td>Real MySQL engine, IAM auth, JDBC-compatible</td></tr>
+    <tr><td><strong>RDS (MariaDB)</strong></td><td><code>mariadb:11</code></td><td>Real MariaDB engine, IAM auth, JDBC-compatible</td></tr>
+    <tr><td><strong>MSK</strong></td><td><code>redpandadata/redpanda:latest</code></td><td>Real Kafka-compatible broker via Redpanda</td></tr>
+    <tr><td><strong>EC2</strong></td><td>AMI-mapped (e.g. <code>public.ecr.aws/amazonlinux/amazonlinux:2023</code>)</td><td>Real Linux containers; SSH key injection; UserData execution; IMDS with IMDSv1+IMDSv2 and IAM credential serving</td></tr>
+    <tr><td><strong>ECS</strong></td><td>User-specified in task definition</td><td>Actual container lifecycle — start, stop, health checks</td></tr>
+    <tr><td><strong>EKS</strong></td><td><code>rancher/k3s:latest</code></td><td>Live Kubernetes API server (k3s), full kubeconfig</td></tr>
+    <tr><td><strong>CodeBuild</strong></td><td>User-specified environment image</td><td>Real buildspec execution; S3 artifact upload; CloudWatch log streaming</td></tr>
+    <tr><td><strong>OpenSearch</strong></td><td><code>opensearchproject/opensearch:2</code></td><td>Full OpenSearch engine with REST API</td></tr>
+    <tr><td><strong>ECR</strong></td><td><code>registry:2</code></td><td>Real OCI-compatible registry — <code>docker push</code> / <code>docker pull</code> work natively</td></tr>
+  </table>
+
+  <h4>Lambda runtimes</h4>
+  <p>Floci resolves each Lambda runtime to the corresponding AWS public ECR image:</p>
+  <table>
+    <tr><th>Runtime</th><th>Image</th></tr>
+    <tr><td><code>java25</code> · <code>java21</code> · <code>java17</code> · <code>java11</code> · <code>java8.al2</code> · <code>java8</code></td><td><code>public.ecr.aws/lambda/java:&lt;version&gt;</code></td></tr>
+    <tr><td><code>python3.14</code> · <code>python3.13</code> · <code>python3.12</code> · <code>python3.11</code> · <code>python3.10</code> · <code>python3.9</code></td><td><code>public.ecr.aws/lambda/python:&lt;version&gt;</code></td></tr>
+    <tr><td><code>nodejs24.x</code> · <code>nodejs22.x</code> · <code>nodejs20.x</code> · <code>nodejs18.x</code> · <code>nodejs16.x</code></td><td><code>public.ecr.aws/lambda/nodejs:&lt;version&gt;</code></td></tr>
+    <tr><td><code>ruby3.4</code> · <code>ruby3.3</code> · <code>ruby3.2</code></td><td><code>public.ecr.aws/lambda/ruby:&lt;version&gt;</code></td></tr>
+    <tr><td><code>dotnet10</code> · <code>dotnet9</code> · <code>dotnet8</code> · <code>dotnet6</code></td><td><code>public.ecr.aws/lambda/dotnet:&lt;version&gt;</code></td></tr>
+    <tr><td><code>go1.x</code></td><td><code>public.ecr.aws/lambda/go:1</code></td></tr>
+    <tr><td><code>provided.al2023</code> · <code>provided.al2</code> · <code>provided</code></td><td><code>public.ecr.aws/lambda/provided:&lt;variant&gt;</code></td></tr>
+  </table>
+
+  <h4>Overriding default images</h4>
+  <table>
+    <tr><th>Variable</th><th>Default</th></tr>
+    <tr><td><code>FLOCI_SERVICES_ELASTICACHE_DEFAULT_IMAGE</code></td><td><code>valkey/valkey:8</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_RDS_DEFAULT_POSTGRES_IMAGE</code></td><td><code>postgres:16-alpine</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_RDS_DEFAULT_MYSQL_IMAGE</code></td><td><code>mysql:8.0</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_RDS_DEFAULT_MARIADB_IMAGE</code></td><td><code>mariadb:11</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_MSK_DEFAULT_IMAGE</code></td><td><code>redpandadata/redpanda:latest</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_OPENSEARCH_DEFAULT_IMAGE</code></td><td><code>opensearchproject/opensearch:2</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_EKS_DEFAULT_IMAGE</code></td><td><code>rancher/k3s:latest</code></td></tr>
+    <tr><td><code>FLOCI_SERVICES_ECR_REGISTRY_IMAGE</code></td><td><code>registry:2</code></td></tr>
+    <tr><td><code>FLOCI_ECR_BASE_URI</code></td><td><code>public.ecr.aws</code> (Lambda runtime base)</td></tr>
+  </table>
+
+  <h3>Supported Services (Full List)</h3>
+  <div class="note">
+    <strong>Lambda, ElastiCache, RDS, MSK, ECS, EC2, EKS, OpenSearch, and CodeBuild</strong> spin up real Docker containers and support IAM authentication and SigV4 request signing — the same auth flow as production AWS. <strong>ECR</strong> runs a shared <code>registry:2</code> container so the stock <code>docker</code> client can push and pull image bytes against repositories returned by the AWS-shaped control plane.
+  </div>
+
+  <table>
+    <tr><th>Service</th><th>How it works</th><th>Notable features</th></tr>
+    <tr><td><strong>SSM Parameter Store</strong></td><td>In-process</td><td>Version history, labels, SecureString, tagging</td></tr>
+    <tr><td><strong>SSM Run Command</strong></td><td>In-process</td><td><code>SendCommand</code>, <code>GetCommandInvocation</code>, <code>ListCommands</code>, <code>CancelCommand</code>; <code>DescribeInstanceInformation</code>; <code>ec2messages</code> polling so the real <code>amazon-ssm-agent</code> can register</td></tr>
+    <tr><td><strong>SQS</strong></td><td>In-process</td><td>Standard &amp; FIFO, DLQ, visibility timeout, batch, tagging</td></tr>
+    <tr><td><strong>SNS</strong></td><td>In-process</td><td>Topics, subscriptions, SQS / Lambda / HTTP delivery, tagging</td></tr>
+    <tr><td><strong>S3</strong></td><td>In-process</td><td>Versioning, multipart upload, pre-signed URLs, Object Lock, event notifications</td></tr>
+    <tr><td><strong>DynamoDB</strong></td><td>In-process</td><td>GSI / LSI, Query, Scan, TTL, transactions, batch operations</td></tr>
+    <tr><td><strong>DynamoDB Streams</strong></td><td>In-process</td><td>Shard iterators, records, Lambda ESM trigger</td></tr>
+    <tr><td><strong>Lambda</strong></td><td><strong>Real Docker</strong></td><td>Warm pool, aliases, Function URLs, SQS / Kinesis / DDB Streams ESM</td></tr>
+    <tr><td><strong>API Gateway REST</strong></td><td>In-process</td><td>Resources, methods, stages, Lambda proxy, MOCK integrations, AWS integrations</td></tr>
+    <tr><td><strong>API Gateway v2 (HTTP)</strong></td><td>In-process</td><td>Routes, integrations, JWT authorizers, stages</td></tr>
+    <tr><td><strong>IAM</strong></td><td>In-process</td><td>Users, roles, groups, policies, instance profiles, access keys</td></tr>
+    <tr><td><strong>STS</strong></td><td>In-process</td><td>AssumeRole, WebIdentity, SAML, GetFederationToken, GetSessionToken</td></tr>
+    <tr><td><strong>Cognito</strong></td><td>In-process</td><td>User pools, app clients, auth flows, JWKS / OpenID well-known endpoints</td></tr>
+    <tr><td><strong>KMS</strong></td><td>In-process</td><td>Encrypt / decrypt, sign / verify, data keys, aliases</td></tr>
+    <tr><td><strong>Kinesis</strong></td><td>In-process</td><td>Streams, shards, enhanced fan-out, split / merge</td></tr>
+    <tr><td><strong>Secrets Manager</strong></td><td>In-process</td><td>Versioning, resource policies, tagging</td></tr>
+    <tr><td><strong>Step Functions</strong></td><td>In-process</td><td>ASL execution, task tokens, execution history</td></tr>
+    <tr><td><strong>CloudFormation</strong></td><td>In-process</td><td>Stacks, change sets, resource provisioning</td></tr>
+    <tr><td><strong>EventBridge</strong></td><td>In-process</td><td>Custom buses, rules, targets (SQS / SNS / Lambda)</td></tr>
+    <tr><td><strong>EventBridge Scheduler</strong></td><td>In-process</td><td>Schedule groups, schedules, flexible time windows, retry policies, dead-letter queues</td></tr>
+    <tr><td><strong>CloudWatch Logs</strong></td><td>In-process</td><td>Log groups, streams, ingestion, filtering</td></tr>
+    <tr><td><strong>CloudWatch Metrics</strong></td><td>In-process</td><td>Custom metrics, statistics, alarms</td></tr>
+    <tr><td><strong>ElastiCache</strong></td><td><strong>Real Docker</strong></td><td>Redis / Valkey, IAM auth, SigV4 validation</td></tr>
+    <tr><td><strong>RDS</strong></td><td><strong>Real Docker</strong></td><td>PostgreSQL &amp; MySQL, IAM auth, JDBC-compatible</td></tr>
+    <tr><td><strong>MSK</strong></td><td><strong>Real Docker</strong></td><td>Kafka compatible via Redpanda orchestration</td></tr>
+    <tr><td><strong>Athena</strong></td><td>In-process + <strong>DuckDB sidecar</strong></td><td>Real SQL execution; Glue-backed views over S3 data; <code>read_parquet</code> / <code>read_json_auto</code> / <code>read_csv_auto</code> inferred from SerDe</td></tr>
+    <tr><td><strong>Glue</strong></td><td>In-process</td><td>Data Catalog; Schema Registry for Avro / JSON Schema / Protobuf; tables consumed by Athena as DuckDB views at query time</td></tr>
+    <tr><td><strong>Data Firehose</strong></td><td>In-process</td><td>Streaming data delivery; records flushed as NDJSON to S3</td></tr>
+    <tr><td><strong>ECS</strong></td><td><strong>Real Docker</strong></td><td>Clusters, task definitions, tasks, services, capacity providers, task sets</td></tr>
+    <tr><td><strong>EC2</strong></td><td><strong>Real Docker</strong></td><td><code>RunInstances</code> launches real Docker containers; SSH key injection; UserData execution; IMDS (IMDSv1+IMDSv2, port 9169); VPCs, subnets, security groups, AMIs, key pairs, internet gateways, route tables, Elastic IPs, tags</td></tr>
+    <tr><td><strong>ACM</strong></td><td>In-process</td><td>Certificate issuance, validation lifecycle</td></tr>
+    <tr><td><strong>ECR</strong></td><td>In-process + <strong>real OCI registry</strong></td><td>Repositories, image push / pull via stock <code>docker</code>, image-backed Lambda functions</td></tr>
+    <tr><td><strong>SES</strong></td><td>In-process</td><td>Send email / raw email, identity verification, DKIM attributes, email templates with <code>{{var}}</code> substitution</td></tr>
+    <tr><td><strong>SES v2 (HTTP)</strong></td><td>In-process</td><td>REST JSON API, identities, DKIM, feedback attributes, account sending, templates</td></tr>
+    <tr><td><strong>OpenSearch</strong></td><td><strong>Real Docker</strong></td><td>Domain CRUD, tags, versions, instance types, upgrade stubs</td></tr>
+    <tr><td><strong>AppConfig</strong></td><td>In-process</td><td>Applications, environments, profiles, hosted configuration versions, deployments</td></tr>
+    <tr><td><strong>AppConfigData</strong></td><td>In-process</td><td>Configuration sessions, dynamic configuration retrieval</td></tr>
+    <tr><td><strong>Bedrock Runtime</strong></td><td>In-process (stub)</td><td>Dummy Converse and InvokeModel responses for local development; streaming returns 501</td></tr>
+    <tr><td><strong>EKS</strong></td><td><strong>Real Docker</strong> (mock mode available)</td><td>Clusters, tagging; real mode starts k3s per cluster with a live Kubernetes API server</td></tr>
+    <tr><td><strong>ELB v2</strong></td><td>In-process</td><td>Application and Network Load Balancers, target groups, listeners, path/host-based routing rules, Lambda targets (ALB→Lambda event format), tags</td></tr>
+    <tr><td><strong>CodeBuild</strong></td><td>In-process + <strong>real Docker</strong></td><td>Projects, report groups, source credentials; <code>StartBuild</code> runs real Docker containers, streams logs to CloudWatch, uploads artifacts to S3 via <code>docker cp</code></td></tr>
+    <tr><td><strong>CodeDeploy</strong></td><td>In-process + <strong>Lambda traffic shifting</strong></td><td>Applications, deployment groups, deployment configs; 17 <code>CodeDeployDefault.*</code> built-ins pre-seeded; <code>CreateDeployment</code> shifts Lambda alias <code>RoutingConfig</code> weights, invokes lifecycle hooks, auto-rolls back on failure</td></tr>
+    <tr><td><strong>Auto Scaling</strong></td><td>In-process + <strong>background reconciler</strong></td><td>Launch configurations, auto scaling groups with min/max/desired capacity; background loop (10 s) calls <code>RunInstances</code> / <code>TerminateInstances</code> to meet desired capacity; lifecycle hooks, scaling policies, ELB v2 target group auto-registration</td></tr>
+    <tr><td><strong>AWS Backup</strong></td><td>In-process</td><td>Vaults, backup plans with rules, resource selections, on-demand jobs with simulated lifecycle (CREATED → RUNNING → COMPLETED), recovery points, tagging</td></tr>
+    <tr><td><strong>Route53</strong></td><td>In-process</td><td>Hosted zones with auto-created SOA + NS records, resource record sets (CREATE/UPSERT/DELETE with atomic validation), change tracking (always INSYNC), health checks, per-resource tagging</td></tr>
+    <tr><td><strong>Transfer Family</strong></td><td>In-process</td><td>Server lifecycle (<code>CreateServer</code> / <code>DeleteServer</code> / <code>StartServer</code> / <code>StopServer</code> / <code>UpdateServer</code>), user management, SSH public key import, tagging</td></tr>
+    <tr><td><strong>Textract</strong></td><td>In-process (stub)</td><td>API-compatible stubs for all operations; dummy block data with realistic shape and metadata; async job simulation with immediate SUCCEEDED status</td></tr>
+    <tr><td><strong>Pricing (Price List Service)</strong></td><td>In-process + bundled static snapshot</td><td><code>DescribeServices</code>, <code>GetAttributeValues</code>, <code>GetProducts</code>, <code>ListPriceLists</code>, <code>GetPriceListFileUrl</code>; pagination; filesystem override via <code>FLOCI_SERVICES_PRICING_SNAPSHOT_PATH</code></td></tr>
+    <tr><td><strong>Cost Explorer</strong></td><td>In-process; cost synthesized from Floci resource state × Pricing snapshot</td><td><code>GetCostAndUsage</code> (full <code>Filter</code>/<code>GroupBy</code>/<code>Metrics</code>/<code>RECORD_TYPE</code>), <code>GetCostAndUsageWithResources</code>, <code>GetDimensionValues</code>, <code>GetTags</code>, RI/SP coverage+utilization stubs; CDI-discovered <code>ResourceUsageEnumerator</code> SPI</td></tr>
+    <tr><td><strong>Cost and Usage Reports (CUR)</strong></td><td>In-process management plane + <code>floci-duck</code> sidecar for Parquet emission</td><td><code>PutReportDefinition</code>, <code>ModifyReportDefinition</code>, <code>DescribeReportDefinitions</code>, <code>DeleteReportDefinition</code>; FOCUS 1.2 / CUR 2.0 columns; account-scoped storage; <code>synchronous</code> / <code>daily</code> / <code>off</code> emit modes</td></tr>
+    <tr><td><strong>BCM Data Exports</strong></td><td>In-process management plane sharing the CUR Parquet engine</td><td><code>CreateExport</code>, <code>GetExport</code>, <code>ListExports</code>, <code>UpdateExport</code>, <code>DeleteExport</code>, <code>ListExecutions</code>, <code>GetExecution</code>; AWS-compatible execution lifecycle</td></tr>
+  </table>
+
+  <h3>Persistence &amp; Storage Modes</h3>
+  <p>Configure globally via <code>FLOCI_STORAGE_MODE</code> or override per service.</p>
+  <table>
+    <tr><th>Mode</th><th>Behavior</th><th>Best for</th><th>Durability</th></tr>
+    <tr><td><code>memory</code></td><td><strong>(Default)</strong> Entirely in-RAM. Data lost when container stops.</td><td>Speed, ephemeral testing, CI pipelines</td><td>❌ None</td></tr>
+    <tr><td><code>persistent</code></td><td>Loaded at startup, flushed to disk on graceful shutdown.</td><td>Simple local dev with state preservation</td><td>⚠️ Medium</td></tr>
+    <tr><td><code>hybrid</code></td><td>In-memory performance with periodic async flushing every 5 seconds.</td><td>The best balance of speed and safety</td><td>✅ Good</td></tr>
+    <tr><td><code>wal</code></td><td>Write-Ahead Log. Every mutation logged to disk before responding.</td><td>Maximum durability for critical state</td><td>💎 Highest</td></tr>
+  </table>
+</section>
+
+<!-- ============================================== -->
+<!-- 2. CODEBUFF -->
+<!-- ============================================== -->
+<section class="repo" id="codebuff">
+  <h2>🤖 codebuff <span class="badge">AI Coding Agent</span></h2>
+  <div class="source">Source: <a href="https://github.com/CodebuffAI/codebuff">github.com/CodebuffAI/codebuff</a> · README.md (main branch)</div>
+
+  <p><strong><a href="https://codebuff.com">Codebuff</a></strong> is an open-source AI coding assistant that edits your codebase through natural language instructions. <strong><a href="https://www.npmjs.com/package/freebuff">Freebuff</a></strong> is the free, ad-supported version — no subscription, no credits, no configuration.</p>
+
+  <p>Instead of using one model for everything, Codebuff coordinates specialized agents that work together to understand your project and make precise changes.</p>
+
+  <p>Codebuff beats Claude Code at 61% vs 53% on their evals across 175+ coding tasks over multiple open-source repos that simulate real-world tasks.</p>
+
+  <h3>How it works</h3>
+  <p>When you ask Codebuff to "add authentication to my API," it might invoke:</p>
+  <ol>
+    <li>A <strong>File Picker Agent</strong> to scan your codebase to understand the architecture and find relevant files</li>
+    <li>A <strong>Planner Agent</strong> to plan which files need changes and in what order</li>
+    <li>An <strong>Editor Agent</strong> to make precise edits</li>
+    <li>A <strong>Reviewer Agent</strong> to validate changes</li>
+  </ol>
+  <p>This multi-agent approach gives you better context understanding, more accurate edits, and fewer errors compared to single-model tools.</p>
+
+  <h3>CLI: Install and start coding</h3>
+  <p>Install:</p>
+  <pre><code>npm install -g codebuff</code></pre>
+  <p>Run:</p>
+  <pre><code>cd your-project
+codebuff</code></pre>
+
+  <p>Then tell Codebuff what you want:</p>
+  <ul>
+    <li>"Fix the SQL injection vulnerability in user registration"</li>
+    <li>"Add rate limiting to all API endpoints"</li>
+    <li>"Refactor the database connection code for better performance"</li>
+  </ul>
+
+  <h3>How Agents Are Configured</h3>
+  <p>To get started building your own agents, start Codebuff and run the <code>/init</code> command:</p>
+  <pre><code>codebuff</code></pre>
+  <p>Then inside the CLI:</p>
+  <pre><code>/init</code></pre>
+
+  <p>This creates:</p>
+  <pre><code>knowledge.md               # Project context for Codebuff
+.agents/
+└── types/                 # TypeScript type definitions
+    ├── agent-definition.ts
+    ├── tools.ts
+    └── util-types.ts</code></pre>
+
+  <p>You can write agent definition files that give you maximum control over agent behavior.</p>
+
+  <p>Implement workflows by specifying tools, which agents can be spawned, and prompts. TypeScript generators provide programmatic control.</p>
+
+  <h4>Example: <code>git-committer</code> agent</h4>
+  <p>Here's a <code>git-committer</code> agent that creates git commits based on the current git state. It runs <code>git diff</code> and <code>git log</code> to analyze changes, then hands control over to the LLM to craft a meaningful commit message and perform the actual commit.</p>
+
+  <pre><code>export default {
+  id: 'git-committer',
+  displayName: 'Git Committer',
+  model: 'openai/gpt-5-nano',
+  toolNames: ['read_files', 'run_terminal_command', 'end_turn'],
+
+  instructionsPrompt:
+    'You create meaningful git commits by analyzing changes, reading relevant files for context, and crafting clear commit messages that explain the "why" behind changes.',
+
+  async *handleSteps() {
+    // Analyze what changed
+    yield { tool: 'run_terminal_command', command: 'git diff' }
+    yield { tool: 'run_terminal_command', command: 'git log --oneline -5' }
+
+    // Stage files and create commit with good message
+    yield 'STEP_ALL'
+  },
+}</code></pre>
+
+  <h3>SDK: Run agents in production</h3>
+  <p>Install the <a href="https://www.npmjs.com/package/@codebuff/sdk">SDK package</a> — note this is different from the CLI codebuff package.</p>
+  <pre><code>npm install @codebuff/sdk</code></pre>
+
+  <p>Import the client and run agents:</p>
+  <pre><code>import { CodebuffClient } from '@codebuff/sdk'
+
+// 1. Initialize the client
+const client = new CodebuffClient({
+  apiKey: 'your-api-key',
+  cwd: '/path/to/your/project',
+  onError: (error) =&gt; console.error('Codebuff error:', error.message),
+})
+
+// 2. Do a coding task...
+const result = await client.run({
+  agent: 'base', // Codebuff's base coding agent
+  prompt: 'Add error handling to all API endpoints',
+  handleEvent: (event) =&gt; {
+    console.log('Progress', event)
+  },
+})
+
+// 3. Or, run a custom agent!
+const myCustomAgent: AgentDefinition = {
+  id: 'greeter',
+  displayName: 'Greeter',
+  model: 'openai/gpt-5.1',
+  instructionsPrompt: 'Say hello!',
+}
+await client.run({
+  agent: 'greeter',
+  agentDefinitions: [myCustomAgent],
+  prompt: 'My name is Bob.',
+  customToolDefinitions: [], // Add custom tools too!
+  handleEvent: (event) =&gt; {
+    console.log('Progress', event)
+  },
+})</code></pre>
+
+  <h3>Freebuff: The free coding agent</h3>
+  <pre><code>npm install -g freebuff
+cd your-project
+freebuff</code></pre>
+  <p>Freebuff is ad-supported and uses models optimized for fast, high-quality assistance. It includes built-in web research, browser use, and more.</p>
+
+  <h3>Why choose Codebuff</h3>
+  <p><strong>Custom workflows:</strong> TypeScript generators let you mix AI generation with programmatic control. Agents can spawn subagents, branch on conditions, and run multi-step processes.</p>
+  <p><strong>Any model on OpenRouter:</strong> Unlike Claude Code which locks you into Anthropic's models, Codebuff supports any model available on <a href="https://openrouter.ai/models">OpenRouter</a> — from Claude and GPT to specialized models like Qwen, DeepSeek, and others.</p>
+  <p><strong>Reuse any published agent:</strong> Compose existing <a href="https://www.codebuff.com/store">published agents</a> to get a leg up. Codebuff agents are the new MCP!</p>
+  <p><strong>SDK:</strong> Build Codebuff into your applications. Create custom tools, integrate with CI/CD, or embed coding assistance into your products.</p>
+
+  <h3>Running Tests</h3>
+  <pre><code>cd cli
+bun test</code></pre>
+  <p>For interactive E2E testing, install tmux:</p>
+  <pre><code># macOS
+brew install tmux
+# Ubuntu/Debian
+sudo apt-get install tmux
+# Windows (via WSL)
+wsl --install
+sudo apt-get install tmux</code></pre>
+
+  <h3>Get started — Install</h3>
+  <ul>
+    <li><strong>CLI:</strong> <code>npm install -g codebuff</code></li>
+    <li><strong>SDK:</strong> <code>npm install @codebuff/sdk</code></li>
+    <li><strong>Freebuff (free):</strong> <code>npm install -g freebuff</code></li>
+  </ul>
+  <p><strong>Documentation:</strong> <a href="https://codebuff.com/docs">codebuff.com/docs</a> · <strong>Community:</strong> <a href="https://codebuff.com/discord">Discord</a></p>
+</section>
+
+<!-- ============================================== -->
+<!-- 3. SPEC-KIT -->
+<!-- ============================================== -->
+<section class="repo" id="spec-kit">
+  <h2>🌱 spec-kit <span class="badge">Spec-Driven Development</span></h2>
+  <div class="source">Source: <a href="https://github.com/github/spec-kit">github.com/github/spec-kit</a> · README.md + templates/spec-template.md (main branch)</div>
+
+  <p><strong>Build high-quality software faster.</strong></p>
+  <p>An open source toolkit that allows you to focus on product scenarios and predictable outcomes instead of vibe coding every piece from scratch.</p>
+
+  <h3>What is Spec-Driven Development?</h3>
+  <p>Spec-Driven Development <strong>flips the script</strong> on traditional software development. For decades, code has been king — specifications were just scaffolding we built and discarded once the "real work" of coding began. Spec-Driven Development changes this: <strong>specifications become executable</strong>, directly generating working implementations rather than just guiding them.</p>
+
+  <h3>Get Started</h3>
+  <h4>1. Install Specify CLI</h4>
+  <p>Requires <a href="https://docs.astral.sh/uv/">uv</a>. Replace <code>vX.Y.Z</code> with the latest tag from Releases:</p>
+  <pre><code>uv tool install specify-cli --from git+https://github.com/github/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5d2e2d383e70363429733a34291d2b0573047307">[email&#160;protected]</a></code></pre>
+
+  <h4>2. Initialize a project</h4>
+  <pre><code>specify init my-project --integration copilot
+cd my-project</code></pre>
+
+  <h4>3. Establish project principles</h4>
+  <p>Use the <code>/speckit.constitution</code> command to create your project's governing principles and development guidelines:</p>
+  <pre><code>/speckit.constitution Create principles focused on code quality, testing standards, user experience consistency, and performance requirements</code></pre>
+
+  <h4>4. Create the spec</h4>
+  <p>Use <code>/speckit.specify</code> to describe what you want to build. Focus on the <strong>what</strong> and <strong>why</strong>, not the tech stack.</p>
+  <pre><code>/speckit.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.</code></pre>
+
+  <h4>5. Create a technical implementation plan</h4>
+  <pre><code>/speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.</code></pre>
+
+  <h4>6. Break down into tasks</h4>
+  <pre><code>/speckit.tasks</code></pre>
+
+  <h4>7. Execute implementation</h4>
+  <pre><code>/speckit.implement</code></pre>
+
+  <h3>Available Slash Commands</h3>
+  <h4>Core Commands</h4>
+  <table>
+    <tr><th>Command</th><th>Agent Skill</th><th>Description</th></tr>
+    <tr><td><code>/speckit.constitution</code></td><td><code>speckit-constitution</code></td><td>Create or update project governing principles and development guidelines</td></tr>
+    <tr><td><code>/speckit.specify</code></td><td><code>speckit-specify</code></td><td>Define what you want to build (requirements and user stories)</td></tr>
+    <tr><td><code>/speckit.plan</code></td><td><code>speckit-plan</code></td><td>Create technical implementation plans with your chosen tech stack</td></tr>
+    <tr><td><code>/speckit.tasks</code></td><td><code>speckit-tasks</code></td><td>Generate actionable task lists for implementation</td></tr>
+    <tr><td><code>/speckit.taskstoissues</code></td><td><code>speckit-taskstoissues</code></td><td>Convert task lists into GitHub issues for tracking and execution</td></tr>
+    <tr><td><code>/speckit.implement</code></td><td><code>speckit-implement</code></td><td>Execute all tasks to build the feature according to the plan</td></tr>
+  </table>
+
+  <h4>Optional Commands</h4>
+  <table>
+    <tr><th>Command</th><th>Agent Skill</th><th>Description</th></tr>
+    <tr><td><code>/speckit.clarify</code></td><td><code>speckit-clarify</code></td><td>Clarify underspecified areas (recommended before <code>/speckit.plan</code>; formerly <code>/quizme</code>)</td></tr>
+    <tr><td><code>/speckit.analyze</code></td><td><code>speckit-analyze</code></td><td>Cross-artifact consistency &amp; coverage analysis (run after <code>/speckit.tasks</code>, before <code>/speckit.implement</code>)</td></tr>
+    <tr><td><code>/speckit.checklist</code></td><td><code>speckit-checklist</code></td><td>Generate custom quality checklists that validate requirements completeness, clarity, and consistency</td></tr>
+  </table>
+
+  <div class="note">
+    Spec Kit works with 30+ AI coding agents — both CLI tools and IDE-based assistants. Run <code>specify integration list</code> to see all available integrations in your installed version. For integrations that support skills mode, passing <code>--integration &lt;agent&gt; --integration-options="--skills"</code> installs agent skills instead of slash-command prompt files.
+  </div>
+
+  <h3>Example Spec File (templates/spec-template.md)</h3>
+  <p>This is the canonical spec template that <code>/speckit.specify</code> populates:</p>
+  <pre><code># Feature Specification: [FEATURE NAME]
+
+**Feature Branch**: `[###-feature-name]`
+**Created**: [DATE]
+**Status**: Draft
+**Input**: User description: "$ARGUMENTS"
+
+## User Scenarios &amp; Testing *(mandatory)*
+
+&lt;!--
+  IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
+  Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
+  you should still have a viable MVP (Minimum Viable Product) that delivers value.
+
+  Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
+  Think of each story as a standalone slice of functionality that can be:
+  - Developed independently
+  - Tested independently
+  - Deployed independently
+  - Demonstrated to users independently
+--&gt;
+
+### User Story 1 - [Brief Title] (Priority: P1)
+
+[Describe this user journey in plain language]
+
+**Why this priority**: [Explain the value and why it has this priority level]
+
+**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+
+**Acceptance Scenarios**:
+
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+
+---
+
+### User Story 2 - [Brief Title] (Priority: P2)
+
+[Describe this user journey in plain language]
+
+**Why this priority**: [Explain the value and why it has this priority level]
+
+**Independent Test**: [Describe how this can be tested independently]
+
+**Acceptance Scenarios**:
+
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+
+---
+
+### User Story 3 - [Brief Title] (Priority: P3)
+
+[Describe this user journey in plain language]
+
+**Why this priority**: [Explain the value and why it has this priority level]
+
+**Independent Test**: [Describe how this can be tested independently]
+
+**Acceptance Scenarios**:
+
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+
+---
+
+### Edge Cases
+
+- What happens when [boundary condition]?
+- How does system handle [error scenario]?
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
+- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
+- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
+- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
+- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+
+*Example of marking unclear requirements:*
+
+- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+
+### Key Entities *(include if feature involves data)*
+
+- **[Entity 1]**: [What it represents, key attributes without implementation]
+- **[Entity 2]**: [What it represents, relationships to other entities]
+
+## Success Criteria *(mandatory)*
+
+### Measurable Outcomes
+
+- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
+- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
+- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
+- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## Assumptions
+
+- [Assumption about target users, e.g., "Users have stable internet connectivity"]
+- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
+- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
+- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]</code></pre>
+
+  <div class="note">
+    Most agents expose spec-kit as <code>/speckit.*</code> slash commands; <strong>Codex CLI in skills mode uses <code>$speckit-*</code> instead</strong>.
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 4. FREE-CLAUDE-CODE -->
+<!-- ============================================== -->
+<section class="repo" id="free-claude-code">
+  <h2>🆓 free-claude-code <span class="badge">Anthropic-Compatible Proxy</span></h2>
+  <div class="source">Source: <a href="https://github.com/Alishahryar1/free-claude-code">github.com/Alishahryar1/free-claude-code</a> · README.md (main branch)</div>
+
+  <p>Use Claude Code CLI, VS Code, JetBrains ACP, or chat bots through your own Anthropic-compatible proxy.</p>
+  <p>Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDIA NIM, Kimi, Wafer, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama. It keeps Claude Code's client-side protocol stable while letting you choose free, paid, or local models.</p>
+
+  <h3>What You Get</h3>
+  <ul>
+    <li>Drop-in proxy for Claude Code's Anthropic API calls.</li>
+    <li>Ten provider backends: NVIDIA NIM, Kimi, Wafer, OpenRouter, DeepSeek, LM Studio, llama.cpp, Ollama, OpenCode Zen, and Z.ai.</li>
+    <li><strong>Per-model routing:</strong> send Opus, Sonnet, Haiku, and fallback traffic to different providers.</li>
+    <li>Native Claude Code <code>/model</code> picker support through the proxy's <code>/v1/models</code> endpoint (Claude Code must opt in to Gateway model discovery).</li>
+    <li>Streaming, tool use, reasoning/thinking block handling, and local request optimizations.</li>
+    <li>Optional Discord or Telegram bot wrapper for remote coding sessions.</li>
+    <li>Optional voice-note transcription through local Whisper or NVIDIA NIM.</li>
+    <li>Local <strong>Admin UI</strong> at <code>/admin</code> to edit supported proxy settings, validate changes, and check providers (loopback access only).</li>
+  </ul>
+
+  <h3>Quick Start</h3>
+  <h4>1. Install the latest version of Claude Code</h4>
+  <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+
+  <h4>2. Install Runtime Requirements</h4>
+  <p>Install the latest version of <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> and Python 3.14.</p>
+  <p>macOS/Linux:</p>
+  <pre><code>curl -LsSf https://astral.sh/uv/install.sh | sh
+uv self update
+uv python install 3.14</code></pre>
+  <p>Windows PowerShell:</p>
+  <pre><code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv self update
+uv python install 3.14</code></pre>
+
+  <h4>3. Get an NVIDIA NIM API Key</h4>
+  <p>Create a free NVIDIA NIM API key, then keep it ready for the Admin UI setup step.</p>
+
+  <h4>4. Install the Proxy</h4>
+  <pre><code>uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git</code></pre>
+
+  <h4>5. Start the Proxy</h4>
+  <pre><code>fcc-server</code></pre>
+  <p>After startup, Uvicorn prints the proxy bind address and the app logs the admin URL:</p>
+  <pre><code>INFO:     Admin UI: http://127.0.0.1:8082/admin (local-only)</code></pre>
+
+  <h4>6. Open the Admin UI and Configure NVIDIA NIM</h4>
+  <p>Paste your NVIDIA NIM API key into <code>NVIDIA_NIM_API_KEY</code>, then click <strong>Validate</strong> and <strong>Apply</strong>. The default model is already set to <code>nvidia_nim/z-ai/glm4.7</code>.</p>
+
+  <h4>7. Run Claude Code</h4>
+  <pre><code>fcc-claude</code></pre>
+  <p><code>fcc-claude</code> reads the current configured port and auth token each time it starts, sets the Claude Code environment variables (including a 190k-token <code>CLAUDE_CODE_AUTO_COMPACT_WINDOW</code> for auto-compaction), and then launches the real <code>claude</code> command.</p>
+
+  <h3>How Routing Is Configured</h3>
+  <p>Pick one provider, enter its key or local URL in the Admin UI, and set <code>MODEL</code> to a provider-prefixed model slug. <code>MODEL</code> is the fallback. <code>MODEL_OPUS</code>, <code>MODEL_SONNET</code>, and <code>MODEL_HAIKU</code> can override routing for Claude Code's model tiers.</p>
+
+  <h4>Provider list with model slug format</h4>
+  <table>
+    <tr><th>#</th><th>Provider</th><th>Admin UI key</th><th>Example MODEL slug</th></tr>
+    <tr><td>1</td><td><a href="https://build.nvidia.com/">NVIDIA NIM</a></td><td><code>NVIDIA_NIM_API_KEY</code></td><td><code>nvidia_nim/z-ai/glm4.7</code></td></tr>
+    <tr><td>2</td><td><a href="https://platform.moonshot.ai/">Kimi</a></td><td><code>KIMI_API_KEY</code></td><td><code>kimi/kimi-k2.5</code></td></tr>
+    <tr><td>3</td><td><a href="https://wafer.ai/">Wafer</a></td><td><code>WAFER_API_KEY</code></td><td><code>wafer/DeepSeek-V4-Pro</code></td></tr>
+    <tr><td>4</td><td><a href="https://openrouter.ai/">OpenRouter</a></td><td><code>OPENROUTER_API_KEY</code></td><td><code>open_router/stepfun/step-3.5-flash:free</code></td></tr>
+    <tr><td>5</td><td><a href="https://platform.deepseek.com/">DeepSeek</a></td><td><code>DEEPSEEK_API_KEY</code></td><td><code>deepseek/deepseek-chat</code></td></tr>
+    <tr><td>6</td><td><a href="https://lmstudio.ai/">LM Studio</a></td><td><code>LM_STUDIO_BASE_URL</code></td><td><code>lmstudio/&lt;model-id&gt;</code></td></tr>
+    <tr><td>7</td><td><a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a></td><td><code>LLAMACPP_BASE_URL</code></td><td><code>llamacpp/&lt;model-slug&gt;</code></td></tr>
+    <tr><td>8</td><td><a href="https://ollama.com/">Ollama</a></td><td><code>OLLAMA_BASE_URL</code></td><td><code>ollama/llama3.1</code></td></tr>
+    <tr><td>9</td><td><a href="https://opencode.ai/">OpenCode Zen</a></td><td><code>OPENCODE_API_KEY</code></td><td><code>opencode/gpt-5.3-codex</code></td></tr>
+    <tr><td>10</td><td><a href="https://z.ai/">Z.ai</a></td><td><code>ZAI_API_KEY</code></td><td><code>zai/glm-5.1</code></td></tr>
+  </table>
+
+  <h4>Mix Providers by Model Tier</h4>
+  <p>Each model tier can use a different provider by setting <code>MODEL_OPUS</code>, <code>MODEL_SONNET</code>, and <code>MODEL_HAIKU</code> in the Admin UI. Leave a tier blank to inherit <code>MODEL</code>.</p>
+  <p>For example, you can route Opus to <code>nvidia_nim/moonshotai/kimi-k2.5</code>, Sonnet to <code>open_router/deepseek/deepseek-r1-0528:free</code>, Haiku to <code>lmstudio/unsloth/GLM-4.7-Flash-GGUF</code>, and keep the fallback <code>MODEL</code> on <code>zai/glm-5.1</code>.</p>
+
+  <h3>Connect Claude Code</h3>
+  <h4>1. Claude Code CLI</h4>
+  <pre><code>fcc-claude</code></pre>
+
+  <h4>2. VS Code Extension</h4>
+  <p>Open Settings, search for <code>claude-code.environmentVariables</code>, choose <strong>Edit in settings.json</strong>, and add:</p>
+  <pre><code>"claudeCode.environmentVariables": [
+  { "name": "ANTHROPIC_BASE_URL", "value": "http://localhost:8082" },
+  { "name": "ANTHROPIC_AUTH_TOKEN", "value": "freecc" },
+  { "name": "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY", "value": "1" },
+  { "name": "CLAUDE_CODE_AUTO_COMPACT_WINDOW", "value": "190000" }
+]</code></pre>
+
+  <h4>3. JetBrains ACP</h4>
+  <p>Edit the installed Claude ACP config:</p>
+  <ul>
+    <li>Windows: <code>C:\Users\%USERNAME%\AppData\Roaming\JetBrains\acp-agents\installed.json</code></li>
+    <li>Linux/macOS: <code>~/.jetbrains/acp.json</code></li>
+  </ul>
+  <pre><code>"env": {
+  "ANTHROPIC_BASE_URL": "http://localhost:8082",
+  "ANTHROPIC_AUTH_TOKEN": "freecc",
+  "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
+  "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "190000"
+}</code></pre>
+
+  <h3>How It Works (Architecture)</h3>
+  <ul>
+    <li>FastAPI exposes Anthropic-compatible routes such as <code>/v1/messages</code>, <code>/v1/messages/count_tokens</code>, and <code>/v1/models</code>.</li>
+    <li>Model routing resolves the Claude model name to <code>MODEL_OPUS</code>, <code>MODEL_SONNET</code>, <code>MODEL_HAIKU</code>, or <code>MODEL</code>.</li>
+    <li>NIM, OpenCode Zen, Z.ai use OpenAI chat streaming translated into Anthropic SSE.</li>
+    <li>Wafer, OpenRouter, DeepSeek, LM Studio, llama.cpp, and Ollama use Anthropic Messages style transports.</li>
+    <li>The proxy normalizes thinking blocks, tool calls, token usage metadata, and provider errors into the shape Claude Code expects.</li>
+    <li>Request optimizations answer trivial Claude Code probes locally to save latency and quota.</li>
+  </ul>
+
+  <h3>Project Structure</h3>
+  <pre><code>free-claude-code/
+├── server.py              # ASGI entry point
+├── api/                   # FastAPI routes, service layer, routing, optimizations
+├── core/                  # Shared Anthropic protocol helpers and SSE utilities
+├── providers/             # Provider transports, registry, rate limiting
+├── messaging/             # Discord/Telegram adapters, sessions, voice
+├── cli/                   # Package entry points and Claude process management
+├── config/                # Settings, provider catalog, logging
+└── tests/                 # Unit and contract tests</code></pre>
+
+  <h3>Package Scripts</h3>
+  <ul>
+    <li><code>fcc-server</code>: starts the proxy with configured host and port.</li>
+    <li><code>fcc-init</code>: optional advanced scaffold for <code>~/.fcc/.env</code>; prefer the Admin UI for normal configuration.</li>
+    <li><code>fcc-claude</code>: launches Claude Code with the configured local proxy URL, auth token, model discovery flag, and a 190k <code>CLAUDE_CODE_AUTO_COMPACT_WINDOW</code> for auto-compaction.</li>
+    <li><code>free-claude-code</code>: compatibility alias for <code>fcc-server</code>.</li>
+  </ul>
+
+  <h3>Extending</h3>
+  <ul>
+    <li>Add OpenAI-compatible providers by extending <code>OpenAIChatTransport</code>.</li>
+    <li>Add Anthropic Messages providers by extending <code>AnthropicMessagesTransport</code>.</li>
+    <li>Register provider metadata in <code>config.provider_catalog</code> and factory wiring in <code>providers.registry</code>.</li>
+    <li>Add messaging platforms by implementing the <code>MessagingPlatform</code> interface in <code>messaging/</code>.</li>
+  </ul>
+</section>
+
+<!-- ============================================== -->
+<!-- 5. CLOAKBROWSER -->
+<!-- ============================================== -->
+<section class="repo" id="cloakbrowser">
+  <h2>🕵️ CloakBrowser <span class="badge">Stealth Chromium</span></h2>
+  <div class="source">Source: <a href="https://github.com/CloakHQ/CloakBrowser">github.com/CloakHQ/CloakBrowser</a> · README.md + examples/stealth_test.py (main branch)</div>
+
+  <h3>Stealth Chromium that passes every bot detection test.</h3>
+  <blockquote>
+    Not a patched config. Not a JS injection. A real Chromium binary with fingerprints modified at the C++ source level. Antibot systems score it as a normal browser — because it <em>is</em> a normal browser.
+  </blockquote>
+
+  <p>Drop-in Playwright/Puppeteer replacement for Python and JavaScript. Same API, same code — just swap the import. <strong>3 lines of code, 30 seconds to unblock.</strong></p>
+
+  <ul>
+    <li><strong>49 source-level C++ patches</strong> — canvas, WebGL, audio, fonts, GPU, screen, WebRTC, network timing, automation signals, CDP input behavior</li>
+    <li><strong><code>humanize=True</code></strong> — human-like mouse curves, keyboard timing, and scroll patterns. One flag, behavioral detection passes</li>
+    <li><strong>0.9 reCAPTCHA v3 score</strong> — human-level, server-verified</li>
+    <li><strong>Passes Cloudflare Turnstile</strong>, FingerprintJS, BrowserScan — tested against 30+ detection sites</li>
+    <li><strong>Auto-updating binary</strong> — background update checks, always on the latest stealth build</li>
+    <li><code>pip install cloakbrowser</code> or <code>npm install cloakbrowser</code> — binary auto-downloads, zero config</li>
+    <li><strong>Free and open source</strong> — no subscriptions, no usage limits</li>
+  </ul>
+
+  <p><strong>Try it now</strong> — no install needed:</p>
+  <pre><code>docker run --rm cloakhq/cloakbrowser cloaktest</code></pre>
+
+  <p><strong>Python:</strong></p>
+  <pre><code>from cloakbrowser import launch
+
+browser = launch()
+page = browser.new_page()
+page.goto("https://protected-site.com")  # no more blocks
+browser.close()</code></pre>
+
+  <p><strong>JavaScript (Playwright):</strong></p>
+  <pre><code>import { launch } from 'cloakbrowser';
+
+const browser = await launch();
+const page = await browser.newPage();
+await page.goto('https://protected-site.com');
+await browser.close();</code></pre>
+
+  <h3>Install</h3>
+  <p><strong>Python:</strong></p>
+  <pre><code>pip install cloakbrowser</code></pre>
+  <p><strong>JavaScript / Node.js:</strong></p>
+  <pre><code># With Playwright
+npm install cloakbrowser playwright-core
+# With Puppeteer
+npm install cloakbrowser puppeteer-core</code></pre>
+  <p>On first run, the stealth Chromium binary is automatically downloaded (~200MB, cached locally).</p>
+
+  <p><strong>Optional:</strong> Auto-detect timezone/locale from proxy IP:</p>
+  <pre><code>pip install cloakbrowser[geoip]</code></pre>
+
+  <h4>Migrating from Playwright (one-line change)</h4>
+  <pre><code>- from playwright.sync_api import sync_playwright
+- pw = sync_playwright().start()
+- browser = pw.chromium.launch()
++ from cloakbrowser import launch
++ browser = launch()
+
+page = browser.new_page()
+page.goto("https://example.com")
+# ... rest of your code works unchanged</code></pre>
+
+  <h3>Latest: v0.3.28 (Chromium 146.0.7680.177.4)</h3>
+  <ul>
+    <li><strong><code>launch_context_async()</code></strong> — async counterpart to <code>launch_context()</code>. Forwards kwargs to <code>browser.new_context()</code> for <code>storage_state</code>, <code>permissions</code>, <code>extra_http_headers</code> without a persistent profile folder.</li>
+    <li><strong>JS <code>contextOptions</code> escape hatch</strong> — forward arbitrary options (including <code>storageState</code>) to Playwright's <code>newContext()</code> from <code>launchContext()</code> / <code>launchPersistentContext()</code>.</li>
+    <li><strong>Native SOCKS5 proxy</strong> — <code>proxy="socks5://user:pass@host:port"</code> works directly in all launch functions, Python + JS. QUIC/HTTP3 tunnels through SOCKS5 via UDP ASSOCIATE.</li>
+    <li><strong>Chromium 146 upgrade</strong> — rebased all patches from 145.0.7632.x to 146.0.7680.177</li>
+    <li><strong>57 fingerprint patches</strong> — additional detection-vector coverage (WebAuthn, AAC audio, window position) and WebGL/canvas consistency fixes</li>
+    <li><strong>WebRTC IP spoofing</strong> — <code>--fingerprint-webrtc-ip=auto</code> resolves your proxy's exit IP and spoofs WebRTC ICE candidates. Auto-injected when using <code>geoip=True</code> (no extra network call)</li>
+    <li><strong>Proxy signal removal</strong> — DNS/connect/SSL timing zeroed, proxy cache headers stripped, Proxy-Connection header leak removed</li>
+    <li><strong><code>cloakserve</code> CDP multiplexer</strong> — rewritten as a multi-connection CDP proxy with per-connection fingerprint seeds</li>
+    <li><strong>Humanize CDP isolation</strong> — keyboard events now use isolated worlds and trusted dispatch for better behavioral stealth</li>
+    <li><strong><code>humanize=True</code></strong> — one flag makes all mouse, keyboard, and scroll interactions behave like a real user. Bézier curves, per-character typing, realistic scroll patterns</li>
+    <li><strong>Stealthy with zero flags</strong> — binary auto-generates a random fingerprint seed at startup. No configuration required</li>
+    <li><strong>Timezone &amp; locale from proxy IP</strong> — <code>launch(proxy="...", geoip=True)</code> auto-detects timezone and locale</li>
+    <li><strong>Persistent profiles</strong> — <code>launch_persistent_context()</code> keeps cookies and localStorage across sessions, bypasses incognito detection</li>
+  </ul>
+
+  <h3>Why CloakBrowser?</h3>
+  <ul>
+    <li><strong>Config-level patches break</strong> — <code>playwright-stealth</code>, <code>undetected-chromedriver</code>, and <code>puppeteer-extra</code> inject JavaScript or tweak flags. Every Chrome update breaks them. Antibot systems detect the patches themselves.</li>
+    <li><strong>CloakBrowser patches Chromium source code</strong> — fingerprints are modified at the C++ level, compiled into the binary. Detection sites see a real browser because it <em>is</em> a real browser.</li>
+    <li><strong>Source-level stealth</strong> — C++ patches handle fingerprints (GPU, screen, UA, hardware reporting) at the binary level. No JavaScript injection, no config-level hacks.</li>
+    <li><strong>Same behavior everywhere</strong> — works identically local, in Docker, and on VPS.</li>
+    <li><strong>Works with AI agents and automation frameworks</strong> — drop-in stealth for browser-use, Crawl4AI, Scrapling, Stagehand, LangChain, Selenium, and more.</li>
+  </ul>
+  <p>CloakBrowser doesn't solve CAPTCHAs — it prevents them from appearing. No CAPTCHA-solving services, no proxy rotation built in — bring your own proxies, use the Playwright API you already know.</p>
+
+  <h3>Testing Capabilities — Test Results</h3>
+  <p>All tests verified against live detection services. Last tested: Apr 2026 (Chromium 146).</p>
+  <table>
+    <tr><th>Detection Service</th><th>Stock Playwright</th><th>CloakBrowser</th><th>Notes</th></tr>
+    <tr><td><strong>reCAPTCHA v3</strong></td><td>0.1 (bot)</td><td><strong>0.9</strong> (human)</td><td>Server-side verified</td></tr>
+    <tr><td><strong>Cloudflare Turnstile</strong> (non-interactive)</td><td>FAIL</td><td><strong>PASS</strong></td><td>Auto-resolve</td></tr>
+    <tr><td><strong>Cloudflare Turnstile</strong> (managed)</td><td>FAIL</td><td><strong>PASS</strong></td><td>Single click</td></tr>
+    <tr><td><strong>ShieldSquare</strong></td><td>BLOCKED</td><td><strong>PASS</strong></td><td>Production site</td></tr>
+    <tr><td><strong>FingerprintJS</strong> bot detection</td><td>DETECTED</td><td><strong>PASS</strong></td><td>demo.fingerprint.com</td></tr>
+    <tr><td><strong>BrowserScan</strong> bot detection</td><td>DETECTED</td><td><strong>NORMAL</strong> (4/4)</td><td>browserscan.net</td></tr>
+    <tr><td><strong>bot.incolumitas.com</strong></td><td>13 fails</td><td><strong>1 fail</strong></td><td>WEBDRIVER spec only</td></tr>
+    <tr><td><strong>deviceandbrowserinfo.com</strong></td><td>6 true flags</td><td><strong>0 true flags</strong></td><td><code>isBot: false</code></td></tr>
+    <tr><td><code>navigator.webdriver</code></td><td><code>true</code></td><td><strong><code>false</code></strong></td><td>Source-level patch</td></tr>
+    <tr><td><code>navigator.plugins.length</code></td><td>0</td><td><strong>5</strong></td><td>Real plugin list</td></tr>
+    <tr><td><code>window.chrome</code></td><td><code>undefined</code></td><td><strong><code>object</code></strong></td><td>Present like real Chrome</td></tr>
+    <tr><td>UA string</td><td><code>HeadlessChrome</code></td><td><strong><code>Chrome/146.0.0.0</code></strong></td><td>No headless leak</td></tr>
+    <tr><td>CDP detection</td><td>Detected</td><td><strong>Not detected</strong></td><td><code>isAutomatedWithCDP: false</code></td></tr>
+    <tr><td>TLS fingerprint</td><td>Mismatch</td><td><strong>Identical to Chrome</strong></td><td>ja3n/ja4/akamai match</td></tr>
+  </table>
+
+  <h3>Stealth Test Suite (<code>examples/stealth_test.py</code>)</h3>
+  <p>The repo ships a full automated stealth test script that runs against major bot detection services, extracting pass/fail verdicts via JS evaluation and reporting results with screenshots.</p>
+
+  <p><strong>Usage:</strong></p>
+  <pre><code>python examples/stealth_test.py
+python examples/stealth_test.py --headed     # watch in real-time
+python examples/stealth_test.py --no-screenshots
+python examples/stealth_test.py --proxy http://10.50.96.5:8888</code></pre>
+
+  <p><strong>Detection services tested by the script:</strong></p>
+  <table>
+    <tr><th>Test name</th><th>URL</th><th>Pass criteria</th></tr>
+    <tr><td><code>bot.sannysoft.com</code></td><td>https://bot.sannysoft.com</td><td>All rows pass (no <code>failed</code> CSS class)</td></tr>
+    <tr><td><code>bot.incolumitas.com</code></td><td>https://bot.incolumitas.com</td><td>Failures only in <code>{WEBDRIVER, connectionRTT}</code> (known false positives)</td></tr>
+    <tr><td><strong>BrowserScan</strong></td><td>https://www.browserscan.net/bot-detection</td><td>Zero "Abnormal" verdicts</td></tr>
+    <tr><td><strong>deviceandbrowserinfo</strong></td><td>https://deviceandbrowserinfo.com/are_you_a_bot</td><td><code>isBot: false</code></td></tr>
+    <tr><td><strong>FingerprintJS</strong></td><td>https://demo.fingerprint.com/web-scraping</td><td>Flight prices shown (not blocked)</td></tr>
+    <tr><td><strong>reCAPTCHA v3 (Google)</strong></td><td>https://recaptcha-demo.appspot.com/recaptcha-v3-request-scores.php</td><td>Score ≥ 0.7</td></tr>
+  </table>
+
+  <p>The script also dumps the live browser fingerprint at startup (UA, full version, platform, cores, GPU vendor/renderer, screen, languages) so you can verify what each detection site is actually seeing.</p>
+
+  <p>A sibling test <code>examples/fingerprint_scan_test.py</code> targets <strong>fingerprint-scan.com</strong> and <strong>CreepJS</strong> specifically for the headless detection signals flagged by the community: <code>noTaskbar</code>, <code>noContentIndex</code>, etc.</p>
+
+  <h3>Browser Profile Manager</h3>
+  <p>Self-hosted alternative to Multilogin, GoLogin, and AdsPower. Create browser profiles with unique fingerprints, proxies, and persistent sessions. Launch and interact with them in your browser via noVNC.</p>
+  <pre><code>docker run -p 8080:8080 -v cloakprofiles:/data cloakhq/cloakbrowser-manager</code></pre>
+  <p>Open <a href="http://localhost:8080">http://localhost:8080</a>. Create a profile. Click <strong>Launch</strong>. Done.</p>
+  <p>→ <a href="https://github.com/CloakHQ/CloakBrowser-Manager">CloakBrowser Manager</a> — free, open source (MIT)</p>
+</section>
+
+<!-- ============================================== -->
+<!-- 6. FASTMCP -->
+<!-- ============================================== -->
+<section class="repo" id="fastmcp">
+  <h2>🚀 fastmcp <span class="badge">MCP Framework</span></h2>
+  <div class="source">Source: <a href="https://github.com/PrefectHQ/fastmcp">github.com/PrefectHQ/fastmcp</a> · README.md + <a href="https://gofastmcp.com/getting-started/quickstart">gofastmcp.com/getting-started/quickstart</a></div>
+
+  <h3>FastMCP 🚀</h3>
+  <p><strong>Move fast and make things.</strong> <em>Made with 💙 by <a href="https://www.prefect.io/">Prefect</a></em></p>
+
+  <p>The <a href="https://modelcontextprotocol.io/">Model Context Protocol</a> (MCP) connects LLMs to tools and data. FastMCP gives you everything you need to go from prototype to production:</p>
+
+  <pre><code>from fastmcp import FastMCP
+
+mcp = FastMCP("Demo 🚀")
+
+@mcp.tool
+def add(a: int, b: int) -&gt; int:
+    """Add two numbers"""
+    return a + b
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+
+  <h3>Why FastMCP</h3>
+  <p>Building an effective MCP application is harder than it looks. FastMCP handles all of it. Declare a tool with a Python function, and the schema, validation, and documentation are generated automatically. Connect to a server with a URL, and transport negotiation, authentication, and protocol lifecycle are managed for you. You focus on your logic, and the MCP part just works: <strong>with FastMCP, best practices are built in.</strong></p>
+
+  <p>That's why FastMCP is the standard framework for working with MCP. FastMCP 1.0 was incorporated into the official MCP Python SDK in 2024. Today, the actively maintained standalone project is downloaded a million times a day, and some version of FastMCP powers 70% of MCP servers across all languages.</p>
+
+  <h4>FastMCP has three pillars:</h4>
+  <div class="grid-2">
+    <div>
+      <h4>Servers</h4>
+      <p>Expose tools, resources, and prompts to LLMs.</p>
+    </div>
+    <div>
+      <h4>Apps</h4>
+      <p>Give your tools interactive UIs rendered directly in the conversation.</p>
+    </div>
+  </div>
+  <div>
+    <h4>Clients</h4>
+    <p>Connect to any MCP server — local or remote, programmatic or CLI.</p>
+  </div>
+
+  <h3>Installation</h3>
+  <p>We recommend installing FastMCP with <a href="https://docs.astral.sh/uv/">uv</a>:</p>
+  <pre><code>uv pip install fastmcp</code></pre>
+
+  <p><strong>Upgrading?</strong> Guides available for:</p>
+  <ul>
+    <li><a href="https://gofastmcp.com/getting-started/upgrading/from-fastmcp-2">Upgrading from FastMCP v2</a></li>
+    <li><a href="https://gofastmcp.com/getting-started/upgrading/from-mcp-sdk">Upgrading from the MCP Python SDK</a></li>
+    <li><a href="https://gofastmcp.com/getting-started/upgrading/from-low-level-sdk">Upgrading from the low-level SDK</a></li>
+  </ul>
+
+  <h3>Quickstart (from gofastmcp.com)</h3>
+
+  <h4>1. Create a FastMCP Server</h4>
+  <p>A FastMCP server is a collection of tools, resources, and other MCP components. To create a server, start by instantiating the <code>FastMCP</code> class. Create a new file called <code>my_server.py</code>:</p>
+  <p><strong>my_server.py</strong></p>
+  <pre><code>from fastmcp import FastMCP
+
+mcp = FastMCP("My MCP Server")</code></pre>
+
+  <h4>2. Add a Tool</h4>
+  <p>To add a tool that returns a simple greeting, write a function and decorate it with <code>@mcp.tool</code> to register it with the server:</p>
+  <p><strong>my_server.py</strong></p>
+  <pre><code>from fastmcp import FastMCP
+
+mcp = FastMCP("My MCP Server")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"</code></pre>
+
+  <h4>3. Run the Server</h4>
+  <p>The simplest way to run your FastMCP server is to call its <code>run()</code> method. You can choose between different transports, like <code>stdio</code> for local servers, or <code>http</code> for remote access.</p>
+
+  <p><strong>Using the FastMCP CLI</strong></p>
+  <p>You can also use the <code>fastmcp run</code> command to start your server. Note that the FastMCP CLI <strong>does not</strong> execute the <code>__main__</code> block of your server file. Instead, it imports your server object and runs it with whatever transport and options you provide.</p>
+
+  <p>To run with the default stdio transport (no matter how you called <code>mcp.run()</code>):</p>
+  <pre><code>fastmcp run my_server.py:mcp</code></pre>
+
+  <p>To run with HTTP transport:</p>
+  <pre><code>fastmcp run my_server.py:mcp --transport http --port 8000</code></pre>
+
+  <h4>4. Call Your Server</h4>
+  <p>Once your server is running with HTTP transport, you can connect to it with a FastMCP client or any LLM client that supports the MCP protocol:</p>
+  <p><strong>my_client.py</strong></p>
+  <pre><code>import asyncio
+from fastmcp import Client
+
+client = Client("http://localhost:8000/mcp")
+
+async def call_tool(name: str):
+    async with client:
+        result = await client.call_tool("greet", {"name": name})
+        print(result)
+
+asyncio.run(call_tool("Ford"))</code></pre>
+
+  <p>Note that:</p>
+  <ul>
+    <li>FastMCP clients are asynchronous, so we need to use <code>asyncio.run</code> to run the client</li>
+    <li>We must enter a client context (<code>async with client:</code>) before using the client</li>
+    <li>You can make multiple client calls within the same context</li>
+  </ul>
+
+  <h4>5. Give Your Tool a UI</h4>
+  <p>Tools normally return text, but any tool can return an interactive UI instead. Add <code>app=True</code> to your tool decorator and return a <a href="https://prefab.prefect.io/">Prefab</a> component — the host renders it as a chart, table, form, or any other visual element right in the conversation. This requires the <code>apps</code> extra (<code>pip install "fastmcp[apps]"</code>).</p>
+
+  <p><strong>my_server.py</strong></p>
+  <pre><code>from prefab_ui.app import PrefabApp
+from prefab_ui.components import Column, Heading, Text, Badge, Row
+from fastmcp import FastMCP
+
+mcp = FastMCP("My MCP Server")
+
+
+@mcp.tool(app=True)
+def greet(name: str) -&gt; PrefabApp:
+    """Greet someone with a visual card."""
+    with Column(gap=4, css_class="p-6") as view:
+        Heading(f"Hello, {name}!")
+        with Row(gap=2, align="center"):
+            Text("Status")
+            Badge("Greeted", variant="success")
+
+    return PrefabApp(view=view)</code></pre>
+
+  <p>You can preview app tools locally with <code>fastmcp dev apps my_server.py</code> — no MCP host required.</p>
+
+  <h4>6. Deploy to Prefect Horizon</h4>
+  <p><a href="https://horizon.prefect.io/">Prefect Horizon</a> is the enterprise MCP platform built by the FastMCP team at <a href="https://www.prefect.io/">Prefect</a>. It provides managed hosting, authentication, access control, and observability for MCP servers.</p>
+
+  <p>To deploy your server, you'll need a <a href="https://github.com/">GitHub account</a>. Once you have one, you can deploy your server in three steps:</p>
+  <ol>
+    <li>Push your <code>my_server.py</code> file to a GitHub repository</li>
+    <li>Sign in to <a href="https://horizon.prefect.io/">Prefect Horizon</a> with your GitHub account</li>
+    <li>Create a new project from your repository and enter <code>my_server.py:mcp</code> as the server entrypoint</li>
+  </ol>
+  <p>Horizon will build and deploy your server, making it available at a URL like <code>https://your-project.fastmcp.app/mcp</code>.</p>
+
+  <h3>📚 Documentation</h3>
+  <p>FastMCP's complete documentation is available at <strong><a href="https://gofastmcp.com">gofastmcp.com</a></strong>. Documentation is also available in <a href="https://llmstxt.org/">llms.txt format</a>:</p>
+  <ul>
+    <li><a href="https://gofastmcp.com/llms.txt"><code>llms.txt</code></a> — sitemap of all documentation pages</li>
+    <li><a href="https://gofastmcp.com/llms-full.txt"><code>llms-full.txt</code></a> — entire documentation (may exceed LLM context window)</li>
+  </ul>
+  <p><strong>Community:</strong> <a href="https://discord.gg/uu8dJCgttd">Discord server</a></p>
+</section>
+
+</div>
+
+<footer>
+  <p>Compiled from upstream README files on the <code>main</code> branch of each repository.</p>
+  <p>All content extracted verbatim — no synthesized statements. For the latest version, always check the original repositories linked above.</p>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

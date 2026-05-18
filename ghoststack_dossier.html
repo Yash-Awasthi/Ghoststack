@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GhostStack — Architecture Intelligence Dossier</title>
+<style>
+/* ============ RESET & BASE ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:15px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:#fafbfc;color:#1a202c;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+code,pre,.mono{font-family:"SF Mono","Monaco","Inconsolata","Roboto Mono",Consolas,monospace}
+
+/* ============ LAYOUT ============ */
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside.sidebar{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:#ffffff;border-right:1px solid #e2e8f0;
+  padding:24px 18px;
+}
+main.content{padding:36px 48px;max-width:1280px;overflow-x:hidden}
+
+/* ============ SIDEBAR ============ */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.brand-mark{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;
+  box-shadow:0 4px 10px rgba(99,102,241,.25);
+}
+.brand-name{font-weight:700;font-size:17px;letter-spacing:-.3px}
+.brand-tag{font-size:11px;color:#64748b;margin-bottom:18px;text-transform:uppercase;letter-spacing:.7px}
+.search{
+  width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;
+  font-size:13px;background:#f8fafc;outline:none;margin-bottom:14px;
+}
+.search:focus{border-color:#6366f1;background:#fff}
+.nav-section{margin-bottom:16px}
+.nav-title{
+  font-size:10.5px;font-weight:700;color:#94a3b8;
+  text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px;padding:0 6px;
+}
+.nav a{
+  display:block;padding:5px 10px;margin:1px 0;border-radius:6px;
+  color:#475569;text-decoration:none;font-size:12.5px;line-height:1.4;
+  border-left:2px solid transparent;
+}
+.nav a:hover{background:#f1f5f9;color:#1e293b}
+.nav a.active{background:#eef2ff;color:#4f46e5;border-left-color:#6366f1;font-weight:600}
+.repo-pill{
+  display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;
+  background:#f1f5f9;color:#64748b;margin-left:4px;
+}
+
+/* ============ HEADER / HERO ============ */
+.hero{
+  background:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
+  border:1px solid #e2e8f0;border-radius:14px;padding:34px 36px;margin-bottom:28px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;top:-50%;right:-20%;width:520px;height:520px;
+  background:radial-gradient(circle,rgba(99,102,241,.08),transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.2px;
+  color:#6366f1;text-transform:uppercase;margin-bottom:10px;
+  padding:3px 10px;background:#eef2ff;border-radius:20px;
+}
+.hero h1{font-size:34px;font-weight:800;letter-spacing:-.8px;margin-bottom:10px;color:#0f172a}
+.hero .sub{font-size:16px;color:#475569;max-width:780px;margin-bottom:22px}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;
+  position:relative;z-index:1;
+}
+.stat-num{font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-.5px}
+.stat-lbl{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ============ SECTIONS ============ */
+section{
+  background:#fff;border:1px solid #e2e8f0;border-radius:12px;
+  padding:28px 32px;margin-bottom:22px;scroll-margin-top:20px;
+}
+section h2{
+  font-size:22px;font-weight:700;letter-spacing:-.4px;color:#0f172a;
+  margin-bottom:6px;display:flex;align-items:center;gap:10px;
+}
+section h2::before{
+  content:"";width:4px;height:22px;background:linear-gradient(180deg,#6366f1,#8b5cf6);
+  border-radius:2px;
+}
+section h3{font-size:16px;font-weight:700;color:#1e293b;margin:20px 0 10px}
+section h4{font-size:13.5px;font-weight:700;color:#334155;margin:14px 0 8px;text-transform:uppercase;letter-spacing:.4px}
+section p{margin-bottom:10px;color:#334155}
+section ul,section ol{margin:8px 0 12px 22px;color:#334155}
+section li{margin-bottom:4px}
+.section-meta{font-size:12px;color:#64748b;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #f1f5f9}
+
+/* ============ TABS ============ */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid #e2e8f0;margin:18px 0 18px}
+.tab-btn{
+  padding:8px 14px;border:none;background:transparent;cursor:pointer;
+  font-size:12.5px;font-weight:600;color:#64748b;border-bottom:2px solid transparent;
+  margin-bottom:-1px;font-family:inherit;
+}
+.tab-btn:hover{color:#1e293b}
+.tab-btn.active{color:#4f46e5;border-bottom-color:#6366f1}
+.tab-pane{display:none;animation:fadeIn .25s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ============ COLLAPSIBLE ============ */
+details.collapsible{
+  border:1px solid #e2e8f0;border-radius:9px;margin:10px 0;
+  background:#fafbfc;overflow:hidden;
+}
+details.collapsible summary{
+  padding:11px 16px;cursor:pointer;font-weight:600;font-size:13.5px;
+  color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;
+  user-select:none;
+}
+details.collapsible summary::-webkit-details-marker{display:none}
+details.collapsible summary::before{
+  content:"▶";font-size:9px;color:#94a3b8;transition:transform .2s;
+}
+details.collapsible[open] summary::before{transform:rotate(90deg)}
+details.collapsible[open] summary{background:#f1f5f9;border-bottom:1px solid #e2e8f0}
+details.collapsible .inner{padding:14px 18px;background:#fff}
+
+/* ============ TABLES ============ */
+.table-wrap{overflow-x:auto;margin:12px 0;border:1px solid #e2e8f0;border-radius:9px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  background:#f8fafc;text-align:left;padding:10px 14px;
+  font-weight:700;color:#334155;border-bottom:1px solid #e2e8f0;
+  font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;
+}
+td{padding:9px 14px;border-bottom:1px solid #f1f5f9;color:#334155;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+td.mono{font-family:"SF Mono",monospace;font-size:12px;color:#475569}
+.cell-yes{color:#059669;font-weight:600}
+.cell-no{color:#dc2626;font-weight:600}
+.cell-partial{color:#d97706;font-weight:600}
+.cell-na{color:#94a3b8}
+
+/* ============ BADGES ============ */
+.badge{
+  display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;
+  border-radius:5px;letter-spacing:.3px;
+}
+.badge-indigo{background:#eef2ff;color:#4f46e5}
+.badge-emerald{background:#d1fae5;color:#047857}
+.badge-amber{background:#fef3c7;color:#92400e}
+.badge-rose{background:#ffe4e6;color:#be123c}
+.badge-slate{background:#f1f5f9;color:#475569}
+.badge-cyan{background:#cffafe;color:#0e7490}
+.badge-violet{background:#ede9fe;color:#6d28d9}
+
+/* ============ CARDS ============ */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:12px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0}
+.card{
+  border:1px solid #e2e8f0;border-radius:9px;padding:14px 16px;background:#fafbfc;
+}
+.card-title{font-size:12.5px;font-weight:700;color:#0f172a;margin-bottom:6px}
+.card-body{font-size:12.5px;color:#475569;line-height:1.5}
+
+/* ============ ASCII / CODE BLOCKS ============ */
+pre.ascii{
+  background:#0f172a;color:#cbd5e1;padding:18px 20px;border-radius:9px;
+  overflow-x:auto;font-size:11.5px;line-height:1.5;margin:14px 0;
+  font-family:"SF Mono","Monaco",monospace;
+}
+pre.ascii .hl{color:#a5b4fc;font-weight:600}
+pre.ascii .em{color:#34d399}
+pre.ascii .warn{color:#fbbf24}
+code.inline{
+  background:#f1f5f9;padding:1px 6px;border-radius:4px;font-size:12px;
+  color:#4338ca;border:1px solid #e2e8f0;
+}
+
+/* ============ CALLOUT ============ */
+.callout{
+  border-left:3px solid #6366f1;background:#f5f6ff;padding:12px 16px;
+  border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:#3730a3;
+}
+.callout.warn{border-color:#f59e0b;background:#fffbeb;color:#78350f}
+.callout.risk{border-color:#ef4444;background:#fef2f2;color:#7f1d1d}
+.callout.ok{border-color:#10b981;background:#ecfdf5;color:#064e3b}
+.callout-title{font-weight:700;display:block;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+
+/* ============ SVG DIAGRAMS ============ */
+.svg-wrap{
+  background:#fafbfc;border:1px solid #e2e8f0;border-radius:9px;
+  padding:20px;margin:14px 0;overflow-x:auto;
+}
+.svg-wrap svg{display:block;margin:0 auto;max-width:100%;height:auto}
+
+/* ============ REPO TABS ============ */
+.repo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:14px 0}
+.repo-card{
+  border:1px solid #e2e8f0;border-radius:8px;padding:11px 13px;background:#fafbfc;
+  cursor:pointer;transition:all .15s;
+}
+.repo-card:hover{border-color:#6366f1;background:#eef2ff;transform:translateY(-1px)}
+.repo-card.active{border-color:#6366f1;background:#eef2ff;box-shadow:0 0 0 2px rgba(99,102,241,.15)}
+.repo-card-name{font-size:12.5px;font-weight:700;color:#0f172a;margin-bottom:2px;font-family:"SF Mono",monospace}
+.repo-card-role{font-size:10.5px;color:#64748b;line-height:1.3}
+
+/* ============ MATRIX ============ */
+.matrix td:first-child{font-weight:600;color:#0f172a;background:#f8fafc}
+.matrix .dot{
+  display:inline-block;width:10px;height:10px;border-radius:50%;
+}
+.dot-5{background:#059669}
+.dot-4{background:#34d399}
+.dot-3{background:#fbbf24}
+.dot-2{background:#fb923c}
+.dot-1{background:#ef4444}
+.dot-0{background:#cbd5e1}
+
+/* ============ VERDICT ============ */
+.verdict-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}
+.verdict-card{
+  border-radius:10px;padding:18px 20px;border:1px solid;
+}
+.v-strong{background:#ecfdf5;border-color:#a7f3d0}
+.v-warn{background:#fef3c7;border-color:#fcd34d}
+.v-risk{background:#fef2f2;border-color:#fca5a5}
+.v-neutral{background:#eef2ff;border-color:#c7d2fe}
+.verdict-title{font-size:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:6px}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr}
+  aside.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid #e2e8f0}
+  main.content{padding:24px 18px}
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .grid-2,.grid-3,.grid-4,.verdict-grid{grid-template-columns:1fr}
+}
+
+/* ============ UTIL ============ */
+.muted{color:#64748b}
+.kbd{font-family:"SF Mono",monospace;font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;border:1px solid #e2e8f0}
+.hr-soft{border:none;border-top:1px dashed #e2e8f0;margin:18px 0}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">GS</div>
+      <div>
+        <div class="brand-name">GhostStack</div>
+        <div class="brand-tag">Architecture Dossier</div>
+      </div>
+    </div>
+    <input type="text" id="navSearch" class="search" placeholder="Search sections / repos…">
+
+    <div class="nav-section">
+      <div class="nav-title">Global Analysis</div>
+      <div class="nav">
+        <a href="#exec-summary">Executive Summary</a>
+        <a href="#system-vision">System Vision</a>
+        <a href="#unified-arch">Unified Architecture</a>
+        <a href="#runtime-graph">Runtime Dependency Graph</a>
+        <a href="#service-graph">Service Interaction Graph</a>
+        <a href="#agent-orch">Agent Orchestration Flow</a>
+        <a href="#local-first">Local-First AI Stack</a>
+        <a href="#spec-driven">Spec-Driven Analysis</a>
+        <a href="#autonomous-cloud">Autonomous Cloud Engineering</a>
+        <a href="#multi-agent">Multi-Agent Coordination</a>
+        <a href="#browser-layer">Browser Automation Layer</a>
+        <a href="#memory-layer">Memory Persistence Layer</a>
+        <a href="#inference-layer">Local Inference Layer</a>
+        <a href="#mcp-orch">MCP Orchestration</a>
+        <a href="#event-flow">Event-Driven Workflow</a>
+        <a href="#lifecycle">Runtime Lifecycle</a>
+        <a href="#dataflow">Dataflow Mapping</a>
+        <a href="#resource-ownership">Resource Ownership</a>
+        <a href="#infra-abstraction">Infrastructure Abstraction</a>
+        <a href="#cloud-emulation">Cloud Emulation Analysis</a>
+        <a href="#agent-runtime">Agent Runtime</a>
+        <a href="#failures">Failure Point Analysis</a>
+        <a href="#bottlenecks">Bottleneck Analysis</a>
+        <a href="#scalability">Scalability Analysis</a>
+        <a href="#security">Security Surface</a>
+        <a href="#ops-complexity">Operational Complexity</a>
+        <a href="#integration-risk">Integration Risk</a>
+        <a href="#maintainability">Long-Term Maintainability</a>
+        <a href="#advantages">Strategic Advantages</a>
+        <a href="#viability">Viability Assessment</a>
+        <a href="#synthesis">Final System Synthesis</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Repository Dossiers</div>
+      <div class="nav">
+        <a href="#repo-floci">floci <span class="repo-pill">emulator</span></a>
+        <a href="#repo-codebuff">codebuff <span class="repo-pill">agents</span></a>
+        <a href="#repo-speckit">spec-kit <span class="repo-pill">spec</span></a>
+        <a href="#repo-fcc">free-claude-code <span class="repo-pill">proxy</span></a>
+        <a href="#repo-cloak">CloakBrowser <span class="repo-pill">browser</span></a>
+        <a href="#repo-fastmcp">fastmcp <span class="repo-pill">mcp</span></a>
+        <a href="#repo-airllm">AirLLM <span class="repo-pill">inference</span></a>
+        <a href="#repo-claudemem">claude-mem <span class="repo-pill">memory</span></a>
+        <a href="#repo-vane">Vane <span class="repo-pill">RAG</span></a>
+        <a href="#repo-scrapling">Scrapling <span class="repo-pill">scrape</span></a>
+        <a href="#repo-mlintern">ml-intern <span class="repo-pill">ML</span></a>
+        <a href="#repo-paperless">paperless-ngx <span class="repo-pill">archive</span></a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Cross-Repo Synthesis</div>
+      <div class="nav">
+        <a href="#cross-overlap">Overlapping Responsibilities</a>
+        <a href="#cross-conflicts">Orchestration Conflicts</a>
+        <a href="#cross-topology">Ideal Runtime Topology</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="content">
+
+    <!-- HERO -->
+    <div class="hero">
+      <span class="hero-eyebrow">Project 05 · Architecture Intelligence Dossier</span>
+      <h1>GhostStack — Spec-Driven Autonomous Local Cloud Lab</h1>
+      <p class="sub">
+        Distributed-systems analysis of a 12-repository confederation that fuses local AWS emulation,
+        multi-agent code synthesis, spec-driven planning, MCP-based tool federation, memory persistence,
+        local inference, stealth browser automation, and document archival into a single
+        coherent <em>autonomous software factory</em>. This dossier reasons across repositories as a unified system,
+        not as independent packages.
+      </p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">12</div><div class="stat-lbl">Repositories</div></div>
+        <div class="stat"><div class="stat-num">47</div><div class="stat-lbl">Emulated AWS Services</div></div>
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">Architectural Planes</div></div>
+        <div class="stat"><div class="stat-num">B+</div><div class="stat-lbl">Viability Verdict</div></div>
+      </div>
+    </div>
+
+    <!-- ========== 1. EXECUTIVE SUMMARY ========== -->
+    <section id="exec-summary">
+      <h2>1 · Executive Summary</h2>
+      <div class="section-meta">Scope: cross-repository systems analysis · Audience: senior systems engineers, AI infrastructure researchers</div>
+
+      <p>
+        GhostStack is not a product — it is an <strong>integration thesis</strong>. The thesis claims that twelve
+        independently maintained open-source projects, when correctly composed, yield a complete
+        <em>cloud-native development substrate</em> that operates with zero external SaaS dependency: spec-driven
+        intent capture (<code class="inline">spec-kit</code>), multi-agent code generation (<code class="inline">codebuff</code>),
+        free LLM routing (<code class="inline">free-claude-code</code>), local AWS emulation (<code class="inline">floci</code>),
+        stealth E2E testing (<code class="inline">CloakBrowser</code> + <code class="inline">Scrapling</code>),
+        persistent agent memory (<code class="inline">claude-mem</code>), local heavy-model review
+        (<code class="inline">AirLLM</code>), tool federation (<code class="inline">fastmcp</code>),
+        in-IDE retrieval (<code class="inline">Vane</code>), ML pipeline automation (<code class="inline">ml-intern</code>),
+        and architectural archival (<code class="inline">paperless-ngx</code>).
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Architectural Verdict</div>
+          <div class="card-body">Coherent in principle, integration-heavy in practice. Three independent runtimes (JVM/GraalVM, Node/Bun, Python) must coexist. Coherence is achievable through MCP as a unifying control surface.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Strongest Property</div>
+          <div class="card-body">Every plane (control, execution, persistence, inference) has a working open-source citizen. No theoretical components — every box is a real repo.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Weakest Property</div>
+          <div class="card-body">No shared schema, no shared event bus, no shared identity model. Integration depends on per-tool MCP adapters and brittle glue scripts.</div>
+        </div>
+      </div>
+
+      <h3>Top-Level Findings</h3>
+      <ol>
+        <li><strong>Two control planes compete:</strong> <code class="inline">spec-kit</code> (declarative intent → tasks) and <code class="inline">codebuff</code>'s internal planner agent (imperative agent graph). A coordinator is required to prevent re-planning loops.</li>
+        <li><strong>Three runtime substrates must coexist:</strong> Quarkus/GraalVM native (floci), Node/TypeScript (codebuff, Vane), and Python (fastmcp, AirLLM, Scrapling, free-claude-code, ml-intern). IPC is HTTP/MCP — adequate but lossy for high-frequency events.</li>
+        <li><strong>Memory is currently single-agent-scoped:</strong> <code class="inline">claude-mem</code> persists per-session for Claude Code. There is <em>no</em> cross-agent shared semantic memory; this is the single largest architectural gap.</li>
+        <li><strong>Inference economics are uneven:</strong> free-claude-code provides 10 routed backends but is throughput-capped (NIM 40 req/min). AirLLM offers unlimited local 70B but only at ~1–3 tok/s on 4GB GPUs — viable for review, infeasible for inner-loop edits.</li>
+        <li><strong>Floci is the structural keystone:</strong> Its 47-service surface is the only component that anchors GhostStack to "real cloud" semantics. Every other repo could be swapped; floci cannot.</li>
+      </ol>
+    </section>
+
+    <!-- ========== 2. SYSTEM VISION ========== -->
+    <section id="system-vision">
+      <h2>2 · GhostStack System Vision</h2>
+      <p>
+        GhostStack reframes the developer workstation as a <strong>self-contained autonomous cloud lab</strong>:
+        the laptop is simultaneously the IDE, the orchestrator, the cloud, the test runner, the inference cluster,
+        and the document archive. The system is designed around five axiomatic constraints:
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Axiom 1 — Zero External Account</div>
+          <div class="card-body">No AWS, no OpenAI, no Anthropic billing. Every dependency must be replaceable with a local or free-tier substitute. floci replaces AWS; free-claude-code replaces Anthropic; AirLLM/Ollama replace GPU vendors.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Axiom 2 — Spec-First, Code-Second</div>
+          <div class="card-body">Code is downstream of specification. <code class="inline">spec-kit</code>'s constitution → spec → plan → tasks pipeline is the canonical entrypoint. Agents do not improvise; they execute spec-derived tasks.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Axiom 3 — Multi-Agent over Monolithic LLM</div>
+          <div class="card-body">No single LLM call is trusted with end-to-end coding. Tasks are decomposed across <em>File Picker → Planner → Editor → Reviewer</em> agents; each has narrow scope and verifiable output.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Axiom 4 — Production-Realistic Fidelity</div>
+          <div class="card-body">Emulation must be high-fidelity enough that <code class="inline">FLOCI_MODE=mirror</code> can flip to real AWS with zero code change. Real Docker for Lambda; WAL-backed S3; DuckDB-backed Athena/Glue.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Axiom 5 — Memory as Infrastructure</div>
+          <div class="card-body">Architectural decisions, specs, diagrams, and review notes are first-class artifacts. <code class="inline">claude-mem</code> persists agent state; <code class="inline">paperless-ngx</code> archives diagrams; <code class="inline">Vane</code> retrieves both.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Axiom 6 — MCP as Universal Bus</div>
+          <div class="card-body">Heterogeneous runtimes (JVM/Node/Python) cannot share memory directly. MCP (Model Context Protocol) becomes the lingua franca: every repo is wrapped as MCP tools, resources, and prompts via <code class="inline">fastmcp</code>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 3. UNIFIED ARCHITECTURE ========== -->
+    <section id="unified-arch">
+      <h2>3 · Unified Architecture Analysis</h2>
+      <p>
+        Treating GhostStack as a single distributed system, six functional <strong>planes</strong> emerge.
+        Each plane has a primary owner repository, secondary participants, and a well-defined interface protocol.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Plane</th><th>Primary Owner</th><th>Secondary Participants</th><th>Interface Protocol</th><th>Persistence</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Intent Plane</strong></td><td>spec-kit</td><td>claude-mem, Vane</td><td>Markdown specs · slash commands</td><td>Git + filesystem</td></tr>
+            <tr><td><strong>Control Plane</strong></td><td>codebuff (planner)</td><td>spec-kit (task queue), fastmcp</td><td>Agent graph · MCP tool calls</td><td>Codebuff session state</td></tr>
+            <tr><td><strong>Inference Plane</strong></td><td>free-claude-code</td><td>AirLLM, Ollama, NVIDIA NIM</td><td>Anthropic-compatible REST :8082</td><td>Stateless (token bucket cache)</td></tr>
+            <tr><td><strong>Execution Plane</strong></td><td>floci</td><td>Docker daemon, DuckDB sidecar</td><td>AWS SDK · HTTP :4566</td><td>WAL (S3), in-mem hybrid (Dynamo), Docker (Lambda)</td></tr>
+            <tr><td><strong>Validation Plane</strong></td><td>CloakBrowser</td><td>Scrapling, ml-intern</td><td>CDP · Playwright-compat</td><td>Trace logs · screenshots</td></tr>
+            <tr><td><strong>Knowledge Plane</strong></td><td>Vane + claude-mem</td><td>paperless-ngx</td><td>RAG retrieval · MCP resource</td><td>Vector DB + Postgres (paperless)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Plane Interactions (SVG Topology)</h3>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 920 480" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#6366f1"/></marker>
+            <marker id="arrG" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#10b981"/></marker>
+            <marker id="arrA" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"/></marker>
+          </defs>
+          <!-- Plane boxes -->
+          <g font-family="-apple-system,sans-serif" font-size="12">
+            <!-- Intent -->
+            <rect x="20" y="30" width="180" height="80" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+            <text x="110" y="55" text-anchor="middle" font-weight="700" fill="#3730a3">Intent Plane</text>
+            <text x="110" y="75" text-anchor="middle" fill="#475569" font-size="11">spec-kit · claude-mem</text>
+            <text x="110" y="92" text-anchor="middle" fill="#64748b" font-size="10">specs · constitution · memory</text>
+
+            <!-- Control -->
+            <rect x="240" y="30" width="180" height="80" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="330" y="55" text-anchor="middle" font-weight="700" fill="#78350f">Control Plane</text>
+            <text x="330" y="75" text-anchor="middle" fill="#475569" font-size="11">codebuff · fastmcp</text>
+            <text x="330" y="92" text-anchor="middle" fill="#64748b" font-size="10">planner · task graph</text>
+
+            <!-- Inference -->
+            <rect x="460" y="30" width="180" height="80" rx="10" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+            <text x="550" y="55" text-anchor="middle" font-weight="700" fill="#065f46">Inference Plane</text>
+            <text x="550" y="75" text-anchor="middle" fill="#475569" font-size="11">free-claude-code · AirLLM</text>
+            <text x="550" y="92" text-anchor="middle" fill="#64748b" font-size="10">10 backends · :8082</text>
+
+            <!-- Knowledge -->
+            <rect x="680" y="30" width="220" height="80" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+            <text x="790" y="55" text-anchor="middle" font-weight="700" fill="#5b21b6">Knowledge Plane</text>
+            <text x="790" y="75" text-anchor="middle" fill="#475569" font-size="11">Vane · paperless-ngx</text>
+            <text x="790" y="92" text-anchor="middle" fill="#64748b" font-size="10">RAG · OCR · archive</text>
+
+            <!-- Execution -->
+            <rect x="130" y="220" width="280" height="100" rx="10" fill="#cffafe" stroke="#0891b2" stroke-width="1.5"/>
+            <text x="270" y="245" text-anchor="middle" font-weight="700" fill="#155e75">Execution Plane</text>
+            <text x="270" y="265" text-anchor="middle" fill="#475569" font-size="11">floci :4566 · 47 AWS services</text>
+            <text x="270" y="285" text-anchor="middle" fill="#64748b" font-size="10">Quarkus Native · Docker · DuckDB</text>
+            <text x="270" y="302" text-anchor="middle" fill="#64748b" font-size="10">S3 · Lambda · DynamoDB · Bedrock</text>
+
+            <!-- Validation -->
+            <rect x="490" y="220" width="280" height="100" rx="10" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.5"/>
+            <text x="630" y="245" text-anchor="middle" font-weight="700" fill="#9f1239">Validation Plane</text>
+            <text x="630" y="265" text-anchor="middle" fill="#475569" font-size="11">CloakBrowser · Scrapling</text>
+            <text x="630" y="285" text-anchor="middle" fill="#64748b" font-size="10">stealth Chromium · CDP · ETL</text>
+            <text x="630" y="302" text-anchor="middle" fill="#64748b" font-size="10">E2E · bot-detection bypass</text>
+
+            <!-- MCP Bus -->
+            <rect x="130" y="380" width="640" height="60" rx="10" fill="#0f172a" stroke="#475569"/>
+            <text x="450" y="405" text-anchor="middle" font-weight="700" fill="#a5b4fc">MCP Universal Bus  ·  fastmcp</text>
+            <text x="450" y="425" text-anchor="middle" fill="#cbd5e1" font-size="10">tools · resources · prompts · cross-runtime IPC</text>
+
+            <!-- Arrows -->
+            <line x1="200" y1="70" x2="240" y2="70" stroke="#6366f1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="420" y1="70" x2="460" y2="70" stroke="#6366f1" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="640" y1="70" x2="680" y2="70" stroke="#6366f1" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <line x1="330" y1="110" x2="270" y2="220" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrA)"/>
+            <line x1="550" y1="110" x2="330" y2="220" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrG)"/>
+            <line x1="410" y1="270" x2="490" y2="270" stroke="#0891b2" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <line x1="270" y1="320" x2="330" y2="380" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <line x1="630" y1="320" x2="570" y2="380" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <line x1="110" y1="110" x2="200" y2="380" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <line x1="790" y1="110" x2="700" y2="380" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="callout">
+        <span class="callout-title">Architectural Inference</span>
+        The dashed lines to the MCP bus are the load-bearing integration surface. Without fastmcp wrapping each plane, GhostStack degenerates into 6 disconnected projects sharing a hard drive. MCP is not optional — it is structural.
+      </div>
+    </section>
+
+    <!-- ========== 4. RUNTIME DEPENDENCY GRAPH ========== -->
+    <section id="runtime-graph">
+      <h2>4 · Runtime Dependency Graph</h2>
+      <p>Process-level dependencies inferred from each project's runtime model. Edges denote network or IPC dependency at request time.</p>
+
+      <pre class="ascii">
+                          <span class="hl">[ Developer · IDE: Cursor / VS Code ]</span>
+                                       │
+              ┌────────────────────────┼────────────────────────┐
+              ▼                        ▼                        ▼
+       <span class="em">codebuff CLI</span>             <span class="em">spec-kit CLI</span>              <span class="em">Vane :3000</span>
+        (Node/Bun)                  (Python/uvx)              (Next.js)
+              │                        │                        │
+              │ spec.* tasks ─────────►│                        │ RAG query
+              │                        │                        │
+              ▼                        ▼                        ▼
+       ╔═════════════════════════════════════════════════════════╗
+       ║   <span class="hl">fastmcp host</span>  ── MCP tool federation surface       ║
+       ║   wraps: floci · spec-kit · codebuff · claude-mem · ... ║
+       ╚═════════════════════════════════════════════════════════╝
+              │            │            │            │
+              ▼            ▼            ▼            ▼
+       fcc-proxy      claude-mem    paperless-     ml-intern
+       :8082          (hooks)       ngx :8000     (smolagents)
+       (FastAPI)                    + Postgres
+              │
+       ┌──────┴────────┬──────────────┬──────────────┐
+       ▼               ▼              ▼              ▼
+    NVIDIA NIM      Ollama        AirLLM         Kimi/DeepSeek
+    (cloud free)    (local)       (local 70B)    (cloud free)
+              │
+              │  generated code · IaC
+              ▼
+       ╔══════════════════════════════════════════╗
+       ║  <span class="hl">floci native</span>  :4566   (Quarkus Native)   ║
+       ║  ┌──────┬──────┬──────┬──────┬─────────┐ ║
+       ║  │  S3  │Lambda│Dynamo│ SQS  │ Bedrock │ ║
+       ║  │ (WAL)│(Dckr)│(hyb) │(mem) │(routed) │ ║
+       ║  └──────┴──────┴──────┴──────┴─────────┘ ║
+       ║  + DuckDB sidecar (Athena/Glue SQL)      ║
+       ╚══════════════════════════════════════════╝
+              │  deployed app
+              ▼
+       <span class="warn">CloakBrowser :9222  (CDP)</span>  ◄──── Scrapling fetchers
+              │
+              ▼
+       E2E results · screenshots · traces ──► paperless-ngx (archive)
+      </pre>
+
+      <h3>Edge Classification</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>From</th><th>To</th><th>Protocol</th><th>Sync/Async</th><th>Failure Mode</th></tr></thead>
+          <tbody>
+            <tr><td>codebuff</td><td>fcc-proxy :8082</td><td>HTTP (Anthropic-compat)</td><td>Sync</td><td>Backend rotation; rate-limit retry</td></tr>
+            <tr><td>codebuff</td><td>floci :4566</td><td>AWS SDK</td><td>Sync</td><td>SDK retry; circuit break on 5xx</td></tr>
+            <tr><td>spec-kit</td><td>codebuff CLI</td><td>Stdout/exec</td><td>Sync</td><td>Exit code; no partial recovery</td></tr>
+            <tr><td>codebuff → reviewer</td><td>AirLLM</td><td>Local HTTP / Python</td><td>Async (slow)</td><td>OOM; layer offload stall</td></tr>
+            <tr><td>CloakBrowser</td><td>floci (via deployed app)</td><td>HTTP</td><td>Sync</td><td>Network flakes; CDP disconnect</td></tr>
+            <tr><td>claude-mem hooks</td><td>codebuff session</td><td>Filesystem hooks</td><td>Async</td><td>Race on concurrent sessions</td></tr>
+            <tr><td>fastmcp</td><td>all wrapped tools</td><td>JSON-RPC over stdio/SSE</td><td>Sync</td><td>Tool timeout; schema drift</td></tr>
+            <tr><td>paperless-ngx</td><td>filesystem watch</td><td>inotify/polling</td><td>Async</td><td>OCR queue saturation</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 5. SERVICE INTERACTION GRAPH ========== -->
+    <section id="service-graph">
+      <h2>5 · Service Interaction Graph</h2>
+      <p>
+        Service-level (not process-level) view. Models the request lifecycle of a single spec-driven build cycle, from
+        intent capture through E2E validation.
+      </p>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif" font-size="11">
+          <defs>
+            <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker>
+          </defs>
+          <!-- Lanes -->
+          <rect x="0" y="0" width="920" height="60" fill="#fafbfc" stroke="#e2e8f0"/>
+          <rect x="0" y="60" width="920" height="80" fill="#fff" stroke="#e2e8f0"/>
+          <rect x="0" y="140" width="920" height="80" fill="#fafbfc" stroke="#e2e8f0"/>
+          <rect x="0" y="220" width="920" height="80" fill="#fff" stroke="#e2e8f0"/>
+          <rect x="0" y="300" width="920" height="60" fill="#fafbfc" stroke="#e2e8f0"/>
+
+          <text x="10" y="30" font-weight="700" fill="#475569" font-size="10">DEVELOPER</text>
+          <text x="10" y="100" font-weight="700" fill="#475569" font-size="10">INTENT</text>
+          <text x="10" y="180" font-weight="700" fill="#475569" font-size="10">AGENTS</text>
+          <text x="10" y="260" font-weight="700" fill="#475569" font-size="10">EXECUTION</text>
+          <text x="10" y="330" font-weight="700" fill="#475569" font-size="10">VALIDATION</text>
+
+          <!-- Nodes -->
+          <g>
+            <rect x="100" y="10" width="100" height="40" rx="6" fill="#eef2ff" stroke="#6366f1"/>
+            <text x="150" y="35" text-anchor="middle">prompt</text>
+
+            <rect x="240" y="70" width="120" height="60" rx="6" fill="#fff" stroke="#6366f1"/>
+            <text x="300" y="95" text-anchor="middle" font-weight="700" fill="#3730a3">spec-kit</text>
+            <text x="300" y="112" text-anchor="middle" font-size="10" fill="#64748b">/specify /plan /tasks</text>
+
+            <rect x="400" y="150" width="120" height="60" rx="6" fill="#fff" stroke="#f59e0b"/>
+            <text x="460" y="175" text-anchor="middle" font-weight="700" fill="#78350f">codebuff</text>
+            <text x="460" y="192" text-anchor="middle" font-size="10" fill="#64748b">FilePicker→Plan→Edit</text>
+
+            <rect x="560" y="150" width="120" height="60" rx="6" fill="#fff" stroke="#10b981"/>
+            <text x="620" y="175" text-anchor="middle" font-weight="700" fill="#065f46">fcc-proxy</text>
+            <text x="620" y="192" text-anchor="middle" font-size="10" fill="#64748b">10 LLM backends</text>
+
+            <rect x="720" y="150" width="140" height="60" rx="6" fill="#fff" stroke="#8b5cf6"/>
+            <text x="790" y="175" text-anchor="middle" font-weight="700" fill="#5b21b6">AirLLM Reviewer</text>
+            <text x="790" y="192" text-anchor="middle" font-size="10" fill="#64748b">local 70B diff audit</text>
+
+            <rect x="240" y="230" width="140" height="60" rx="6" fill="#fff" stroke="#0891b2"/>
+            <text x="310" y="255" text-anchor="middle" font-weight="700" fill="#155e75">floci :4566</text>
+            <text x="310" y="272" text-anchor="middle" font-size="10" fill="#64748b">AWS SDK calls</text>
+
+            <rect x="420" y="230" width="120" height="60" rx="6" fill="#fff" stroke="#0891b2"/>
+            <text x="480" y="255" text-anchor="middle" font-weight="700" fill="#155e75">Docker Lambda</text>
+            <text x="480" y="272" text-anchor="middle" font-size="10" fill="#64748b">user code exec</text>
+
+            <rect x="580" y="230" width="120" height="60" rx="6" fill="#fff" stroke="#0891b2"/>
+            <text x="640" y="255" text-anchor="middle" font-weight="700" fill="#155e75">DuckDB</text>
+            <text x="640" y="272" text-anchor="middle" font-size="10" fill="#64748b">Athena/Glue SQL</text>
+
+            <rect x="340" y="310" width="130" height="40" rx="6" fill="#fff" stroke="#e11d48"/>
+            <text x="405" y="335" text-anchor="middle" font-weight="700" fill="#9f1239">CloakBrowser</text>
+
+            <rect x="490" y="310" width="130" height="40" rx="6" fill="#fff" stroke="#e11d48"/>
+            <text x="555" y="335" text-anchor="middle" font-weight="700" fill="#9f1239">Scrapling</text>
+
+            <rect x="640" y="310" width="160" height="40" rx="6" fill="#fff" stroke="#8b5cf6"/>
+            <text x="720" y="335" text-anchor="middle" font-weight="700" fill="#5b21b6">paperless-ngx</text>
+          </g>
+
+          <!-- Flow arrows -->
+          <g stroke="#475569" stroke-width="1.2" fill="none">
+            <line x1="200" y1="30" x2="240" y2="90" marker-end="url(#arr2)"/>
+            <line x1="360" y1="120" x2="400" y2="160" marker-end="url(#arr2)"/>
+            <line x1="520" y1="180" x2="560" y2="180" marker-end="url(#arr2)"/>
+            <line x1="680" y1="180" x2="720" y2="180" marker-end="url(#arr2)"/>
+            <line x1="460" y1="210" x2="310" y2="230" marker-end="url(#arr2)"/>
+            <line x1="380" y1="260" x2="420" y2="260" marker-end="url(#arr2)"/>
+            <line x1="540" y1="260" x2="580" y2="260" marker-end="url(#arr2)"/>
+            <line x1="480" y1="290" x2="405" y2="310" marker-end="url(#arr2)"/>
+            <line x1="470" y1="330" x2="490" y2="330" marker-end="url(#arr2)"/>
+            <line x1="620" y1="330" x2="640" y2="330" marker-end="url(#arr2)"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ========== 6. AGENT ORCHESTRATION FLOW ========== -->
+    <section id="agent-orch">
+      <h2>6 · Agent Orchestration Flow</h2>
+      <p>
+        Codebuff's documented agent topology is <em>File Picker → Planner → Editor → Reviewer</em>. Within GhostStack,
+        this is extended by spec-kit's task queue (upstream) and AirLLM's local reviewer (downstream replacement
+        for the default reviewer agent for sensitive code).
+      </p>
+
+      <pre class="ascii">
+   spec-kit task                                      claude-mem
+   queue (ordered)                                    memory injection
+        │                                                 │
+        ▼                                                 ▼
+   ┌──────────────┐    files       ┌──────────────┐    ┌──────────────┐
+   │ File Picker  │ ──────────────►│   Planner    │◄───│  Vane RAG    │
+   │ (scan repo)  │                │  (sequence)  │    │  (citations) │
+   └──────────────┘                └──────┬───────┘    └──────────────┘
+                                          │ task list
+                                          ▼
+                                   ┌──────────────┐
+                                   │   Editor     │ ──► fcc-proxy → LLM
+                                   │ (apply diff) │     (free backends)
+                                   └──────┬───────┘
+                                          │ diff
+                                          ▼
+                                   ┌──────────────┐
+                       ┌───────────┤   Reviewer   │
+                       │           │ (audit diff) │ ──► AirLLM (local 70B)
+                       │ approve   └──────┬───────┘     for sensitive code
+                       │                  │ reject
+                       │                  ▼
+                       │           re-plan loop  (max N retries)
+                       ▼
+                  commit + emit
+                  to floci IaC
+      </pre>
+
+      <h3>Coordination Properties</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Property</th><th>Mechanism</th><th>Inferred Risk</th></tr></thead>
+          <tbody>
+            <tr><td>Task ordering</td><td>spec-kit emits topologically-sorted task list</td><td><span class="badge badge-emerald">Low</span> — explicit DAG</td></tr>
+            <tr><td>Context sharing</td><td>Codebuff session state + claude-mem injection</td><td><span class="badge badge-amber">Medium</span> — no schema; prompt-string coupling</td></tr>
+            <tr><td>Failure recovery</td><td>Reviewer reject → Planner re-plan</td><td><span class="badge badge-rose">High</span> — unbounded loops without budget</td></tr>
+            <tr><td>Concurrency</td><td>Sequential per file; parallel across files via codebuff's <code class="inline">spawn_agents</code></td><td><span class="badge badge-amber">Medium</span> — git conflicts on shared files</td></tr>
+            <tr><td>Budget enforcement</td><td>Token-bucket in fcc-proxy</td><td><span class="badge badge-emerald">Low</span> — rate-limit honored</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 7. LOCAL-FIRST AI STACK ========== -->
+    <section id="local-first">
+      <h2>7 · Local-First AI Stack Analysis</h2>
+      <p>
+        GhostStack's "local-first" claim must be evaluated per component. A component is <strong>truly local</strong> if
+        no external network call is required at runtime; <strong>routed-local</strong> if it can run local but defaults to remote;
+        <strong>hybrid</strong> if some operations require remote endpoints.
+      </p>
+
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead><tr><th>Repo</th><th>Locality</th><th>Network at Runtime</th><th>Local Hardware Demand</th><th>Offline Failure Mode</th></tr></thead>
+          <tbody>
+            <tr><td>floci</td><td><span class="badge badge-emerald">Truly Local</span></td><td>None (port 4566 loopback)</td><td>~50MB RAM idle; scales with Lambda containers</td><td>None — fully offline</td></tr>
+            <tr><td>codebuff</td><td><span class="badge badge-amber">Hybrid</span></td><td>Required (LLM calls)</td><td>Negligible (orchestration)</td><td>Hard fail — no LLM no agents</td></tr>
+            <tr><td>spec-kit</td><td><span class="badge badge-emerald">Truly Local</span></td><td>None (template generator)</td><td>Negligible</td><td>None — fully offline</td></tr>
+            <tr><td>free-claude-code</td><td><span class="badge badge-cyan">Routed</span></td><td>Required unless Ollama backend</td><td>Negligible (proxy)</td><td>Graceful — switches to local Ollama if configured</td></tr>
+            <tr><td>AirLLM</td><td><span class="badge badge-emerald">Truly Local</span></td><td>HF model download (one-time)</td><td>4–8GB VRAM; 70B model ~140GB on disk</td><td>None after download</td></tr>
+            <tr><td>CloakBrowser</td><td><span class="badge badge-emerald">Truly Local</span></td><td>To target sites only</td><td>~500MB per Chromium instance</td><td>None for local targets</td></tr>
+            <tr><td>Scrapling</td><td><span class="badge badge-emerald">Truly Local</span></td><td>To target sites only</td><td>Low</td><td>None for local targets</td></tr>
+            <tr><td>claude-mem</td><td><span class="badge badge-emerald">Truly Local</span></td><td>None (filesystem hooks)</td><td>Disk only</td><td>None</td></tr>
+            <tr><td>Vane</td><td><span class="badge badge-amber">Hybrid</span></td><td>Search backend + LLM</td><td>Moderate (embedding model)</td><td>Degraded — local LLM mode available</td></tr>
+            <tr><td>fastmcp</td><td><span class="badge badge-emerald">Truly Local</span></td><td>None (stdio/SSE local)</td><td>Negligible</td><td>None</td></tr>
+            <tr><td>ml-intern</td><td><span class="badge badge-amber">Hybrid</span></td><td>HF Hub + LLM</td><td>Variable (training)</td><td>Degraded</td></tr>
+            <tr><td>paperless-ngx</td><td><span class="badge badge-emerald">Truly Local</span></td><td>None</td><td>Postgres + OCR worker</td><td>None</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-title">Locality Inference</span>
+        8 of 12 components are truly local. The remaining 4 (codebuff, free-claude-code, Vane, ml-intern) depend on LLM inference,
+        which is the <em>only</em> non-local plane. With AirLLM + Ollama plugged into free-claude-code, the entire stack becomes
+        100% offline-capable — at the cost of severely degraded inner-loop latency (10–60s per Editor turn vs sub-second).
+      </div>
+    </section>
+
+    <!-- ========== 8. SPEC-DRIVEN ANALYSIS ========== -->
+    <section id="spec-driven">
+      <h2>8 · Spec-Driven Development Analysis</h2>
+      <p>
+        Spec-kit imposes a four-phase pipeline: <code class="inline">/speckit.constitution</code> → <code class="inline">/specify</code>
+        → <code class="inline">/plan</code> → <code class="inline">/tasks</code> → <code class="inline">/implement</code>.
+        Each phase produces a versioned artifact under <code class="inline">.specify/</code>. GhostStack treats these artifacts
+        as the canonical contract that downstream agents must satisfy.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Phase Artifacts</div>
+          <div class="card-body">
+            <strong>constitution.md</strong> — invariants, governance principles<br>
+            <strong>spec.md</strong> — functional intent, user stories<br>
+            <strong>plan.md</strong> — technical decomposition<br>
+            <strong>tasks.md</strong> — ordered, dependency-aware unit work
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Integration with codebuff</div>
+          <div class="card-body">
+            tasks.md is consumed as the codebuff Planner's input queue. Each task entry becomes a planner step;
+            File Picker scopes each step to a file set. Codebuff's autonomous re-planning is <em>constrained</em>
+            by spec-kit's task DAG — preventing runaway agent improvisation.
+          </div>
+        </div>
+      </div>
+
+      <h3>Spec → Code Coherence Inference</h3>
+      <p>
+        The spec-kit + codebuff coupling creates a <strong>two-tier planner</strong>: spec-kit operates at the macro level
+        (feature decomposition), codebuff's Planner agent operates at the micro level (file-level edit sequencing).
+        This is architecturally sound because the levels are non-overlapping. A risk emerges if codebuff's Planner
+        revises the macro plan — this must be disallowed via prompt constraints or MCP-enforced scope.
+      </p>
+
+      <div class="callout">
+        <span class="callout-title">Critical Coupling Point</span>
+        spec-kit emits <code class="inline">tasks.md</code> as markdown. codebuff consumes it via prompt injection.
+        No formal schema validation exists. Drift in spec-kit's output format would silently break codebuff's Planner.
+        A shared JSON-LD / OpenAPI contract should mediate this boundary.
+      </div>
+    </section>
+
+    <!-- ========== 9. AUTONOMOUS CLOUD ENG ========== -->
+    <section id="autonomous-cloud">
+      <h2>9 · Autonomous Cloud Engineering Analysis</h2>
+      <p>
+        Autonomous cloud engineering means agents can: (a) author IaC (Terraform/CDK), (b) deploy to a cloud,
+        (c) observe runtime behavior, (d) repair drift. GhostStack supports (a)–(c); (d) is partially supported through
+        the Reviewer agent loop but lacks a true observability feedback channel.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Capability</th><th>Owner</th><th>Maturity</th><th>Gap</th></tr></thead>
+          <tbody>
+            <tr><td>IaC authoring</td><td>codebuff Editor</td><td><span class="badge badge-emerald">Strong</span></td><td>None</td></tr>
+            <tr><td>Deploy to local AWS</td><td>floci (Terraform endpoint override)</td><td><span class="badge badge-emerald">Strong</span></td><td>CloudFormation completeness varies per service</td></tr>
+            <tr><td>Deploy to real AWS</td><td>floci mirror mode</td><td><span class="badge badge-amber">Claimed</span></td><td>Unverifiable parity — needs contract tests</td></tr>
+            <tr><td>Runtime observation</td><td>CloakBrowser + Scrapling</td><td><span class="badge badge-amber">Partial</span></td><td>UI-level only; no CloudWatch-equivalent</td></tr>
+            <tr><td>Cost observation</td><td>—</td><td><span class="badge badge-rose">Missing</span></td><td>floci has no billing surface; real-cloud cost model absent</td></tr>
+            <tr><td>Drift repair</td><td>codebuff loop</td><td><span class="badge badge-amber">Partial</span></td><td>Reactive only; no state reconciliation</td></tr>
+            <tr><td>Secret management</td><td>—</td><td><span class="badge badge-rose">Missing</span></td><td>No KMS/SecretsManager integration in floci's documented surface</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 10. MULTI-AGENT COORDINATION ========== -->
+    <section id="multi-agent">
+      <h2>10 · Multi-Agent Coordination Analysis</h2>
+      <p>
+        Codebuff's <code class="inline">spawn_agents</code> primitive supports hierarchical agent composition. Within GhostStack,
+        five agent <em>classes</em> can be inferred:
+      </p>
+
+      <div class="grid-3">
+        <div class="card"><div class="card-title">File-scoped Editors</div><div class="card-body">Read-write narrow context. Spawned per file by Planner. Conflict-prone on shared imports.</div></div>
+        <div class="card"><div class="card-title">Reviewer Pool</div><div class="card-body">Heterogeneous: cloud LLM for speed, AirLLM for sensitive paths, ml-intern for ML-specific review.</div></div>
+        <div class="card"><div class="card-title">Verifier Agents</div><div class="card-body">Drive CloakBrowser/Scrapling. Asynchronous to Editors. Emit pass/fail to Planner.</div></div>
+        <div class="card"><div class="card-title">Knowledge Agents</div><div class="card-body">Vane retrieval + claude-mem injection. Read-only against shared corpus.</div></div>
+        <div class="card"><div class="card-title">Archivist Agents</div><div class="card-body">Emit specs/diagrams to paperless-ngx. Idempotent. Tail of every pipeline.</div></div>
+        <div class="card"><div class="card-title">Bootstrap Agent</div><div class="card-body">spec-kit's task generator. Single-shot per phase.</div></div>
+      </div>
+
+      <h4>Coordination Primitives Required</h4>
+      <ul>
+        <li><strong>Mutex on file paths</strong> — needed to prevent two Editors writing the same file. Codebuff does not document filesystem-level locking; must be enforced by Planner sequencing or git working-tree partitioning.</li>
+        <li><strong>Result aggregation</strong> — Reviewer outputs from heterogeneous reviewers must be merged. No documented aggregator exists; inferred to be Planner's responsibility.</li>
+        <li><strong>Memory propagation</strong> — claude-mem hooks operate per-session; cross-session learning is via summarization. No shared agent memory exists.</li>
+      </ul>
+    </section>
+
+    <!-- ========== 11. BROWSER LAYER ========== -->
+    <section id="browser-layer">
+      <h2>11 · Browser Automation Layer Analysis</h2>
+      <p>
+        CloakBrowser and Scrapling form GhostStack's <strong>web-facing actuation surface</strong>. Their composition is
+        non-trivial: CloakBrowser supplies the runtime (stealth Chromium with passing fingerprints); Scrapling supplies
+        the adaptive parsing/selection layer and HTTP-based fetchers for non-JS endpoints.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">CloakBrowser Role</div>
+          <div class="card-body">Custom Chromium build with anti-detection patches. Exposes CDP over <code class="inline">cloakserve</code>. Wraps as Playwright/Stagehand-compatible. Used for E2E tests against deployed-to-floci apps and for high-fidelity simulation of real users against external services.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Scrapling Role</div>
+          <div class="card-body">Adaptive selectors that survive DOM changes; StealthyFetcher (browser-backed) and HTTP fetchers (sub-ms); Cloudflare Turnstile bypass; spider framework for crawl-scale. In GhostStack, generates "sample apps" — i.e., ETL pipelines that scrape real data and target floci-emulated S3/DynamoDB.</div>
+        </div>
+      </div>
+
+      <h3>Composition Pattern</h3>
+      <pre class="ascii">
+  spec-kit emits "TODO app with user uploads"
+       │
+       ▼
+  codebuff Editor writes ETL Lambda + S3 buckets
+       │
+       ▼
+  Scrapling spider populates S3 via floci with REAL scraped data
+       │
+       ▼
+  CloakBrowser drives the deployed UI (running against floci)
+       │
+       ▼
+  E2E pass/fail ──► Reviewer ──► commit or re-plan
+      </pre>
+
+      <div class="callout warn">
+        <span class="callout-title">Security Surface Note</span>
+        CloakBrowser issues have flagged <em>untrusted origins accessing local CDP can lead to unauthorized browser control and local file disclosure</em>. In GhostStack this surface is exposed alongside floci :4566 and fcc-proxy :8082 — three privileged loopback services. Strict bind-to-127.0.0.1 and token auth are mandatory.
+      </div>
+    </section>
+
+    <!-- ========== 12. MEMORY LAYER ========== -->
+    <section id="memory-layer">
+      <h2>12 · Memory Persistence Layer Analysis</h2>
+      <p>
+        claude-mem provides per-session compression and cross-session injection for Claude Code. Its "biomimetic memory architecture" / Endless Mode is a chunked, summarized, semantically-indexed transcript store. Within GhostStack, claude-mem is the <strong>only persistent agent memory</strong>.
+      </p>
+
+      <h4>Memory Topology</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Memory Class</th><th>Owner</th><th>Lifetime</th><th>Scope</th><th>Retrieval</th></tr></thead>
+          <tbody>
+            <tr><td>Session transcript</td><td>claude-mem</td><td>Session</td><td>Single agent</td><td>Auto-inject on resume</td></tr>
+            <tr><td>Constitution</td><td>spec-kit</td><td>Project lifetime</td><td>All agents (read-only)</td><td>Prompt-prepend</td></tr>
+            <tr><td>Spec/Plan/Tasks</td><td>spec-kit</td><td>Phase lifetime</td><td>Codebuff Planner</td><td>File read</td></tr>
+            <tr><td>Code (filesystem)</td><td>git</td><td>Repo lifetime</td><td>Editors</td><td>FilePicker scan</td></tr>
+            <tr><td>Architectural diagrams</td><td>paperless-ngx</td><td>Permanent</td><td>Vane retrieval</td><td>OCR + full-text search</td></tr>
+            <tr><td>Doc corpus</td><td>Vane index</td><td>Project lifetime</td><td>All Q&A agents</td><td>Vector RAG</td></tr>
+            <tr><td>Inter-agent shared memory</td><td><span class="cell-no">NONE</span></td><td>—</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout risk">
+        <span class="callout-title">Critical Gap</span>
+        There is no shared <em>working memory</em> between codebuff agents and Vane, between Editor and Reviewer, or between
+        agents and floci's emulated state. All cross-agent coordination flows through filesystem artifacts and prompt strings.
+        For non-trivial workflows, a <strong>shared semantic memory service</strong> (Redis Streams + vector store, or a fastmcp
+        resource server) is the most impactful missing component.
+      </div>
+    </section>
+
+    <!-- ========== 13. INFERENCE LAYER ========== -->
+    <section id="inference-layer">
+      <h2>13 · Local Inference Layer Analysis</h2>
+      <p>
+        Two distinct inference modalities coexist: <strong>routed cloud-free</strong> (free-claude-code) and <strong>truly local heavy</strong> (AirLLM).
+        Their roles are non-overlapping: free-claude-code serves the high-frequency inner loop (FilePicker/Planner/Editor turns);
+        AirLLM serves the low-frequency, high-trust outer loop (Reviewer for sensitive paths).
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">free-claude-code (:8082)</div>
+          <div class="card-body">
+            FastAPI proxy emitting Anthropic-compatible responses. Backends: NVIDIA NIM (40 req/min), Kimi K2, DeepSeek, GLM, Qwen, Ollama, LM Studio, Cerebras Free, Together Free, Groq Free.
+            Token-bucket + sliding-window rate-limit enforcement. Stateless. Hot-swappable backends.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">AirLLM</div>
+          <div class="card-body">
+            Layer-wise inference: loads one transformer layer at a time onto GPU, swaps to CPU/disk for others. Enables 70B on 4GB VRAM without quantization. Throughput: ~1–3 tok/s on consumer hardware — usable for batch review, not for interactive coding.
+          </div>
+        </div>
+      </div>
+
+      <h3>Throughput Economics (Inferred)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Operation</th><th>Backend</th><th>Latency (typical)</th><th>Cost</th><th>Suitable For</th></tr></thead>
+          <tbody>
+            <tr><td>FilePicker scan</td><td>NIM via fcc</td><td>2–5s</td><td>Free (40/min cap)</td><td>Always</td></tr>
+            <tr><td>Planner step</td><td>DeepSeek/Kimi via fcc</td><td>5–10s</td><td>Free</td><td>Always</td></tr>
+            <tr><td>Editor diff</td><td>NIM/DeepSeek</td><td>10–30s</td><td>Free</td><td>Always</td></tr>
+            <tr><td>Reviewer (default)</td><td>NIM</td><td>10–20s</td><td>Free</td><td>Routine code</td></tr>
+            <tr><td>Reviewer (sensitive)</td><td>AirLLM 70B local</td><td>1–10 min</td><td>Hardware only</td><td>Auth, crypto, IaC</td></tr>
+            <tr><td>Vane RAG</td><td>Local embed + small LLM</td><td>1–3s</td><td>Hardware</td><td>Q&A</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 14. MCP ORCHESTRATION ========== -->
+    <section id="mcp-orch">
+      <h2>14 · MCP Orchestration Analysis</h2>
+      <p>
+        fastmcp is the <strong>structural glue</strong> that makes GhostStack a system rather than a collection of CLIs.
+        Every other repository can be wrapped as MCP tools/resources/prompts, exposing a uniform JSON-RPC surface
+        that any MCP-aware client (Claude Code, Cursor, custom agents) can consume.
+      </p>
+
+      <h4>Inferred MCP Server Composition</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>MCP Server</th><th>Tools (verbs)</th><th>Resources (data)</th><th>Prompts (templates)</th></tr></thead>
+          <tbody>
+            <tr><td>ghoststack-floci</td><td><code class="inline">floci.start</code>, <code class="inline">floci.deploy</code>, <code class="inline">floci.invoke_lambda</code></td><td>S3 listings, DynamoDB scans, CloudWatch-equivalent logs</td><td>"explain this AWS error", "suggest IaC fix"</td></tr>
+            <tr><td>ghoststack-speckit</td><td><code class="inline">spec.init</code>, <code class="inline">spec.plan</code>, <code class="inline">spec.tasks</code></td><td>constitution.md, spec.md, tasks.md</td><td>Refinement prompts per phase</td></tr>
+            <tr><td>ghoststack-codebuff</td><td><code class="inline">codebuff.run_agent</code>, <code class="inline">codebuff.spawn</code></td><td>session transcript, agent registry</td><td>Agent-specific system prompts</td></tr>
+            <tr><td>ghoststack-mem</td><td><code class="inline">mem.recall</code>, <code class="inline">mem.summarize</code></td><td>Chunked transcripts</td><td>Context-injection templates</td></tr>
+            <tr><td>ghoststack-vane</td><td><code class="inline">vane.query</code>, <code class="inline">vane.index</code></td><td>Doc corpus, citations</td><td>RAG-style answer prompts</td></tr>
+            <tr><td>ghoststack-paperless</td><td><code class="inline">archive.add</code>, <code class="inline">archive.search</code></td><td>Indexed docs/diagrams</td><td>—</td></tr>
+            <tr><td>ghoststack-browser</td><td><code class="inline">cloak.run_e2e</code>, <code class="inline">scrape.fetch</code></td><td>HARs, screenshots</td><td>"verify checkout flow"</td></tr>
+            <tr><td>ghoststack-airllm</td><td><code class="inline">review.audit_diff</code></td><td>—</td><td>Sensitive-code review templates</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <span class="callout-title">Architectural Implication</span>
+        fastmcp's decorator-driven Python ergonomics make this 8-server federation tractable, but at runtime it implies
+        ~8 long-running Python processes (or one composite server with sub-routers). The composite approach is preferable;
+        the v1494 router-based architecture issue confirms this is on the fastmcp roadmap.
+      </div>
+    </section>
+
+    <!-- ========== 15. EVENT FLOW ========== -->
+    <section id="event-flow">
+      <h2>15 · Event-Driven Workflow Analysis</h2>
+      <p>
+        GhostStack's event surface is dual-layer: <strong>application events</strong> inside floci (SQS, EventBridge, SNS, S3 notifications)
+        and <strong>orchestration events</strong> between agents (task complete, review reject, build fail). The two never share a bus.
+      </p>
+
+      <h4>Event Bus Inventory</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Bus</th><th>Owner</th><th>Scope</th><th>Delivery Semantics</th><th>Persistence</th></tr></thead>
+          <tbody>
+            <tr><td>EventBridge (emulated)</td><td>floci</td><td>App-internal</td><td>At-least-once (inferred)</td><td>In-memory scheduler</td></tr>
+            <tr><td>SQS (emulated)</td><td>floci</td><td>App-internal</td><td>At-least-once</td><td>In-memory + WAL</td></tr>
+            <tr><td>SNS (emulated)</td><td>floci</td><td>App-internal</td><td>Best-effort</td><td>None</td></tr>
+            <tr><td>S3 notifications</td><td>floci</td><td>App-internal → Lambda</td><td>At-least-once</td><td>Via WAL</td></tr>
+            <tr><td>Agent task queue</td><td>codebuff</td><td>Orchestration</td><td>Sequential, in-process</td><td>Session state</td></tr>
+            <tr><td>spec-kit task list</td><td>spec-kit</td><td>Orchestration</td><td>Read-once</td><td>Filesystem</td></tr>
+            <tr><td>claude-mem hooks</td><td>claude-mem</td><td>Orchestration meta</td><td>Best-effort</td><td>Filesystem</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-title">Cross-Bus Gap</span>
+        An app-internal event (e.g., a Lambda failure surfaced via EventBridge) cannot today trigger a re-plan in codebuff
+        without manual polling. Bridging floci's EventBridge to codebuff's agent queue (likely via a fastmcp resource subscription
+        or an SSE channel) is the most impactful missing primitive for true autonomous loops.
+      </div>
+    </section>
+
+    <!-- ========== 16. LIFECYCLE ========== -->
+    <section id="lifecycle">
+      <h2>16 · Runtime Lifecycle Analysis</h2>
+
+      <h4>Boot Order (topologically sorted)</h4>
+      <ol>
+        <li><strong>paperless-ngx</strong> + <strong>Postgres</strong> — slow startup; archive should be live before any artifacts are emitted.</li>
+        <li><strong>floci :4566</strong> — Quarkus native, 24ms cold start. Must be live before any IaC is applied.</li>
+        <li><strong>free-claude-code :8082</strong> — FastAPI, ~1s. Required by every agent.</li>
+        <li><strong>AirLLM</strong> — lazy-loaded on first Reviewer call; first call cold ~30–120s.</li>
+        <li><strong>Vane :3000</strong> — Next.js + embedding model warm-up.</li>
+        <li><strong>fastmcp host</strong> — composite server; spawns child MCP servers; ~2–5s.</li>
+        <li><strong>CloakBrowser</strong> — lazy-launched per test; ~3s per profile.</li>
+        <li><strong>codebuff</strong> + <strong>spec-kit</strong> — CLI, on-demand.</li>
+        <li><strong>claude-mem</strong> — hook-driven; attaches to Claude Code session.</li>
+      </ol>
+
+      <h4>Shutdown Hazards</h4>
+      <ul>
+        <li>floci WAL must be flushed cleanly or S3-emulated state diverges from object layout on next boot.</li>
+        <li>Docker-backed Lambda containers leak if floci is killed via SIGKILL — Docker daemon retains zombies.</li>
+        <li>claude-mem hooks must be drained before session end or transcript chunks are lost.</li>
+        <li>paperless-ngx OCR workers must finish in-flight jobs; otherwise re-OCR on restart.</li>
+      </ul>
+    </section>
+
+    <!-- ========== 17. DATAFLOW ========== -->
+    <section id="dataflow">
+      <h2>17 · Dataflow Mapping</h2>
+      <p>End-to-end dataflow for a single "build → test → archive" cycle.</p>
+
+      <pre class="ascii">
+   <span class="hl">[NL intent]</span>
+        │
+        ▼ spec-kit.specify → spec.md (markdown)
+   <span class="hl">[spec.md]</span> ────────────────► Vane index (vector) ───► RAG
+        │                                              │
+        ▼ spec-kit.tasks                                │
+   <span class="hl">[tasks.md]</span>                                       │
+        │                                              ▼
+        ▼ codebuff Planner reads tasks.md      claude-mem corpus
+   <span class="hl">[file edits / diffs]</span>
+        │
+        ▼ git working tree
+   <span class="hl">[source code]</span>
+        │
+        ▼ terraform/cdk apply → AWS SDK
+   <span class="hl">[floci internal state]</span>
+        │       (WAL · in-mem · Docker containers · DuckDB tables)
+        │
+        ▼ deployed app reachable via :4566 routed endpoints
+   <span class="hl">[runtime traces / logs]</span>
+        │
+        ▼ CloakBrowser E2E → screenshots, HAR
+   <span class="hl">[test artifacts]</span>
+        │
+        ▼ spec-kit emits SVG diagram → paperless watch folder
+   <span class="hl">[indexed archive]</span> ◄──── OCR + tag pipeline
+        │
+        ▼ Vane re-indexes for next session
+   <span class="hl">[knowledge base growth]</span>
+      </pre>
+    </section>
+
+    <!-- ========== 18. RESOURCE OWNERSHIP ========== -->
+    <section id="resource-ownership">
+      <h2>18 · Resource Ownership Mapping</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Resource</th><th>Owner</th><th>Consumers</th><th>Ownership Model</th></tr></thead>
+          <tbody>
+            <tr><td>S3 buckets (emulated)</td><td>floci</td><td>Lambdas, deployed app, Scrapling ETLs</td><td>Single-writer, multi-reader</td></tr>
+            <tr><td>DynamoDB tables</td><td>floci</td><td>Lambdas, deployed app</td><td>Shared, optimistic concurrency</td></tr>
+            <tr><td>Lambda containers</td><td>floci → Docker daemon</td><td>EventBridge, SQS, API Gateway</td><td>Floci-managed lifecycle (LRU warm pool)</td></tr>
+            <tr><td>Bedrock model proxy</td><td>floci</td><td>ml-intern, deployed apps</td><td>Routed to local model or external</td></tr>
+            <tr><td>LLM tokens (free tier)</td><td>fcc-proxy</td><td>Every agent</td><td>Token-bucket budget</td></tr>
+            <tr><td>GPU VRAM</td><td>AirLLM (exclusive)</td><td>Reviewer, ml-intern</td><td>Mutually exclusive — cannot share GPU</td></tr>
+            <tr><td>Specs / constitution</td><td>spec-kit + git</td><td>Codebuff, Vane, paperless</td><td>Single-writer (developer), multi-reader</td></tr>
+            <tr><td>Agent memory chunks</td><td>claude-mem</td><td>Claude Code session</td><td>Per-session, append-only</td></tr>
+            <tr><td>Document index</td><td>paperless-ngx</td><td>Vane</td><td>Single-writer (paperless), single-reader (Vane)</td></tr>
+            <tr><td>Browser profiles</td><td>CloakBrowser-Manager</td><td>E2E tests</td><td>Per-profile isolation</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout risk">
+        <span class="callout-title">Contention Hotspot</span>
+        GPU VRAM is the single most contended resource. AirLLM cannot share VRAM with Vane's embedding model or ml-intern's training jobs.
+        A GPU scheduler (or strict sequential mode toggle) is required for any host with a single GPU.
+      </div>
+    </section>
+
+    <!-- ========== 19. INFRA ABSTRACTION ========== -->
+    <section id="infra-abstraction">
+      <h2>19 · Infrastructure Abstraction Analysis</h2>
+      <p>
+        floci provides a <strong>protocol-level abstraction</strong> — the AWS SDK contract — rather than a resource-level abstraction.
+        This is strategically superior to LocalStack for one reason: <em>any AWS SDK client unmodified</em> works against floci.
+        No driver. No adapter. The abstraction boundary is the AWS API itself.
+      </p>
+
+      <h3>Abstraction Layers Stacked</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>What It Abstracts</th><th>What Leaks Through</th></tr></thead>
+          <tbody>
+            <tr><td>AWS SDK</td><td>HTTP wire format, signatures</td><td>Region semantics, IAM (mocked)</td></tr>
+            <tr><td>floci HTTP Router</td><td>Service dispatch</td><td>JAX-RS/Vert.x async semantics</td></tr>
+            <tr><td>Service modules (S3, Lambda…)</td><td>Storage backends</td><td>WAL vs in-memory consistency differences</td></tr>
+            <tr><td>DuckDB sidecar</td><td>Athena/Glue SQL</td><td>SQL dialect divergence</td></tr>
+            <tr><td>Docker daemon</td><td>Lambda runtime</td><td>Cold start = real Docker start, not AWS Firecracker</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 20. CLOUD EMULATION ========== -->
+    <section id="cloud-emulation">
+      <h2>20 · Cloud Emulation Analysis</h2>
+      <p>
+        floci's documented coverage: <strong>47 services</strong> including S3, Lambda, DynamoDB, SQS, SNS, EventBridge, API Gateway,
+        Cognito, RDS, Bedrock Runtime, EKS, IAM (mock), KMS, CloudWatch, Step Functions, Glue, Athena (DuckDB), SageMaker (partial).
+        Documented startup: 24ms native; 13 MiB idle memory.
+      </p>
+
+      <h4>Service Fidelity Tiering (inferred)</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tier</th><th>Services</th><th>Fidelity</th><th>Real-Cloud Parity Risk</th></tr></thead>
+          <tbody>
+            <tr><td>Tier 1 — High Fidelity</td><td>S3, DynamoDB, SQS, Lambda, EventBridge</td><td>Real Docker / WAL / hybrid storage</td><td><span class="badge badge-emerald">Low</span></td></tr>
+            <tr><td>Tier 2 — Functional</td><td>SNS, API Gateway, Cognito, KMS, IAM</td><td>HTTP-level mocks; reduced semantics</td><td><span class="badge badge-amber">Medium</span></td></tr>
+            <tr><td>Tier 3 — Routed</td><td>Bedrock Runtime, SageMaker, Comprehend</td><td>Proxied to local LLMs / HF models</td><td><span class="badge badge-amber">Medium</span></td></tr>
+            <tr><td>Tier 4 — Skeletal</td><td>EKS, ECS, App Mesh, Step Functions</td><td>API-shape only</td><td><span class="badge badge-rose">High</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 21. AGENT RUNTIME ========== -->
+    <section id="agent-runtime">
+      <h2>21 · Agent Runtime Analysis</h2>
+      <p>
+        Codebuff is a Node/TypeScript runtime. Its agents are TypeScript generators that interleave LLM calls with deterministic tool invocations.
+        The runtime is single-process with cooperative concurrency. Agents <em>do not</em> have isolated address spaces — they share the
+        codebuff session heap and the filesystem.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Agent Isolation</div>
+          <div class="card-body">
+            None at process level. Each agent is a generator function; isolation is by prompt scoping. Memory leaks across agents are possible via shared session state. <span class="badge badge-amber">Cooperative</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Failure Containment</div>
+          <div class="card-body">
+            Agent throw → caught by runtime → reported to Planner. No retry semantics standardized. <span class="badge badge-amber">Manual</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tool Surface</div>
+          <div class="card-body">
+            Filesystem, shell, network. Extended via codebuff's <code class="inline">spawn_agents</code> and (in GhostStack) via fastmcp tool wrappers.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Determinism</div>
+          <div class="card-body">
+            Non-deterministic at LLM call boundaries; deterministic between. No record-and-replay. Re-runs are not bit-reproducible.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 22. FAILURES ========== -->
+    <section id="failures">
+      <h2>22 · Failure Point Analysis</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Failure Point</th><th>Probability</th><th>Blast Radius</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td>NIM rate-limit (40 rpm)</td><td><span class="badge badge-rose">High</span></td><td>All agents block</td><td>fcc-proxy backend rotation</td></tr>
+            <tr><td>AirLLM OOM</td><td><span class="badge badge-amber">Medium</span></td><td>Reviewer stalls</td><td>Layer-offload tuning; fallback to cloud LLM</td></tr>
+            <tr><td>floci Docker daemon failure</td><td><span class="badge badge-amber">Medium</span></td><td>Lambda invocations fail</td><td>Pre-flight check on boot</td></tr>
+            <tr><td>spec drift (tasks.md format change)</td><td><span class="badge badge-amber">Medium</span></td><td>Planner misreads</td><td>Schema contract layer</td></tr>
+            <tr><td>CloakBrowser fingerprint detection</td><td><span class="badge badge-amber">Medium</span></td><td>E2E false negatives on real sites</td><td>Profile rotation</td></tr>
+            <tr><td>Scrapling selector drift</td><td><span class="badge badge-amber">Medium</span></td><td>ETL silent corruption</td><td>Adaptive selectors (built-in)</td></tr>
+            <tr><td>claude-mem hook race</td><td><span class="badge badge-amber">Low</span></td><td>Lost transcript chunk</td><td>Single-session enforcement</td></tr>
+            <tr><td>fastmcp schema mismatch</td><td><span class="badge badge-amber">Low</span></td><td>Tool call fails</td><td>Strict JSON schema validation</td></tr>
+            <tr><td>Reviewer reject loop</td><td><span class="badge badge-rose">High</span></td><td>Infinite re-plan</td><td>Bounded retry budget</td></tr>
+            <tr><td>floci → real AWS parity gap</td><td><span class="badge badge-rose">High</span></td><td>Mirror mode breaks</td><td>Contract testing suite</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 23. BOTTLENECKS ========== -->
+    <section id="bottlenecks">
+      <h2>23 · Bottleneck Analysis</h2>
+      <ol>
+        <li><strong>LLM throughput (inner loop)</strong> — NIM's 40 rpm dominates wall-clock. With 4 agents in parallel, effective ceiling is ~10 turns/min per agent. Mitigation: rotate to DeepSeek/Kimi during NIM cool-down.</li>
+        <li><strong>AirLLM token rate</strong> — 1–3 tok/s makes 70B local review feasible only for diffs &lt;1k tokens. Larger diffs must fall back to cloud.</li>
+        <li><strong>Docker Lambda cold start</strong> — Real container cold starts (1–3s) dominate floci's emulated invocation latency. LRU warm-pool partially mitigates.</li>
+        <li><strong>OCR queue (paperless-ngx)</strong> — Single-worker default. Burst of diagram emissions can backlog.</li>
+        <li><strong>GPU contention</strong> — Single GPU shared by Vane embed, AirLLM, ml-intern. Sequential scheduling required.</li>
+        <li><strong>fastmcp tool latency aggregation</strong> — Each MCP hop adds 10–50ms. Pipelines of 5+ hops are perceptible.</li>
+      </ol>
+    </section>
+
+    <!-- ========== 24. SCALABILITY ========== -->
+    <section id="scalability">
+      <h2>24 · Scalability Analysis</h2>
+      <p>
+        GhostStack scales vertically (more CPU/RAM/GPU per host) cleanly. Horizontal scaling is <strong>not designed for</strong> —
+        the architecture assumes a single developer workstation. Three dimensions exhibit hard limits:
+      </p>
+      <ul>
+        <li><strong>Concurrent agents</strong>: codebuff is single-process; ~4–8 parallel agents before context-switch dominates.</li>
+        <li><strong>Concurrent Lambdas</strong>: floci uses real Docker containers; bounded by host's Docker concurrency (~50–100 typical).</li>
+        <li><strong>Concurrent E2E browsers</strong>: each CloakBrowser instance ~500MB; ~10–20 parallel on a 32GB host.</li>
+      </ul>
+      <div class="callout">
+        <span class="callout-title">Production Trajectory</span>
+        Scaling GhostStack beyond a single host would require: (a) codebuff to be re-engineered for distributed agent execution,
+        (b) floci to support a clustering mode, (c) a true shared event bus replacing in-process queues. Today's design is
+        <em>laptop-optimal</em>, not <em>cluster-optimal</em>.
+      </div>
+    </section>
+
+    <!-- ========== 25. SECURITY ========== -->
+    <section id="security">
+      <h2>25 · Security Surface Analysis</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Surface</th><th>Risk</th><th>Required Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td>floci :4566</td><td>Unauthenticated; exposes "AWS" emulator</td><td>Bind 127.0.0.1; firewall</td></tr>
+            <tr><td>fcc-proxy :8082</td><td>API keys for 10 backends stored in env</td><td>Process-isolated env; no logs</td></tr>
+            <tr><td>CloakBrowser CDP</td><td>Local file disclosure if origin trusted</td><td>Token-gated CDP; sandbox</td></tr>
+            <tr><td>codebuff filesystem access</td><td>Agents can write anywhere in repo</td><td>Path allow-list; review-before-commit</td></tr>
+            <tr><td>Lambda code execution</td><td>Arbitrary code from LLM into Docker</td><td>Network-isolated bridge; volume mounts read-only</td></tr>
+            <tr><td>Scraped data</td><td>May contain PII, secrets</td><td>Sanitization pre-S3 write</td></tr>
+            <tr><td>paperless OCR</td><td>Indexes secrets if leaked into diagrams</td><td>Pre-archive filter</td></tr>
+            <tr><td>MCP tool surface</td><td>Any MCP-aware client can call privileged tools</td><td>Per-tool capability tokens</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 26. OPS COMPLEXITY ========== -->
+    <section id="ops-complexity">
+      <h2>26 · Operational Complexity Analysis</h2>
+      <p>
+        Number of long-running processes on a fully-warm workstation: <strong>~14</strong> (floci, fcc-proxy, fastmcp host, 1–N MCP child servers, Vane, paperless web, paperless workers, Postgres, Docker daemon, AirLLM server, codebuff CLI, optional Ollama, IDE). This is non-trivial.
+      </p>
+
+      <div class="grid-3">
+        <div class="card"><div class="card-title">Process Supervision</div><div class="card-body">Docker Compose covers most; AirLLM and codebuff are not natively containerized. Need a Procfile-style supervisor (overmind, foreman).</div></div>
+        <div class="card"><div class="card-title">Log Aggregation</div><div class="card-body">Heterogeneous logs (JVM, FastAPI, Node, Docker). No native aggregator. Recommended: vector.dev or Loki sidecar.</div></div>
+        <div class="card"><div class="card-title">Health Checks</div><div class="card-body">Each service has its own probe semantics. Need a unified health endpoint or readiness script.</div></div>
+        <div class="card"><div class="card-title">Upgrades</div><div class="card-body">12 repos, 12 release cadences. Lockfile per language. Compatibility matrix must be maintained.</div></div>
+        <div class="card"><div class="card-title">Disk Footprint</div><div class="card-body">~150GB on disk: AirLLM 70B weights ~140GB; Docker images ~5GB; paperless DB grows with use.</div></div>
+        <div class="card"><div class="card-title">Boot Time</div><div class="card-body">~30s cold (floci 24ms + Postgres ~10s + Vane ~5s + fastmcp ~3s + warm-pools).</div></div>
+      </div>
+    </section>
+
+    <!-- ========== 27. INTEGRATION RISK ========== -->
+    <section id="integration-risk">
+      <h2>27 · Integration Risk Analysis</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Integration Pair</th><th>Coupling Type</th><th>Risk</th><th>Stabilizing Boundary</th></tr></thead>
+          <tbody>
+            <tr><td>spec-kit ↔ codebuff</td><td>Markdown prompt injection</td><td><span class="badge badge-rose">High</span> — format drift</td><td>JSON-schema contract</td></tr>
+            <tr><td>codebuff ↔ fcc-proxy</td><td>Anthropic API mimicry</td><td><span class="badge badge-amber">Medium</span> — Anthropic API evolves</td><td>Version pin both sides</td></tr>
+            <tr><td>codebuff ↔ floci</td><td>AWS SDK</td><td><span class="badge badge-emerald">Low</span> — stable contract</td><td>AWS API itself</td></tr>
+            <tr><td>floci → CloakBrowser</td><td>HTTP only (via deployed app)</td><td><span class="badge badge-emerald">Low</span></td><td>—</td></tr>
+            <tr><td>Reviewer (codebuff) ↔ AirLLM</td><td>OpenAI-compat HTTP (assumed)</td><td><span class="badge badge-amber">Medium</span> — schema mismatch</td><td>Adapter</td></tr>
+            <tr><td>All ↔ fastmcp</td><td>JSON-RPC</td><td><span class="badge badge-amber">Medium</span> — tool schemas hand-written</td><td>Strict validation + tests</td></tr>
+            <tr><td>claude-mem ↔ codebuff session</td><td>Hooks (filesystem)</td><td><span class="badge badge-rose">High</span> — hook API instability</td><td>Pin claude-mem version</td></tr>
+            <tr><td>paperless ↔ Vane</td><td>Postgres / FTS</td><td><span class="badge badge-emerald">Low</span></td><td>—</td></tr>
+            <tr><td>Scrapling ↔ CloakBrowser</td><td>Browser session sharing</td><td><span class="badge badge-amber">Medium</span> — fingerprint conflict</td><td>Profile separation</td></tr>
+            <tr><td>ml-intern ↔ floci Bedrock</td><td>Bedrock API (mocked)</td><td><span class="badge badge-amber">Medium</span> — model parity</td><td>Routed proxy</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 28. MAINTAINABILITY ========== -->
+    <section id="maintainability">
+      <h2>28 · Long-Term Maintainability Analysis</h2>
+      <ul>
+        <li><strong>Heterogeneous language stacks</strong> raise onboarding cost. A maintainer must understand Java/Quarkus (floci), Node/TS (codebuff, Vane), Python (rest).</li>
+        <li><strong>Release-rate mismatch</strong>: codebuff and Vane release weekly; floci monthly; spec-kit on GitHub's cadence; paperless quarterly. A pinned compatibility matrix is essential.</li>
+        <li><strong>Single-maintainer dependencies</strong>: Scrapling (D4Vinci), AirLLM (lyogavin), claude-mem (thedotmack), Vane (ItzCrazyKns) — bus-factor of one each.</li>
+        <li><strong>floci's strategic position</strong>: 47 services is ambitious; sustaining parity with AWS evolution is a long-term burden. Tier-1 services are stable; Tier-3/4 will need ongoing investment.</li>
+        <li><strong>MCP ecosystem volatility</strong>: MCP is recent. Schema changes likely; fastmcp tracks the spec actively (good).</li>
+      </ul>
+    </section>
+
+    <!-- ========== 29. STRATEGIC ADVANTAGES ========== -->
+    <section id="advantages">
+      <h2>29 · Strategic Architectural Advantages</h2>
+      <div class="grid-2">
+        <div class="card"><div class="card-title">Cost Floor of Zero</div><div class="card-body">No external SaaS at runtime. Recurring cost = electricity. This is unprecedented for a stack that emulates 47 cloud services.</div></div>
+        <div class="card"><div class="card-title">Spec-as-Source-of-Truth</div><div class="card-body">Every artifact (code, IaC, diagrams, archives) traces back to <code class="inline">spec.md</code>. Reverse engineering becomes spec lookup.</div></div>
+        <div class="card"><div class="card-title">MCP as Unifier</div><div class="card-body">Bet on a public standard (MCP) rather than a proprietary bus. Future IDEs / agents get GhostStack tools for free.</div></div>
+        <div class="card"><div class="card-title">Drop-in Mirror Mode</div><div class="card-body">FLOCI_MODE=mirror compiles directly to real AWS calls. Zero developer-to-production code drift.</div></div>
+        <div class="card"><div class="card-title">Real Docker for Lambda</div><div class="card-body">Higher fidelity than LocalStack community tier. Cold-start, memory, IO semantics match real Lambda more faithfully.</div></div>
+        <div class="card"><div class="card-title">Defense-in-Depth Review</div><div class="card-body">Sensitive code paths reviewed by AirLLM (local, 70B, uncensored) — no upstream LLM ever sees secrets.</div></div>
+      </div>
+    </section>
+
+    <!-- ========== 30. VIABILITY ========== -->
+    <section id="viability">
+      <h2>30 · Viability Assessment</h2>
+      <div class="verdict-grid">
+        <div class="verdict-card v-strong">
+          <div class="verdict-title">✓ Technically Coherent</div>
+          Each plane has a real, documented owner. No vapor components. Every box maps to a working repository.
+          <span class="badge badge-emerald" style="margin-top:8px;display:inline-block">Confidence: High</span>
+        </div>
+        <div class="verdict-card v-warn">
+          <div class="verdict-title">~ Architecturally Viable (with caveats)</div>
+          Coherent on paper; integration glue is currently absent. Requires substantial wiring effort — but no <em>blocking</em>
+          architectural impossibilities.
+          <span class="badge badge-amber" style="margin-top:8px;display:inline-block">Confidence: Medium-High</span>
+        </div>
+        <div class="verdict-card v-warn">
+          <div class="verdict-title">~ Realistically Operable</div>
+          14 long-running processes, 3 runtimes, 150GB disk, single-GPU contention. Operable on a developer-class workstation
+          (32GB RAM, 1 GPU); unwieldy on a laptop with &lt;16GB.
+          <span class="badge badge-amber" style="margin-top:8px;display:inline-block">Confidence: Medium</span>
+        </div>
+        <div class="verdict-card v-strong">
+          <div class="verdict-title">✓ Locally Executable</div>
+          All non-LLM planes run locally. With Ollama/AirLLM, LLM plane runs locally too. End-to-end offline operation
+          is achievable.
+          <span class="badge badge-emerald" style="margin-top:8px;display:inline-block">Confidence: High</span>
+        </div>
+        <div class="verdict-card v-risk">
+          <div class="verdict-title">✗ Scalable Beyond Prototype</div>
+          Single-host design. Multi-developer / cluster mode requires re-engineering of codebuff (distributed agents),
+          floci (clustering), and event bus (replace in-process queues).
+          <span class="badge badge-rose" style="margin-top:8px;display:inline-block">Confidence: High</span>
+        </div>
+        <div class="verdict-card v-neutral">
+          <div class="verdict-title">◎ Production Realism</div>
+          As a <em>development lab</em>: production-realistic. As a <em>production runtime</em>: explicitly not designed for it.
+          Mirror mode bridges to real AWS for production deploys.
+          <span class="badge badge-indigo" style="margin-top:8px;display:inline-block">Confidence: High</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== REPO DOSSIERS ========== -->
+    <section>
+      <h2>Repository Dossiers — Tabbed View</h2>
+      <p>Per-repository deep-dive. Each repository is analyzed as a node in GhostStack's topology, not as a standalone project.</p>
+
+      <div class="repo-grid" id="repoGrid">
+        <div class="repo-card active" data-repo="floci"><div class="repo-card-name">floci</div><div class="repo-card-role">AWS local emulator</div></div>
+        <div class="repo-card" data-repo="codebuff"><div class="repo-card-name">codebuff</div><div class="repo-card-role">Multi-agent CLI</div></div>
+        <div class="repo-card" data-repo="speckit"><div class="repo-card-name">spec-kit</div><div class="repo-card-role">Spec-driven CLI</div></div>
+        <div class="repo-card" data-repo="fcc"><div class="repo-card-name">free-claude-code</div><div class="repo-card-role">LLM proxy router</div></div>
+        <div class="repo-card" data-repo="cloak"><div class="repo-card-name">CloakBrowser</div><div class="repo-card-role">Stealth Chromium</div></div>
+        <div class="repo-card" data-repo="fastmcp"><div class="repo-card-name">fastmcp</div><div class="repo-card-role">MCP framework</div></div>
+        <div class="repo-card" data-repo="airllm"><div class="repo-card-name">AirLLM</div><div class="repo-card-role">Layer-wise inference</div></div>
+        <div class="repo-card" data-repo="claudemem"><div class="repo-card-name">claude-mem</div><div class="repo-card-role">Persistent memory</div></div>
+        <div class="repo-card" data-repo="vane"><div class="repo-card-name">Vane</div><div class="repo-card-role">RAG answering engine</div></div>
+        <div class="repo-card" data-repo="scrapling"><div class="repo-card-name">Scrapling</div><div class="repo-card-role">Adaptive scraping</div></div>
+        <div class="repo-card" data-repo="mlintern"><div class="repo-card-name">ml-intern</div><div class="repo-card-role">ML pipeline agent</div></div>
+        <div class="repo-card" data-repo="paperless"><div class="repo-card-name">paperless-ngx</div><div class="repo-card-role">Doc archive</div></div>
+      </div>
+
+      <!-- ============ FLOCI ============ -->
+      <div id="repo-floci" class="repo-section" data-repo="floci">
+        <h3>floci-io/floci — Local AWS Emulator (Quarkus Native)</h3>
+        <div class="section-meta">Role: Execution Plane keystone · Language: Java (Quarkus) → GraalVM native</div>
+
+        <details class="collapsible" open><summary>1. Repository Overview</summary><div class="inner">
+          <p><strong>Purpose</strong>: Drop-in replacement for AWS, exposing AWS SDK contracts on a single loopback endpoint (:4566). Emulates 47 services with <em>real Docker</em> for stateful runtimes (Lambda) and in-process implementations where fidelity allows.</p>
+          <p><strong>Ecosystem role</strong>: The unique structural keystone — no other open-source project provides a free, feature-gate-less, GraalVM-native AWS emulator with this surface area. Direct competitor to LocalStack but explicitly without feature gates.</p>
+          <p><strong>Maturity</strong>: Active (v1.5.9-class), single endpoint, documented 24ms cold start, 13 MiB idle.</p>
+          <p><strong>Architectural category</strong>: Infrastructure abstraction / emulator / control-plane proxy.</p>
+        </div></details>
+
+        <details class="collapsible"><summary>2. Internal Architecture (Inferred)</summary><div class="inner">
+          <ul>
+            <li><strong>HTTP Router</strong>: JAX-RS on top of Vert.x — non-blocking, reactive, single port :4566.</li>
+            <li><strong>Service dispatch</strong>: Path/host header → service module. AWS region routing collapsed to local.</li>
+            <li><strong>Storage backends</strong> (heterogeneous, per service):
+              <ul>
+                <li>S3 — write-ahead log (WAL) backed object store.</li>
+                <li>DynamoDB — hybrid in-memory + disk page cache.</li>
+                <li>SQS/SNS — in-memory queues with persistence checkpoints.</li>
+                <li>Lambda — Docker daemon spawns user-code containers; LRU warm pool retains N containers.</li>
+                <li>Athena/Glue — DuckDB sidecar process; SQL routed via JDBC-like bridge.</li>
+                <li>Bedrock Runtime — routed to local LLMs (Ollama) or external free providers.</li>
+              </ul>
+            </li>
+            <li><strong>Concurrency model</strong>: Vert.x event loop + worker pools. CPU-bound work (e.g., crypto for KMS) offloaded.</li>
+            <li><strong>Native image</strong>: GraalVM ahead-of-time compilation; explains 24ms cold start.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>3. Technology Stack</summary><div class="inner">
+          <ul>
+            <li>Quarkus framework, GraalVM native-image, JAX-RS, Vert.x, DuckDB (sidecar), Docker daemon (external dependency), Jackson, AWS SDK contract compliance.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>4. Probable Repository Structure</summary><div class="inner">
+<pre class="ascii">
+floci/
+├── core/                    # router, dispatch, telemetry
+├── services/
+│   ├── s3/                  # WAL store, multipart, presigned
+│   ├── lambda/              # Docker controller, warm pool, layer cache
+│   ├── dynamodb/            # hybrid store, GSI, streams
+│   ├── sqs/  sns/  events/  # in-mem + persistence
+│   ├── bedrock/             # router to local/free LLMs
+│   ├── athena/ glue/        # DuckDB bridge
+│   └── ...                  # 40 more services
+├── sidecars/
+│   └── duckdb/
+├── extensions/              # Quarkus extensions
+├── native-image-config/
+└── docker/
+</pre>
+        </div></details>
+
+        <details class="collapsible"><summary>5. Internal Systems Analysis</summary><div class="inner">
+          <ul>
+            <li><strong>Scheduler</strong>: EventBridge-emulator uses a wheel-based scheduler for cron rules.</li>
+            <li><strong>Warm pool</strong>: LRU keyed by (function, version, env-hash); container reuse drives sub-second invocations.</li>
+            <li><strong>WAL</strong>: append-only log per S3 bucket; segment compaction on size threshold.</li>
+            <li><strong>Topological boot</strong>: service dependency DAG resolved at startup (Lambda needs Dynamo for env-state, etc.).</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>6. AI/LLM Relevance</summary><div class="inner">
+          <p>Bedrock Runtime route is the AI-relevant surface: it proxies Bedrock-shaped requests to local LLMs (via fcc-proxy or Ollama). This lets <code class="inline">ml-intern</code> and deployed apps consume Bedrock Runtime APIs against a free backend.</p>
+        </div></details>
+
+        <details class="collapsible"><summary>7. GhostStack Integration Role</summary><div class="inner">
+          <ul>
+            <li><strong>Consumes</strong>: AWS SDK calls (boto3, aws-sdk-js, Java SDK, Terraform, CDK). Docker daemon socket. DuckDB.</li>
+            <li><strong>Emits</strong>: SDK-compatible responses, EventBridge events to subscribed Lambda invocations, S3 notifications.</li>
+            <li><strong>Upstream</strong>: codebuff Editor output (IaC).</li>
+            <li><strong>Downstream</strong>: CloakBrowser (drives deployed UIs hosted on floci's API Gateway emulator).</li>
+            <li><strong>Lifecycle</strong>: First long-running service to start; last to stop.</li>
+            <li><strong>Plane</strong>: Execution Plane owner.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>8. Capability Matrix</summary><div class="inner">
+          <div class="table-wrap"><table class="matrix">
+            <tbody>
+              <tr><td>Extensibility</td><td><span class="dot dot-4"></span> 4/5 — Quarkus extensions, service modules</td></tr>
+              <tr><td>Portability</td><td><span class="dot dot-5"></span> 5/5 — single native binary, ~40MB</td></tr>
+              <tr><td>Scalability</td><td><span class="dot dot-2"></span> 2/5 — single-process design</td></tr>
+              <tr><td>Offline capability</td><td><span class="dot dot-5"></span> 5/5 — fully offline</td></tr>
+              <tr><td>Observability</td><td><span class="dot dot-2"></span> 2/5 — Quarkus metrics; no CloudWatch-equivalent</td></tr>
+              <tr><td>Enterprise readiness</td><td><span class="dot dot-2"></span> 2/5 — no auth, no multi-tenancy</td></tr>
+              <tr><td>Local-first compat</td><td><span class="dot dot-5"></span> 5/5 — canonical</td></tr>
+              <tr><td>Orchestration compat</td><td><span class="dot dot-4"></span> 4/5 — SDK-compatible</td></tr>
+            </tbody>
+          </table></div>
+        </div></details>
+
+        <details class="collapsible"><summary>9. Architectural Insights</summary><div class="inner">
+          <ul>
+            <li><strong>Hidden advantage</strong>: GraalVM native means floci competes with shell-script-fast tools, not JVM-slow ones.</li>
+            <li><strong>Unusual choice</strong>: Real Docker for Lambda (instead of in-process invoke) buys fidelity at the cost of Docker dependency.</li>
+            <li><strong>Systemic importance</strong>: Without floci, GhostStack has no execution substrate. It is non-replaceable in the stated architecture.</li>
+            <li><strong>Bottleneck</strong>: Single-process scaling ceiling; Docker concurrency dominates at high Lambda fan-out.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>10. Research Notes</summary><div class="inner">
+          <p>Trajectory likely toward (a) clustering mode, (b) richer observability surface (CloudWatch metrics emulation), (c) parity test suite vs real AWS. Maintenance burden grows quadratically with service count — Tier-3/4 services will lag.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ CODEBUFF ============ -->
+      <div id="repo-codebuff" class="repo-section" data-repo="codebuff" style="display:none">
+        <h3>CodebuffAI/codebuff — Multi-Agent Terminal Coding</h3>
+        <div class="section-meta">Role: Control Plane owner · Language: TypeScript / Bun · Agent topology: File Picker → Planner → Editor → Reviewer</div>
+
+        <details class="collapsible" open><summary>1. Repository Overview</summary><div class="inner">
+          <p><strong>Purpose</strong>: Multi-agent CLI that decomposes coding tasks across specialized agents. Reports 61% success on complex benchmarks vs 53% for Claude Code. Spawns hierarchical agents via <code class="inline">spawn_agents</code> primitive.</p>
+          <p><strong>Architectural category</strong>: Agent orchestrator / control plane / code-mutation engine.</p>
+        </div></details>
+
+        <details class="collapsible"><summary>2. Internal Architecture (Inferred)</summary><div class="inner">
+          <ul>
+            <li><strong>Runtime</strong>: Single-process Node/Bun. Generators-as-agents pattern.</li>
+            <li><strong>Agent registry</strong>: Pluggable. Each agent declares (a) system prompt, (b) tool surface, (c) spawn rules.</li>
+            <li><strong>Tool surface</strong>: filesystem (read/write/glob), shell, network (HTTP), spawn_agents (recursive). Browser tools via forked Stagehand integration.</li>
+            <li><strong>Session state</strong>: in-memory turn graph; persisted hooks for claude-mem.</li>
+            <li><strong>Concurrency</strong>: cooperative, single-process; parallel spawn supported but bounded by cost budget.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>3. Technology Stack</summary><div class="inner">
+          <p>TypeScript, Bun/Node, Stagehand fork (browser), generators, custom agent DSL.</p>
+        </div></details>
+
+        <details class="collapsible"><summary>4. Probable Structure</summary><div class="inner">
+<pre class="ascii">
+codebuff/
+├── cli/                  # entry, REPL
+├── agents/
+│   ├── file-picker.ts
+│   ├── planner.ts
+│   ├── editor.ts
+│   ├── reviewer.ts
+│   └── base/             # agent generators
+├── tools/                # fs, shell, http, browser
+├── session/              # turn graph, state
+├── publishers/           # base2 v0.0.9 etc.
+└── adapters/             # LLM clients
+</pre>
+        </div></details>
+
+        <details class="collapsible"><summary>5. Internal Systems</summary><div class="inner">
+          <ul>
+            <li>Planner emits ordered actions; Editor consumes one at a time.</li>
+            <li>Reviewer can <em>reject</em>; rejection re-enters Planner queue.</li>
+            <li>File Picker uses repo-scan heuristics + LLM to short-list files; reduces editor context.</li>
+            <li>Token-budget tracker per session.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>6. AI/LLM Relevance</summary><div class="inner">
+          <p>Central. Every agent is LLM-backed; quality bound to backend LLM quality. The multi-agent decomposition mitigates single-call hallucinations.</p>
+        </div></details>
+
+        <details class="collapsible"><summary>7. GhostStack Integration Role</summary><div class="inner">
+          <ul>
+            <li><strong>Consumes</strong>: spec-kit tasks.md, fcc-proxy LLM completions, codebase, MCP tool calls.</li>
+            <li><strong>Emits</strong>: file diffs, git commits, agent traces (to claude-mem).</li>
+            <li><strong>Plane</strong>: Control Plane.</li>
+          </ul>
+        </div></details>
+
+        <details class="collapsible"><summary>8. Capability Matrix</summary><div class="inner">
+          <div class="table-wrap"><table class="matrix"><tbody>
+            <tr><td>Extensibility</td><td><span class="dot dot-5"></span> 5/5 — custom agents via TypeScript generators</td></tr>
+            <tr><td>Portability</td><td><span class="dot dot-4"></span> 4/5 — npm/bun install</td></tr>
+            <tr><td>Scalability</td><td><span class="dot dot-2"></span> 2/5 — single-process</td></tr>
+            <tr><td>Offline</td><td><span class="dot dot-1"></span> 1/5 — LLM-bound</td></tr>
+            <tr><td>Observability</td><td><span class="dot dot-3"></span> 3/5 — turn logs</td></tr>
+            <tr><td>Enterprise</td><td><span class="dot dot-3"></span> 3/5</td></tr>
+            <tr><td>Local-first compat</td><td><span class="dot dot-3"></span> 3/5 — only via fcc-proxy + Ollama</td></tr>
+            <tr><td>Orchestration compat</td><td><span class="dot dot-5"></span> 5/5 — its central skill</td></tr>
+          </tbody></table></div>
+        </div></details>
+
+        <details class="collapsible"><summary>9. Architectural Insights</summary><div class="inner">
+          <p>The generator-as-agent abstraction is unusually clean — it mixes deterministic control flow with non-deterministic LLM yields. Hidden cost: agent state is implicit in generator stack; debugging requires turn-by-turn replay.</p>
+        </div></details>
+
+        <details class="collapsible"><summary>10. Research Notes</summary><div class="inner">
+          <p>Trajectory: more agent classes, MCP-native tool import, distributed mode. Maintenance burden tied to LLM API churn.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ SPEC-KIT ============ -->
+      <div id="repo-speckit" class="repo-section" data-repo="speckit" style="display:none">
+        <h3>github/spec-kit — Spec-Driven Development Toolkit</h3>
+        <div class="section-meta">Role: Intent Plane owner · Language: Python (Specify CLI, uvx)</div>
+
+        <details class="collapsible" open><summary>1. Overview</summary><div class="inner">
+          <p>Slash-command-driven SDD pipeline: <code class="inline">/speckit.constitution</code>, <code class="inline">/specify</code>, <code class="inline">/plan</code>, <code class="inline">/tasks</code>, <code class="inline">/implement</code>. Generates structured markdown artifacts under <code class="inline">.specify/</code>. Integrates with Claude Code, Copilot, and (in GhostStack) codebuff.</p>
+        </div></details>
+        <details class="collapsible"><summary>2. Architecture</summary><div class="inner">
+          <p>CLI-only, stateless. Reads templates, renders markdown. The "intelligence" is delegated to whatever AI assistant is bound to the slash command. Spec-kit defines the <em>phases</em>; the AI fills the <em>content</em>.</p>
+        </div></details>
+        <details class="collapsible"><summary>3. Tech Stack</summary><div class="inner">
+          <p>Python, uvx (uv tool runner), Jinja templates, markdown parsers.</p>
+        </div></details>
+        <details class="collapsible"><summary>4. Structure</summary><div class="inner">
+<pre class="ascii">
+spec-kit/
+├── specify_cli/
+├── templates/
+│   ├── constitution/
+│   ├── spec/
+│   ├── plan/
+│   └── tasks/
+├── presets/
+└── extensions/
+</pre>
+        </div></details>
+        <details class="collapsible"><summary>5–10. Systems / AI / Role / Capabilities / Insights / Notes</summary><div class="inner">
+          <p>Spec-kit is a <em>discipline-enforcing</em> tool, not a runtime. Its role in GhostStack is to gate codebuff: no implementation without a spec. Hidden advantage: human-readable artifacts persist independently of any LLM — they are the durable knowledge layer.</p>
+          <p>Capability matrix highlights: extensibility 4/5 (presets); offline 5/5; orchestration compat 5/5 — spec-kit is upstream of every workflow.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ FREE-CLAUDE-CODE ============ -->
+      <div id="repo-fcc" class="repo-section" data-repo="fcc" style="display:none">
+        <h3>Alishahryar1/free-claude-code — Anthropic-Compatible LLM Proxy</h3>
+        <div class="section-meta">Role: Inference Plane primary · Language: Python (FastAPI :8082)</div>
+        <details class="collapsible" open><summary>1. Overview</summary><div class="inner">
+          <p>A lightweight FastAPI proxy that intercepts Anthropic-shaped API calls and routes them to free or local backends: NVIDIA NIM (40 req/min free), Kimi K2, DeepSeek, GLM-4, Qwen, Ollama, LM Studio, Cerebras Free, Together Free, Groq. Implements rate limiting, payload normalization (Anthropic ↔ OpenAI ↔ provider-specific), and streaming bridges.</p>
+        </div></details>
+        <details class="collapsible"><summary>2. Architecture</summary><div class="inner">
+          <ul>
+            <li>Request normalizer (Anthropic shape in) → backend adapter (provider-specific out).</li>
+            <li>Token bucket per backend with sliding-window fallback.</li>
+            <li>SSE/streaming pass-through.</li>
+            <li>Stateless — no persistence beyond rate-limit counters.</li>
+          </ul>
+        </div></details>
+        <details class="collapsible"><summary>3–10. Stack / Role / Capabilities</summary><div class="inner">
+          <p>FastAPI + httpx + SSE. In GhostStack, fcc-proxy is the <em>single point of LLM access</em>; every agent funnels through :8082. This is also the choke point for budget enforcement and observability (every prompt/completion logged here). Capability: offline 3/5 (requires backend); orchestration compat 5/5.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ CLOAKBROWSER ============ -->
+      <div id="repo-cloak" class="repo-section" data-repo="cloak" style="display:none">
+        <h3>CloakHQ/CloakBrowser — Stealth Chromium for Automation</h3>
+        <div class="section-meta">Role: Validation Plane owner · Custom Chromium build · CDP via cloakserve</div>
+        <details class="collapsible" open><summary>1–2. Overview / Architecture</summary><div class="inner">
+          <p>Patched Chromium with anti-detection (fingerprint randomization, WebGL/canvas spoofing, navigator property masking). Wraps Playwright/Stagehand-compatible interfaces. Companion <em>CloakBrowser-Manager</em> is a web GUI for profile management. Exposes CDP locally for agent control.</p>
+          <p>Self-hosted alternative to Multilogin/GoLogin/AdsPower category.</p>
+        </div></details>
+        <details class="collapsible"><summary>3–10. Stack / Role</summary><div class="inner">
+          <p>Custom Chromium binary, Python/JS wrappers, Docker deployment. Integrates with browser-use, Crawl4AI, Scrapling, Stagehand, LangChain, Selenium. <strong>Security note (from issues)</strong>: untrusted browser origins can access local CDP — token-gating mandatory in GhostStack. Capability: enterprise 4/5; offline 5/5 for local targets; observability 4/5 (HARs, traces).</p>
+        </div></details>
+      </div>
+
+      <!-- ============ FASTMCP ============ -->
+      <div id="repo-fastmcp" class="repo-section" data-repo="fastmcp" style="display:none">
+        <h3>PrefectHQ/fastmcp — Pythonic MCP Server Framework</h3>
+        <div class="section-meta">Role: Cross-runtime IPC bus owner · Language: Python (with TS sibling @prefecthq/fastmcp-ts)</div>
+        <details class="collapsible" open><summary>1–4. Overview / Architecture</summary><div class="inner">
+          <p>Decorator-driven framework: <code class="inline">@mcp.tool()</code>, <code class="inline">@mcp.resource()</code>, <code class="inline">@mcp.prompt()</code> wrap Python callables into MCP-compliant primitives. Dev UI on :8080; reverse proxy at /mcp forwards to the user's server. Active proposal for router-based composite servers (issue #1494).</p>
+        </div></details>
+        <details class="collapsible"><summary>5–10. Internals / GhostStack Role</summary><div class="inner">
+          <p>In GhostStack, fastmcp is the universal adapter. Every other component is wrapped: floci as <code class="inline">ghoststack-floci</code> MCP server, codebuff as <code class="inline">ghoststack-codebuff</code>, etc. Composite router pattern preferred to avoid 8+ child processes. Capability: extensibility 5/5; orchestration compat 5/5.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ AIRLLM ============ -->
+      <div id="repo-airllm" class="repo-section" data-repo="airllm" style="display:none">
+        <h3>lyogavin/airllm — 70B Inference on 4GB GPU</h3>
+        <div class="section-meta">Role: Local heavy-model reviewer · Language: Python</div>
+        <details class="collapsible" open><summary>1–4. Overview / Architecture</summary><div class="inner">
+          <p>Layer-wise inference: only one transformer layer is resident in GPU VRAM at a time; remaining layers stream from CPU/disk. Enables 70B-class models on 4GB consumer GPUs without quantization or distillation. Throughput: ~1–3 tok/s on consumer hardware.</p>
+        </div></details>
+        <details class="collapsible"><summary>5–10. Role in GhostStack</summary><div class="inner">
+          <p>Acts as the <strong>trust-anchor reviewer</strong> for sensitive code paths (auth flows, crypto, IaC). Its role is intentionally <em>narrow</em>: low throughput is acceptable because review is gated, not inner-loop. Capability: offline 5/5; throughput 1/5; trust 5/5 — code never leaves the host.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ CLAUDE-MEM ============ -->
+      <div id="repo-claudemem" class="repo-section" data-repo="claudemem" style="display:none">
+        <h3>thedotmack/claude-mem — Persistent Memory for Claude Code</h3>
+        <div class="section-meta">Role: Memory Persistence Layer owner</div>
+        <details class="collapsible" open><summary>1–10. Synthesis</summary><div class="inner">
+          <p>Hook-driven plugin for Claude Code. Captures every session, compresses with AI, injects relevant context into subsequent sessions. Beta "Endless Mode" implements a biomimetic memory architecture (chunked, semantically-indexed, with consolidation passes). 46K+ GitHub stars indicate high community validation.</p>
+          <p>In GhostStack: the only cross-session persistence for agent state. Combined with spec-kit's constitution.md, it gives codebuff agents a long-lived "world model" without requiring shared databases. Capability: offline 5/5; observability 3/5; orchestration compat 4/5.</p>
+          <p><strong>Gap</strong>: scoped to Claude Code sessions. Cross-agent (codebuff → Vane → ml-intern) memory propagation is not native; requires explicit fastmcp resource sharing.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ VANE ============ -->
+      <div id="repo-vane" class="repo-section" data-repo="vane" style="display:none">
+        <h3>ItzCrazyKns/Vane — Privacy-Focused Answering Engine</h3>
+        <div class="section-meta">Role: Knowledge Plane retrieval surface · Language: TypeScript (Next.js)</div>
+        <details class="collapsible" open><summary>1–10. Synthesis</summary><div class="inner">
+          <p>Self-hosted RAG-style answering engine. Combines web search + local doc indexing + local or cloud LLM. Supports a wide model catalog (GPT-5, Claude Opus 4.1, Gemini 2.5, plus local providers AIML, Lemonade, LM Studio).</p>
+          <p>In GhostStack: the in-IDE "ask the docs" surface. Indexes the paperless-ngx corpus (architectural diagrams, specs) plus external docs. Capability: extensibility 5/5; offline 4/5 (with local LLM); orchestration compat 4/5 via fastmcp resource.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ SCRAPLING ============ -->
+      <div id="repo-scrapling" class="repo-section" data-repo="scrapling" style="display:none">
+        <h3>D4Vinci/Scrapling — Adaptive Web Scraping Framework</h3>
+        <div class="section-meta">Role: ETL data source · Language: Python · v0.4+</div>
+        <details class="collapsible" open><summary>1–10. Synthesis</summary><div class="inner">
+          <p>Adaptive parser whose selectors survive DOM changes via element fingerprinting. Three-tier fetcher hierarchy: HTTP fetcher (sub-ms, HTTP/3), StealthyFetcher (browser-backed with anti-bot), and spider framework for crawl scale. Bypasses Cloudflare Turnstile out of the box.</p>
+          <p>In GhostStack: generates "real data" sample apps. A spec-kit prompt "build a TODO app" yields a codebuff Editor implementation that uses Scrapling to populate floci-emulated S3 with real scraped content — closing the loop on production-realistic test data. Capability: extensibility 5/5; offline 5/5 for local targets; orchestration compat 4/5.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ ML-INTERN ============ -->
+      <div id="repo-mlintern" class="repo-section" data-repo="mlintern" style="display:none">
+        <h3>huggingface/ml-intern — Autonomous ML Pipeline Agent</h3>
+        <div class="section-meta">Role: ML-specific autonomous agent · Built on smolagents</div>
+        <details class="collapsible" open><summary>1–10. Synthesis</summary><div class="inner">
+          <p>Open-source ML "intern": reads HF papers, writes training code, ships models. Built on Hugging Face's smolagents framework, with deep HF Hub access.</p>
+          <p>In GhostStack: handles spec-kit specs that include ML requirements ("add image classifier"). Trains baseline models, deploys against floci's emulated Bedrock Runtime endpoint. Session traces are uploaded to a HF dataset for community improvement. Capability: extensibility 4/5; offline 3/5 (needs HF + LLM); orchestration compat 3/5.</p>
+        </div></details>
+      </div>
+
+      <!-- ============ PAPERLESS ============ -->
+      <div id="repo-paperless" class="repo-section" data-repo="paperless" style="display:none">
+        <h3>paperless-ngx/paperless-ngx — Document Archive</h3>
+        <div class="section-meta">Role: Architectural archive · Language: Django/Python · Postgres-backed</div>
+        <details class="collapsible" open><summary>1–10. Synthesis</summary><div class="inner">
+          <p>Community-supported document management system: OCR pipeline (Tika/Tesseract), AI-driven auto-tagging, full-text search, versioning. Django + Postgres + Redis + worker pool architecture.</p>
+          <p>In GhostStack: the long-term memory for architectural artifacts. spec-kit emits SVG diagrams; paperless watch-folder ingests; OCR makes them searchable; Vane queries the index. Capability: enterprise 5/5; offline 5/5; observability 5/5; orchestration compat 3/5 (via fastmcp resource).</p>
+        </div></details>
+      </div>
+
+    </section>
+
+    <!-- ========== CROSS-REPO SYNTHESIS ========== -->
+    <section id="cross-overlap">
+      <h2>Cross-Repository Synthesis — Overlaps &amp; Conflicts</h2>
+      <h3 id="cross-overlap-sub">Overlapping Responsibilities</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Capability</th><th>Owners</th><th>Resolution</th></tr></thead>
+          <tbody>
+            <tr><td>Planning</td><td>spec-kit (macro), codebuff Planner (micro)</td><td>Non-overlapping levels — fine</td></tr>
+            <tr><td>Memory</td><td>claude-mem (transcript), Vane (vector), paperless (docs), spec-kit (git)</td><td>Different lifetimes — fine; but no unified query surface</td></tr>
+            <tr><td>LLM routing</td><td>fcc-proxy, Vane internal router, ml-intern internal</td><td><span class="cell-partial">Conflict</span> — three independent routers; budget enforcement fragmented</td></tr>
+            <tr><td>Web automation</td><td>CloakBrowser (runtime), Scrapling (selectors + HTTP)</td><td>Composable — Scrapling can use CloakBrowser as its driver</td></tr>
+            <tr><td>Code review</td><td>codebuff Reviewer, AirLLM Reviewer</td><td>Strategy pattern — AirLLM substitutes for sensitive paths</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="cross-conflicts">Orchestration Conflicts &amp; Coordination Risks</h3>
+      <ol>
+        <li><strong>Dual planners</strong>: spec-kit's <code class="inline">/plan</code> vs codebuff's Planner. Mitigation: spec-kit emits read-only plan; codebuff Planner is constrained to micro-decisions inside spec-kit's task envelope.</li>
+        <li><strong>LLM budget contention</strong>: three independent routers (fcc-proxy, Vane, ml-intern) issue parallel requests to the same NIM keys. Mitigation: route all LLM through fcc-proxy.</li>
+        <li><strong>GPU contention</strong>: AirLLM, Vane embeddings, ml-intern training fight for single GPU. Mitigation: explicit GPU scheduler (or sequential mode).</li>
+        <li><strong>Filesystem race</strong>: claude-mem hooks + codebuff session writes + spec-kit artifact updates can interleave. Mitigation: write barriers; single-writer convention per path.</li>
+      </ol>
+
+      <h3 id="cross-topology">Ideal Runtime Topology</h3>
+      <pre class="ascii">
+   <span class="hl">SUPERVISOR (overmind / Compose)</span>
+        ├── docker-engine
+        ├── postgres (paperless)
+        ├── paperless-web · paperless-workers
+        ├── floci (native binary, :4566)
+        ├── fcc-proxy (:8082) ←─ single LLM ingress
+        ├── airllm-server (:8090, optional)
+        ├── ollama (:11434, optional)
+        ├── vane-web (:3000)
+        ├── <span class="em">fastmcp composite host (:9000)</span>
+        │       └── tool routers:
+        │             /floci  /speckit  /codebuff  /mem
+        │             /vane   /paperless  /browser  /airllm
+        ├── cloakserve (CDP, on demand)
+        └── developer terminal: codebuff · spec-kit · claude-mem
+      </pre>
+      <p>Process boundaries: Docker Compose for the heavy services; native CLIs (codebuff/spec-kit) on the host shell. IPC: HTTP for everything cross-process; fastmcp's stdio/SSE for in-process tool federation. Persistence: floci's own WAL + Postgres (paperless) + filesystem (specs, memory chunks).</p>
+    </section>
+
+    <!-- ========== 31. SYNTHESIS ========== -->
+    <section id="synthesis">
+      <h2>31 · Final System Synthesis</h2>
+
+      <h3>What GhostStack Actually Is</h3>
+      <p>
+        A <strong>federation</strong> — not a platform. Each repository remains a sovereign project with its own release cadence,
+        contributor community, and roadmap. GhostStack's value is the <em>composition pattern</em>: which repositories occupy
+        which planes, and what minimum glue (fastmcp wrappers + a supervisor + a budget proxy + a shared archive) is required to
+        make them cooperate.
+      </p>
+
+      <h3>Architectural Confidence Levels</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Claim</th><th>Confidence</th><th>Basis</th></tr></thead>
+          <tbody>
+            <tr><td>Each component exists and works in isolation</td><td><span class="badge badge-emerald">Very High</span></td><td>All 12 repos are public, active, documented</td></tr>
+            <tr><td>floci can replace AWS for development</td><td><span class="badge badge-emerald">High</span></td><td>47-service surface, real Docker for Lambda</td></tr>
+            <tr><td>MCP federation makes them cooperate</td><td><span class="badge badge-amber">Medium-High</span></td><td>fastmcp is mature; per-tool wrappers must be authored</td></tr>
+            <tr><td>The system is local-first end-to-end</td><td><span class="badge badge-emerald">High</span></td><td>With Ollama/AirLLM, no external runtime call required</td></tr>
+            <tr><td>floci mirror mode achieves zero code drift</td><td><span class="badge badge-amber">Medium</span></td><td>Claim is structurally sound; needs parity test suite</td></tr>
+            <tr><td>Multi-agent loops converge reliably</td><td><span class="badge badge-amber">Medium</span></td><td>Reviewer reject loops need explicit budget</td></tr>
+            <tr><td>Cross-agent memory is unified</td><td><span class="badge badge-rose">Low</span></td><td>Genuine gap; requires shared semantic store</td></tr>
+            <tr><td>Scales beyond single workstation</td><td><span class="badge badge-rose">Low</span></td><td>Not designed for it</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Strongest Architectural Advantages</h3>
+      <ol>
+        <li>Zero recurring cost — no SaaS, no AWS, no Anthropic billing.</li>
+        <li>Spec-as-contract — every artifact traces to a versioned spec.</li>
+        <li>MCP as universal bus — bets on a public standard, future-proofs the federation.</li>
+        <li>floci's drop-in AWS SDK compatibility — protocol-level (not driver-level) abstraction.</li>
+        <li>Heterogeneous reviewers (cloud + AirLLM local) — defense in depth for sensitive code.</li>
+        <li>Spec-driven gating prevents agent runaway — codebuff's planner operates inside spec-kit's envelope.</li>
+      </ol>
+
+      <h3>Weakest Architectural Assumptions</h3>
+      <ol>
+        <li>That markdown is a sufficient inter-tool schema (spec-kit → codebuff).</li>
+        <li>That MCP wrappers will be authored for every repo (work item, not a given).</li>
+        <li>That a single GPU can serve AirLLM + Vane + ml-intern (it cannot — scheduler required).</li>
+        <li>That claude-mem hooks alone are sufficient cross-agent memory (they are not).</li>
+        <li>That FLOCI_MODE=mirror parity holds for Tier-3/4 services (unverified).</li>
+        <li>That a 70B local model is fast enough for inner-loop review (it is not — gated review only).</li>
+      </ol>
+
+      <h3>Highest-Risk Integrations</h3>
+      <ol>
+        <li>spec-kit ↔ codebuff (prompt-string coupling)</li>
+        <li>claude-mem ↔ codebuff session (hook API)</li>
+        <li>Reviewer reject ↔ Planner re-plan (unbounded loop)</li>
+        <li>fcc-proxy ↔ external free providers (terms-of-service drift)</li>
+        <li>CloakBrowser CDP ↔ untrusted local origins (security)</li>
+      </ol>
+
+      <h3>Likely Scaling Bottlenecks</h3>
+      <ol>
+        <li>LLM throughput (NIM 40 rpm)</li>
+        <li>AirLLM 1–3 tok/s on consumer GPU</li>
+        <li>Docker Lambda cold-start fan-out</li>
+        <li>Single-GPU contention across AirLLM/Vane/ml-intern</li>
+        <li>fastmcp tool-call hop accumulation</li>
+      </ol>
+
+      <h3>Operational Feasibility</h3>
+      <p>
+        Feasible on a <strong>32GB RAM / single mid-range GPU / 200GB free disk</strong> workstation. Feasible to bring up in
+        a single Compose-file plus three native CLIs (codebuff, spec-kit, claude-mem on the host). Boot time ~30s warm.
+        Daily operational burden: monitoring 14 long-running processes, rotating LLM backend keys, and managing GPU exclusivity.
+      </p>
+
+      <h3>Maintainability Outlook</h3>
+      <p>
+        Twelve independent maintainers means twelve risk vectors. Three (Scrapling, AirLLM, claude-mem) have single-maintainer
+        bus-factor. floci is a heavyweight ongoing investment. The architecture itself is resilient to swap-outs at most planes —
+        only floci is non-replaceable. With a pinned compatibility matrix and quarterly upgrade cadence, the federation is maintainable.
+      </p>
+
+      <h3>Production Realism Assessment</h3>
+      <p>
+        As a <strong>development lab</strong> — production-realistic. Developers can author, deploy, test, and iterate on
+        full-fidelity cloud applications without an AWS account. As a <strong>production runtime</strong> — explicitly not.
+        Mirror mode is the production bridge. The interesting question is whether floci's parity is good enough that mirror flips
+        succeed without surprise. That requires a contract test suite that does not yet exist.
+      </p>
+
+      <h3>Local Hardware Feasibility</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Hardware</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>16GB RAM, no GPU</td><td><span class="badge badge-rose">Unviable</span> — AirLLM impractical, Vane embed slow</td></tr>
+            <tr><td>32GB RAM, 4GB GPU</td><td><span class="badge badge-amber">Viable (slow review)</span> — AirLLM works at 1 tok/s</td></tr>
+            <tr><td>32GB RAM, 12GB GPU</td><td><span class="badge badge-emerald">Comfortable</span> — AirLLM ~3 tok/s, Vane fast</td></tr>
+            <tr><td>64GB RAM, 24GB GPU</td><td><span class="badge badge-emerald">Optimal</span> — concurrent ml-intern training feasible</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="hr-soft">
+
+      <h3>Overall Verdict</h3>
+      <div class="callout ok">
+        <span class="callout-title">Verdict — GhostStack is Architecturally Viable as a Federation</span>
+        The composition is sound. Every plane has a real, working open-source owner. The federation pattern is realistic and the
+        binding standard (MCP) is the correct bet. The remaining work is integration engineering — primarily fastmcp wrappers,
+        a unified supervisor, a budget proxy, and a parity test suite for floci. These are tractable, not foundational, problems.
+        GhostStack will not scale beyond a single workstation without re-architecture, but as a <em>spec-driven autonomous local
+        cloud lab</em> for a single developer or small team, it is one of the most architecturally coherent open-source
+        compositions currently assemblable.
+      </div>
+
+      <div class="callout">
+        <span class="callout-title">Final Architectural Confidence</span>
+        <strong>B+ / 4.0 of 5.0.</strong> Strong on coherence, locality, and cost. Weak on cross-agent memory, mirror-mode parity verification,
+        and multi-host scaling. None of the weaknesses are foundational; all are addressable with named, scoped work items.
+      </div>
+
+    </section>
+
+    <footer style="text-align:center;color:#94a3b8;font-size:12px;padding:30px 0">
+      GhostStack Architecture Intelligence Dossier · Generated as a single self-contained HTML document · No external assets, no CDNs
+    </footer>
+
+  </main>
+</div>
+
+<script>
+/* ============ SEARCH FILTER ============ */
+(function(){
+  const s = document.getElementById('navSearch');
+  if(!s) return;
+  s.addEventListener('input', e=>{
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.nav a').forEach(a=>{
+      const t = a.textContent.toLowerCase();
+      a.style.display = (!q || t.includes(q)) ? '' : 'none';
+    });
+  });
+})();
+
+/* ============ SCROLLSPY ============ */
+(function(){
+  const links = document.querySelectorAll('.nav a');
+  const sections = Array.from(document.querySelectorAll('section[id]'));
+  function onScroll(){
+    const y = window.scrollY + 100;
+    let active = null;
+    for(const sec of sections){
+      if(sec.offsetTop <= y) active = sec.id;
+    }
+    links.forEach(a=>{
+      const hash = a.getAttribute('href').slice(1);
+      a.classList.toggle('active', hash === active);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
+/* ============ REPO CARD TABS ============ */
+(function(){
+  const cards = document.querySelectorAll('.repo-card');
+  const sections = document.querySelectorAll('.repo-section');
+  cards.forEach(c=>{
+    c.addEventListener('click', ()=>{
+      const id = c.dataset.repo;
+      cards.forEach(x=>x.classList.toggle('active', x===c));
+      sections.forEach(s=>s.style.display = (s.dataset.repo===id) ? '' : 'none');
+      // scroll into view
+      const tgt = document.getElementById('repo-'+id);
+      if(tgt) tgt.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+})();
+
+/* ============ Auto-expand details when anchored ============ */
+(function(){
+  window.addEventListener('hashchange', ()=>{
+    const id = location.hash.slice(1);
+    const el = document.getElementById(id);
+    if(el){
+      el.querySelectorAll('details.collapsible').forEach((d,i)=>{
+        if(i===0) d.open = true;
+      });
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
