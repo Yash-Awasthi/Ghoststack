@@ -18,4 +18,5 @@ export interface IQueueBackend {
   moveToDeadLetter(job: QueueJob, error: string): Promise<void>;
   getDeadLetterQueue(): Promise<QueueJob[]>;
   getQueueLength(): Promise<number>;
+  getActiveJobs(): Promise<QueueJob[]>;
 }

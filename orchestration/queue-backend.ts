@@ -47,4 +47,8 @@ export class MemoryQueueBackend implements IQueueBackend {
   async getQueueLength(): Promise<number> {
     return this.activeQueue.length;
   }
+
+  async getActiveJobs(): Promise<QueueJob[]> {
+    return [...this.activeQueue];
+  }
 }
