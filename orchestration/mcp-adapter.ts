@@ -7,6 +7,7 @@ export class MCPRuntime implements IMCPRuntime {
   private metricsCollector?: IMetricsCollector;
   private tracer?: ITraceRecorder;
   private executionsLog: IMCPExecutionResult[] = [];
+  private blocklist: Set<string>;
 
   // Metrics parameters
   private totalInvocations = 0;
@@ -18,11 +19,20 @@ export class MCPRuntime implements IMCPRuntime {
   constructor(
     registry: IMCPServerRegistry,
     metricsCollector?: IMetricsCollector,
-    tracer?: ITraceRecorder
+    tracer?: ITraceRecorder,
+    customBlocklist?: string[]
   ) {
     this.registry = registry;
     this.metricsCollector = metricsCollector;
     this.tracer = tracer;
+    this.blocklist = new Set(customBlocklist || [
+      'shell_execute',
+      'execute_command',
+      'write_system_file',
+      'eval',
+      'delete_directory',
+      'rmrf'
+    ]);
   }
 
   async executeTask(task: IMCPTask): Promise<IMCPExecutionResult> {
@@ -36,6 +46,25 @@ export class MCPRuntime implements IMCPRuntime {
       toolName: task.toolName,
       correlationId: task.correlationId
     });
+
+    // 1. Tool Blocklist Validation
+    if (this.blocklist.has(task.toolName)) {
+      this.totalFailures++;
+      this.metricsCollector?.increment("mcp.failures");
+
+      const res: IMCPExecutionResult = {
+        success: false,
+        error: `Tool execution blocked by safety policy: ${task.toolName}`,
+        durationMs: Date.now() - startTimeMs,
+        correlationId: task.correlationId
+      };
+
+      this.executionsLog.push(res);
+      if (traceSpan) {
+        this.tracer?.endSpan(traceSpan.spanId, { status: "failed", error: res.error });
+      }
+      return res;
+    }
 
     const serverEntry = await this.registry.getServer(task.serverName);
     if (!serverEntry) {

@@ -45,6 +45,7 @@ export class FileEventStore implements IEventStore {
 
 export class FileRuntimePersistence implements IRuntimePersistence {
   private filePath: string;
+  private writeQueue: Promise<void> = Promise.resolve();
 
   constructor(filePath: string) {
     this.filePath = filePath;
@@ -71,23 +72,32 @@ export class FileRuntimePersistence implements IRuntimePersistence {
   }
 
   private writeState(state: Record<string, any>) {
-    fs.writeFileSync(this.filePath, JSON.stringify(state, null, 2), 'utf8');
+    const tempPath = `${this.filePath}.tmp`;
+    fs.writeFileSync(tempPath, JSON.stringify(state, null, 2), 'utf8');
+    fs.renameSync(tempPath, this.filePath);
   }
 
   async saveState(key: string, state: any): Promise<void> {
-    const current = this.readState();
-    current[key] = state;
-    this.writeState(current);
+    this.writeQueue = this.writeQueue.then(() => {
+      const current = this.readState();
+      current[key] = state;
+      this.writeState(current);
+    }).catch(() => {});
+    return this.writeQueue;
   }
 
   async getState<T>(key: string): Promise<T | undefined> {
+    await this.writeQueue;
     const current = this.readState();
     return current[key] as T;
   }
 
   async clearState(key: string): Promise<void> {
-    const current = this.readState();
-    delete current[key];
-    this.writeState(current);
+    this.writeQueue = this.writeQueue.then(() => {
+      const current = this.readState();
+      delete current[key];
+      this.writeState(current);
+    }).catch(() => {});
+    return this.writeQueue;
   }
 }

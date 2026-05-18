@@ -1,5 +1,6 @@
 import { IBrowserExecutionAdapter, IBrowserTask, IEnvironmentTelemetry } from './interfaces/environment.interface';
 import { IExecutionContext } from './interfaces/execution.interface';
+import { isSafeUrl } from './security-utils';
 
 export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
   constructor(
@@ -27,7 +28,7 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
     logs.push(`Initiating browser task execution for: ${task.url}`);
     
     // Safety Policy verification
-    if (task.url.startsWith("file://") || task.url.includes("169.254.169.254")) {
+    if (!isSafeUrl(task.url)) {
       logs.push(`Safety Policy Block: Forbidden URL protocol/host: ${task.url}`);
       return {
         success: false,
@@ -56,7 +57,7 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
       for (const action of task.actions) {
         logs.push(`Executing interactive event: ${action.type} (Selector: ${action.selector || 'none'})`);
         if (action.type === 'navigate' && action.value) {
-          if (action.value.startsWith("file://") || action.value.includes("169.254.169.254")) {
+          if (!isSafeUrl(action.value)) {
             this.telemetry.browserSessionsActive -= 1;
             logs.push(`Safety Policy Block: Forbidden redirect URL: ${action.value}`);
             return {
@@ -78,7 +79,7 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
       };
     }
 
-    // High fidelity production Playwright integration
+    // High fidelity production Playwright integration with active request filtering
     try {
       const { chromium } = require('playwright');
       const browser = await chromium.launch({ headless: true });
@@ -87,6 +88,17 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
 
       logs.push("Real chromium browser context initiated.");
       
+      // Route intercepting to prevent DNS rebinding or in-page malicious redirects
+      await page.route('**/*', (route: any) => {
+        const reqUrl = route.request().url();
+        if (!isSafeUrl(reqUrl)) {
+          logs.push(`In-page redirect / asset load blocked by safety policy: ${reqUrl}`);
+          route.abort('blockedbyclient');
+        } else {
+          route.continue();
+        }
+      });
+
       const loadPromise = page.goto(task.url);
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error(`Timeout of ${task.timeoutMs}ms breached.`)), task.timeoutMs)

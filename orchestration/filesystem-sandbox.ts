@@ -1,4 +1,5 @@
 import { IFilesystemSandbox, ISandboxConstraint } from './interfaces/environment.interface';
+import { isSafeSandboxPath } from './security-utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -9,9 +10,7 @@ export class SandboxConstraint implements ISandboxConstraint {
   ) {}
 
   validateWrite(filePath: string, contentSize: number, currentTotal: number): boolean {
-    const resolved = path.resolve(filePath);
-    const resolvedPrefix = path.resolve(this.allowedPathPrefix);
-    if (!resolved.startsWith(resolvedPrefix)) {
+    if (!isSafeSandboxPath(this.allowedPathPrefix, filePath)) {
       return false;
     }
     if (currentTotal + contentSize > this.maxWriteBytes) {
@@ -36,8 +35,7 @@ export class FilesystemSandbox implements IFilesystemSandbox {
 
   async createDirectory(pathSegment: string): Promise<string> {
     const targetDir = path.resolve(path.join(this.sandboxDir, pathSegment));
-    const resolvedPrefix = path.resolve(this.constraint.allowedPathPrefix);
-    if (!targetDir.startsWith(resolvedPrefix)) {
+    if (!isSafeSandboxPath(this.constraint.allowedPathPrefix, targetDir)) {
       throw new Error(`Sandbox Path violation: Cannot create directory outside bounds: ${targetDir}`);
     }
     if (!fs.existsSync(targetDir)) {
@@ -70,8 +68,7 @@ export class FilesystemSandbox implements IFilesystemSandbox {
 
   async readFile(filePath: string): Promise<string> {
     const targetFile = path.resolve(filePath);
-    const resolvedPrefix = path.resolve(this.constraint.allowedPathPrefix);
-    if (!targetFile.startsWith(resolvedPrefix)) {
+    if (!isSafeSandboxPath(this.constraint.allowedPathPrefix, targetFile)) {
       throw new Error(`Sandbox Read violation: Path isolation bounds breached: ${targetFile}`);
     }
     if (!fs.existsSync(targetFile)) {
@@ -82,8 +79,7 @@ export class FilesystemSandbox implements IFilesystemSandbox {
 
   async deleteFile(filePath: string): Promise<void> {
     const targetFile = path.resolve(filePath);
-    const resolvedPrefix = path.resolve(this.constraint.allowedPathPrefix);
-    if (!targetFile.startsWith(resolvedPrefix)) {
+    if (!isSafeSandboxPath(this.constraint.allowedPathPrefix, targetFile)) {
       throw new Error(`Sandbox Delete violation: Path isolation bounds breached: ${targetFile}`);
     }
     if (fs.existsSync(targetFile)) {

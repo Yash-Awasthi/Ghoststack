@@ -1,5 +1,6 @@
 import { IScrapingExecutionAdapter, IScrapingTask, IEnvironmentTelemetry } from './interfaces/environment.interface';
 import { IExecutionContext } from './interfaces/execution.interface';
+import { isSafeUrl } from './security-utils';
 
 export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
   constructor(
@@ -35,7 +36,7 @@ export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
     const data: Record<string, string> = {};
 
     // Safety checks: restrict recursive parsing of non-http destinations
-    if (task.url.startsWith("file://") || task.url.includes("169.254.169.254")) {
+    if (!isSafeUrl(task.url)) {
       return {
         success: false,
         data: { error: "BLOCKED_BY_SAFETY_POLICY" },
