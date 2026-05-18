@@ -1,0 +1,21 @@
+export interface RetryPolicy {
+  maxRetries: number;
+  backoffFactorMs: number;
+}
+
+export interface QueueJob<T = any> {
+  id: string;
+  payload: T;
+  priority: 'low' | 'medium' | 'high';
+  retries: number;
+  maxRetries: number;
+  createdAt: Date;
+}
+
+export interface IQueueBackend {
+  push(job: QueueJob): Promise<void>;
+  pop(): Promise<QueueJob | undefined>;
+  moveToDeadLetter(job: QueueJob, error: string): Promise<void>;
+  getDeadLetterQueue(): Promise<QueueJob[]>;
+  getQueueLength(): Promise<number>;
+}

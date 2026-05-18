@@ -4,7 +4,10 @@ import { LocalAgentRegistry, Agent } from '../orchestration/agent-registry';
 import { RuntimeManager } from '../orchestration/runtime-manager';
 import { YAMLConfigLoader } from '../runtime/config-loader';
 import { GhostStackOrchestrator } from '../runtime/orchestrator';
+import { FileEventStore } from '../orchestration/persistence-manager';
+import { StructuredLogger } from '../orchestration/logger';
 import * as path from 'path';
+import * as fs from 'fs';
 
 describe("Event Bus & Task Routing Pipeline", () => {
   it("should process and route agent tasks with dependency resolution", async () => {
@@ -59,8 +62,23 @@ describe("Agent Registry Operations", () => {
   });
 });
 
-describe("GhostStack Orchestrator Integration", () => {
-  it("should successfully bootstrap and retrieve active services", async () => {
+describe("GhostStack Orchestrator Crash Recovery & Core Integration", () => {
+  const testDir = path.join(__dirname, '../temp-integration-db');
+  const eventLogPath = path.join(testDir, 'integration_events.jsonl');
+
+  beforeEach(() => {
+    if (!fs.existsSync(testDir)) {
+      fs.mkdirSync(testDir, { recursive: true });
+    }
+  });
+
+  afterEach(() => {
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should boot, record task routes persistently, and reconstruct queue after cold restart", async () => {
     const loader = new YAMLConfigLoader({
       portsPath: path.join(__dirname, '../runtime/ports.yaml'),
       servicesPath: path.join(__dirname, '../runtime/services.yaml'),
@@ -70,15 +88,46 @@ describe("GhostStack Orchestrator Integration", () => {
 
     const rm = new RuntimeManager(loader);
     const bus = new LocalEventBus();
-    const router = new TaskRouter(bus);
+    const eventStore = new FileEventStore(eventLogPath);
+    const router = new TaskRouter(bus, eventStore);
     const registry = new LocalAgentRegistry();
+    const logger = new StructuredLogger();
 
-    const orchestrator = new GhostStackOrchestrator(rm, bus, router, registry);
-    const activeServices = await orchestrator.start();
+    // 1. Initial boot and route a task
+    const orchestrator1 = new GhostStackOrchestrator(rm, bus, router, registry, eventStore, logger);
+    await orchestrator1.start();
 
-    expect(activeServices).toBeDefined();
-    expect(activeServices).toContain("floci");
-    expect(activeServices).toContain("fcc");
-    expect(activeServices).toContain("mcp");
+    const task: Task = {
+      id: "task-durable-01",
+      title: "Write Specs",
+      description: "Generate kit layout",
+      priority: "medium",
+      status: "pending",
+      dependencies: []
+    };
+
+    await router.route(task);
+    expect(router.getQueue().length).toBe(1);
+
+    // 2. Simulate Cold Crash / Restart by creating a completely fresh memory context
+    const freshBus = new LocalEventBus();
+    // Use the exact same persistent event store log
+    const sameEventStore = new FileEventStore(eventLogPath);
+    const freshRouter = new TaskRouter(freshBus, sameEventStore);
+    const freshRegistry = new LocalAgentRegistry();
+
+    const orchestrator2 = new GhostStackOrchestrator(rm, freshBus, freshRouter, freshRegistry, sameEventStore, logger);
+    
+    // Assert queue is empty before boot recovery
+    expect(freshRouter.getQueue().length).toBe(0);
+
+    // 3. Boot new orchestrator and verify recovery
+    await orchestrator2.start();
+    
+    // Queue should be restored from historical log!
+    const restoredQueue = freshRouter.getQueue();
+    expect(restoredQueue.length).toBe(1);
+    expect(restoredQueue[0].id).toBe("task-durable-01");
+    expect(restoredQueue[0].title).toBe("Write Specs");
   });
 });
