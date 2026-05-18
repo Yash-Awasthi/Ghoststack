@@ -4,6 +4,7 @@ import { IQueueBackend } from './interfaces/queue.interface';
 import { IServiceDiscovery } from './interfaces/discovery.interface';
 import { IEventStore } from './interfaces/persistence.interface';
 import { IMCPRuntime, IMCPServerRegistry } from './interfaces/mcp.interface';
+import { IGovernanceEngine, IApprovalWorkflow, ICognitiveTrace } from './interfaces/governance.interface';
 
 export class RuntimeInspector implements IRuntimeInspector {
   private metrics: IMetricsCollector;
@@ -12,6 +13,9 @@ export class RuntimeInspector implements IRuntimeInspector {
   private eventStore: IEventStore;
   private mcpRuntime?: IMCPRuntime;
   private mcpRegistry?: IMCPServerRegistry;
+  private governanceEngine?: IGovernanceEngine;
+  private approvalWorkflow?: IApprovalWorkflow;
+  private plansLog: ICognitiveTrace[] = [];
   private bootTime = new Date();
 
   constructor(
@@ -20,7 +24,9 @@ export class RuntimeInspector implements IRuntimeInspector {
     discovery: IServiceDiscovery,
     eventStore: IEventStore,
     mcpRuntime?: IMCPRuntime,
-    mcpRegistry?: IMCPServerRegistry
+    mcpRegistry?: IMCPServerRegistry,
+    governanceEngine?: IGovernanceEngine,
+    approvalWorkflow?: IApprovalWorkflow
   ) {
     this.metrics = metrics;
     this.queue = queue;
@@ -28,6 +34,8 @@ export class RuntimeInspector implements IRuntimeInspector {
     this.eventStore = eventStore;
     this.mcpRuntime = mcpRuntime;
     this.mcpRegistry = mcpRegistry;
+    this.governanceEngine = governanceEngine;
+    this.approvalWorkflow = approvalWorkflow;
   }
 
   async getHealth(): Promise<any> {
@@ -143,6 +151,39 @@ export class RuntimeInspector implements IRuntimeInspector {
     return this.mcpRuntime ? await this.mcpRuntime.getExecutionsLog() : [];
   }
 
+  // Cognitive Governance Endpoints
+  async getGovernanceInfo(): Promise<any> {
+    if (!this.governanceEngine) return {};
+    const engine = this.governanceEngine as any;
+    return {
+      constraints: engine.getConstraints ? engine.getConstraints().map((c: any) => c.name) : [],
+      policies: engine.getPolicies ? engine.getPolicies().map((p: any) => p.name) : [],
+      guardrails: engine.getGuardrails ? engine.getGuardrails().map((g: any) => g.name) : []
+    };
+  }
+
+  async getApprovalsList(): Promise<any[]> {
+    return this.approvalWorkflow ? await this.approvalWorkflow.listRecords() : [];
+  }
+
+  async getPlansList(): Promise<ICognitiveTrace[]> {
+    return [...this.plansLog];
+  }
+
+  async getGuardrailsInfo(): Promise<any> {
+    if (!this.governanceEngine) return {};
+    const engine = this.governanceEngine as any;
+    const guardrails = engine.getGuardrails ? engine.getGuardrails() : [];
+    return {
+      activeGuardrailsCount: guardrails.length,
+      stormThreshold: 5
+    };
+  }
+
+  recordPlan(plan: ICognitiveTrace): void {
+    this.plansLog.push(plan);
+  }
+
   async getSnapshots(): Promise<any> {
     return {
       timestamp: new Date(),
@@ -152,7 +193,8 @@ export class RuntimeInspector implements IRuntimeInspector {
       services: await this.getServices(),
       events: await this.getEvents(),
       tasks: await this.getTasks(),
-      mcp: await this.getMCPSummary()
+      mcp: await this.getMCPSummary(),
+      governance: await this.getGovernanceInfo()
     };
   }
 }

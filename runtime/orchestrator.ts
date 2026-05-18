@@ -8,6 +8,7 @@ import { TaskDependencyResolver } from '../orchestration/dependency-resolver';
 import { MemoryQueueBackend } from '../orchestration/queue-backend';
 import { TaskExecutor } from '../orchestration/task-executor';
 import { IMetricsCollector, ITraceRecorder } from '../orchestration/interfaces/observability.interface';
+import { IPlanningEngine, IGovernanceEngine, IApprovalWorkflow } from '../orchestration/interfaces/governance.interface';
 
 export class GhostStackOrchestrator {
   private runtimeManager: IRuntimeManager;
@@ -24,6 +25,12 @@ export class GhostStackOrchestrator {
   private tracer?: ITraceRecorder;
   private bootTime = new Date();
 
+  // Cognitive Governance Engines
+  private planningEngine?: IPlanningEngine;
+  private governanceEngine?: IGovernanceEngine;
+  private approvalWorkflow?: IApprovalWorkflow;
+  private inspector?: any;
+
   constructor(
     runtimeManager: IRuntimeManager,
     eventBus: IEventBus,
@@ -34,7 +41,11 @@ export class GhostStackOrchestrator {
     queue?: MemoryQueueBackend,
     executor?: TaskExecutor,
     metrics?: IMetricsCollector,
-    tracer?: ITraceRecorder
+    tracer?: ITraceRecorder,
+    planningEngine?: IPlanningEngine,
+    governanceEngine?: IGovernanceEngine,
+    approvalWorkflow?: IApprovalWorkflow,
+    inspector?: any
   ) {
     this.runtimeManager = runtimeManager;
     this.eventBus = eventBus;
@@ -48,6 +59,11 @@ export class GhostStackOrchestrator {
     this.resolver = new TaskDependencyResolver();
     this.queue = queue || new MemoryQueueBackend();
     this.executor = executor;
+
+    this.planningEngine = planningEngine;
+    this.governanceEngine = governanceEngine;
+    this.approvalWorkflow = approvalWorkflow;
+    this.inspector = inspector;
   }
 
   async start(): Promise<string[]> {
@@ -123,6 +139,60 @@ export class GhostStackOrchestrator {
     if (traceSpan) {
       this.tracer?.endSpan(traceSpan.spanId, { status: "success" });
     }
+  }
+
+  async submitCognitiveObjective(objective: string): Promise<{ planId: string; allowed: boolean; reason?: string }> {
+    if (!this.planningEngine || !this.governanceEngine) {
+      throw new Error("Cognitive Planning and Governance systems are not registered in the Orchestrator.");
+    }
+
+    const plan = await this.planningEngine.generatePlan(objective);
+    if (this.inspector && typeof this.inspector.recordPlan === 'function') {
+      this.inspector.recordPlan(plan);
+    }
+
+    // 1. Evaluate plan through global guardrails
+    const planEval = await this.governanceEngine.evaluatePlan(plan);
+    if (!planEval.allowed) {
+      return { planId: plan.planId, allowed: false, reason: planEval.reason };
+    }
+
+    let hasPendingApprovals = false;
+    const tasksToExecute: Task[] = [];
+
+    // 2. Validate individual synthesized tasks
+    for (const synth of plan.synthesisResults) {
+      const taskEval = await this.governanceEngine.evaluateTask(synth);
+      if (!taskEval.allowed) {
+        return { planId: plan.planId, allowed: false, reason: taskEval.reason };
+      }
+
+      if (taskEval.requiresApproval) {
+        hasPendingApprovals = true;
+        if (this.approvalWorkflow) {
+          await this.approvalWorkflow.createRequest(synth.taskId);
+        }
+      }
+
+      tasksToExecute.push({
+        id: synth.taskId,
+        title: synth.action,
+        description: `${synth.action} with ${JSON.stringify(synth.arguments)}`,
+        priority: synth.priority,
+        status: taskEval.requiresApproval ? "pending_approval" : "pending",
+        dependencies: synth.dependencies
+      });
+    }
+
+    // 3. Dispatch execution ONLY if there are no safety approval blocks pending
+    if (!hasPendingApprovals) {
+      await this.submitAndExecuteTasks(tasksToExecute);
+    }
+
+    return {
+      planId: plan.planId,
+      allowed: true
+    };
   }
 
   getQueue(): MemoryQueueBackend {

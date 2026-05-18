@@ -37,6 +37,17 @@ export class RuntimeDiagnosticAPI {
         return (this.inspector as any).getMCPTools ? (this.inspector as any).getMCPTools() : [];
       case '/runtime/mcp/executions':
         return (this.inspector as any).getMCPExecutions ? (this.inspector as any).getMCPExecutions() : [];
+      
+      // Phase 6 Cognitive Governance Endpoints
+      case '/runtime/governance':
+        return (this.inspector as any).getGovernanceInfo ? (this.inspector as any).getGovernanceInfo() : {};
+      case '/runtime/approvals':
+        return (this.inspector as any).getApprovalsList ? (this.inspector as any).getApprovalsList() : [];
+      case '/runtime/plans':
+        return (this.inspector as any).getPlansList ? (this.inspector as any).getPlansList() : [];
+      case '/runtime/guardrails':
+        return (this.inspector as any).getGuardrailsInfo ? (this.inspector as any).getGuardrailsInfo() : {};
+
       default:
         throw new Error(`Not Found: ${path}`);
     }
