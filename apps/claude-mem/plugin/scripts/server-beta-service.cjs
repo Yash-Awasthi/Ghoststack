@@ -25634,15 +25634,13 @@ var ae,
                   includePayload: l,
                   requestId: i.requestId ?? null
                 }),
-                  s
-                    .status(200)
-                    .json({
-                      jobs: g.map((I) => _b(I, { includePayload: l })),
-                      total: x,
-                      limit: m,
-                      offset: y,
-                      requestId: i.requestId ?? null
-                    }));
+                  s.status(200).json({
+                    jobs: g.map((I) => _b(I, { includePayload: l })),
+                    total: x,
+                    limit: m,
+                    offset: y,
+                    requestId: i.requestId ?? null
+                  }));
               } catch (g) {
                 this.handleDbError(g, s, "jobs.list");
               }
@@ -25686,14 +25684,12 @@ var ae,
               let o = this.routeParam(i.params.id),
                 c = await this.retryGenerationJob(i, s, o, a);
               c &&
-                s
-                  .status(200)
-                  .json({
-                    generationJob: Ab(c.job),
-                    retriedCount: c.retriedCount,
-                    alreadyQueued: c.alreadyQueued,
-                    requestId: i.requestId ?? null
-                  });
+                s.status(200).json({
+                  generationJob: Ab(c.job),
+                  retriedCount: c.retriedCount,
+                  alreadyQueued: c.alreadyQueued,
+                  requestId: i.requestId ?? null
+                });
             })
           ),
           e.post(
@@ -25705,13 +25701,11 @@ var ae,
               let o = this.routeParam(i.params.id),
                 c = await this.cancelGenerationJob(i, s, o, a);
               c &&
-                s
-                  .status(200)
-                  .json({
-                    generationJob: Ab(c.job),
-                    alreadyCancelled: c.alreadyCancelled,
-                    requestId: i.requestId ?? null
-                  });
+                s.status(200).json({
+                  generationJob: Ab(c.job),
+                  alreadyCancelled: c.alreadyCancelled,
+                  requestId: i.requestId ?? null
+                });
             })
           ),
           e.post(
@@ -26108,22 +26102,18 @@ var ae,
           );
         if (c.status === "processing")
           return (
-            t
-              .status(409)
-              .json({
-                error: "Conflict",
-                message: "Generation job is currently processing; cancel or wait for completion before retrying"
-              }),
+            t.status(409).json({
+              error: "Conflict",
+              message: "Generation job is currently processing; cancel or wait for completion before retrying"
+            }),
             null
           );
         if (c.status === "completed")
           return (
-            t
-              .status(409)
-              .json({
-                error: "Conflict",
-                message: "Generation job already completed; retrying would duplicate observations"
-              }),
+            t.status(409).json({
+              error: "Conflict",
+              message: "Generation job already completed; retrying would duplicate observations"
+            }),
             null
           );
         let l = wK(c.payload) + 1,

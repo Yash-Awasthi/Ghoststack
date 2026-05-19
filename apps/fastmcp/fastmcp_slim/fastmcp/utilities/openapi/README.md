@@ -17,16 +17,19 @@ The implementation follows a **stateless request building strategy** using `open
 ### Key Architecture Principles
 
 #### 1. Stateless Request Building
+
 - Uses `openapi-core` library for robust OpenAPI parameter serialization
 - Builds HTTP requests on-demand with zero startup latency
 - Offloads OpenAPI compliance to a well-tested library without code generation overhead
 
 #### 2. Pre-calculated Optimization
+
 - **Schema Pre-calculation**: Combined schemas calculated once during parsing
 - **Parameter Mapping**: Collision resolution mapping calculated upfront
 - **Zero Runtime Overhead**: All complex processing done during initialization
 
 #### 3. Performance-First Design
+
 - **No Code Generation**: Eliminates 100-200ms startup latency
 - **Serverless Friendly**: Ideal for cold-start environments
 - **Minimal Dependencies**: Uses lightweight `openapi-core` instead of full client generation
@@ -58,24 +61,28 @@ MCP Tool Call → RequestDirector.build() → httpx.Request → HTTP Response �
 ## Key Features
 
 ### 1. High-Performance Request Building
+
 - Zero startup latency - no code generation required
 - Stateless request building scales infinitely
 - Uses proven `openapi-core` library for OpenAPI compliance
 - Perfect for serverless and cold-start environments
 
 ### 2. Comprehensive Parameter Support
+
 - **Parameter Collisions**: Intelligent collision resolution with suffixing
 - **DeepObject Style**: Full support for deepObject parameters with explode=true/false
 - **Complex Schemas**: Handles nested objects, arrays, and all OpenAPI types
 - **Pre-calculated Mapping**: Parameter location mapping done upfront for performance
 
 ### 3. Enhanced Error Handling
+
 - HTTP status code mapping to MCP errors
 - Structured error responses with detailed information
 - Graceful handling of network timeouts and connection errors
 - Proper error context preservation
 
 ### 4. Advanced Schema Processing
+
 - **Pre-calculated Schemas**: Combined parameter and body schemas calculated once
 - **Collision-aware**: Automatically handles parameter name collisions
 - **Type Safety**: Full Pydantic model validation
@@ -93,6 +100,7 @@ MCP Tool Call → RequestDirector.build() → httpx.Request → HTTP Response �
 ### RequestDirector Integration
 
 All components use the same RequestDirector approach:
+
 - Consistent parameter handling across all component types
 - Uniform error handling and response processing
 - Simplified architecture without fallback complexity
@@ -117,7 +125,7 @@ async with httpx.AsyncClient() as client:
         client=client,
         name="My API Server"
     )
-    
+
     # Server automatically creates RequestDirector and pre-calculates schemas
 ```
 
@@ -148,7 +156,7 @@ Tests are located in `/tests/server/openapi/`:
 1. **Core Functionality**
    - `test_server.py` - Server initialization and RequestDirector integration
 
-2. **OpenAPI Features**  
+2. **OpenAPI Features**
    - `test_parameter_collisions.py` - Parameter name collision handling
    - `test_deepobject_style.py` - DeepObject parameter style support
    - `test_openapi_features.py` - General OpenAPI feature compliance

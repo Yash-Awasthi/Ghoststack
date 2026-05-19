@@ -12,17 +12,17 @@ sees those changes in the next `GetCostAndUsage` call.
 
 ## Supported Operations
 
-| Operation | Notes |
-|-----------|-------|
-| `GetCostAndUsage` | Full `TimePeriod` / `Granularity` / `Filter` / `GroupBy` / `Metrics` support |
+| Operation                      | Notes                                                                                                    |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `GetCostAndUsage`              | Full `TimePeriod` / `Granularity` / `Filter` / `GroupBy` / `Metrics` support                             |
 | `GetCostAndUsageWithResources` | Same shape as `GetCostAndUsage`; for resource-level breakdown, group by `Type=DIMENSION,Key=RESOURCE_ID` |
-| `GetDimensionValues` | Returns dimension values present in the synthesized data set |
-| `GetTags` | Returns tag keys / values across enumerated resources |
-| `GetReservationCoverage` | Stub — returns zeroed totals; full RI math lands in a follow-up PR |
-| `GetReservationUtilization` | Stub — returns zeroed totals |
-| `GetSavingsPlansCoverage` | Stub — returns empty list |
-| `GetSavingsPlansUtilization` | Stub — returns zeroed totals |
-| `GetCostCategories` | Stub — returns empty list (cost-category management not yet emulated) |
+| `GetDimensionValues`           | Returns dimension values present in the synthesized data set                                             |
+| `GetTags`                      | Returns tag keys / values across enumerated resources                                                    |
+| `GetReservationCoverage`       | Stub — returns zeroed totals; full RI math lands in a follow-up PR                                       |
+| `GetReservationUtilization`    | Stub — returns zeroed totals                                                                             |
+| `GetSavingsPlansCoverage`      | Stub — returns empty list                                                                                |
+| `GetSavingsPlansUtilization`   | Stub — returns zeroed totals                                                                             |
+| `GetCostCategories`            | Stub — returns empty list (cost-category management not yet emulated)                                    |
 
 ## Cost synthesis model
 
@@ -33,12 +33,12 @@ service with cost data needs zero changes to `CostExplorerService`.
 
 The bundled enumerators cover:
 
-| Service | Priced unit | Source |
-|---------|-------------|--------|
-| `AmazonEC2` | `BoxUsage:<instanceType>` × hours | `Ec2Service.describeInstances` |
-| `AmazonS3` | `TimedStorage-Standard` × GB-month | `S3Service.listBuckets` + `listObjects` |
-| `AWSLambda` | `AWS-Lambda-Requests` (zero quantity, catalog only) | `LambdaService.listFunctions` |
-| Other Floci services (DDB, SQS, SNS, …) | catalog only, zero quantity | `UnpricedServicesEnumerator` |
+| Service                                 | Priced unit                                         | Source                                  |
+| --------------------------------------- | --------------------------------------------------- | --------------------------------------- |
+| `AmazonEC2`                             | `BoxUsage:<instanceType>` × hours                   | `Ec2Service.describeInstances`          |
+| `AmazonS3`                              | `TimedStorage-Standard` × GB-month                  | `S3Service.listBuckets` + `listObjects` |
+| `AWSLambda`                             | `AWS-Lambda-Requests` (zero quantity, catalog only) | `LambdaService.listFunctions`           |
+| Other Floci services (DDB, SQS, SNS, …) | catalog only, zero quantity                         | `UnpricedServicesEnumerator`            |
 
 Unpriced services emit zero-quantity catalog rows so they remain visible in
 `GetDimensionValues SERVICE` responses without contributing billed cost.
@@ -47,11 +47,11 @@ Unpriced services emit zero-quantity catalog rows so they remain visible in
 
 `GROUP_BY=RECORD_TYPE` distinguishes:
 
-| Record type | When emitted |
-|-------------|--------------|
-| `Usage` | All synthesized usage rows (always present) |
-| `Credit` | When `FLOCI_SERVICES_CE_CREDIT_USD_MONTHLY > 0` (see below) |
-| `Tax` / `Refund` / `DiscountedUsage` / `SavingsPlan*` | Reserved for future PRs; not currently emitted |
+| Record type                                           | When emitted                                                |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| `Usage`                                               | All synthesized usage rows (always present)                 |
+| `Credit`                                              | When `FLOCI_SERVICES_CE_CREDIT_USD_MONTHLY > 0` (see below) |
+| `Tax` / `Refund` / `DiscountedUsage` / `SavingsPlan*` | Reserved for future PRs; not currently emitted              |
 
 ### Synthetic credit injection
 
@@ -69,10 +69,10 @@ floci:
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_CE_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_CE_CREDIT_USD_MONTHLY` | `0.0` | Synthetic monthly credit, applied as a `Credit` `RECORD_TYPE` row |
+| Variable                               | Default | Description                                                       |
+| -------------------------------------- | ------- | ----------------------------------------------------------------- |
+| `FLOCI_SERVICES_CE_ENABLED`            | `true`  | Enable or disable the service                                     |
+| `FLOCI_SERVICES_CE_CREDIT_USD_MONTHLY` | `0.0`   | Synthetic monthly credit, applied as a `Credit` `RECORD_TYPE` row |
 
 ## Examples
 

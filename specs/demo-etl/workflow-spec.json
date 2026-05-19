@@ -1,0 +1,56 @@
+{
+  "spec_version": "v1.1",
+  "metadata": {
+    "name": "Governed ETL Data Pipeline",
+    "description": "Standard Extract, Transform, and Load pipeline executing under strict quota governance and sandbox policies.",
+    "author": "GhostStack Core Developer",
+    "created_at": "2026-05-18T17:00:00Z"
+  },
+  "template_id": "governed-etl-template",
+  "variables": {
+    "source_url": "https://news.ycombinator.com",
+    "target_s3_bucket": "ghoststack-etl-archive",
+    "transform_pattern": "(?:AI|LLM|Agent|GPT|Cognitive)"
+  },
+  "tasks": [
+    {
+      "id": "etl-task-1",
+      "title": "Extract Page Scraped Data",
+      "description": "Scrapes data from the target website using the sandbox-safe scraping execution adapter.",
+      "type": "scraping",
+      "action": "scrape_url",
+      "priority": "normal",
+      "arguments": {
+        "url": "https://news.ycombinator.com",
+        "maxLengthBytes": 50000
+      },
+      "dependencies": []
+    },
+    {
+      "id": "etl-task-2",
+      "title": "Transform & Filter Content",
+      "description": "Extracts matches matching high-priority patterns using the memory planning-engine.",
+      "type": "floci",
+      "action": "filter_content",
+      "priority": "normal",
+      "arguments": {
+        "pattern": "(?:AI|LLM|Agent|GPT|Cognitive)",
+        "sourceTaskId": "etl-task-1"
+      },
+      "dependencies": ["etl-task-1"]
+    },
+    {
+      "id": "etl-task-3",
+      "title": "Load Content to Storage",
+      "description": "Saves transformed content to persistent S3 bucket and verifies checksum via the runtime manager.",
+      "type": "floci",
+      "action": "create_s3_bucket",
+      "priority": "high",
+      "arguments": {
+        "bucketName": "ghoststack-etl-archive",
+        "sourceTaskId": "etl-task-2"
+      },
+      "dependencies": ["etl-task-2"]
+    }
+  ]
+}

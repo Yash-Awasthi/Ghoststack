@@ -15,47 +15,47 @@ Floci implements the CodeBuild API — stored-state management plus real build e
 
 ### Projects
 
-| Operation | Notes |
-|---|---|
-| `CreateProject` | Stores project config; requires `name`, `source.type`, `artifacts.type`, `environment`, `serviceRole` |
-| `UpdateProject` | Partial update — only supplied fields are modified |
-| `DeleteProject` | Removes project by name |
-| `BatchGetProjects` | Returns found projects and a `projectsNotFound` list |
-| `ListProjects` | Returns all project names in the region |
+| Operation          | Notes                                                                                                 |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| `CreateProject`    | Stores project config; requires `name`, `source.type`, `artifacts.type`, `environment`, `serviceRole` |
+| `UpdateProject`    | Partial update — only supplied fields are modified                                                    |
+| `DeleteProject`    | Removes project by name                                                                               |
+| `BatchGetProjects` | Returns found projects and a `projectsNotFound` list                                                  |
+| `ListProjects`     | Returns all project names in the region                                                               |
 
 ### Build Execution
 
-| Operation | Notes |
-|---|---|
-| `StartBuild` | Launches a real Docker container using the project's image; runs buildspec phases (`INSTALL`, `PRE_BUILD`, `BUILD`, `POST_BUILD`); returns immediately with `IN_PROGRESS` status |
-| `BatchGetBuilds` | Returns current build state; poll until `buildComplete` is `true` |
-| `ListBuilds` | Returns all build IDs in the region, most recent first |
-| `ListBuildsForProject` | Returns build IDs for a specific project |
-| `StopBuild` | Signals a running build to stop; build transitions to `STOPPED` |
-| `RetryBuild` | Starts a new build using the same config as a completed build; returns a new build record |
+| Operation              | Notes                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `StartBuild`           | Launches a real Docker container using the project's image; runs buildspec phases (`INSTALL`, `PRE_BUILD`, `BUILD`, `POST_BUILD`); returns immediately with `IN_PROGRESS` status |
+| `BatchGetBuilds`       | Returns current build state; poll until `buildComplete` is `true`                                                                                                                |
+| `ListBuilds`           | Returns all build IDs in the region, most recent first                                                                                                                           |
+| `ListBuildsForProject` | Returns build IDs for a specific project                                                                                                                                         |
+| `StopBuild`            | Signals a running build to stop; build transitions to `STOPPED`                                                                                                                  |
+| `RetryBuild`           | Starts a new build using the same config as a completed build; returns a new build record                                                                                        |
 
 ### Report Groups
 
-| Operation | Notes |
-|---|---|
-| `CreateReportGroup` | Stores report group config |
-| `UpdateReportGroup` | Partial update by ARN |
-| `DeleteReportGroup` | Removes report group by ARN |
+| Operation              | Notes                                                         |
+| ---------------------- | ------------------------------------------------------------- |
+| `CreateReportGroup`    | Stores report group config                                    |
+| `UpdateReportGroup`    | Partial update by ARN                                         |
+| `DeleteReportGroup`    | Removes report group by ARN                                   |
 | `BatchGetReportGroups` | Returns found report groups and a `reportGroupsNotFound` list |
-| `ListReportGroups` | Returns all report group ARNs in the region |
+| `ListReportGroups`     | Returns all report group ARNs in the region                   |
 
 ### Source Credentials
 
-| Operation | Notes |
-|---|---|
+| Operation                 | Notes                                                                                                       |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `ImportSourceCredentials` | Stores server type and auth type; deduplicated by `serverType+authType`; token is accepted but not returned |
-| `ListSourceCredentials` | Returns stored credential metadata (no tokens) |
-| `DeleteSourceCredentials` | Removes source credentials by ARN |
+| `ListSourceCredentials`   | Returns stored credential metadata (no tokens)                                                              |
+| `DeleteSourceCredentials` | Removes source credentials by ARN                                                                           |
 
 ### Images
 
-| Operation | Notes |
-|---|---|
+| Operation                      | Notes                                                                 |
+| ------------------------------ | --------------------------------------------------------------------- |
 | `ListCuratedEnvironmentImages` | Returns a static list of standard CodeBuild images for AL2 and Ubuntu |
 
 ## Build Execution Model
@@ -86,9 +86,9 @@ When `artifacts.type=S3`, collected files are uploaded to the configured S3 buck
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_CODEBUILD_ENABLED` | `true` | Enable or disable the service |
+| Variable                           | Default | Description                   |
+| ---------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_CODEBUILD_ENABLED` | `true`  | Enable or disable the service |
 
 ## CLI Examples
 

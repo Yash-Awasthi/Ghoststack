@@ -18,7 +18,10 @@ from fastmcp import FastMCP
 That's it. Your `@mcp.tool`, `@mcp.resource`, and `@mcp.prompt` decorators, your `mcp.run()` call, and the rest of your server code all work as-is.
 
 <Tip>
-**Why upgrade?** FastMCP 1.0 pioneered the Pythonic MCP server experience, and we're proud it was bundled into the `mcp` package. The standalone FastMCP project has since grown into a full framework for taking MCP servers from prototype to production — with composition, middleware, proxy servers, authentication, and much more. Upgrading gives you access to all of that, plus ongoing updates and fixes.
+  **Why upgrade?** FastMCP 1.0 pioneered the Pythonic MCP server experience, and we're proud it was bundled into the
+  `mcp` package. The standalone FastMCP project has since grown into a full framework for taking MCP servers from
+  prototype to production — with composition, middleware, proxy servers, authentication, and much more. Upgrading gives
+  you access to all of that, plus ongoing updates and fixes.
 </Tip>
 
 ## Install
@@ -41,17 +44,18 @@ STEP 2 — CONSTRUCTOR KWARGS (only if FastMCP() receives transport settings):
 FastMCP() no longer accepts: host, port, log_level, debug, sse_path, streamable_http_path, json_response, stateless_http.
 Fix: pass these to run() instead.
 Before: `mcp = FastMCP("server", host="0.0.0.0", port=8080); mcp.run()`
-After:  `mcp = FastMCP("server"); mcp.run(transport="http", host="0.0.0.0", port=8080)`
+After: `mcp = FastMCP("server"); mcp.run(transport="http", host="0.0.0.0", port=8080)`
 
 STEP 3 — PROMPTS (only if using PromptMessage directly or returning dicts):
 mcp.types.PromptMessage is replaced by fastmcp.prompts.Message.
 Before: `PromptMessage(role="user", content=TextContent(type="text", text="Hello"))`
-After:  `Message("Hello")`  — role defaults to "user", accepts plain strings.
+After: `Message("Hello")` — role defaults to "user", accepts plain strings.
 Also: if prompts return raw dicts like `{"role": "user", "content": "..."}`, these must become Message objects or plain strings.
 The MCP SDK's FastMCP 1.0 silently coerced dicts; standalone FastMCP requires typed returns.
 
-STEP 4 — OTHER MCP IMPORTS (only if importing from mcp.* directly):
+STEP 4 — OTHER MCP IMPORTS (only if importing from mcp.\* directly):
 Direct imports from the `mcp` package (e.g., `import mcp.types`, `from mcp.server.stdio import stdio_server`) still work because FastMCP includes `mcp` as a dependency. However, prefer FastMCP's own APIs where equivalents exist:
+
 - mcp.types.TextContent for tool returns → just return plain Python values (str, int, dict, etc.)
 - mcp.types.ImageContent → fastmcp.utilities.types.Image
 - from mcp.server.stdio import stdio_server → not needed, mcp.run() handles transport
@@ -60,6 +64,7 @@ STEP 5 — DECORATORS (only if treating decorated functions as objects):
 @mcp.tool, @mcp.resource, @mcp.prompt now return the original function, not a component object. Code that accesses .name or .description on the decorated result needs updating. Set FASTMCP_DECORATOR_MODE=object temporarily to restore v1 behavior (this compat setting is itself deprecated).
 
 For each issue found, show the original line, explain what changed, and provide the corrected code.
+
 </Prompt>
 
 ## What Might Need Updating
@@ -117,12 +122,12 @@ If your server imports directly from the `mcp` package — like `import mcp.type
 
 Where FastMCP provides its own API for the same thing, it's worth switching over:
 
-| mcp Package | FastMCP Equivalent |
-|---|---|
-| `mcp.types.TextContent(type="text", text=str(x))` | Just return `x` from your tool |
-| `mcp.types.ImageContent(...)` | `from fastmcp.utilities.types import Image` |
-| `mcp.types.PromptMessage(...)` | `from fastmcp.prompts import Message` |
-| `from mcp.server.stdio import stdio_server` | Not needed — `mcp.run()` handles transport |
+| mcp Package                                       | FastMCP Equivalent                          |
+| ------------------------------------------------- | ------------------------------------------- |
+| `mcp.types.TextContent(type="text", text=str(x))` | Just return `x` from your tool              |
+| `mcp.types.ImageContent(...)`                     | `from fastmcp.utilities.types import Image` |
+| `mcp.types.PromptMessage(...)`                    | `from fastmcp.prompts import Message`       |
+| `from mcp.server.stdio import stdio_server`       | Not needed — `mcp.run()` handles transport  |
 
 For anything without a FastMCP equivalent (e.g., specific protocol types you use directly), the `mcp.*` import is fine to keep.
 

@@ -20,16 +20,22 @@ async function main() {
   }
   const u = users[0]
   console.log('=== user ===')
-  console.log(JSON.stringify({
-    id: u.id,
-    email: u.email,
-    name: u.name,
-    handle: u.handle,
-    banned: u.banned,
-    created_at: u.created_at,
-    emailVerified: u.emailVerified,
-    image: u.image,
-  }, null, 2))
+  console.log(
+    JSON.stringify(
+      {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        handle: u.handle,
+        banned: u.banned,
+        created_at: u.created_at,
+        emailVerified: u.emailVerified,
+        image: u.image,
+      },
+      null,
+      2,
+    ),
+  )
 
   const accounts = await db
     .select()
@@ -37,7 +43,9 @@ async function main() {
     .where(eq(schema.account.userId, u.id))
   console.log('\n=== accounts ===')
   for (const a of accounts) {
-    console.log(`  provider=${a.provider}  providerAccountId=${a.providerAccountId}  scope=${a.scope ?? ''}`)
+    console.log(
+      `  provider=${a.provider}  providerAccountId=${a.providerAccountId}  scope=${a.scope ?? ''}`,
+    )
   }
 
   const stats = await db
@@ -53,7 +61,9 @@ async function main() {
     .groupBy(schema.message.agent_id)
   console.log('\n=== messages by agent ===')
   for (const s of stats) {
-    console.log(`  ${s.agent_id}: ${s.count} msgs, $${Number(s.totalCost).toFixed(2)}, ${s.first} → ${s.last}`)
+    console.log(
+      `  ${s.agent_id}: ${s.count} msgs, $${Number(s.totalCost).toFixed(2)}, ${s.first} → ${s.last}`,
+    )
   }
 
   const repos = await db
@@ -68,7 +78,9 @@ async function main() {
     .limit(20)
   console.log('\n=== repos touched ===')
   for (const r of repos) {
-    console.log(`  ${r.count.toString().padStart(5)}  ${r.repo_url ?? '(null)'}`)
+    console.log(
+      `  ${r.count.toString().padStart(5)}  ${r.repo_url ?? '(null)'}`,
+    )
   }
 
   const sample = await db
@@ -87,10 +99,17 @@ async function main() {
     .limit(5)
   console.log('\n=== 5 most recent messages (last user turn) ===')
   for (const m of sample) {
-    console.log(`\n  ${m.finished_at.toISOString()}  agent=${m.agent_id}  repo=${m.repo_url ?? ''}  in=${m.input_tokens} out=${m.output_tokens} cost=$${Number(m.cost).toFixed(4)}`)
+    console.log(
+      `\n  ${m.finished_at.toISOString()}  agent=${m.agent_id}  repo=${m.repo_url ?? ''}  in=${m.input_tokens} out=${m.output_tokens} cost=$${Number(m.cost).toFixed(4)}`,
+    )
     const msg = m.lastMessage as any
-    const content = typeof msg?.content === 'string' ? msg.content : JSON.stringify(msg?.content)?.slice(0, 500)
-    console.log(`    role=${msg?.role}  content=${(content ?? '').slice(0, 500)}`)
+    const content =
+      typeof msg?.content === 'string'
+        ? msg.content
+        : JSON.stringify(msg?.content)?.slice(0, 500)
+    console.log(
+      `    role=${msg?.role}  content=${(content ?? '').slice(0, 500)}`,
+    )
   }
 
   // Session/CLI usage
@@ -106,8 +125,15 @@ async function main() {
     .limit(10)
   console.log('\n=== recent sessions ===')
   for (const s of sessions) {
-    console.log(`  ${s.created_at.toISOString()}  type=${s.type}  fp=${s.fingerprint_id ?? ''}`)
+    console.log(
+      `  ${s.created_at.toISOString()}  type=${s.type}  fp=${s.fingerprint_id ?? ''}`,
+    )
   }
 }
 
-main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1) })
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })

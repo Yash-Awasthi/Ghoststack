@@ -6,7 +6,7 @@ icon: house
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -90,12 +90,12 @@ mcp.local_provider.remove_prompt("my_prompt")
 
 When you try to add a component that already exists, the behavior depends on the `on_duplicate` setting:
 
-| Mode | Behavior |
-|------|----------|
-| `"error"` (default) | Raise `ValueError` |
-| `"warn"` | Log warning and replace |
-| `"replace"` | Silently replace |
-| `"ignore"` | Keep existing component |
+| Mode                | Behavior                |
+| ------------------- | ----------------------- |
+| `"error"` (default) | Raise `ValueError`      |
+| `"warn"`            | Log warning and replace |
+| `"replace"`         | Silently replace        |
+| `"ignore"`          | Keep existing component |
 
 Configure this when creating the server:
 
@@ -154,6 +154,7 @@ server2 = FastMCP("Server2", providers=[shared_tools])
 ```
 
 This is useful for:
+
 - Sharing components across servers
 - Testing components in isolation
 - Building reusable component libraries

@@ -5,7 +5,7 @@ description: Source components from other MCP servers
 icon: arrows-retweet
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.0.0" />
 
@@ -49,12 +49,14 @@ if __name__ == "__main__":
 ```
 
 This gives you:
+
 - Safe concurrent request handling
 - Automatic forwarding of MCP features (sampling, elicitation, etc.)
 - Session isolation to prevent context mixing
 
 <Tip>
-To mount a proxy inside another FastMCP server, see [Mounting External Servers](/servers/composition#mounting-external-servers).
+  To mount a proxy inside another FastMCP server, see [Mounting External
+  Servers](/servers/composition#mounting-external-servers).
 </Tip>
 
 ## Transport Bridging
@@ -118,7 +120,8 @@ async with Client("backend_server.py") as connected_client:
 ```
 
 <Warning>
-Shared sessions may cause context mixing in concurrent scenarios. Use only in single-threaded situations or with explicit synchronization.
+  Shared sessions may cause context mixing in concurrent scenarios. Use only in single-threaded situations or with
+  explicit synchronization.
 </Warning>
 
 ## MCP Feature Forwarding
@@ -127,13 +130,13 @@ Shared sessions may cause context mixing in concurrent scenarios. Use only in si
 
 Proxies automatically forward MCP protocol features:
 
-| Feature | Description |
-|---------|-------------|
-| Roots | Filesystem root access requests |
-| Sampling | LLM completion requests |
-| Elicitation | User input requests |
-| Logging | Log messages from backend |
-| Progress | Progress notifications |
+| Feature     | Description                     |
+| ----------- | ------------------------------- |
+| Roots       | Filesystem root access requests |
+| Sampling    | LLM completion requests         |
+| Elicitation | User input requests             |
+| Logging     | Log messages from backend       |
+| Progress    | Progress notifications          |
 
 ```python
 from fastmcp.server import create_proxy
@@ -212,12 +215,12 @@ composite = create_proxy(config, name="Composite")
 
 Proxied components follow standard prefixing rules:
 
-| Component Type | Pattern |
-|----------------|---------|
-| Tools | `{prefix}_{tool_name}` |
-| Prompts | `{prefix}_{prompt_name}` |
-| Resources | `protocol://{prefix}/path` |
-| Templates | `protocol://{prefix}/...` |
+| Component Type | Pattern                    |
+| -------------- | -------------------------- |
+| Tools          | `{prefix}_{tool_name}`     |
+| Prompts        | `{prefix}_{prompt_name}`   |
+| Resources      | `protocol://{prefix}/path` |
+| Templates      | `protocol://{prefix}/...`  |
 
 ## Mirrored Components
 
@@ -251,10 +254,10 @@ my_server.disable(keys={local_tool.key})
 
 Proxying introduces network latency:
 
-| Operation | Local | Proxied (HTTP) |
-|-----------|-------|----------------|
-| `list_tools()` | 1-2ms | 300-400ms |
-| `call_tool()` | 1-2ms | 200-500ms |
+| Operation      | Local | Proxied (HTTP) |
+| -------------- | ----- | -------------- |
+| `list_tools()` | 1-2ms | 300-400ms      |
+| `call_tool()`  | 1-2ms | 200-500ms      |
 
 When mounting proxy servers, this latency affects all operations on the parent server.
 
@@ -300,7 +303,8 @@ proxy = FastMCPProxy(
 This eliminates the MCP initialization handshake on every call, which can dramatically reduce latency under load. The `Client` uses reference counting for its session lifecycle, so concurrent callers sharing the same instance is safe.
 
 <Warning>
-Only reuse sessions when you know the backend is stateless (e.g. stateless HTTP). For stateful backends (stdio processes, servers that track session state), use the default fresh-session behavior to avoid context mixing.
+  Only reuse sessions when you know the backend is stateless (e.g. stateless HTTP). For stateful backends (stdio
+  processes, servers that track session state), use the default fresh-session behavior to avoid context mixing.
 </Warning>
 
 ## Advanced Usage

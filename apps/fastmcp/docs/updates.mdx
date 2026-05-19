@@ -16,23 +16,28 @@ Pins `pydantic-monty<0.0.8` to fix a breaking change in Monty that affects code 
 </Update>
 
 <Update label="FastMCP 3.1.0" description="March 3, 2026" tags={["Releases"]}>
-<Card
-title="FastMCP v3.1.0: Code to Joy"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v3.1.0"
-cta="Read the release notes"
->
-The Code Mode release. Instead of loading the entire tool catalog into context, `CodeMode` gives LLMs meta-tools: search for relevant tools on demand, inspect their schemas, then write Python that chains `call_tool()` calls in a sandbox. Also ships search transforms, early Prefab Apps integration, `MultiAuth` for composing multiple token verification sources, and PropelAuth support.
-</Card>
+  <Card
+    title="FastMCP v3.1.0: Code to Joy"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v3.1.0"
+    cta="Read the release notes"
+  >
+    The Code Mode release. Instead of loading the entire tool catalog into context, `CodeMode` gives LLMs meta-tools:
+    search for relevant tools on demand, inspect their schemas, then write Python that chains `call_tool()` calls in a
+    sandbox. Also ships search transforms, early Prefab Apps integration, `MultiAuth` for composing multiple token
+    verification sources, and PropelAuth support.
+  </Card>
 </Update>
 
 <Update label="FastMCP 3.0.2" description="February 22, 2026" tags={["Releases"]}>
-<Card
-title="FastMCP v3.0.2: Threecovery Mode II"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v3.0.2"
-cta="Read the release notes"
->
-Two community-contributed fixes: auth headers from MCP transport no longer leak through to downstream OpenAPI APIs, and background task workers now correctly receive the originating request ID. Plus a new docs example for context-aware tool factories.
-</Card>
+  <Card
+    title="FastMCP v3.0.2: Threecovery Mode II"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v3.0.2"
+    cta="Read the release notes"
+  >
+    Two community-contributed fixes: auth headers from MCP transport no longer leak through to downstream OpenAPI APIs,
+    and background task workers now correctly receive the originating request ID. Plus a new docs example for
+    context-aware tool factories.
+  </Card>
 </Update>
 
 <Update label="FastMCP 3.0.1" description="February 20, 2026" tags={["Releases"]}>
@@ -46,6 +51,7 @@ First patch after 3.0 — mostly smoothing out rough edges discovered in the wil
 🔐 **OIDC `verify_id_token`** — New option for providers that issue opaque access tokens but standard JWT id_tokens. Verifies identity via the id_token while using the access_token for upstream API calls.
 
 🐞 **11 bug fixes** — State serialization, future annotations with `Context`/`Depends`, OpenAI handler deprecation warnings, type checker compatibility, and more.
+
 </Card>
 </Update>
 
@@ -69,6 +75,7 @@ The surface API is largely unchanged — `@mcp.tool()` still works exactly as be
 ⚡ **Develop faster** — `--reload`, standalone decorators, automatic threadpool dispatch, tool timeouts, pagination, and concurrent tool execution.
 
 🖥️ **CLI** — `fastmcp list`, `fastmcp call`, `fastmcp discover`, `fastmcp generate-cli`, and `fastmcp install` for Claude Desktop, Cursor, and Goose.
+
 </Card>
 </Update>
 
@@ -89,6 +96,7 @@ FastMCP 3 RC1 means we believe the API is stable. Beta 2 drew a wave of real-wor
 📡 **Background Task Notifications** — A distributed Redis queue replaces polling for progress updates and elicitation relay.
 
 ✅ **OpenAPI Output Validation** — `validate_output=False` disables strict schema checking for imperfect backend APIs.
+
 </Card>
 </Update>
 
@@ -111,6 +119,7 @@ Beta 2 reflects the huge number of people that kicked the tires on Beta 1. Seven
 🛡️ **ResponseLimitingMiddleware** caps tool response sizes with UTF-8-safe truncation.
 
 🪿 **Goose Integration** — `fastmcp install goose` for one-command server installation into Goose.
+
 </Card>
 </Update>
 
@@ -131,37 +140,41 @@ FastMCP 3.0 rebuilds the framework around three primitives: components, provider
 💾 **Session-Scoped State** persists across requests, with per-session visibility control.
 
 ⚡ **DX Improvements** include `--reload` for development, automatic threadpool dispatch, tool timeouts, pagination, and OpenTelemetry tracing.
+
 </Card>
 </Update>
 
 <Update label="FastMCP 2.14.6" description="March 27, 2026" tags={["Releases"]}>
-<Card
-title="FastMCP 2.14.6: $Ref Dead Redemption"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.14.6"
-cta="Read the release notes"
->
-v2.14.4 backported `dereference_refs()` but never wired it into the tool schema pipeline — `$ref` and `$defs` were still sent to MCP clients. Now fixed: schemas are fully inlined before reaching clients.
-</Card>
+  <Card
+    title="FastMCP 2.14.6: $Ref Dead Redemption"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.14.6"
+    cta="Read the release notes"
+  >
+    v2.14.4 backported `dereference_refs()` but never wired it into the tool schema pipeline — `$ref` and `$defs` were
+    still sent to MCP clients. Now fixed: schemas are fully inlined before reaching clients.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.14.5" description="February 3, 2026" tags={["Releases"]}>
-<Card
-title="FastMCP 2.14.5: Sealed Docket"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.14.5"
-cta="Read the release notes"
->
-Fixes a memory leak in the memory:// docket broker where cancelled tasks accumulated instead of being cleaned up. Bumps pydocket to ≥0.17.2.
-</Card>
+  <Card
+    title="FastMCP 2.14.5: Sealed Docket"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.14.5"
+    cta="Read the release notes"
+  >
+    Fixes a memory leak in the memory:// docket broker where cancelled tasks accumulated instead of being cleaned up.
+    Bumps pydocket to ≥0.17.2.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.14.4" description="January 22, 2026" tags={["Releases"]}>
-<Card
-title="FastMCP 2.14.4: Package Deal"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.14.4"
-cta="Read the release notes"
->
-Fixes a fresh install bug where the packaging library was missing as a direct dependency, plus backports $ref dereferencing in tool schemas and a task capabilities location fix.
-</Card>
+  <Card
+    title="FastMCP 2.14.4: Package Deal"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.14.4"
+    cta="Read the release notes"
+  >
+    Fixes a fresh install bug where the packaging library was missing as a direct dependency, plus backports $ref
+    dereferencing in tool schemas and a task capabilities location fix.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.14.3" description="January 12, 2026" tags={["Releases"]}>
@@ -175,6 +188,7 @@ Sometimes five seconds just isn't enough. This release fixes an HTTP transport b
 ⏱️ **HTTP transport timeout fix** restores MCP's 30-second default connect timeout, which was incorrectly defaulting to 5 seconds.
 
 🔧 **Infrastructure fixes** including OAuth token storage TTL, Redis key prefixing for ACL isolation, and ContextVar propagation for ASGI-mounted servers with background tasks.
+
 </Card>
 </Update>
 
@@ -189,6 +203,7 @@ A wave of community contributions arrives safely in the 2.x line. Important back
 🔧 **OpenAPI 3.1 support** fixes version detection to properly handle 3.1 specs alongside 3.0.
 
 📋 **MCP spec compliance** for root-level `$ref` resolution in output schemas and titled enum elicitation schemas.
+
 </Card>
 </Update>
 
@@ -203,6 +218,7 @@ FastMCP 2.14.1 introduces sampling with tools (SEP-1577), enabling servers to pa
 🤖 **Sampling with tools** lets servers leverage client LLM capabilities for multi-step agentic workflows. The new `ctx.sample_step()` method provides single LLM calls with tool inspection, while `result_type` enables structured outputs via validated Pydantic models.
 
 🔧 **AnthropicSamplingHandler** joins the existing OpenAI handler, and both are now promoted from experimental to production-ready status with a unified API.
+
 </Card>
 </Update>
 
@@ -219,6 +235,7 @@ FastMCP 2.14 begins adopting the MCP 2025-11-25 specification, introducing proto
 🔧 **OpenAPI Parser Promoted** from experimental to standard with improved performance through single-pass schema processing.
 
 📋 **MCP Spec Updates** including SSE polling (SEP-1699), multi-select elicitation (SEP-1330), and tool name validation (SEP-986). Also removes deprecated APIs accumulated across 2.x.
+
 </Card>
 </Update>
 
@@ -245,6 +262,7 @@ Polishes the authentication stack with improvements to token refresh, scope hand
 🔄 **Token refresh fixes** for Azure and Google providers, plus OAuth proxy improvements for multi-instance deployments.
 
 🎨 **Icon support** added to proxy classes for richer UX.
+
 </Card>
 </Update>
 
@@ -261,6 +279,7 @@ Introduces meta parameter support for `ToolResult`, enabling tools to return sup
 🔐 **New auth providers** for OCI and Supabase, plus custom token verifiers with DebugTokenVerifier for development.
 
 🔒 **Security fixes** for CVE-2025-61920 and safer Cursor deeplink URL validation on Windows.
+
 </Card>
 </Update>
 
@@ -279,17 +298,19 @@ FastMCP 2.13 "Cache Me If You Can" represents a fundamental maturation of the fr
 ⚡ **Response Caching Middleware** dramatically improves performance for expensive operations, while **Server lifespans** provide proper initialization and cleanup hooks that run once per server instance instead of per client session.
 
 ✨ **Developer experience improvements** include Pydantic input validation, icon support, RFC 6570 query parameters for resource templates, improved Context API methods, and async file/directory resources.
+
 </Card>
 </Update>
 
 <Update label="FastMCP 2.12.5" description="October 17, 2025" tags={["Releases"]}>
-<Card
-title="FastMCP 2.12.5: Safety Pin"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.5"
-cta="Read the release notes"
->
-Pins MCP SDK version below 1.17 to ensure the `.well-known` payload appears in the expected location when using FastMCP auth providers with composite applications.
-</Card>
+  <Card
+    title="FastMCP 2.12.5: Safety Pin"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.5"
+    cta="Read the release notes"
+  >
+    Pins MCP SDK version below 1.17 to ensure the `.well-known` payload appears in the expected location when using
+    FastMCP auth providers with composite applications.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.12.4" description="September 26, 2025" tags={["Releases"]}>
@@ -305,37 +326,43 @@ FastMCP 2.12.4 adds comprehensive OIDC support and expands authentication option
 🏢 **Enterprise Authentication** expands with AWS Cognito and Descope providers, broadening the authentication ecosystem.
 
 🛠️ **Improved Reliability** through enhanced URL handling, persistent OAuth storage, and numerous parser fixes based on community feedback.
+
 </Card>
 </Update>
 
 <Update label="FastMCP 2.12.3" description="September 17, 2025" tags={["Releases"]}>
-<Card
-title="FastMCP 2.12.3: Double Time"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.3"
-cta="Read the release notes"
->
-FastMCP 2.12.3 focuses on performance and developer experience improvements. This release includes optimized auth provider imports that reduce server startup time, enhanced OIDC authentication flows, and automatic inline snapshot creation for testing.
-</Card>
+  <Card
+    title="FastMCP 2.12.3: Double Time"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.3"
+    cta="Read the release notes"
+  >
+    FastMCP 2.12.3 focuses on performance and developer experience improvements. This release includes optimized auth
+    provider imports that reduce server startup time, enhanced OIDC authentication flows, and automatic inline snapshot
+    creation for testing.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.12.2" description="September 3, 2025" tags={["Releases"]}>
-<Card
-title="FastMCP 2.12.2: Perchance to Stream"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.2"
-cta="Read the release notes"
->
-Hotfix for streamable-http transport validation in fastmcp.json configuration files, resolving a parsing error when CLI arguments were merged against the configuration spec.
-</Card>
+  <Card
+    title="FastMCP 2.12.2: Perchance to Stream"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.2"
+    cta="Read the release notes"
+  >
+    Hotfix for streamable-http transport validation in fastmcp.json configuration files, resolving a parsing error when
+    CLI arguments were merged against the configuration spec.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.12.1" description="September 3, 2025" tags={["Releases"]}>
-<Card
-title="FastMCP 2.12.1: OAuth to Joy"
-href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.1"
-cta="Read the release notes"
->
-FastMCP 2.12.1 strengthens OAuth proxy implementation with improved client storage reliability, PKCE forwarding, configurable token endpoint authentication methods, and expanded scope handling based on extensive community testing.
-</Card>
+  <Card
+    title="FastMCP 2.12.1: OAuth to Joy"
+    href="https://github.com/PrefectHQ/fastmcp/releases/tag/v2.12.1"
+    cta="Read the release notes"
+  >
+    FastMCP 2.12.1 strengthens OAuth proxy implementation with improved client storage reliability, PKCE forwarding,
+    configurable token endpoint authentication methods, and expanded scope handling based on extensive community
+    testing.
+  </Card>
 </Update>
 
 <Update label="FastMCP 2.12" description="August 31, 2025" tags={["Releases"]}>
@@ -351,6 +378,7 @@ FastMCP 2.12 represents one of our most significant releases to date. After exte
 📋 **Declarative JSON Configuration** introduces `fastmcp.json` as the single source of truth for server settings, making MCP servers as portable and shareable as container images.
 
 🧠 **Sampling API Fallback** tackles adoption challenges by letting servers generate completions server-side when clients don't support the feature, encouraging innovation while maintaining compatibility.
+
 </Card>
 </Update>
 
@@ -369,6 +397,7 @@ FastMCP 2.11 brings enterprise-ready authentication and dramatic performance imp
 💾 **Enhanced State Management** provides persistent state across tool calls with a simple dictionary interface, improving context handling and type annotations.
 
 This release emphasizes speed and simplicity while setting the foundation for future enterprise features.
+
 </Card>
 </Update>
 
@@ -387,6 +416,7 @@ FastMCP 2.10 achieves full compliance with the 6/18/2025 MCP specification updat
 🛠️ **Enhanced HTTP Routing** with OpenAPI extensions support and configurable algorithms for more flexible API integration.
 
 This release includes a breaking change to `client.call_tool()` return signatures but significantly expands the interaction capabilities of MCP servers.
+
 </Card>
 </Update>
 
@@ -396,13 +426,14 @@ title="FastMCP 2.9: MCP-Native Middleware" href="https://www.jlowin.dev/blog/fas
 img="https://jlowin.dev/_image?href=%2F_astro%2Fhero.BkVTdeBk.jpg&w=1200&h=630&f=png" 
 cta="Read more"  
 >
-FastMCP 2.9 is a major release that, among other things, introduces two important features that push beyond the basic MCP protocol. 
+FastMCP 2.9 is a major release that, among other things, introduces two important features that push beyond the basic MCP protocol.
 
-🤝 *MCP Middleware* brings a flexible middleware system for intercepting and controlling server operations - think authentication, logging, rate limiting, and custom business logic without touching core protocol code. 
+🤝 _MCP Middleware_ brings a flexible middleware system for intercepting and controlling server operations - think authentication, logging, rate limiting, and custom business logic without touching core protocol code.
 
-✨ *Server-side type conversion* for prompts solves a major developer pain point: while MCP requires string arguments, your functions can now work with native Python types like lists and dictionaries, with automatic conversion handling the complexity.
+✨ _Server-side type conversion_ for prompts solves a major developer pain point: while MCP requires string arguments, your functions can now work with native Python types like lists and dictionaries, with automatic conversion handling the complexity.
 
 These features transform FastMCP from a simple protocol implementation into a powerful framework for building sophisticated MCP applications. Combined with the new `File` utility for binary data and improvements to authentication and serialization, this release makes FastMCP significantly more flexible and developer-friendly while maintaining full protocol compliance.
+
 </Card>
 </Update>
 
@@ -454,10 +485,9 @@ def add(a: int, b: int) -> int:
 In addition, decorators now return the objects they create, instead of the decorated function. This is an important usability enhancement.
 
 The bulk of the update is focused on improving the FastMCP internals, including a few breaking internal changes to private APIs. A number of functions that have clung on since 1.0 are now deprecated.
+
 </Card>
 </Update>
-
-
 
 <Update label="FastMCP 2.6" description="June 2, 2025" tags={["Releases", "Blog Posts"]}>
 <Card 
@@ -468,6 +498,7 @@ cta="Read more"
 FastMCP 2.6 is here!
 
 This release introduces first-class authentication for MCP servers and clients, including pragmatic Bearer token support and seamless OAuth 2.1 integration. This release aligns with how major AI platforms are adopting MCP today, making it easier than ever to securely connect your tools to real-world AI models. Dive into the update and secure your stack with minimal friction.
+
 </Card>
 </Update>
 
@@ -485,7 +516,6 @@ Stop vibe-testing your MCP server through LLM guesswork. FastMCP 2.0 introduces 
 
 </Card>
 </Update>
-
 
 <Update description="May 8, 2025" label="10,000 Stars" tags={["Blog Posts"]}>
 <Card
@@ -523,8 +553,8 @@ cta="Read more"
 
 Even AI needs a good travel adapter 🔌
 
-
 FastMCP now supports proxying arbitrary MCP servers, letting you run a local FastMCP instance that transparently forwards requests to any remote or third-party server—regardless of transport. This enables transport bridging (e.g., stdio ⇄ SSE), simplified client configuration, and powerful gateway patterns. Proxies are fully composable with other FastMCP servers, letting you mount or import them just like local servers. Use `FastMCP.from_client()` to wrap any backend in a clean, Pythonic proxy.
+
 </Card>
 </Update>
 
@@ -536,26 +566,23 @@ img="https://www.jlowin.dev/_image?href=%2F_astro%2Fhero.DpbmGNrr.png&w=1000&h=5
 cta="Read more"
 >
 
-This major release reimagines FastMCP as a full ecosystem platform, with powerful new features for composition, integration, and client interaction. You can now compose local and remote servers, proxy arbitrary MCP servers (with transport translation), and generate MCP servers from OpenAPI or FastAPI apps. A new client infrastructure supports advanced workflows like LLM sampling. 
+This major release reimagines FastMCP as a full ecosystem platform, with powerful new features for composition, integration, and client interaction. You can now compose local and remote servers, proxy arbitrary MCP servers (with transport translation), and generate MCP servers from OpenAPI or FastAPI apps. A new client infrastructure supports advanced workflows like LLM sampling.
 
 FastMCP 2.0 builds on the success of v1 with a cleaner, more flexible foundation—try it out today!
+
 </Card>
 </Update>
-
-
 
 <Update label="Official SDK" description="December 3, 2024" tags={["Announcements"]}>
-<Card
-title="FastMCP is joining the official MCP Python SDK!"
-href="https://bsky.app/profile/jlowin.dev/post/3lch4xk5cf22c"
-icon="sparkles"
-cta="Read the announcement"
->
-FastMCP 1.0 will become part of the official MCP Python SDK!
-</Card>
+  <Card
+    title="FastMCP is joining the official MCP Python SDK!"
+    href="https://bsky.app/profile/jlowin.dev/post/3lch4xk5cf22c"
+    icon="sparkles"
+    cta="Read the announcement"
+  >
+    FastMCP 1.0 will become part of the official MCP Python SDK!
+  </Card>
 </Update>
-
-
 
 <Update label="FastMCP 1.0" description="December 1, 2024" tags={["Releases", "Blog Posts"]}>
 <Card
@@ -567,6 +594,6 @@ cta="Read more"
 Because life's too short for boilerplate.
 
 This is where it all started. FastMCP’s launch post introduced a clean, Pythonic way to build MCP servers without the protocol overhead. Just write functions; FastMCP handles the rest. What began as a weekend project quickly became the foundation of a growing ecosystem.
+
 </Card>
 </Update>
-

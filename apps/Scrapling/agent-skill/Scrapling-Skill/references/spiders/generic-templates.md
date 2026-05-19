@@ -146,21 +146,21 @@ class CustomSpider(Spider):
 
 ## LinkExtractor reference
 
-| Argument | Default | Description |
-|---|---|---|
-| `allow` | `()` | URL patterns to keep. Empty means "match all". String, compiled `Pattern`, or iterable of either. |
-| `deny` | `()` | URL patterns to drop. Always overrides `allow`. |
-| `allow_domains` | `()` | Hostnames to keep. Subdomains match automatically (`example.com` matches `api.example.com`). |
-| `deny_domains` | `()` | Hostnames to drop. |
-| `restrict_css` | `()` | CSS selectors that scope DOM extraction to a region. |
-| `restrict_xpath` | `()` | XPath selectors that scope DOM extraction to a region. |
-| `tags` | `("a", "area")` | Element tags to look for links in. |
-| `attrs` | `("href",)` | Attributes on those tags to read URLs from. |
-| `canonicalize` | `True` | Sort query params and normalize the path. |
-| `strip` | `True` | Strip whitespace from extracted URLs. |
-| `keep_fragment` | `False` | Preserve the `#fragment` when canonicalizing. |
-| `deny_extensions` | `IGNORED_EXTENSIONS` | File extensions to drop (pdf, zip, images, video, etc.). |
-| `process` | `None` | Optional callable applied to each extracted URL before filtering. Return a falsy value to drop. |
+| Argument          | Default              | Description                                                                                       |
+| ----------------- | -------------------- | ------------------------------------------------------------------------------------------------- |
+| `allow`           | `()`                 | URL patterns to keep. Empty means "match all". String, compiled `Pattern`, or iterable of either. |
+| `deny`            | `()`                 | URL patterns to drop. Always overrides `allow`.                                                   |
+| `allow_domains`   | `()`                 | Hostnames to keep. Subdomains match automatically (`example.com` matches `api.example.com`).      |
+| `deny_domains`    | `()`                 | Hostnames to drop.                                                                                |
+| `restrict_css`    | `()`                 | CSS selectors that scope DOM extraction to a region.                                              |
+| `restrict_xpath`  | `()`                 | XPath selectors that scope DOM extraction to a region.                                            |
+| `tags`            | `("a", "area")`      | Element tags to look for links in.                                                                |
+| `attrs`           | `("href",)`          | Attributes on those tags to read URLs from.                                                       |
+| `canonicalize`    | `True`               | Sort query params and normalize the path.                                                         |
+| `strip`           | `True`               | Strip whitespace from extracted URLs.                                                             |
+| `keep_fragment`   | `False`              | Preserve the `#fragment` when canonicalizing.                                                     |
+| `deny_extensions` | `IGNORED_EXTENSIONS` | File extensions to drop (pdf, zip, images, video, etc.).                                          |
+| `process`         | `None`               | Optional callable applied to each extracted URL before filtering. Return a falsy value to drop.   |
 
 `LinkExtractor.extract(response)` returns a `list[str]` of absolute, filtered, deduped URLs.
 

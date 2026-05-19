@@ -14,11 +14,11 @@ services:
       - "4566:4566"
     environment:
       # These LocalStack vars are automatically translated — no extra config needed:
-      PERSISTENCE: "1"                      # → FLOCI_STORAGE_MODE=persistent
-      LOCALSTACK_HOST: floci                # → FLOCI_HOSTNAME=floci
-      LAMBDA_DOCKER_NETWORK: mynet          # → FLOCI_SERVICES_LAMBDA_DOCKER_NETWORK=mynet
-      LAMBDA_REMOVE_CONTAINERS: "1"         # → FLOCI_SERVICES_LAMBDA_EPHEMERAL=true
-      DEBUG: "1"                            # → QUARKUS_LOG_LEVEL=DEBUG
+      PERSISTENCE: "1" # → FLOCI_STORAGE_MODE=persistent
+      LOCALSTACK_HOST: floci # → FLOCI_HOSTNAME=floci
+      LAMBDA_DOCKER_NETWORK: mynet # → FLOCI_SERVICES_LAMBDA_DOCKER_NETWORK=mynet
+      LAMBDA_REMOVE_CONTAINERS: "1" # → FLOCI_SERVICES_LAMBDA_EPHEMERAL=true
+      DEBUG: "1" # → QUARKUS_LOG_LEVEL=DEBUG
 ```
 
 Explicitly set Floci variables always win — the translation only fills in values that haven't been set. To disable the translation entirely, set `LOCALSTACK_PARITY=false`.
@@ -51,24 +51,24 @@ The port (`4566`), credentials (`test` / `test`), and AWS SDK configuration are 
 
 ### 2 — Map environment variables
 
-| LocalStack variable | Floci equivalent | Notes |
-|---|---|---|
-| `LOCALSTACK_HOST` | `FLOCI_HOSTNAME` | Hostname embedded in response URLs |
-| `LOCALSTACK_HOSTNAME` | `FLOCI_HOSTNAME` | Alias — same effect |
-| `PERSISTENCE=1` | `FLOCI_STORAGE_MODE=persistent` | Enable disk persistence |
-| `PERSIST_STATE=1` | `FLOCI_STORAGE_MODE=persistent` | Alias for `PERSISTENCE` — same effect |
-| `EDGE_PORT` | `FLOCI_PORT` | Bind port override |
-| `GATEWAY_LISTEN` | `QUARKUS_HTTP_HOST` | Bind address override |
-| `LS_LOG` / `DEBUG=1` | `QUARKUS_LOG_LEVEL` | Log verbosity |
-| `DOCKER_HOST` | `FLOCI_DOCKER_DOCKER_HOST` | Docker daemon socket path or TCP address |
-| `LAMBDA_DOCKER_NETWORK` | `FLOCI_SERVICES_LAMBDA_DOCKER_NETWORK` | Network for Lambda containers |
-| `DOCKER_NETWORK` | `FLOCI_SERVICES_DOCKER_NETWORK` | Network for all spawned containers |
-| `LAMBDA_REMOVE_CONTAINERS=1` | `FLOCI_SERVICES_LAMBDA_EPHEMERAL=true` | Remove Lambda containers after invocation |
-| `USE_SSL=1` | `FLOCI_TLS_ENABLED=true` | Enable TLS/HTTPS — see [TLS / HTTPS](../configuration/tls.md) |
-| `CUSTOM_SSL_CERT_PATH` | `FLOCI_TLS_CERT_PATH` + `FLOCI_TLS_KEY_PATH` | LocalStack accepts a single combined PEM; Floci accepts it in both fields |
-| `SERVICES` | _(not needed)_ | Floci starts all 41 services instantly; no selection required |
-| `LAMBDA_EXECUTOR` | _(not needed)_ | Floci always runs Lambda in Docker containers |
-| `LAMBDA_REMOTE_DOCKER` | _(not supported)_ | Use per-function `S3Bucket=hot-reload` instead — see [Lambda](../services/lambda.md) |
+| LocalStack variable          | Floci equivalent                             | Notes                                                                                |
+| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `LOCALSTACK_HOST`            | `FLOCI_HOSTNAME`                             | Hostname embedded in response URLs                                                   |
+| `LOCALSTACK_HOSTNAME`        | `FLOCI_HOSTNAME`                             | Alias — same effect                                                                  |
+| `PERSISTENCE=1`              | `FLOCI_STORAGE_MODE=persistent`              | Enable disk persistence                                                              |
+| `PERSIST_STATE=1`            | `FLOCI_STORAGE_MODE=persistent`              | Alias for `PERSISTENCE` — same effect                                                |
+| `EDGE_PORT`                  | `FLOCI_PORT`                                 | Bind port override                                                                   |
+| `GATEWAY_LISTEN`             | `QUARKUS_HTTP_HOST`                          | Bind address override                                                                |
+| `LS_LOG` / `DEBUG=1`         | `QUARKUS_LOG_LEVEL`                          | Log verbosity                                                                        |
+| `DOCKER_HOST`                | `FLOCI_DOCKER_DOCKER_HOST`                   | Docker daemon socket path or TCP address                                             |
+| `LAMBDA_DOCKER_NETWORK`      | `FLOCI_SERVICES_LAMBDA_DOCKER_NETWORK`       | Network for Lambda containers                                                        |
+| `DOCKER_NETWORK`             | `FLOCI_SERVICES_DOCKER_NETWORK`              | Network for all spawned containers                                                   |
+| `LAMBDA_REMOVE_CONTAINERS=1` | `FLOCI_SERVICES_LAMBDA_EPHEMERAL=true`       | Remove Lambda containers after invocation                                            |
+| `USE_SSL=1`                  | `FLOCI_TLS_ENABLED=true`                     | Enable TLS/HTTPS — see [TLS / HTTPS](../configuration/tls.md)                        |
+| `CUSTOM_SSL_CERT_PATH`       | `FLOCI_TLS_CERT_PATH` + `FLOCI_TLS_KEY_PATH` | LocalStack accepts a single combined PEM; Floci accepts it in both fields            |
+| `SERVICES`                   | _(not needed)_                               | Floci starts all 41 services instantly; no selection required                        |
+| `LAMBDA_EXECUTOR`            | _(not needed)_                               | Floci always runs Lambda in Docker containers                                        |
+| `LAMBDA_REMOTE_DOCKER`       | _(not supported)_                            | Use per-function `S3Bucket=hot-reload` instead — see [Lambda](../services/lambda.md) |
 
 ### 3 — Init scripts (no change required)
 
@@ -76,7 +76,7 @@ LocalStack init scripts mounted under `/etc/localstack/init/` run unchanged in F
 
 ```yaml title="docker-compose.yml"
 volumes:
-  - ./init/ready.d:/etc/localstack/init/ready.d:ro  # works as-is
+  - ./init/ready.d:/etc/localstack/init/ready.d:ro # works as-is
 ```
 
 Floci reads both `/etc/localstack/init/` (compat) and `/etc/floci/init/` (native). When the same filename exists in both, the Floci copy takes priority.
@@ -123,13 +123,13 @@ If you wait on `/_localstack/init` or `/_localstack/health` in CI or scripts, no
 
 ### 6 — Inspection endpoints
 
-| Endpoint | Notes |
-|---|---|
-| `GET /_aws/ses` | Captured emails — identical |
-| `GET /_aws/ses?id=<id>` | Single message — identical |
-| `DELETE /_aws/ses` | Clear mailbox — identical |
-| `GET /_aws/sqs/messages?QueueUrl=<url>` | Non-destructive queue peek — identical |
-| `DELETE /_aws/sqs/messages?QueueUrl=<url>` | Purge queue — identical |
+| Endpoint                                   | Notes                                  |
+| ------------------------------------------ | -------------------------------------- |
+| `GET /_aws/ses`                            | Captured emails — identical            |
+| `GET /_aws/ses?id=<id>`                    | Single message — identical             |
+| `DELETE /_aws/ses`                         | Clear mailbox — identical              |
+| `GET /_aws/sqs/messages?QueueUrl=<url>`    | Non-destructive queue peek — identical |
+| `DELETE /_aws/sqs/messages?QueueUrl=<url>` | Purge queue — identical                |
 
 ### 7 — Testcontainers
 
@@ -189,17 +189,17 @@ services:
 ```yaml title="docker-compose.yml (after — Floci, minimal change)"
 services:
   floci:
-    image: floci/floci:latest-compat  # (1)
+    image: floci/floci:latest-compat # (1)
     ports:
       - "4566:4566"
     environment:
-      LOCALSTACK_HOST: floci          # translated automatically — no rename needed
+      LOCALSTACK_HOST: floci # translated automatically — no rename needed
       PERSISTENCE: "1"
       LAMBDA_DOCKER_NETWORK: myapp_default
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./data:/app/data              # (2)
-      - ./init/ready.d:/etc/localstack/init/ready.d:ro  # compat path — unchanged
+      - ./data:/app/data # (2)
+      - ./init/ready.d:/etc/localstack/init/ready.d:ro # compat path — unchanged
 ```
 
 1. Switch to `latest-compat` if your init scripts use `aws` or `boto3`.
@@ -219,10 +219,10 @@ S3Client s3 = S3Client.builder()
 
 Floci also registers its own wildcard DNS domains for virtual-hosted style:
 
-| Domain | Usage |
-|---|---|
+| Domain                    | Usage                                                    |
+| ------------------------- | -------------------------------------------------------- |
 | `*.s3.localhost.floci.io` | S3 virtual-hosted style (`bucket.s3.localhost.floci.io`) |
-| `*.localhost.floci.io` | Direct subdomain style (`bucket.localhost.floci.io`) |
+| `*.localhost.floci.io`    | Direct subdomain style (`bucket.localhost.floci.io`)     |
 
 DNS resolution works differently depending on where the client runs:
 
@@ -244,10 +244,10 @@ See [S3 → Virtual-Hosted Style](../services/s3.md#virtual-hosted-style) for fu
 
 ## Known differences
 
-| Area | LocalStack | Floci |
-|---|---|---|
-| Lambda executor | Configurable (`LAMBDA_EXECUTOR`) | Always Docker containers |
-| `LAMBDA_REMOTE_DOCKER` | Supported | Not supported — use per-function `S3Bucket=hot-reload` instead |
-| Service selection | `SERVICES=sqs,s3,...` | All 41 services start automatically; no selection |
-| Data directory | `/var/lib/localstack` | `/app/data` |
-| Log variable | `LS_LOG` / `DEBUG` | `QUARKUS_LOG_LEVEL` |
+| Area                   | LocalStack                       | Floci                                                          |
+| ---------------------- | -------------------------------- | -------------------------------------------------------------- |
+| Lambda executor        | Configurable (`LAMBDA_EXECUTOR`) | Always Docker containers                                       |
+| `LAMBDA_REMOTE_DOCKER` | Supported                        | Not supported — use per-function `S3Bucket=hot-reload` instead |
+| Service selection      | `SERVICES=sqs,s3,...`            | All 41 services start automatically; no selection              |
+| Data directory         | `/var/lib/localstack`            | `/app/data`                                                    |
+| Log variable           | `LS_LOG` / `DEBUG`               | `QUARKUS_LOG_LEVEL`                                            |

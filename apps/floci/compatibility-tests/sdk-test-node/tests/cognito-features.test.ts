@@ -9,8 +9,8 @@
  *   #235 — AdminSetUserPassword(Permanent=false) changes the password
  */
 
-import { createPublicKey, createVerify } from 'node:crypto';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { createPublicKey, createVerify } from "node:crypto";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   CognitoIdentityProviderClient,
   CreateUserPoolCommand,
@@ -26,15 +26,15 @@ import {
   MessageActionType,
   ExplicitAuthFlowsType,
   AuthFlowType,
-  ChallengeNameType,
-} from '@aws-sdk/client-cognito-identity-provider';
-import { makeClient, uniqueName, ENDPOINT } from './setup';
+  ChallengeNameType
+} from "@aws-sdk/client-cognito-identity-provider";
+import { makeClient, uniqueName, ENDPOINT } from "./setup";
 
 // ── JWT helpers ──────────────────────────────────────────────────────────────
 
 function decodeJwtPart(token: string, index: number): any {
-  const part = token.split('.')[index];
-  return JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
+  const part = token.split(".")[index];
+  return JSON.parse(Buffer.from(part, "base64url").toString("utf8"));
 }
 
 async function fetchJwk(poolId: string, kid: string): Promise<any> {
@@ -44,21 +44,21 @@ async function fetchJwk(poolId: string, kid: string): Promise<any> {
 }
 
 function verifyRs256(token: string, jwk: any): boolean {
-  const [headerB64, payloadB64, sigB64] = token.split('.');
-  const key = createPublicKey({ key: jwk, format: 'jwk' });
-  const verifier = createVerify('RSA-SHA256');
+  const [headerB64, payloadB64, sigB64] = token.split(".");
+  const key = createPublicKey({ key: jwk, format: "jwk" });
+  const verifier = createVerify("RSA-SHA256");
   verifier.update(`${headerB64}.${payloadB64}`);
-  return verifier.verify(key, Buffer.from(sigB64, 'base64url'));
+  return verifier.verify(key, Buffer.from(sigB64, "base64url"));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
+describe("Cognito features (#218 #220 #228 #229 #233 #234 #235)", () => {
   let cognito: CognitoIdentityProviderClient;
   let poolId: string;
   let clientId: string;
   const username = `compat-${uniqueName()}@example.com`;
-  const password = 'CompatPass1!';
+  const password = "CompatPass1!";
   let userSub: string;
 
   beforeAll(() => {
@@ -68,44 +68,44 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
   afterAll(async () => {
     try {
       if (poolId) await cognito.send(new DeleteUserPoolCommand({ UserPoolId: poolId }));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   });
 
   // ── Setup ──────────────────────────────────────────────────────────────────
 
-  it('creates pool', async () => {
-    const resp = await cognito.send(
-      new CreateUserPoolCommand({ PoolName: `compat-pool-${uniqueName()}` })
-    );
+  it("creates pool", async () => {
+    const resp = await cognito.send(new CreateUserPoolCommand({ PoolName: `compat-pool-${uniqueName()}` }));
     poolId = resp.UserPool!.Id!;
     expect(poolId).toBeTruthy();
   });
 
-  it('creates client', async () => {
+  it("creates client", async () => {
     const resp = await cognito.send(
       new CreateUserPoolClientCommand({
         UserPoolId: poolId,
         ClientName: `compat-client-${uniqueName()}`,
         ExplicitAuthFlows: [
           ExplicitAuthFlowsType.ALLOW_USER_PASSWORD_AUTH,
-          ExplicitAuthFlowsType.ALLOW_REFRESH_TOKEN_AUTH,
-        ],
+          ExplicitAuthFlowsType.ALLOW_REFRESH_TOKEN_AUTH
+        ]
       })
     );
     clientId = resp.UserPoolClient!.ClientId!;
     expect(clientId).toBeTruthy();
   });
 
-  it('creates user with permanent password', async () => {
+  it("creates user with permanent password", async () => {
     await cognito.send(
       new AdminCreateUserCommand({
         UserPoolId: poolId,
         Username: username,
         UserAttributes: [
-          { Name: 'email', Value: username },
-          { Name: 'email_verified', Value: 'true' },
+          { Name: "email", Value: username },
+          { Name: "email_verified", Value: "true" }
         ],
-        MessageAction: MessageActionType.SUPPRESS,
+        MessageAction: MessageActionType.SUPPRESS
       })
     );
     await cognito.send(
@@ -113,27 +113,25 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
         UserPoolId: poolId,
         Username: username,
         Password: password,
-        Permanent: true,
+        Permanent: true
       })
     );
 
-    const user = await cognito.send(
-      new AdminGetUserCommand({ UserPoolId: poolId, Username: username })
-    );
-    userSub = user.UserAttributes?.find((a) => a.Name === 'sub')?.Value ?? '';
+    const user = await cognito.send(new AdminGetUserCommand({ UserPoolId: poolId, Username: username }));
+    userSub = user.UserAttributes?.find((a) => a.Name === "sub")?.Value ?? "";
     expect(userSub).toBeTruthy();
   });
 
   // ── Issue #229 — InitiateAuth rejects when no password hash set ────────────
 
-  it('#229: rejects auth when user has no password set', async () => {
+  it("#229: rejects auth when user has no password set", async () => {
     const noHashUser = `no-hash-${uniqueName()}@example.com`;
     await cognito.send(
       new AdminCreateUserCommand({
         UserPoolId: poolId,
         Username: noHashUser,
-        UserAttributes: [{ Name: 'email', Value: noHashUser }],
-        MessageAction: MessageActionType.SUPPRESS,
+        UserAttributes: [{ Name: "email", Value: noHashUser }],
+        MessageAction: MessageActionType.SUPPRESS
       })
     );
 
@@ -142,19 +140,19 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
         new InitiateAuthCommand({
           ClientId: clientId,
           AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-          AuthParameters: { USERNAME: noHashUser, PASSWORD: 'anything' },
+          AuthParameters: { USERNAME: noHashUser, PASSWORD: "anything" }
         })
       )
     ).rejects.toThrow();
   });
 
-  it('#229: rejects wrong password', async () => {
+  it("#229: rejects wrong password", async () => {
     await expect(
       cognito.send(
         new InitiateAuthCommand({
           ClientId: clientId,
           AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-          AuthParameters: { USERNAME: username, PASSWORD: 'WrongPass1!' },
+          AuthParameters: { USERNAME: username, PASSWORD: "WrongPass1!" }
         })
       )
     ).rejects.toThrow();
@@ -162,15 +160,15 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
 
   // ── Issue #235 — AdminSetUserPassword(Permanent=false) changes the password ─
 
-  it('#235: Permanent=false changes password and sets FORCE_CHANGE_PASSWORD status', async () => {
-    const tempPass = 'TempPass1!';
+  it("#235: Permanent=false changes password and sets FORCE_CHANGE_PASSWORD status", async () => {
+    const tempPass = "TempPass1!";
 
     await cognito.send(
       new AdminSetUserPasswordCommand({
         UserPoolId: poolId,
         Username: username,
         Password: tempPass,
-        Permanent: false,
+        Permanent: false
       })
     );
 
@@ -180,7 +178,7 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
         new InitiateAuthCommand({
           ClientId: clientId,
           AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-          AuthParameters: { USERNAME: username, PASSWORD: password },
+          AuthParameters: { USERNAME: username, PASSWORD: password }
         })
       )
     ).rejects.toThrow();
@@ -190,7 +188,7 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: tempPass },
+        AuthParameters: { USERNAME: username, PASSWORD: tempPass }
       })
     );
     expect(challengeResp.ChallengeName).toBe(ChallengeNameType.NEW_PASSWORD_REQUIRED);
@@ -201,31 +199,31 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
         UserPoolId: poolId,
         Username: username,
         Password: password,
-        Permanent: true,
+        Permanent: true
       })
     );
   });
 
   // ── Issue #228 — AccessToken contains client_id claim ─────────────────────
 
-  it('#228: AccessToken contains client_id claim matching the ClientId', async () => {
+  it("#228: AccessToken contains client_id claim matching the ClientId", async () => {
     const resp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const payload = decodeJwtPart(resp.AuthenticationResult!.AccessToken!, 1);
     expect(payload.client_id).toBe(clientId);
   });
 
-  it('#228: IdToken does not contain client_id claim', async () => {
+  it("#228: IdToken does not contain client_id claim", async () => {
     const resp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const payload = decodeJwtPart(resp.AuthenticationResult!.IdToken!, 1);
@@ -234,25 +232,25 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
 
   // ── Issue #218 — RS256 JWT signing + JWKS verification ────────────────────
 
-  it('#218: AccessToken header declares alg=RS256 with a kid', async () => {
+  it("#218: AccessToken header declares alg=RS256 with a kid", async () => {
     const resp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const header = decodeJwtPart(resp.AuthenticationResult!.AccessToken!, 0);
-    expect(header.alg).toBe('RS256');
+    expect(header.alg).toBe("RS256");
     expect(header.kid).toBeTruthy();
   });
 
-  it('#218: AccessToken RS256 signature verifies against JWKS public key', async () => {
+  it("#218: AccessToken RS256 signature verifies against JWKS public key", async () => {
     const resp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const token = resp.AuthenticationResult!.AccessToken!;
@@ -264,35 +262,31 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
 
   // ── Issue #220 — AdminGetUser accepts sub UUID and email alias ────────────
 
-  it('#220: AdminGetUser resolves by sub UUID', async () => {
+  it("#220: AdminGetUser resolves by sub UUID", async () => {
     expect(userSub).toBeTruthy();
-    const resp = await cognito.send(
-      new AdminGetUserCommand({ UserPoolId: poolId, Username: userSub })
-    );
+    const resp = await cognito.send(new AdminGetUserCommand({ UserPoolId: poolId, Username: userSub }));
     expect(resp.Username).toBe(username);
   });
 
-  it('#220: AdminGetUser resolves by email alias', async () => {
-    const resp = await cognito.send(
-      new AdminGetUserCommand({ UserPoolId: poolId, Username: username })
-    );
+  it("#220: AdminGetUser resolves by email alias", async () => {
+    const resp = await cognito.send(new AdminGetUserCommand({ UserPoolId: poolId, Username: username }));
     expect(resp.Username).toBe(username);
   });
 
-  it('#220: AdminSetUserPassword works with sub UUID as Username', async () => {
+  it("#220: AdminSetUserPassword works with sub UUID as Username", async () => {
     await cognito.send(
       new AdminSetUserPasswordCommand({
         UserPoolId: poolId,
         Username: userSub,
         Password: password,
-        Permanent: true,
+        Permanent: true
       })
     );
     const resp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     expect(resp.AuthenticationResult?.AccessToken).toBeTruthy();
@@ -300,49 +294,49 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
 
   // ── Issue #233 — ListUsers respects Filter parameter ─────────────────────
 
-  it('#233: ListUsers without filter returns the user', async () => {
+  it("#233: ListUsers without filter returns the user", async () => {
     const resp = await cognito.send(new ListUsersCommand({ UserPoolId: poolId }));
     expect(resp.Users?.some((u) => u.Username === username)).toBe(true);
   });
 
-  it('#233: ListUsers with email exact-match filter returns only matching user', async () => {
+  it("#233: ListUsers with email exact-match filter returns only matching user", async () => {
     const resp = await cognito.send(
       new ListUsersCommand({
         UserPoolId: poolId,
-        Filter: `email = "${username}"`,
+        Filter: `email = "${username}"`
       })
     );
     expect(resp.Users).toHaveLength(1);
     expect(resp.Users![0].Username).toBe(username);
   });
 
-  it('#233: ListUsers with email starts-with filter returns matching users', async () => {
+  it("#233: ListUsers with email starts-with filter returns matching users", async () => {
     const resp = await cognito.send(
       new ListUsersCommand({
         UserPoolId: poolId,
-        Filter: `email ^= "compat-"`,
+        Filter: `email ^= "compat-"`
       })
     );
     expect(resp.Users?.some((u) => u.Username === username)).toBe(true);
   });
 
-  it('#233: ListUsers with sub exact-match filter returns only that user', async () => {
+  it("#233: ListUsers with sub exact-match filter returns only that user", async () => {
     expect(userSub).toBeTruthy();
     const resp = await cognito.send(
       new ListUsersCommand({
         UserPoolId: poolId,
-        Filter: `sub = "${userSub}"`,
+        Filter: `sub = "${userSub}"`
       })
     );
     expect(resp.Users).toHaveLength(1);
     expect(resp.Users![0].Username).toBe(username);
   });
 
-  it('#233: ListUsers with non-matching filter returns empty list', async () => {
+  it("#233: ListUsers with non-matching filter returns empty list", async () => {
     const resp = await cognito.send(
       new ListUsersCommand({
         UserPoolId: poolId,
-        Filter: `email = "nobody@nowhere.invalid"`,
+        Filter: `email = "nobody@nowhere.invalid"`
       })
     );
     expect(resp.Users).toHaveLength(0);
@@ -350,23 +344,23 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
 
   // ── Issue #234 — GetTokensFromRefreshToken ────────────────────────────────
 
-  it('#234: InitiateAuth returns a structured refresh token', async () => {
+  it("#234: InitiateAuth returns a structured refresh token", async () => {
     const resp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     expect(resp.AuthenticationResult?.RefreshToken).toBeTruthy();
   });
 
-  it('#234: GetTokensFromRefreshToken returns new AccessToken and IdToken', async () => {
+  it("#234: GetTokensFromRefreshToken returns new AccessToken and IdToken", async () => {
     const loginResp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const refreshToken = loginResp.AuthenticationResult!.RefreshToken!;
@@ -374,7 +368,7 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
     const refreshResp = await cognito.send(
       new GetTokensFromRefreshTokenCommand({
         ClientId: clientId,
-        RefreshToken: refreshToken,
+        RefreshToken: refreshToken
       })
     );
 
@@ -384,12 +378,12 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
     expect(refreshResp.AuthenticationResult?.RefreshToken).toBeFalsy();
   });
 
-  it('#234: GetTokensFromRefreshToken returns token with correct client_id claim', async () => {
+  it("#234: GetTokensFromRefreshToken returns token with correct client_id claim", async () => {
     const loginResp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const refreshToken = loginResp.AuthenticationResult!.RefreshToken!;
@@ -397,7 +391,7 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
     const refreshResp = await cognito.send(
       new GetTokensFromRefreshTokenCommand({
         ClientId: clientId,
-        RefreshToken: refreshToken,
+        RefreshToken: refreshToken
       })
     );
 
@@ -405,42 +399,58 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
     expect(payload.client_id).toBe(clientId);
   });
 
-  it('#234: GetTokensFromRefreshToken rejects invalid refresh token', async () => {
+  it("#234: GetTokensFromRefreshToken rejects invalid refresh token", async () => {
     await expect(
       cognito.send(
         new GetTokensFromRefreshTokenCommand({
           ClientId: clientId,
-          RefreshToken: 'not-a-valid-token',
+          RefreshToken: "not-a-valid-token"
         })
       )
     ).rejects.toThrow();
   });
 
-  it('DescribeUserPool returns all 20 standard SchemaAttributes', async () => {
+  it("DescribeUserPool returns all 20 standard SchemaAttributes", async () => {
     const resp = await cognito.send(new DescribeUserPoolCommand({ UserPoolId: poolId }));
     const schema = resp.UserPool?.SchemaAttributes ?? [];
     expect(schema).toHaveLength(20);
     const names = schema.map((a) => a.Name);
     const expected = [
-      'sub', 'name', 'given_name', 'family_name', 'middle_name', 'nickname',
-      'preferred_username', 'profile', 'picture', 'website', 'email',
-      'email_verified', 'gender', 'birthdate', 'zoneinfo', 'locale',
-      'phone_number', 'phone_number_verified', 'address', 'updated_at',
+      "sub",
+      "name",
+      "given_name",
+      "family_name",
+      "middle_name",
+      "nickname",
+      "preferred_username",
+      "profile",
+      "picture",
+      "website",
+      "email",
+      "email_verified",
+      "gender",
+      "birthdate",
+      "zoneinfo",
+      "locale",
+      "phone_number",
+      "phone_number_verified",
+      "address",
+      "updated_at"
     ];
     for (const attr of expected) {
       expect(names).toContain(attr);
     }
-    const sub = schema.find((a) => a.Name === 'sub');
+    const sub = schema.find((a) => a.Name === "sub");
     expect(sub?.Required).toBe(true);
     expect(sub?.Mutable).toBe(false);
   });
 
-  it('#234: REFRESH_TOKEN_AUTH flow also works with structured token', async () => {
+  it("#234: REFRESH_TOKEN_AUTH flow also works with structured token", async () => {
     const loginResp = await cognito.send(
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-        AuthParameters: { USERNAME: username, PASSWORD: password },
+        AuthParameters: { USERNAME: username, PASSWORD: password }
       })
     );
     const refreshToken = loginResp.AuthenticationResult!.RefreshToken!;
@@ -449,7 +459,7 @@ describe('Cognito features (#218 #220 #228 #229 #233 #234 #235)', () => {
       new InitiateAuthCommand({
         ClientId: clientId,
         AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
-        AuthParameters: { REFRESH_TOKEN: refreshToken },
+        AuthParameters: { REFRESH_TOKEN: refreshToken }
       })
     );
 

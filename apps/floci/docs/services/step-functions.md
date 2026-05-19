@@ -5,27 +5,27 @@
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateStateMachine` | Create a state machine (Standard or Express) |
-| `DescribeStateMachine` | Get state machine definition and metadata |
-| `ListStateMachines` | List all state machines |
-| `DeleteStateMachine` | Delete a state machine |
+| Action                           | Description                                                 |
+| -------------------------------- | ----------------------------------------------------------- |
+| `CreateStateMachine`             | Create a state machine (Standard or Express)                |
+| `DescribeStateMachine`           | Get state machine definition and metadata                   |
+| `ListStateMachines`              | List all state machines                                     |
+| `DeleteStateMachine`             | Delete a state machine                                      |
 | `ValidateStateMachineDefinition` | Validate an ASL definition without creating a state machine |
-| `StartExecution` | Start a new execution |
-| `DescribeExecution` | Get execution status and output |
-| `ListExecutions` | List executions for a state machine |
-| `StopExecution` | Stop a running execution |
-| `GetExecutionHistory` | Get the full event history of an execution |
-| `SendTaskSuccess` | Report task success (for `.waitForTaskToken` tasks) |
-| `SendTaskFailure` | Report task failure |
-| `SendTaskHeartbeat` | Send a heartbeat for long-running tasks |
+| `StartExecution`                 | Start a new execution                                       |
+| `DescribeExecution`              | Get execution status and output                             |
+| `ListExecutions`                 | List executions for a state machine                         |
+| `StopExecution`                  | Stop a running execution                                    |
+| `GetExecutionHistory`            | Get the full event history of an execution                  |
+| `SendTaskSuccess`                | Report task success (for `.waitForTaskToken` tasks)         |
+| `SendTaskFailure`                | Report task failure                                         |
+| `SendTaskHeartbeat`              | Send a heartbeat for long-running tasks                     |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_STEPFUNCTIONS_ENABLED` | `true` | Enable or disable the service |
+| Variable                               | Default | Description                   |
+| -------------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_STEPFUNCTIONS_ENABLED` | `true`  | Enable or disable the service |
 
 ## Examples
 

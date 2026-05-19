@@ -4,38 +4,38 @@ The Specify CLI supports a wide range of AI coding agents. When you run `specify
 
 ## Supported AI Coding Agents
 
-| Agent                                                                                | Key              | Notes                                                                                                                                     |
-| ------------------------------------------------------------------------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [Amp](https://ampcode.com/)                                                          | `amp`            |                                                                                                                                           |
-| [Antigravity (agy)](https://antigravity.google/)                                     | `agy`            | Skills-based integration; skills are installed automatically                                                                               |
-| [Auggie CLI](https://docs.augmentcode.com/cli/overview)                              | `auggie`         |                                                                                                                                           |
-| [Claude Code](https://www.anthropic.com/claude-code)                                 | `claude`         | Skills-based integration; installs skills in `.claude/skills`                                                                              |
-| [CodeBuddy CLI](https://www.codebuddy.ai/cli)                                        | `codebuddy`      |                                                                                                                                           |
-| [Codex CLI](https://github.com/openai/codex)                                         | `codex`          | Skills-based integration; installs skills into `.agents/skills` and invokes them as `$speckit-<command>` |
-| [Cursor](https://cursor.sh/)                                                         | `cursor-agent`   |                                                                                                                                           |
-| [Devin for Terminal](https://cli.devin.ai/docs)                                      | `devin`          | Skills-based integration; installs skills into `.devin/skills/` and invokes them as `/speckit-<command>` |
-| [Forge](https://forgecode.dev/)                                                      | `forge`          |                                                                                                                                           |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli)                            | `gemini`         |                                                                                                                                           |
-| [GitHub Copilot](https://code.visualstudio.com/)                                     | `copilot`        |                                                                                                                                           |
-| [Goose](https://block.github.io/goose/)                                              | `goose`          | Uses YAML recipe format in `.goose/recipes/`                                                                                              |
-| [IBM Bob](https://www.ibm.com/products/bob)                                          | `bob`            | IDE-based agent                                                                                                                           |
-| [iFlow CLI](https://docs.iflow.cn/en/cli/quickstart)                                 | `iflow`          |                                                                                                                                           |
-| [Junie](https://junie.jetbrains.com/)                                                | `junie`          |                                                                                                                                           |
-| [Kilo Code](https://github.com/Kilo-Org/kilocode)                                    | `kilocode`       |                                                                                                                                           |
-| [Kimi Code](https://code.kimi.com/)                                                  | `kimi`           | Skills-based integration; supports `--migrate-legacy` for dotted→hyphenated directory migration                                            |
-| [Kiro CLI](https://kiro.dev/docs/cli/)                                               | `kiro-cli`       | Kiro CLI does not substitute `$ARGUMENTS` in file-based prompts, so Spec Kit ships a prose fallback at render time (see [Manage prompts](https://kiro.dev/docs/cli/chat/manage-prompts/) and issue [#1926](https://github.com/github/spec-kit/issues/1926)). Alias: `--integration kiro` |
-| [Lingma](https://lingma.aliyun.com/)                                                 | `lingma`         | Skills-based integration; skills are installed automatically                                                                               |
-| [Mistral Vibe](https://github.com/mistralai/mistral-vibe)                            | `vibe`           |                                                                                                                                           |
-| [opencode](https://opencode.ai/)                                                     | `opencode`       |                                                                                                                                           |
-| [Pi Coding Agent](https://pi.dev)                                                    | `pi`             | Pi doesn't have MCP support out of the box, so `taskstoissues` won't work as intended. MCP support can be added via [extensions](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#extensions) |
-| [Qoder CLI](https://qoder.com/cli)                                                   | `qodercli`       |                                                                                                                                           |
-| [Qwen Code](https://github.com/QwenLM/qwen-code)                                     | `qwen`           |                                                                                                                                           |
-| [Roo Code](https://roocode.com/)                                                     | `roo`            |                                                                                                                                           |
-| [SHAI (OVHcloud)](https://github.com/ovh/shai)                                       | `shai`           |                                                                                                                                           |
-| [Tabnine CLI](https://docs.tabnine.com/main/getting-started/tabnine-cli)             | `tabnine`        |                                                                                                                                           |
-| [Trae](https://www.trae.ai/)                                                         | `trae`           | Skills-based integration; skills are installed automatically                                                                               |
-| [Windsurf](https://windsurf.com/)                                                    | `windsurf`       |                                                                                                                                           |
-| Generic                                                                              | `generic`        | Bring your own agent — use `--integration generic --integration-options="--commands-dir <path>"` for AI coding agents not listed above     |
+| Agent                                                                    | Key            | Notes                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Amp](https://ampcode.com/)                                              | `amp`          |                                                                                                                                                                                                                                                                                          |
+| [Antigravity (agy)](https://antigravity.google/)                         | `agy`          | Skills-based integration; skills are installed automatically                                                                                                                                                                                                                             |
+| [Auggie CLI](https://docs.augmentcode.com/cli/overview)                  | `auggie`       |                                                                                                                                                                                                                                                                                          |
+| [Claude Code](https://www.anthropic.com/claude-code)                     | `claude`       | Skills-based integration; installs skills in `.claude/skills`                                                                                                                                                                                                                            |
+| [CodeBuddy CLI](https://www.codebuddy.ai/cli)                            | `codebuddy`    |                                                                                                                                                                                                                                                                                          |
+| [Codex CLI](https://github.com/openai/codex)                             | `codex`        | Skills-based integration; installs skills into `.agents/skills` and invokes them as `$speckit-<command>`                                                                                                                                                                                 |
+| [Cursor](https://cursor.sh/)                                             | `cursor-agent` |                                                                                                                                                                                                                                                                                          |
+| [Devin for Terminal](https://cli.devin.ai/docs)                          | `devin`        | Skills-based integration; installs skills into `.devin/skills/` and invokes them as `/speckit-<command>`                                                                                                                                                                                 |
+| [Forge](https://forgecode.dev/)                                          | `forge`        |                                                                                                                                                                                                                                                                                          |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli)                | `gemini`       |                                                                                                                                                                                                                                                                                          |
+| [GitHub Copilot](https://code.visualstudio.com/)                         | `copilot`      |                                                                                                                                                                                                                                                                                          |
+| [Goose](https://block.github.io/goose/)                                  | `goose`        | Uses YAML recipe format in `.goose/recipes/`                                                                                                                                                                                                                                             |
+| [IBM Bob](https://www.ibm.com/products/bob)                              | `bob`          | IDE-based agent                                                                                                                                                                                                                                                                          |
+| [iFlow CLI](https://docs.iflow.cn/en/cli/quickstart)                     | `iflow`        |                                                                                                                                                                                                                                                                                          |
+| [Junie](https://junie.jetbrains.com/)                                    | `junie`        |                                                                                                                                                                                                                                                                                          |
+| [Kilo Code](https://github.com/Kilo-Org/kilocode)                        | `kilocode`     |                                                                                                                                                                                                                                                                                          |
+| [Kimi Code](https://code.kimi.com/)                                      | `kimi`         | Skills-based integration; supports `--migrate-legacy` for dotted→hyphenated directory migration                                                                                                                                                                                          |
+| [Kiro CLI](https://kiro.dev/docs/cli/)                                   | `kiro-cli`     | Kiro CLI does not substitute `$ARGUMENTS` in file-based prompts, so Spec Kit ships a prose fallback at render time (see [Manage prompts](https://kiro.dev/docs/cli/chat/manage-prompts/) and issue [#1926](https://github.com/github/spec-kit/issues/1926)). Alias: `--integration kiro` |
+| [Lingma](https://lingma.aliyun.com/)                                     | `lingma`       | Skills-based integration; skills are installed automatically                                                                                                                                                                                                                             |
+| [Mistral Vibe](https://github.com/mistralai/mistral-vibe)                | `vibe`         |                                                                                                                                                                                                                                                                                          |
+| [opencode](https://opencode.ai/)                                         | `opencode`     |                                                                                                                                                                                                                                                                                          |
+| [Pi Coding Agent](https://pi.dev)                                        | `pi`           | Pi doesn't have MCP support out of the box, so `taskstoissues` won't work as intended. MCP support can be added via [extensions](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#extensions)                                                                         |
+| [Qoder CLI](https://qoder.com/cli)                                       | `qodercli`     |                                                                                                                                                                                                                                                                                          |
+| [Qwen Code](https://github.com/QwenLM/qwen-code)                         | `qwen`         |                                                                                                                                                                                                                                                                                          |
+| [Roo Code](https://roocode.com/)                                         | `roo`          |                                                                                                                                                                                                                                                                                          |
+| [SHAI (OVHcloud)](https://github.com/ovh/shai)                           | `shai`         |                                                                                                                                                                                                                                                                                          |
+| [Tabnine CLI](https://docs.tabnine.com/main/getting-started/tabnine-cli) | `tabnine`      |                                                                                                                                                                                                                                                                                          |
+| [Trae](https://www.trae.ai/)                                             | `trae`         | Skills-based integration; skills are installed automatically                                                                                                                                                                                                                             |
+| [Windsurf](https://windsurf.com/)                                        | `windsurf`     |                                                                                                                                                                                                                                                                                          |
+| Generic                                                                  | `generic`      | Bring your own agent — use `--integration generic --integration-options="--commands-dir <path>"` for AI coding agents not listed above                                                                                                                                                   |
 
 ## List Available Integrations
 
@@ -53,11 +53,11 @@ The list also shows whether each built-in integration is declared multi-install 
 specify integration install <key>
 ```
 
-| Option                   | Description                                                              |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `--script sh\|ps`        | Script type: `sh` (bash/zsh) or `ps` (PowerShell)                        |
-| `--force`                | Opt in to installing alongside integrations that are not declared multi-install safe |
-| `--integration-options`  | Integration-specific options (e.g. `--integration-options="--commands-dir .myagent/cmds"`) |
+| Option                  | Description                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| `--script sh\|ps`       | Script type: `sh` (bash/zsh) or `ps` (PowerShell)                                          |
+| `--force`               | Opt in to installing alongside integrations that are not declared multi-install safe       |
+| `--integration-options` | Integration-specific options (e.g. `--integration-options="--commands-dir .myagent/cmds"`) |
 
 Installs the specified integration into the current project. If another integration is already installed, the command only proceeds automatically when all involved integrations are declared multi-install safe. Otherwise, use `switch` to replace the default integration or pass `--force` to explicitly opt in to multi-install. If the installation fails partway through, it automatically rolls back to a clean state.
 
@@ -73,9 +73,9 @@ Installing an additional integration does not change the default integration. Us
 specify integration uninstall [<key>]
 ```
 
-| Option    | Description                                         |
-| --------- | --------------------------------------------------- |
-| `--force` | Remove files even if they have been modified         |
+| Option    | Description                                  |
+| --------- | -------------------------------------------- |
+| `--force` | Remove files even if they have been modified |
 
 Uninstalls the current integration (or the specified one). Spec Kit tracks every file created during install along with a SHA-256 hash of the original content:
 
@@ -89,11 +89,11 @@ Uninstalls the current integration (or the specified one). Spec Kit tracks every
 specify integration switch <key>
 ```
 
-| Option                   | Description                                                              |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `--script sh\|ps`        | Script type: `sh` (bash/zsh) or `ps` (PowerShell)                        |
-| `--force`                | Force removal of modified files during uninstall; when the target is already installed, overwrite managed shared templates while changing the default |
-| `--integration-options`  | Options for the target integration when it is not already installed      |
+| Option                  | Description                                                                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--script sh\|ps`       | Script type: `sh` (bash/zsh) or `ps` (PowerShell)                                                                                                     |
+| `--force`               | Force removal of modified files during uninstall; when the target is already installed, overwrite managed shared templates while changing the default |
+| `--integration-options` | Options for the target integration when it is not already installed                                                                                   |
 
 If the target integration is not already installed, equivalent to running `uninstall` followed by `install` in a single step. In this mode, `--force` controls whether modified files from the removed integration are deleted. If the target integration is already installed, `switch` only changes the default integration, like `use`; in this mode, `--force` controls whether managed shared templates are overwritten while the default changes. `--integration-options` is rejected for already-installed targets because changing integration options requires reinstalling managed files; run `upgrade <key> --integration-options ...` first, then `use <key>`.
 
@@ -103,8 +103,8 @@ If the target integration is not already installed, equivalent to running `unins
 specify integration use <key>
 ```
 
-| Option    | Description                                         |
-| --------- | --------------------------------------------------- |
+| Option    | Description                                                   |
+| --------- | ------------------------------------------------------------- |
 | `--force` | Overwrite managed shared templates while changing the default |
 
 Sets the default integration without uninstalling any other installed integrations. This also refreshes managed shared templates so command references match the new default integration's invocation style. Modified or untracked shared templates are preserved unless `--force` is used.
@@ -115,11 +115,11 @@ Sets the default integration without uninstalling any other installed integratio
 specify integration upgrade [<key>]
 ```
 
-| Option                   | Description                                                              |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `--force`                | Overwrite files even if they have been modified                          |
-| `--script sh\|ps`        | Script type: `sh` (bash/zsh) or `ps` (PowerShell)                        |
-| `--integration-options`  | Options for the integration                                              |
+| Option                  | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `--force`               | Overwrite files even if they have been modified   |
+| `--script sh\|ps`       | Script type: `sh` (bash/zsh) or `ps` (PowerShell) |
+| `--integration-options` | Options for the integration                       |
 
 Reinstalls an installed integration with updated templates and commands (e.g., after upgrading Spec Kit). Defaults to the default integration; if a key is provided, it must be one of the installed integrations. Detects locally modified files and blocks the upgrade unless `--force` is used. Stale files from the previous install that are no longer needed are removed automatically. Shared templates stay aligned with the default integration even when upgrading a non-default integration.
 
@@ -127,10 +127,10 @@ Reinstalls an installed integration with updated templates and commands (e.g., a
 
 Some integrations accept additional options via `--integration-options`:
 
-| Integration | Option              | Description                                                    |
-| ----------- | ------------------- | -------------------------------------------------------------- |
-| `generic`   | `--commands-dir`    | Required. Directory for command files                          |
-| `kimi`      | `--migrate-legacy`  | Migrate legacy dotted skill directories to hyphenated format   |
+| Integration | Option             | Description                                                  |
+| ----------- | ------------------ | ------------------------------------------------------------ |
+| `generic`   | `--commands-dir`   | Required. Directory for command files                        |
+| `kimi`      | `--migrate-legacy` | Migrate legacy dotted skill directories to hyphenated format |
 
 Example:
 
@@ -152,25 +152,25 @@ An integration is multi-install safe when it uses isolated agent directories, a 
 
 The currently declared multi-install safe integrations are:
 
-| Key | Isolation |
-| --- | --------- |
-| `auggie` | `.augment/commands`, `.augment/rules/specify-rules.md` |
-| `claude` | `.claude/skills`, `CLAUDE.md` |
-| `codebuddy` | `.codebuddy/commands`, `CODEBUDDY.md` |
-| `codex` | `.agents/skills`, `AGENTS.md` |
-| `cursor-agent` | `.cursor/skills`, `.cursor/rules/specify-rules.mdc` |
-| `gemini` | `.gemini/commands`, `GEMINI.md` |
-| `iflow` | `.iflow/commands`, `IFLOW.md` |
-| `junie` | `.junie/commands`, `.junie/AGENTS.md` |
-| `kilocode` | `.kilocode/workflows`, `.kilocode/rules/specify-rules.md` |
-| `kimi` | `.kimi/skills`, `KIMI.md` |
-| `qodercli` | `.qoder/commands`, `QODER.md` |
-| `qwen` | `.qwen/commands`, `QWEN.md` |
-| `roo` | `.roo/commands`, `.roo/rules/specify-rules.md` |
-| `shai` | `.shai/commands`, `SHAI.md` |
-| `tabnine` | `.tabnine/agent/commands`, `TABNINE.md` |
-| `trae` | `.trae/skills`, `.trae/rules/project_rules.md` |
-| `windsurf` | `.windsurf/workflows`, `.windsurf/rules/specify-rules.md` |
+| Key            | Isolation                                                 |
+| -------------- | --------------------------------------------------------- |
+| `auggie`       | `.augment/commands`, `.augment/rules/specify-rules.md`    |
+| `claude`       | `.claude/skills`, `CLAUDE.md`                             |
+| `codebuddy`    | `.codebuddy/commands`, `CODEBUDDY.md`                     |
+| `codex`        | `.agents/skills`, `AGENTS.md`                             |
+| `cursor-agent` | `.cursor/skills`, `.cursor/rules/specify-rules.mdc`       |
+| `gemini`       | `.gemini/commands`, `GEMINI.md`                           |
+| `iflow`        | `.iflow/commands`, `IFLOW.md`                             |
+| `junie`        | `.junie/commands`, `.junie/AGENTS.md`                     |
+| `kilocode`     | `.kilocode/workflows`, `.kilocode/rules/specify-rules.md` |
+| `kimi`         | `.kimi/skills`, `KIMI.md`                                 |
+| `qodercli`     | `.qoder/commands`, `QODER.md`                             |
+| `qwen`         | `.qwen/commands`, `QWEN.md`                               |
+| `roo`          | `.roo/commands`, `.roo/rules/specify-rules.md`            |
+| `shai`         | `.shai/commands`, `SHAI.md`                               |
+| `tabnine`      | `.tabnine/agent/commands`, `TABNINE.md`                   |
+| `trae`         | `.trae/skills`, `.trae/rules/project_rules.md`            |
+| `windsurf`     | `.windsurf/workflows`, `.windsurf/rules/specify-rules.md` |
 
 Integrations that share a context file or command directory with another integration, require dynamic install paths such as `--commands-dir`, or merge shared tool settings are not declared safe by default. They can still be installed alongside another integration with `--force`.
 

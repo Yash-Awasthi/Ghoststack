@@ -13,13 +13,12 @@ The Scrapling Interactive Shell is an enhanced IPython-based environment designe
     3. You've completed or read the [Main classes](../parsing/main_classes.md) page to know what properties/methods the [Response](../fetching/choosing.md#response-object) class is inheriting from the [Selector](../parsing/main_classes.md#selector) class.
     4. You've completed or read at least one page from the fetchers section to use here for requests: [HTTP requests](../fetching/static.md), [Dynamic websites](../fetching/dynamic.md), or [Dynamic websites with hard protections](../fetching/stealthy.md).
 
-
 ## Why use the Interactive Shell?
 
 The interactive shell transforms web scraping from a slow script-and-run cycle into a fast, exploratory experience. It's perfect for:
 
 - **Rapid prototyping**: Test scraping strategies instantly
-- **Data exploration**: Interactively navigate and extract from websites  
+- **Data exploration**: Interactively navigate and extract from websites
 - **Learning Scrapling**: Experiment with features in real-time
 - **Debugging scrapers**: Step through requests and inspect results
 - **Converting workflows**: Transform curl commands from browser DevTools to a Fetcher request in a one-liner
@@ -71,7 +70,7 @@ The shell provides convenient shortcuts that eliminate boilerplate code:
 - **`post(url, **kwargs)`** - HTTP POST request (instead of `Fetcher.post`)
 - **`put(url, **kwargs)`** - HTTP PUT request (instead of `Fetcher.put`)
 - **`delete(url, **kwargs)`** - HTTP DELETE request (instead of `Fetcher.delete`)
-- **`fetch(url, **kwargs)`** - Browser-based fetch (instead of `DynamicFetcher.fetch`) 
+- **`fetch(url, **kwargs)`** - Browser-based fetch (instead of `DynamicFetcher.fetch`)
 - **`stealthy_fetch(url, **kwargs)`** - Stealthy browser fetch (instead of `StealthyFetcher.fetch`)
 
 The most commonly used classes are automatically available without any import, including `Fetcher`, `AsyncFetcher`, `DynamicFetcher`, `StealthyFetcher`, and `Selector`.
@@ -82,33 +81,33 @@ The shell automatically tracks your requests and pages:
 
 - **Current Page Access**
 
-    The `page` and `response` commands are automatically updated with the last fetched page:
-    
-    ```python
-    get('https://quotes.toscrape.com')
-    # 'page' and 'response' both refer to the last fetched page
-    page.url  # 'https://quotes.toscrape.com'
-    response.status  # Prints 200; Same as page.status
-    ```
+  The `page` and `response` commands are automatically updated with the last fetched page:
+
+  ```python
+  get('https://quotes.toscrape.com')
+  # 'page' and 'response' both refer to the last fetched page
+  page.url  # 'https://quotes.toscrape.com'
+  response.status  # Prints 200; Same as page.status
+  ```
 
 - **Page History**
 
-    The `pages` command keeps track of the last five pages (it's a `Selectors` object):
-    
-    ```python
-     get('https://site1.com')
-     get('https://site2.com') 
-     get('https://site3.com')
-    
-     # Access last 5 pages
-     len(pages)  # `Selectors` object with `page` history -> 3
-     pages[0].url  # First page in history -> 'https://site1.com'
-     pages[-1].url  # Most recent page -> 'https://site3.com'
-    
-     # Work with historical pages
-     for i, old_page in enumerate(pages):
-    ...     print(f"Page {i}: {old_page.url} - {old_page.status}")
-    ```
+  The `pages` command keeps track of the last five pages (it's a `Selectors` object):
+
+  ```python
+   get('https://site1.com')
+   get('https://site2.com')
+   get('https://site3.com')
+
+   # Access last 5 pages
+   len(pages)  # `Selectors` object with `page` history -> 3
+   pages[0].url  # First page in history -> 'https://site1.com'
+   pages[-1].url  # Most recent page -> 'https://site3.com'
+
+   # Work with historical pages
+   for i, old_page in enumerate(pages):
+  ...     print(f"Page {i}: {old_page.url} - {old_page.status}")
+  ```
 
 ## Additional helpful commands
 
@@ -131,26 +130,26 @@ First, you need to copy a request as a curl command like the following:
 
 - **Convert Curl command to Request Object**
 
-    ```python
-     curl_cmd = '''curl 'https://scrapling.requestcatcher.com/post' \
-    ...   -X POST \
-    ...   -H 'Content-Type: application/json' \
-    ...   -d '{"name": "test", "value": 123}' '''
-    
-     request = uncurl(curl_cmd)
-     request.method  # -> 'post'
-     request.url  # -> 'https://scrapling.requestcatcher.com/post'
-     request.headers  # -> {'Content-Type': 'application/json'}
-    ```
+  ```python
+   curl_cmd = '''curl 'https://scrapling.requestcatcher.com/post' \
+  ...   -X POST \
+  ...   -H 'Content-Type: application/json' \
+  ...   -d '{"name": "test", "value": 123}' '''
+
+   request = uncurl(curl_cmd)
+   request.method  # -> 'post'
+   request.url  # -> 'https://scrapling.requestcatcher.com/post'
+   request.headers  # -> {'Content-Type': 'application/json'}
+  ```
 
 - **Execute Curl Command Directly**
 
-    ```python
-     # Convert and execute in one step
-     curl2fetcher(curl_cmd)
-     page.status  # -> 200
-     page.json()['json']  # -> {'name': 'test', 'value': 123}
-    ```
+  ```python
+   # Convert and execute in one step
+   curl2fetcher(curl_cmd)
+   page.status  # -> 200
+   page.json()['json']  # -> {'name': 'test', 'value': 123}
+  ```
 
 ### IPython Features
 
@@ -213,7 +212,7 @@ with FetcherSession() as session:
 {'userId': 1, 'id': 1, 'title': 'sunt aut...', 'body': 'quia et...'}
 
 >>> # Test POST requests
->>> new_post = post('https://jsonplaceholder.typicode.com/posts', 
+>>> new_post = post('https://jsonplaceholder.typicode.com/posts',
 ...                 json={'title': 'Test Post', 'body': 'Test content', 'userId': 1})
 >>> new_post.json()['id']
 101
@@ -229,6 +228,6 @@ If you need help other than what is available in-terminal, you can:
 
 - [Scrapling Documentation](https://scrapling.readthedocs.io/)
 - [Discord Community](https://discord.gg/EMgGbDceNQ)
-- [GitHub Issues](https://github.com/D4Vinci/Scrapling/issues)  
+- [GitHub Issues](https://github.com/D4Vinci/Scrapling/issues)
 
 And that's it! Happy scraping! The shell makes web scraping as easy as a conversation.

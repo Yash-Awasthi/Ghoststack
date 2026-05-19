@@ -19,7 +19,7 @@ For detailed resolution and command registration flows, see [ARCHITECTURE.md](AR
 
 ## Command Overrides
 
-Presets can also override the commands that guide the SDD workflow. Templates define *what* gets produced (specs, plans, constitutions); commands define *how* the LLM produces them (the step-by-step instructions).
+Presets can also override the commands that guide the SDD workflow. Templates define _what_ gets produced (specs, plans, constitutions); commands define _how_ the LLM produces them (the step-by-step instructions).
 
 Unlike templates, command overrides are applied **at install time**. When a preset includes `type: "command"` entries, the commands are registered into all detected agent directories (`.claude/commands/`, `.gemini/commands/`, etc.) in the correct format (Markdown or TOML with appropriate argument placeholders). When the preset is removed, the registered commands are cleaned up.
 
@@ -73,23 +73,23 @@ provides:
     - type: "template"
       name: "spec-template"
       file: "templates/spec-addendum.md"
-      strategy: "append"        # adds content after the core template
+      strategy: "append" # adds content after the core template
 ```
 
-| Strategy | Description |
-|----------|-------------|
-| `replace` (default) | Fully replaces the lower-priority template |
-| `prepend` | Places content **before** the resolved lower-priority template, separated by a blank line |
-| `append` | Places content **after** the resolved lower-priority template, separated by a blank line |
-| `wrap` | Content contains `{CORE_TEMPLATE}` placeholder (or `$CORE_SCRIPT` for scripts) replaced with the lower-priority content |
+| Strategy            | Description                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `replace` (default) | Fully replaces the lower-priority template                                                                              |
+| `prepend`           | Places content **before** the resolved lower-priority template, separated by a blank line                               |
+| `append`            | Places content **after** the resolved lower-priority template, separated by a blank line                                |
+| `wrap`              | Content contains `{CORE_TEMPLATE}` placeholder (or `$CORE_SCRIPT` for scripts) replaced with the lower-priority content |
 
 **Supported combinations:**
 
-| Type | `replace` | `prepend` | `append` | `wrap` |
-|------|-----------|-----------|----------|--------|
-| **template** | ✓ (default) | ✓ | ✓ | ✓ |
-| **command** | ✓ (default) | ✓ | ✓ | ✓ |
-| **script** | ✓ (default) | — | — | ✓ |
+| Type         | `replace`   | `prepend` | `append` | `wrap` |
+| ------------ | ----------- | --------- | -------- | ------ |
+| **template** | ✓ (default) | ✓         | ✓        | ✓      |
+| **command**  | ✓ (default) | ✓         | ✓        | ✓      |
+| **script**   | ✓ (default) | —         | —        | ✓      |
 
 Multiple composing presets chain recursively. For example, a security preset with `prepend` and a compliance preset with `append` will produce: security header + core content + compliance footer.
 
@@ -123,10 +123,10 @@ See [scaffold/](scaffold/) for a scaffold you can copy to create your own preset
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPECKIT_PRESET_CATALOG_URL` | Override the full catalog stack with a single URL (replaces all defaults) | Built-in default stack |
-| `GH_TOKEN` / `GITHUB_TOKEN` | GitHub token for authenticated requests to GitHub-hosted URLs (`raw.githubusercontent.com`, `github.com`, `api.github.com`, `codeload.github.com`). Required when your catalog JSON or preset ZIPs are hosted in a private GitHub repository. | None |
+| Variable                     | Description                                                                                                                                                                                                                                   | Default                |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `SPECKIT_PRESET_CATALOG_URL` | Override the full catalog stack with a single URL (replaces all defaults)                                                                                                                                                                     | Built-in default stack |
+| `GH_TOKEN` / `GITHUB_TOKEN`  | GitHub token for authenticated requests to GitHub-hosted URLs (`raw.githubusercontent.com`, `github.com`, `api.github.com`, `codeload.github.com`). Required when your catalog JSON or preset ZIPs are hosted in a private GitHub repository. | None                   |
 
 #### Example: Using a private GitHub-hosted catalog
 
@@ -145,10 +145,10 @@ The token is attached automatically to requests targeting GitHub domains. Non-Gi
 
 ## Configuration Files
 
-| File | Scope | Description |
-|------|-------|-------------|
-| `.specify/preset-catalogs.yml` | Project | Custom catalog stack for this project |
-| `~/.specify/preset-catalogs.yml` | User | Custom catalog stack for all projects |
+| File                             | Scope   | Description                           |
+| -------------------------------- | ------- | ------------------------------------- |
+| `.specify/preset-catalogs.yml`   | Project | Custom catalog stack for this project |
+| `~/.specify/preset-catalogs.yml` | User    | Custom catalog stack for all projects |
 
 ## Future Considerations
 

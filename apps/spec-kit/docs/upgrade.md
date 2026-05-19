@@ -6,12 +6,12 @@
 
 ## Quick Reference
 
-| What to Upgrade | Command | When to Use |
-|----------------|---------|-------------|
-| **CLI Tool Only** | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` | Get latest CLI features without touching project files |
-| **CLI Tool Only (pipx)** | `pipx install --force git+https://github.com/github/spec-kit.git@vX.Y.Z` | Reinstall/upgrade a pipx-installed CLI to a specific release |
-| **Project Files** | `specify init --here --force --integration <your-agent>` | Update slash commands, templates, and scripts in your project |
-| **Both** | Run CLI upgrade, then project update | Recommended for major version updates |
+| What to Upgrade          | Command                                                                                        | When to Use                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **CLI Tool Only**        | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` | Get latest CLI features without touching project files        |
+| **CLI Tool Only (pipx)** | `pipx install --force git+https://github.com/github/spec-kit.git@vX.Y.Z`                       | Reinstall/upgrade a pipx-installed CLI to a specific release  |
+| **Project Files**        | `specify init --here --force --integration <your-agent>`                                       | Update slash commands, templates, and scripts in your project |
+| **Both**                 | Run CLI upgrade, then project update                                                           | Recommended for major version updates                         |
 
 ---
 

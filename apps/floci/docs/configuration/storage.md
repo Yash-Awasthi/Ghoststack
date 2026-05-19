@@ -4,58 +4,58 @@ Floci supports four storage backends. You can set a global default and override 
 
 ## Modes
 
-| Mode | Data survives restart | Write performance | Use case |
-|---|---|---|---|
-| `memory` | No | Fastest | Unit tests, CI pipelines |
-| `persistent` | Yes | Synchronous disk write on every change | Development with durable state |
-| `hybrid` | Yes | In-memory reads, async flush to disk | General local development |
-| `wal` | Yes | Append-only write-ahead log with compaction | High-write workloads |
+| Mode         | Data survives restart | Write performance                           | Use case                       |
+| ------------ | --------------------- | ------------------------------------------- | ------------------------------ |
+| `memory`     | No                    | Fastest                                     | Unit tests, CI pipelines       |
+| `persistent` | Yes                   | Synchronous disk write on every change      | Development with durable state |
+| `hybrid`     | Yes                   | In-memory reads, async flush to disk        | General local development      |
+| `wal`        | Yes                   | Append-only write-ahead log with compaction | High-write workloads           |
 
 ## Global Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_STORAGE_MODE` | `memory` | Storage backend (`memory`, `persistent`, `hybrid`, `wal`) |
-| `FLOCI_STORAGE_PERSISTENT_PATH` | `./data` | Base directory for all persistent data |
-| `FLOCI_STORAGE_WAL_COMPACTION_INTERVAL_MS` | `30000` | WAL compaction interval (milliseconds) |
+| Variable                                   | Default  | Description                                               |
+| ------------------------------------------ | -------- | --------------------------------------------------------- |
+| `FLOCI_STORAGE_MODE`                       | `memory` | Storage backend (`memory`, `persistent`, `hybrid`, `wal`) |
+| `FLOCI_STORAGE_PERSISTENT_PATH`            | `./data` | Base directory for all persistent data                    |
+| `FLOCI_STORAGE_WAL_COMPACTION_INTERVAL_MS` | `30000`  | WAL compaction interval (milliseconds)                    |
 
 !!! note "Code default vs shipped default"
-    The Java `@WithDefault` for `storage.mode` is `hybrid`, but the published Docker image ships with `memory` set in `application.yml`. Running the stock image gives you `memory` unless you set `FLOCI_STORAGE_MODE`.
+The Java `@WithDefault` for `storage.mode` is `hybrid`, but the published Docker image ships with `memory` set in `application.yml`. Running the stock image gives you `memory` unless you set `FLOCI_STORAGE_MODE`.
 
 ## Per-Service Override
 
 When not set for a service, it inherits `FLOCI_STORAGE_MODE`. Only override when you need different behavior for a specific service.
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_STORAGE_SERVICES_SSM_MODE` | global default | SSM storage mode |
-| `FLOCI_STORAGE_SERVICES_SSM_FLUSH_INTERVAL_MS` | `5000` | SSM flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_SQS_MODE` | global default | SQS storage mode |
-| `FLOCI_STORAGE_SERVICES_S3_MODE` | global default | S3 storage mode |
-| `FLOCI_STORAGE_SERVICES_DYNAMODB_MODE` | global default | DynamoDB storage mode |
-| `FLOCI_STORAGE_SERVICES_DYNAMODB_FLUSH_INTERVAL_MS` | `5000` | DynamoDB flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_SNS_MODE` | global default | SNS storage mode |
-| `FLOCI_STORAGE_SERVICES_SNS_FLUSH_INTERVAL_MS` | `5000` | SNS flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_LAMBDA_MODE` | global default | Lambda storage mode |
-| `FLOCI_STORAGE_SERVICES_LAMBDA_FLUSH_INTERVAL_MS` | `5000` | Lambda flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_CLOUDWATCHLOGS_MODE` | global default | CloudWatch Logs storage mode |
-| `FLOCI_STORAGE_SERVICES_CLOUDWATCHLOGS_FLUSH_INTERVAL_MS` | `5000` | CloudWatch Logs flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_CLOUDWATCHMETRICS_MODE` | global default | CloudWatch Metrics storage mode |
-| `FLOCI_STORAGE_SERVICES_CLOUDWATCHMETRICS_FLUSH_INTERVAL_MS` | `5000` | CloudWatch Metrics flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_SECRETSMANAGER_MODE` | global default | Secrets Manager storage mode |
-| `FLOCI_STORAGE_SERVICES_SECRETSMANAGER_FLUSH_INTERVAL_MS` | `5000` | Secrets Manager flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_ACM_MODE` | global default | ACM storage mode |
-| `FLOCI_STORAGE_SERVICES_ACM_FLUSH_INTERVAL_MS` | `5000` | ACM flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_OPENSEARCH_MODE` | global default | OpenSearch storage mode |
-| `FLOCI_STORAGE_SERVICES_OPENSEARCH_FLUSH_INTERVAL_MS` | `5000` | OpenSearch flush interval (ms) |
-| `FLOCI_STORAGE_SERVICES_RDS_MODE` | global default | RDS metadata storage mode (see note below) |
+| Variable                                                     | Default        | Description                                |
+| ------------------------------------------------------------ | -------------- | ------------------------------------------ |
+| `FLOCI_STORAGE_SERVICES_SSM_MODE`                            | global default | SSM storage mode                           |
+| `FLOCI_STORAGE_SERVICES_SSM_FLUSH_INTERVAL_MS`               | `5000`         | SSM flush interval (ms)                    |
+| `FLOCI_STORAGE_SERVICES_SQS_MODE`                            | global default | SQS storage mode                           |
+| `FLOCI_STORAGE_SERVICES_S3_MODE`                             | global default | S3 storage mode                            |
+| `FLOCI_STORAGE_SERVICES_DYNAMODB_MODE`                       | global default | DynamoDB storage mode                      |
+| `FLOCI_STORAGE_SERVICES_DYNAMODB_FLUSH_INTERVAL_MS`          | `5000`         | DynamoDB flush interval (ms)               |
+| `FLOCI_STORAGE_SERVICES_SNS_MODE`                            | global default | SNS storage mode                           |
+| `FLOCI_STORAGE_SERVICES_SNS_FLUSH_INTERVAL_MS`               | `5000`         | SNS flush interval (ms)                    |
+| `FLOCI_STORAGE_SERVICES_LAMBDA_MODE`                         | global default | Lambda storage mode                        |
+| `FLOCI_STORAGE_SERVICES_LAMBDA_FLUSH_INTERVAL_MS`            | `5000`         | Lambda flush interval (ms)                 |
+| `FLOCI_STORAGE_SERVICES_CLOUDWATCHLOGS_MODE`                 | global default | CloudWatch Logs storage mode               |
+| `FLOCI_STORAGE_SERVICES_CLOUDWATCHLOGS_FLUSH_INTERVAL_MS`    | `5000`         | CloudWatch Logs flush interval (ms)        |
+| `FLOCI_STORAGE_SERVICES_CLOUDWATCHMETRICS_MODE`              | global default | CloudWatch Metrics storage mode            |
+| `FLOCI_STORAGE_SERVICES_CLOUDWATCHMETRICS_FLUSH_INTERVAL_MS` | `5000`         | CloudWatch Metrics flush interval (ms)     |
+| `FLOCI_STORAGE_SERVICES_SECRETSMANAGER_MODE`                 | global default | Secrets Manager storage mode               |
+| `FLOCI_STORAGE_SERVICES_SECRETSMANAGER_FLUSH_INTERVAL_MS`    | `5000`         | Secrets Manager flush interval (ms)        |
+| `FLOCI_STORAGE_SERVICES_ACM_MODE`                            | global default | ACM storage mode                           |
+| `FLOCI_STORAGE_SERVICES_ACM_FLUSH_INTERVAL_MS`               | `5000`         | ACM flush interval (ms)                    |
+| `FLOCI_STORAGE_SERVICES_OPENSEARCH_MODE`                     | global default | OpenSearch storage mode                    |
+| `FLOCI_STORAGE_SERVICES_OPENSEARCH_FLUSH_INTERVAL_MS`        | `5000`         | OpenSearch flush interval (ms)             |
+| `FLOCI_STORAGE_SERVICES_RDS_MODE`                            | global default | RDS metadata storage mode (see note below) |
 
 !!! note "RDS storage mode"
-    `FLOCI_STORAGE_SERVICES_RDS_MODE` controls Floci's own metadata persistence for RDS, not the
-    DB container volumes. In all modes, each DB instance or cluster gets a named Docker volume
-    (`floci-rds-{volumeId}`). In `memory` mode the volume is automatically removed when the
-    instance is deleted. In other modes the volume is retained unless
-    `FLOCI_STORAGE_PRUNE_VOLUMES_ON_DELETE=true`.
+`FLOCI_STORAGE_SERVICES_RDS_MODE` controls Floci's own metadata persistence for RDS, not the
+DB container volumes. In all modes, each DB instance or cluster gets a named Docker volume
+(`floci-rds-{volumeId}`). In `memory` mode the volume is automatically removed when the
+instance is deleted. In other modes the volume is retained unless
+`FLOCI_STORAGE_PRUNE_VOLUMES_ON_DELETE=true`.
 
 ## Recommended Profiles
 
@@ -148,9 +148,9 @@ docker volume prune --filter label=floci=true
 
 By default volumes survive resource deletion, matching real AWS behavior.
 
-| `FLOCI_STORAGE_MODE` | Volume on resource delete |
-|---|---|
-| `memory` | **Always removed** — memory mode implies no persistence across restarts |
+| `FLOCI_STORAGE_MODE`            | Volume on resource delete                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------- |
+| `memory`                        | **Always removed** — memory mode implies no persistence across restarts       |
 | `persistent` / `hybrid` / `wal` | Retained (default) — remove with `FLOCI_STORAGE_PRUNE_VOLUMES_ON_DELETE=true` |
 
 ```bash
@@ -169,6 +169,6 @@ FLOCI_STORAGE_HOST_PERSISTENT_PATH=/absolute/host/path/data
 ```
 
 !!! warning
-    `FLOCI_STORAGE_HOST_PERSISTENT_PATH` must be an absolute path (starting with `/`). Volume
-    names and relative paths are not supported and will be silently ignored, falling back to
-    named-volume mode.
+`FLOCI_STORAGE_HOST_PERSISTENT_PATH` must be an absolute path (starting with `/`). Volume
+names and relative paths are not supported and will be silently ignored, falling back to
+named-volume mode.

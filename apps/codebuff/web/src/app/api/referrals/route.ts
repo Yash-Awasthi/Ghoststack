@@ -7,7 +7,6 @@ import { z } from 'zod/v4'
 
 import { authOptions } from '../auth/[...nextauth]/auth-options'
 
-
 type Referral = Pick<typeof schema.user.$inferSelect, 'id' | 'name' | 'email'> &
   Pick<typeof schema.referral.$inferSelect, 'credits' | 'is_legacy'>
 const ReferralSchema = z.object({

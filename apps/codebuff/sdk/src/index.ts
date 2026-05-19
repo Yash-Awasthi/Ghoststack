@@ -47,10 +47,7 @@ export type {
   LoadLocalAgentsResult,
   AgentValidationError,
 } from './agents/load-agents'
-export type {
-  MCPFileConfig,
-  LoadedMCPConfig,
-} from './agents/load-mcp-config'
+export type { MCPFileConfig, LoadedMCPConfig } from './agents/load-mcp-config'
 
 export { validateAgents } from './validate-agents'
 export type { ValidationResult, ValidateAgentsOptions } from './validate-agents'
@@ -95,6 +92,4 @@ export {
   promptAiSdkStream,
   promptAiSdkStructured,
 } from './impl/llm'
-export {
-  resetChatGptOAuthRateLimit,
-} from './impl/model-provider'
+export { resetChatGptOAuthRateLimit } from './impl/model-provider'

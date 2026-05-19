@@ -5,37 +5,37 @@
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateQueue` | Create a standard or FIFO queue |
-| `DeleteQueue` | Delete a queue |
-| `ListQueues` | List all queues |
-| `GetQueueUrl` | Look up a queue URL by name |
-| `GetQueueAttributes` | Get queue configuration attributes |
-| `SetQueueAttributes` | Update queue configuration |
-| `SendMessage` | Send a message to a queue |
-| `SendMessageBatch` | Send up to 10 messages in one call |
-| `ReceiveMessage` | Poll for messages |
-| `DeleteMessage` | Acknowledge and delete a message |
-| `DeleteMessageBatch` | Delete multiple messages at once |
-| `ChangeMessageVisibility` | Extend or reset a message's visibility timeout |
-| `ChangeMessageVisibilityBatch` | Change visibility for multiple messages |
-| `PurgeQueue` | Delete all messages in a queue |
-| `TagQueue` | Add tags to a queue |
-| `UntagQueue` | Remove tags from a queue |
-| `ListQueueTags` | List tags on a queue |
-| `ListDeadLetterSourceQueues` | Find queues that use this queue as DLQ |
-| `StartMessageMoveTask` | Start a DLQ redrive task |
-| `ListMessageMoveTasks` | List DLQ redrive tasks |
+| Action                         | Description                                    |
+| ------------------------------ | ---------------------------------------------- |
+| `CreateQueue`                  | Create a standard or FIFO queue                |
+| `DeleteQueue`                  | Delete a queue                                 |
+| `ListQueues`                   | List all queues                                |
+| `GetQueueUrl`                  | Look up a queue URL by name                    |
+| `GetQueueAttributes`           | Get queue configuration attributes             |
+| `SetQueueAttributes`           | Update queue configuration                     |
+| `SendMessage`                  | Send a message to a queue                      |
+| `SendMessageBatch`             | Send up to 10 messages in one call             |
+| `ReceiveMessage`               | Poll for messages                              |
+| `DeleteMessage`                | Acknowledge and delete a message               |
+| `DeleteMessageBatch`           | Delete multiple messages at once               |
+| `ChangeMessageVisibility`      | Extend or reset a message's visibility timeout |
+| `ChangeMessageVisibilityBatch` | Change visibility for multiple messages        |
+| `PurgeQueue`                   | Delete all messages in a queue                 |
+| `TagQueue`                     | Add tags to a queue                            |
+| `UntagQueue`                   | Remove tags from a queue                       |
+| `ListQueueTags`                | List tags on a queue                           |
+| `ListDeadLetterSourceQueues`   | Find queues that use this queue as DLQ         |
+| `StartMessageMoveTask`         | Start a DLQ redrive task                       |
+| `ListMessageMoveTasks`         | List DLQ redrive tasks                         |
 
 ## Local Inspection Endpoint
 
 For test assertions and debugging, Floci exposes a LocalStack-compatible endpoint that lets you peek at queue contents without consuming messages:
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/_aws/sqs/messages?QueueUrl=<url>` | List all messages in the queue (non-destructive) |
-| `DELETE` | `/_aws/sqs/messages?QueueUrl=<url>` | Purge all messages from the queue |
+| Method   | Path                                | Description                                      |
+| -------- | ----------------------------------- | ------------------------------------------------ |
+| `GET`    | `/_aws/sqs/messages?QueueUrl=<url>` | List all messages in the queue (non-destructive) |
+| `DELETE` | `/_aws/sqs/messages?QueueUrl=<url>` | Purge all messages from the queue                |
 
 `GET` returns every message currently in the queue — including in-flight messages — without changing visibility timeouts or advancing receive counts. It does not remove messages.
 
@@ -77,12 +77,12 @@ curl -X DELETE "http://localhost:4566/_aws/sqs/messages?QueueUrl=$QUEUE_URL"
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_SQS_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT` | `30` | Default message visibility timeout (seconds) |
-| `FLOCI_SERVICES_SQS_MAX_MESSAGE_SIZE` | `262144` | Maximum message size in bytes (256 KB) |
-| `FLOCI_SERVICES_SQS_CLEAR_FIFO_DEDUPLICATION_CACHE_ON_PURGE` | `false` | When `true`, `PurgeQueue` also clears the FIFO deduplication cache for the queue and any SNS FIFO topics subscribed to it |
+| Variable                                                     | Default  | Description                                                                                                               |
+| ------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `FLOCI_SERVICES_SQS_ENABLED`                                 | `true`   | Enable or disable the service                                                                                             |
+| `FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT`              | `30`     | Default message visibility timeout (seconds)                                                                              |
+| `FLOCI_SERVICES_SQS_MAX_MESSAGE_SIZE`                        | `262144` | Maximum message size in bytes (256 KB)                                                                                    |
+| `FLOCI_SERVICES_SQS_CLEAR_FIFO_DEDUPLICATION_CACHE_ON_PURGE` | `false`  | When `true`, `PurgeQueue` also clears the FIFO deduplication cache for the queue and any SNS FIFO topics subscribed to it |
 
 ## Examples
 

@@ -63,6 +63,7 @@ Background information and helpful context goes here.
 ### Name Validation Rules
 
 Skill names must:
+
 - Be 1-64 characters long
 - Use only lowercase letters, numbers, and hyphens
 - Not start or end with a hyphen
@@ -101,7 +102,7 @@ This loads the skill's instructions into the conversation.
 Codebuff can also load skills automatically via the `skill` tool when it determines a skill is relevant. The agent sees available skills listed in its tool description and can call:
 
 ```typescript
-skill({ name: "my-skill" })
+skill({ name: 'my-skill' })
 ```
 
 The full `SKILL.md` content is then loaded into the conversation context.
@@ -126,6 +127,7 @@ Use this skill when creating a new release.
 ## Versioning
 
 Follow semantic versioning (semver):
+
 - **MAJOR** (1.0.0) — Breaking changes
 - **MINOR** (0.1.0) — New features, backward compatible
 - **PATCH** (0.0.1) — Bug fixes, backward compatible
@@ -141,6 +143,7 @@ Follow semantic versioning (semver):
 ## Commit Message Format
 
 Use conventional commits:
+
 - `feat:` — New feature
 - `fix:` — Bug fix
 - `docs:` — Documentation
@@ -206,11 +209,13 @@ metadata:
 ## Global vs Project Skills
 
 **Global skills** (`~/.agents/skills/`):
+
 - Personal workflows
 - Cross-project tools
 - Your coding preferences
 
 **Project skills** (`.agents/skills/`):
+
 - Team conventions
 - Project-specific processes
 - Codebase-specific knowledge
@@ -227,6 +232,7 @@ metadata:
 ### Invalid Frontmatter
 
 Ensure your YAML frontmatter:
+
 - Starts and ends with `---`
 - Has required `name` and `description` fields
 - Uses valid YAML syntax

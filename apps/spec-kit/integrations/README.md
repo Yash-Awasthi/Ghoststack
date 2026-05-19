@@ -106,23 +106,23 @@ Both catalog files follow the same JSON schema:
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `schema_version` | string | Must be `"1.0"` |
-| `updated_at` | string | ISO 8601 timestamp |
-| `integrations` | object | Map of integration ID → metadata |
+| Field            | Type   | Description                      |
+| ---------------- | ------ | -------------------------------- |
+| `schema_version` | string | Must be `"1.0"`                  |
+| `updated_at`     | string | ISO 8601 timestamp               |
+| `integrations`   | object | Map of integration ID → metadata |
 
 ### Integration Entry Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | Yes | Unique ID (lowercase alphanumeric + hyphens) |
-| `name` | string | Yes | Human-readable display name |
-| `version` | string | Yes | PEP 440 version (e.g., `1.0.0`, `1.0.0a1`) |
-| `description` | string | Yes | One-line description |
-| `author` | string | No | Author name or organization |
-| `repository` | string | No | Source repository URL |
-| `tags` | array | No | Searchable tags (e.g., `["cli", "ide"]`) |
+| Field         | Type   | Required | Description                                  |
+| ------------- | ------ | -------- | -------------------------------------------- |
+| `id`          | string | Yes      | Unique ID (lowercase alphanumeric + hyphens) |
+| `name`        | string | Yes      | Human-readable display name                  |
+| `version`     | string | Yes      | PEP 440 version (e.g., `1.0.0`, `1.0.0a1`)   |
+| `description` | string | Yes      | One-line description                         |
+| `author`      | string | No       | Author name or organization                  |
+| `repository`  | string | No       | Source repository URL                        |
+| `tags`        | array  | No       | Searchable tags (e.g., `["cli", "ide"]`)     |
 
 ## Contributing
 

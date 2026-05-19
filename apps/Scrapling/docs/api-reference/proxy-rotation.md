@@ -14,5 +14,6 @@ from scrapling.fetchers import ProxyRotator
 ```
 
 ## ::: scrapling.engines.toolbelt.proxy_rotation.ProxyRotator
+
     handler: python
     :docstring:

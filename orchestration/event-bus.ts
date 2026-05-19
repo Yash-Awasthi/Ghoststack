@@ -13,7 +13,7 @@ export class LocalEventBus implements IEventBus {
   async publish(event: string, payload: any): Promise<void> {
     const eventHandlers = this.handlers.get(event);
     if (!eventHandlers) return;
-    
+
     const promises = Array.from(eventHandlers).map(async (handler) => {
       try {
         await handler(payload);
@@ -21,7 +21,7 @@ export class LocalEventBus implements IEventBus {
         console.error(`Error executing event handler for ${event}:`, err);
       }
     });
-    
+
     await Promise.all(promises);
   }
 
@@ -30,7 +30,7 @@ export class LocalEventBus implements IEventBus {
       this.handlers.set(event, new Set());
     }
     this.handlers.get(event)!.add(handler);
-    
+
     return {
       unsubscribe: () => {
         const eventHandlers = this.handlers.get(event);

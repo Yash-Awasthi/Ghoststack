@@ -5,6 +5,7 @@ This document captures the design decisions around component listing methods in 
 ## Problem
 
 The server had parallel implementations for listing components:
+
 - `get_tools()` / `_list_tools()`
 - `get_resources()` / `_list_resources()`
 - `get_prompts()` / `_list_prompts()`

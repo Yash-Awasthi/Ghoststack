@@ -1,6 +1,6 @@
-import { IMCPRuntime, IMCPTask, IMCPExecutionResult, IMCPRuntimeMetrics } from './interfaces/mcp.interface';
-import { IMCPServerRegistry } from './interfaces/mcp.interface';
-import { IMetricsCollector, ITraceRecorder } from './interfaces/observability.interface';
+import { IMCPRuntime, IMCPTask, IMCPExecutionResult, IMCPRuntimeMetrics } from "./interfaces/mcp.interface";
+import { IMCPServerRegistry } from "./interfaces/mcp.interface";
+import { IMetricsCollector, ITraceRecorder } from "./interfaces/observability.interface";
 
 export class MCPRuntime implements IMCPRuntime {
   private registry: IMCPServerRegistry;
@@ -25,14 +25,9 @@ export class MCPRuntime implements IMCPRuntime {
     this.registry = registry;
     this.metricsCollector = metricsCollector;
     this.tracer = tracer;
-    this.blocklist = new Set(customBlocklist || [
-      'shell_execute',
-      'execute_command',
-      'write_system_file',
-      'eval',
-      'delete_directory',
-      'rmrf'
-    ]);
+    this.blocklist = new Set(
+      customBlocklist || ["shell_execute", "execute_command", "write_system_file", "eval", "delete_directory", "rmrf"]
+    );
   }
 
   async executeTask(task: IMCPTask): Promise<IMCPExecutionResult> {
@@ -70,14 +65,14 @@ export class MCPRuntime implements IMCPRuntime {
     if (!serverEntry) {
       this.totalFailures++;
       this.metricsCollector?.increment("mcp.failures");
-      
+
       const res: IMCPExecutionResult = {
         success: false,
         error: `Server not found: ${task.serverName}`,
         durationMs: Date.now() - startTimeMs,
         correlationId: task.correlationId
       };
-      
+
       this.executionsLog.push(res);
       if (traceSpan) {
         this.tracer?.endSpan(traceSpan.spanId, { status: "failed", error: res.error });

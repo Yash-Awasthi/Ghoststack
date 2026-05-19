@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from 'bun:test'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  spyOn,
+  test,
+} from 'bun:test'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import os from 'os'
 import path from 'path'
@@ -91,7 +99,13 @@ describe('loadSkills', () => {
       'project-claude-skill',
     ])
     expect(skills['global-claude-skill']?.filePath).toBe(
-      path.join(homeDir, '.claude', 'skills', 'global-claude-skill', 'SKILL.md'),
+      path.join(
+        homeDir,
+        '.claude',
+        'skills',
+        'global-claude-skill',
+        'SKILL.md',
+      ),
     )
     expect(skills['project-agents-skill']?.description).toBe(
       'Description for project-agents-skill',
@@ -172,8 +186,8 @@ describe('loadSkills', () => {
 
   test('skips invalid skill directories and malformed skill definitions', async () => {
     const skillsRoot = path.join(projectDir, '.agents', 'skills')
-    const consoleError = spyOn(console, 'error').mockImplementation(() => { })
-    const consoleWarn = spyOn(console, 'warn').mockImplementation(() => { })
+    const consoleError = spyOn(console, 'error').mockImplementation(() => {})
+    const consoleWarn = spyOn(console, 'warn').mockImplementation(() => {})
 
     mkdirSync(path.join(skillsRoot, 'missing-skill-file'), { recursive: true })
 

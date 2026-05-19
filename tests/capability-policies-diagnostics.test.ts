@@ -1,18 +1,18 @@
-import { CapabilityPolicy, ExecutionEnvironment } from '../orchestration/capability-policy';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
-import { FilesystemSandbox, SandboxConstraint } from '../orchestration/filesystem-sandbox';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { MetricsCollector } from '../orchestration/observability-manager';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { FileEventStore } from '../orchestration/persistence-manager';
-import * as path from 'path';
-import * as fs from 'fs';
+import { CapabilityPolicy, ExecutionEnvironment } from "../orchestration/capability-policy";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
+import { FilesystemSandbox, SandboxConstraint } from "../orchestration/filesystem-sandbox";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { MetricsCollector } from "../orchestration/observability-manager";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { FileEventStore } from "../orchestration/persistence-manager";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Milestone 4: Capability Policies & Diagnostics API Mappings", () => {
-  const rootDir = path.resolve(path.join(__dirname, '../temp-inspector-test'));
-  const eventLogPath = path.join(rootDir, 'events_inspect.jsonl');
+  const rootDir = path.resolve(path.join(__dirname, "../temp-inspector-test"));
+  const eventLogPath = path.join(rootDir, "events_inspect.jsonl");
 
   beforeEach(() => {
     if (!fs.existsSync(rootDir)) {
@@ -63,7 +63,7 @@ describe("Milestone 4: Capability Policies & Diagnostics API Mappings", () => {
     browserTelemetry.browserSessionsActive = 3;
     browserTelemetry.recordNavigation("https://news.ycombinator.com");
     scrapingTelemetry.recordFetch(1200);
-    await sandbox.writeFile(path.join(rootDir, 'inspect.txt'), "inspect test");
+    await sandbox.writeFile(path.join(rootDir, "inspect.txt"), "inspect test");
 
     const inspector = new RuntimeInspector(
       metrics,

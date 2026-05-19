@@ -7,24 +7,31 @@ Floci supports Application Load Balancers (ALB) and Network Load Balancers (NLB)
 ## Supported Actions
 
 ### Load Balancers
+
 `CreateLoadBalancer` · `DescribeLoadBalancers` · `DeleteLoadBalancer` · `ModifyLoadBalancerAttributes` · `DescribeLoadBalancerAttributes` · `SetSecurityGroups` · `SetSubnets` · `SetIpAddressType`
 
 ### Target Groups
+
 `CreateTargetGroup` · `DescribeTargetGroups` · `ModifyTargetGroup` · `DeleteTargetGroup` · `ModifyTargetGroupAttributes` · `DescribeTargetGroupAttributes`
 
 ### Targets
+
 `RegisterTargets` · `DeregisterTargets` · `DescribeTargetHealth`
 
 ### Listeners
+
 `CreateListener` · `DescribeListeners` · `ModifyListener` · `DeleteListener` · `AddListenerCertificates` · `RemoveListenerCertificates` · `DescribeListenerCertificates`
 
 ### Rules
+
 `CreateRule` · `DescribeRules` · `ModifyRule` · `DeleteRule` · `SetRulePriorities`
 
 ### Tags
+
 `AddTags` · `RemoveTags` · `DescribeTags`
 
 ### Metadata
+
 `DescribeSSLPolicies` · `DescribeAccountLimits`
 
 ## Behavior Notes
@@ -107,9 +114,9 @@ aws elbv2 delete-target-group \
 
 ## Configuration
 
-| Environment variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_ELBV2_ENABLED` | `true` | Enable or disable the ELBv2 service |
+| Environment variable           | Default | Description                         |
+| ------------------------------ | ------- | ----------------------------------- |
+| `FLOCI_SERVICES_ELBV2_ENABLED` | `true`  | Enable or disable the ELBv2 service |
 
 ## Phase 2 (Planned)
 

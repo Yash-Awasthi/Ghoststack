@@ -30,7 +30,6 @@ class MySpider(Spider):
 
 Each request automatically gets the next proxy in the rotation. The proxy used is stored in `response.meta["proxy"]` so you can track which proxy fetched which page.
 
-
 Browser sessions support both string and dict proxy formats:
 
 ```python
@@ -105,7 +104,6 @@ def weighted_strategy(proxies, current_index):
 
 rotator = ProxyRotator(proxies, strategy=weighted_strategy)
 ```
-
 
 ## Per-Request Proxy Override
 
@@ -196,7 +194,6 @@ class MySpider(Spider):
 
 What happened above is that I left the blocking detection logic unchanged and had the spider mainly use requests until it got blocked, then switch to the stealthy browser.
 
-
 Putting it all together:
 
 ```python
@@ -232,4 +229,5 @@ class MySpider(Spider):
     async def parse(self, response: Response):
         yield {"title": response.css("title::text").get("")}
 ```
+
 The above logic is: requests are made with cheap proxies, such as datacenter proxies, until they are blocked, then retried with higher-quality proxies, such as residential or mobile proxies.

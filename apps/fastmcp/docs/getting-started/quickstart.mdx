@@ -9,7 +9,7 @@ If you haven't already installed FastMCP, follow the [installation instructions]
 
 ## Create a FastMCP Server
 
-A FastMCP server is a collection of tools, resources, and other MCP components. To create a server, start by instantiating the `FastMCP` class. 
+A FastMCP server is a collection of tools, resources, and other MCP components. To create a server, start by instantiating the `FastMCP` class.
 
 Create a new file called `my_server.py` and add the following code:
 
@@ -19,9 +19,7 @@ from fastmcp import FastMCP
 mcp = FastMCP("My MCP Server")
 ```
 
-
 That's it! You've created a FastMCP server, albeit a very boring one. Let's add a tool to make it more interesting.
-
 
 ## Add a Tool
 
@@ -36,7 +34,6 @@ mcp = FastMCP("My MCP Server")
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 ```
-
 
 ## Run the Server
 
@@ -78,6 +75,7 @@ This lets us run the server with `python my_server.py`. The stdio transport is t
 Why do we need the `if __name__ == "__main__":` block?
 
 The `__main__` block is recommended for consistency and compatibility, ensuring your server works with all MCP clients that execute your server file as a script. Users who will exclusively run their server with the FastMCP CLI can omit it, as the CLI imports the server object directly.
+
 </Tip>
 
 ### Using the FastMCP CLI
@@ -85,11 +83,13 @@ The `__main__` block is recommended for consistency and compatibility, ensuring 
 You can also use the `fastmcp run` command to start your server. Note that the FastMCP CLI **does not** execute the `__main__` block of your server file. Instead, it imports your server object and runs it with whatever transport and options you provide.
 
 For example, to run this server with the default stdio transport (no matter how you called `mcp.run()`), you can use the following command:
+
 ```bash
 fastmcp run my_server.py:mcp
 ```
 
 To run this server with the HTTP transport, you can use the following command:
+
 ```bash
 fastmcp run my_server.py:mcp --transport http --port 8000
 ```
@@ -113,6 +113,7 @@ asyncio.run(call_tool("Ford"))
 ```
 
 Note that:
+
 - FastMCP clients are asynchronous, so we need to use `asyncio.run` to run the client
 - We must enter a client context (`async with client:`) before using the client
 - You can make multiple client calls within the same context
@@ -149,9 +150,7 @@ You can preview app tools locally with `fastmcp dev apps my_server.py` — no MC
 
 [Prefect Horizon](https://horizon.prefect.io?utm_source=gofastmcp&utm_medium=docs) is the enterprise MCP platform built by the FastMCP team at [Prefect](https://www.prefect.io). It provides managed hosting, authentication, access control, and observability for MCP servers.
 
-<Info>
-Horizon is **free for personal projects** and offers enterprise governance for teams.
-</Info>
+<Info>Horizon is **free for personal projects** and offers enterprise governance for teams.</Info>
 
 To deploy your server, you'll need a [GitHub account](https://github.com). Once you have one, you can deploy your server in three steps:
 

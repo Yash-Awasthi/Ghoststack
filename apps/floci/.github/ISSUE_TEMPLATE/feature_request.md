@@ -1,9 +1,9 @@
 ---
 name: Feature request
 about: Missing AWS API action or service
-title: '[FEAT] '
+title: "[FEAT] "
 labels: enhancement
-assignees: ''
+assignees: ""
 ---
 
 ## Service

@@ -5,7 +5,7 @@ description: Scaffold a standalone typed CLI from any MCP server
 icon: wand-magic-sparkles
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -95,7 +95,7 @@ fastmcp generate-cli weather --no-skill
 
 ## How It Works
 
-The generated script is a *client*, not a server — it connects to the server on every invocation rather than bundling it. A `CLIENT_SPEC` variable at the top holds the resolved transport (a URL string or `StdioTransport` with baked-in command and arguments).
+The generated script is a _client_, not a server — it connects to the server on every invocation rather than bundling it. A `CLIENT_SPEC` variable at the top holds the resolved transport (a URL string or `StdioTransport` with baked-in command and arguments).
 
 The most common edit is changing `CLIENT_SPEC` — for example, pointing a script generated from a dev server at production. Beyond that, the helper functions (`_call_tool`, `_print_tool_result`) are thin wrappers around `fastmcp.Client` that are easy to adapt.
 

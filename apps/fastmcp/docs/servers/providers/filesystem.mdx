@@ -6,7 +6,7 @@ icon: folder-tree
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -114,14 +114,14 @@ The decorator supports: `uri` (required), `name`, `title`, `description`, `icons
 
 Mark a function as a prompt template.
 
-```python test="skip"
+````python test="skip"
 from fastmcp.prompts import prompt
 
 @prompt
 def code_review(code: str, language: str = "python") -> str:
     """Generate a code review prompt."""
     return f"Please review this {language} code:\n\n```{language}\n{code}\n```"
-```
+````
 
 ```python
 from fastmcp.prompts import prompt
@@ -162,14 +162,14 @@ components/
 
 The provider follows these rules when scanning:
 
-| Rule | Behavior |
-|------|----------|
-| File extensions | Only `.py` files are scanned |
-| `__init__.py` | Skipped (used for package structure, not components) |
-| `__pycache__` | Skipped |
-| Private functions | Functions starting with `_` are ignored, even if decorated |
-| No decorators | Files without `@tool`, `@resource`, or `@prompt` are silently skipped |
-| Multiple components | A single file can contain any number of decorated functions |
+| Rule                | Behavior                                                              |
+| ------------------- | --------------------------------------------------------------------- |
+| File extensions     | Only `.py` files are scanned                                          |
+| `__init__.py`       | Skipped (used for package structure, not components)                  |
+| `__pycache__`       | Skipped                                                               |
+| Private functions   | Functions starting with `_` are ignored, even if decorated            |
+| No decorators       | Files without `@tool`, `@resource`, or `@prompt` are silently skipped |
+| Multiple components | A single file can contain any number of decorated functions           |
 
 ### Package Imports
 
@@ -206,9 +206,7 @@ With `reload=True`, the provider:
 2. Re-imports modules that have changed
 3. Updates the component registry with any new, modified, or removed components
 
-<Warning>
-Reload mode adds overhead to every request. Use it only during development, not in production.
-</Warning>
+<Warning>Reload mode adds overhead to every request. Use it only during development, not in production.</Warning>
 
 ## Error Handling
 

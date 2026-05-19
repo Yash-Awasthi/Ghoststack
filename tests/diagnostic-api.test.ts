@@ -1,15 +1,15 @@
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { MetricsCollector } from '../orchestration/observability-manager';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { FileEventStore } from '../orchestration/persistence-manager';
-import * as path from 'path';
-import * as fs from 'fs';
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { MetricsCollector } from "../orchestration/observability-manager";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { FileEventStore } from "../orchestration/persistence-manager";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Milestone 4: Diagnostic API Endpoints", () => {
-  const testDir = path.join(__dirname, '../temp-api-db');
-  const eventLogPath = path.join(testDir, 'api_events.jsonl');
+  const testDir = path.join(__dirname, "../temp-api-db");
+  const eventLogPath = path.join(testDir, "api_events.jsonl");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {

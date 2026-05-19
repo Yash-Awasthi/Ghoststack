@@ -87,7 +87,9 @@ async function main() {
       ),
     )
     .groupBy(schema.message.user_id)
-  const lifetimeByUser = new Map(lifetime.map((m) => [m.user_id!, Number(m.count)]))
+  const lifetimeByUser = new Map(
+    lifetime.map((m) => [m.user_id!, Number(m.count)]),
+  )
 
   // 3) Login providers
   const accounts = await db
@@ -149,7 +151,9 @@ async function main() {
   }
 
   // 5) sig_hash sharing across all users (to catch rotated fingerprints from same device)
-  const sigHashes = [...new Set([...fpSigHash.values()].filter((s): s is string => !!s))]
+  const sigHashes = [
+    ...new Set([...fpSigHash.values()].filter((s): s is string => !!s)),
+  ]
   let sigHashUserCounts = new Map<string, number>()
   if (sigHashes.length > 0) {
     const rows = await db
@@ -164,7 +168,9 @@ async function main() {
       )
       .where(inArray(schema.fingerprint.sig_hash, sigHashes))
       .groupBy(schema.fingerprint.sig_hash)
-    sigHashUserCounts = new Map(rows.map((r) => [r.sig_hash!, Number(r.userCount)]))
+    sigHashUserCounts = new Map(
+      rows.map((r) => [r.sig_hash!, Number(r.userCount)]),
+    )
   }
 
   // ---- Print ----
@@ -235,7 +241,8 @@ async function main() {
     if (providers.length === 0 && msgLT > 0) flags.push('no-oauth')
     // Auto-generated looking email/handle
     if (s.email && /\+[a-z0-9]{6,}@/i.test(s.email)) flags.push('plus-alias')
-    if (s.email && /^[a-z]{3,8}\d{4,}@/i.test(s.email)) flags.push('email-digits')
+    if (s.email && /^[a-z]{3,8}\d{4,}@/i.test(s.email))
+      flags.push('email-digits')
     if (s.handle && /^user[-_]?\d+/i.test(s.handle)) flags.push('handle-userN')
 
     const email = s.email ?? s.user_id.slice(0, 8)
@@ -281,9 +288,13 @@ async function main() {
       }
     }
   }
-  const sharedClusters = Object.entries(clusters).filter(([, users]) => users.length >= 2)
+  const sharedClusters = Object.entries(clusters).filter(
+    ([, users]) => users.length >= 2,
+  )
   if (sharedClusters.length > 0) {
-    console.log(`\nClusters of active/queued freebuff users sharing a device sig_hash:`)
+    console.log(
+      `\nClusters of active/queued freebuff users sharing a device sig_hash:`,
+    )
     for (const [h, users] of sharedClusters) {
       console.log(`  sig_hash=${h.slice(0, 12)}…  n=${users.length}`)
       for (const u of [...new Set(users)]) console.log(`    ${u}`)

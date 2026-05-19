@@ -5,7 +5,7 @@ description: Use server-side prompt templates with automatic argument serializat
 icon: message-lines
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.0.0" />
 
@@ -19,7 +19,7 @@ Use `list_prompts()` to retrieve all available prompt templates:
 async with client:
     prompts = await client.list_prompts()
     # prompts -> list[mcp.types.Prompt]
-    
+
     for prompt in prompts:
         print(f"Prompt: {prompt.name}")
         print(f"Description: {prompt.description}")
@@ -40,20 +40,23 @@ You can use the `meta` field to filter prompts based on their tags:
 ```python
 async with client:
     prompts = await client.list_prompts()
-    
+
     # Filter prompts by tag
     analysis_prompts = [
-        prompt for prompt in prompts 
+        prompt for prompt in prompts
         if hasattr(prompt, '_meta') and prompt._meta and
            prompt._meta.get('_fastmcp', {}) and
            'analysis' in prompt._meta.get('_fastmcp', {}).get('tags', [])
     ]
-    
+
     print(f"Found {len(analysis_prompts)} analysis prompts")
 ```
 
 <Note>
-The `_meta` field is part of the standard MCP specification. FastMCP servers include tags and other metadata within a `_fastmcp` namespace (e.g., `_meta._fastmcp.tags`) to avoid conflicts with user-defined metadata. This behavior can be controlled with the server's `include_fastmcp_meta` setting - when disabled, the `_fastmcp` namespace won't be included. Other MCP server implementations may not provide this metadata structure.
+  The `_meta` field is part of the standard MCP specification. FastMCP servers include tags and other metadata within a
+  `_fastmcp` namespace (e.g., `_meta._fastmcp.tags`) to avoid conflicts with user-defined metadata. This behavior can be
+  controlled with the server's `include_fastmcp_meta` setting - when disabled, the `_fastmcp` namespace won't be
+  included. Other MCP server implementations may not provide this metadata structure.
 </Note>
 
 ## Using Prompts
@@ -67,7 +70,7 @@ async with client:
     # Simple prompt without arguments
     result = await client.get_prompt("welcome_message")
     # result -> mcp.types.GetPromptResult
-    
+
     # Access the generated messages
     for message in result.messages:
         print(f"Role: {message.role}")
@@ -85,7 +88,7 @@ async with client:
         "name": "Alice",
         "role": "administrator"
     })
-    
+
     # Access the personalized messages
     for message in result.messages:
         print(f"Generated message: {message.content}")
@@ -144,7 +147,7 @@ The `get_prompt()` method returns a `GetPromptResult` object containing a list o
 ```python
 async with client:
     result = await client.get_prompt("conversation_starter", {"topic": "climate"})
-    
+
     # Access individual messages
     for i, message in enumerate(result.messages):
         print(f"Message {i + 1}:")
@@ -161,7 +164,7 @@ async with client:
     # Raw MCP method returns full protocol object
     prompts_result = await client.list_prompts_mcp()
     # prompts_result -> mcp.types.ListPromptsResult
-    
+
     prompt_result = await client.get_prompt_mcp("example_prompt", {"arg": "value"})
     # prompt_result -> mcp.types.GetPromptResult
 ```
@@ -189,7 +192,7 @@ async with client:
         "role": "helpful assistant",
         "expertise": "python programming"
     })
-    
+
     # Access the returned messages
     message = result.messages[0]
     print(f"Prompt: {message.content}")
@@ -205,12 +208,13 @@ async with client:
         "candidate_name": "Alice",
         "position": "Senior Developer"
     })
-    
+
     # Multiple messages for a conversation flow
     for message in result.messages:
         print(f"{message.role}: {message.content}")
 ```
 
 <Tip>
-Prompt arguments and their expected types depend on the specific prompt implementation. Check the server's documentation or use `list_prompts()` to see available arguments for each prompt.
+  Prompt arguments and their expected types depend on the specific prompt implementation. Check the server's
+  documentation or use `list_prompts()` to see available arguments for each prompt.
 </Tip>

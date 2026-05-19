@@ -139,14 +139,14 @@ Or copy only the modified CLI portion if you want a lighter sandbox.
 
 ## 10. Rapid Edit Loop Summary
 
-| Action | Command |
-|--------|---------|
-| Run CLI directly | `python -m src.specify_cli --help` |
-| Editable install | `uv pip install -e .` then `specify ...` |
-| Local uvx run (repo root) | `uvx --from . specify ...` |
-| Local uvx run (abs path) | `uvx --from /mnt/c/GitHub/spec-kit specify ...` |
-| Git branch uvx | `uvx --from git+URL@branch specify ...` |
-| Build wheel | `uv build` |
+| Action                    | Command                                         |
+| ------------------------- | ----------------------------------------------- |
+| Run CLI directly          | `python -m src.specify_cli --help`              |
+| Editable install          | `uv pip install -e .` then `specify ...`        |
+| Local uvx run (repo root) | `uvx --from . specify ...`                      |
+| Local uvx run (abs path)  | `uvx --from /mnt/c/GitHub/spec-kit specify ...` |
+| Git branch uvx            | `uvx --from git+URL@branch specify ...`         |
+| Build wheel               | `uv build`                                      |
 
 ## 11. Cleaning Up
 
@@ -158,12 +158,12 @@ rm -rf .venv dist build *.egg-info
 
 ## 12. Common Issues
 
-| Symptom | Fix |
-|---------|-----|
-| `ModuleNotFoundError: typer` | Run `uv pip install -e .` |
-| Scripts not executable (Linux) | Re-run init or `chmod +x scripts/*.sh` |
-| Git step skipped | You passed `--no-git` or Git not installed |
-| Wrong script type downloaded | Pass `--script sh` or `--script ps` explicitly |
+| Symptom                         | Fix                                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `ModuleNotFoundError: typer`    | Run `uv pip install -e .`                                                                                       |
+| Scripts not executable (Linux)  | Re-run init or `chmod +x scripts/*.sh`                                                                          |
+| Git step skipped                | You passed `--no-git` or Git not installed                                                                      |
+| Wrong script type downloaded    | Pass `--script sh` or `--script ps` explicitly                                                                  |
 | TLS errors on corporate network | Configure your environment's certificate store or proxy. The `--skip-tls` flag is deprecated and has no effect. |
 
 ## 13. Next Steps

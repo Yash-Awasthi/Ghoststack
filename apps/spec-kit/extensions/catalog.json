@@ -11,12 +11,7 @@
       "author": "spec-kit-core",
       "repository": "https://github.com/github/spec-kit",
       "bundled": true,
-      "tags": [
-        "git",
-        "branching",
-        "workflow",
-        "core"
-      ]
+      "tags": ["git", "branching", "workflow", "core"]
     }
   }
 }

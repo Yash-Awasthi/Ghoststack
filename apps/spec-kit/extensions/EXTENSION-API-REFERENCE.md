@@ -20,51 +20,51 @@ Technical reference for Spec Kit extension system APIs and manifest schema.
 File: `extension.yml`
 
 ```yaml
-schema_version: "1.0"  # Required
+schema_version: "1.0" # Required
 
 extension:
-  id: string           # Required, pattern: ^[a-z0-9-]+$
-  name: string         # Required, human-readable name
-  version: string      # Required, semantic version (X.Y.Z)
-  description: string  # Required, brief description (<200 chars)
-  author: string       # Required
-  repository: string   # Required, valid URL
-  license: string      # Required (e.g., "MIT", "Apache-2.0")
-  homepage: string     # Optional, valid URL
+  id: string # Required, pattern: ^[a-z0-9-]+$
+  name: string # Required, human-readable name
+  version: string # Required, semantic version (X.Y.Z)
+  description: string # Required, brief description (<200 chars)
+  author: string # Required
+  repository: string # Required, valid URL
+  license: string # Required (e.g., "MIT", "Apache-2.0")
+  homepage: string # Optional, valid URL
 
 requires:
-  speckit_version: string  # Required, version specifier (>=X.Y.Z)
-  tools:                   # Optional, array of tool requirements
-    - name: string         # Tool name
-      version: string      # Optional, version specifier
-      required: boolean    # Optional, default: false
+  speckit_version: string # Required, version specifier (>=X.Y.Z)
+  tools: # Optional, array of tool requirements
+    - name: string # Tool name
+      version: string # Optional, version specifier
+      required: boolean # Optional, default: false
 
 provides:
-  commands:              # Required, at least one command
-    - name: string       # Required, pattern: ^speckit\.[a-z0-9-]+\.[a-z0-9-]+$
-      file: string       # Required, relative path to command file
+  commands: # Required, at least one command
+    - name: string # Required, pattern: ^speckit\.[a-z0-9-]+\.[a-z0-9-]+$
+      file: string # Required, relative path to command file
       description: string # Required
-      aliases: [string]  # Optional, same pattern as name; namespace must match extension.id and must not shadow core or installed extension commands
+      aliases: [string] # Optional, same pattern as name; namespace must match extension.id and must not shadow core or installed extension commands
 
-  config:                # Optional, array of config files
-    - name: string       # Config file name
-      template: string   # Template file path
+  config: # Optional, array of config files
+    - name: string # Config file name
+      template: string # Template file path
       description: string
-      required: boolean  # Default: false
+      required: boolean # Default: false
 
-hooks:                   # Optional, event hooks
-  event_name:            # e.g., "after_specify", "after_plan", "after_tasks", "after_implement"
-    command: string      # Command to execute
-    optional: boolean    # Default: true
-    prompt: string       # Prompt text for optional hooks
-    description: string  # Hook description
-    condition: string    # Optional, condition expression
+hooks: # Optional, event hooks
+  event_name: # e.g., "after_specify", "after_plan", "after_tasks", "after_implement"
+    command: string # Command to execute
+    optional: boolean # Default: true
+    prompt: string # Prompt text for optional hooks
+    description: string # Hook description
+    condition: string # Optional, condition expression
 
-tags:                    # Optional, array of tags (2-10 recommended)
+tags: # Optional, array of tags (2-10 recommended)
   - string
 
-defaults:                # Optional, default configuration values
-  key: value             # Any YAML structure
+defaults: # Optional, default configuration values
+  key: value # Any YAML structure
 ```
 
 ### Field Specifications
@@ -101,7 +101,7 @@ defaults:                # Optional, default configuration values
 - **Type**: string
 - **Pattern**: `^speckit\.[a-z0-9-]+\.[a-z0-9-]+$`
 - **Description**: Namespaced command name
-- **Format**:  `speckit.{extension-id}.{command-name}`
+- **Format**: `speckit.{extension-id}.{command-name}`
 - **Examples**: `speckit.jira.specstoissues`, `speckit.linear.sync`
 - **Invalid**: `jira.specstoissues`, `speckit.command`, `speckit.jira.CreateIssues`
 
@@ -263,13 +263,13 @@ entry = CatalogEntry(
 
 **Fields**:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `url` | `str` | Catalog URL (must use HTTPS, or HTTP for localhost) |
-| `name` | `str` | Human-readable catalog name |
-| `priority` | `int` | Sort order (lower = higher priority, wins on conflicts) |
-| `install_allowed` | `bool` | Whether extensions from this catalog can be installed |
-| `description` | `str` | Optional human-readable description of the catalog (default: empty) |
+| Field             | Type   | Description                                                         |
+| ----------------- | ------ | ------------------------------------------------------------------- |
+| `url`             | `str`  | Catalog URL (must use HTTPS, or HTTP for localhost)                 |
+| `name`            | `str`  | Human-readable catalog name                                         |
+| `priority`        | `int`  | Sort order (lower = higher priority, wins on conflicts)             |
+| `install_allowed` | `bool` | Whether extensions from this catalog can be installed               |
+| `description`     | `str`  | Optional human-readable description of the catalog (default: empty) |
 
 ### ExtensionCatalog
 
@@ -321,9 +321,9 @@ catalog.clear_cache()
 
 Each extension dict returned by `search()` and `get_extension_info()` includes:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `_catalog_name` | `str` | Name of the source catalog |
+| Field              | Type   | Description                                       |
+| ------------------ | ------ | ------------------------------------------------- |
+| `_catalog_name`    | `str`  | Name of the source catalog                        |
 | `_install_allowed` | `bool` | Whether installation is allowed from this catalog |
 
 **Catalog config file** (`.specify/extension-catalogs.yml`):
@@ -419,8 +419,8 @@ yaml_text = registrar.render_frontmatter(frontmatter: Dict)  # str
 ---
 description: "Command description"
 tools:
-  - 'mcp-server/tool_name'
-  - 'other-mcp-server/other_tool'
+  - "mcp-server/tool_name"
+  - "other-mcp-server/other_tool"
 ---
 
 # Command Title
@@ -443,7 +443,9 @@ $ARGUMENTS
 Instruction text...
 
 \`\`\`bash
+
 # Shell commands
+
 \`\`\`
 
 ### Step 2: Another Step
@@ -462,8 +464,8 @@ Additional notes and tips.
 ### Frontmatter Fields
 
 ```yaml
-description: string   # Required, brief command description
-tools: [string]       # Optional, MCP tools required
+description: string # Required, brief command description
+tools: [string] # Optional, MCP tools required
 ```
 
 ### Special Variables
@@ -825,6 +827,6 @@ satisfied = version_satisfies("1.2.3", ">=1.0.0,<2.0.0")  # bool
 
 ---
 
-*Last Updated: 2026-01-28*
-*API Version: 1.0*
-*Spec Kit Version: 0.1.0*
+_Last Updated: 2026-01-28_
+_API Version: 1.0_
+_Spec Kit Version: 0.1.0_

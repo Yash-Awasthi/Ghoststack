@@ -11,25 +11,25 @@ Standalone `TagResource` rejects reserved `floci:*` keys. `ListTagsForResource` 
 
 ## Supported Actions
 
-| Category | Actions |
-|---|---|
-| **User Pools** | CreateUserPool, DescribeUserPool, ListUserPools, UpdateUserPool, DeleteUserPool |
-| **User Pool Tags** | TagResource, UntagResource, ListTagsForResource |
-| **User Pool Clients** | CreateUserPoolClient, DescribeUserPoolClient, ListUserPoolClients, DeleteUserPoolClient |
-| **Resource Servers** | CreateResourceServer, DescribeResourceServer, ListResourceServers, DeleteResourceServer |
-| **Admin User Management** | AdminCreateUser (including `MessageAction=RESEND`), AdminGetUser, AdminDeleteUser, AdminSetUserPassword, AdminUpdateUserAttributes |
-| **User Operations** | SignUp, ConfirmSignUp, GetUser, UpdateUserAttributes, ChangePassword, ForgotPassword, ConfirmForgotPassword |
-| **Authentication** | InitiateAuth, AdminInitiateAuth, RespondToAuthChallenge (supports USER_PASSWORD_AUTH, USER_SRP_AUTH, ADMIN_USER_SRP_AUTH) |
-| **User Listing** | ListUsers |
-| **Groups** | CreateGroup, GetGroup, UpdateGroup, ListGroups, ListUsersInGroup, DeleteGroup, AdminAddUserToGroup, AdminRemoveUserFromGroup, AdminListGroupsForUser |
+| Category                  | Actions                                                                                                                                              |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **User Pools**            | CreateUserPool, DescribeUserPool, ListUserPools, UpdateUserPool, DeleteUserPool                                                                      |
+| **User Pool Tags**        | TagResource, UntagResource, ListTagsForResource                                                                                                      |
+| **User Pool Clients**     | CreateUserPoolClient, DescribeUserPoolClient, ListUserPoolClients, DeleteUserPoolClient                                                              |
+| **Resource Servers**      | CreateResourceServer, DescribeResourceServer, ListResourceServers, DeleteResourceServer                                                              |
+| **Admin User Management** | AdminCreateUser (including `MessageAction=RESEND`), AdminGetUser, AdminDeleteUser, AdminSetUserPassword, AdminUpdateUserAttributes                   |
+| **User Operations**       | SignUp, ConfirmSignUp, GetUser, UpdateUserAttributes, ChangePassword, ForgotPassword, ConfirmForgotPassword                                          |
+| **Authentication**        | InitiateAuth, AdminInitiateAuth, RespondToAuthChallenge (supports USER_PASSWORD_AUTH, USER_SRP_AUTH, ADMIN_USER_SRP_AUTH)                            |
+| **User Listing**          | ListUsers                                                                                                                                            |
+| **Groups**                | CreateGroup, GetGroup, UpdateGroup, ListGroups, ListUsersInGroup, DeleteGroup, AdminAddUserToGroup, AdminRemoveUserFromGroup, AdminListGroupsForUser |
 
 ## Well-Known And OAuth Endpoints
 
-| Endpoint | Description |
-|---|---|
-| `GET /{userPoolId}/.well-known/openid-configuration` | OpenID discovery document |
-| `GET /{userPoolId}/.well-known/jwks.json` | JSON Web Key Set for JWT validation |
-| `POST /cognito-idp/oauth2/token` | Relaxed OAuth token endpoint for `grant_type=client_credentials` |
+| Endpoint                                             | Description                                                      |
+| ---------------------------------------------------- | ---------------------------------------------------------------- |
+| `GET /{userPoolId}/.well-known/openid-configuration` | OpenID discovery document                                        |
+| `GET /{userPoolId}/.well-known/jwks.json`            | JSON Web Key Set for JWT validation                              |
+| `POST /cognito-idp/oauth2/token`                     | Relaxed OAuth token endpoint for `grant_type=client_credentials` |
 
 `POST /cognito-idp/oauth2/token` is intentionally emulator-friendly rather than full Cognito parity:
 
@@ -44,9 +44,9 @@ Standalone `TagResource` rejects reserved `floci:*` keys. `ListTagsForResource` 
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_COGNITO_ENABLED` | `true` | Enable or disable the service |
+| Variable                         | Default | Description                   |
+| -------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_COGNITO_ENABLED` | `true`  | Enable or disable the service |
 
 ## Examples
 

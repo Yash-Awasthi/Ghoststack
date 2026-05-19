@@ -5,7 +5,7 @@ description: Modify components as they flow through your server
 icon: wand-magic-sparkles
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -140,16 +140,16 @@ The `Transform` base class provides default implementations that pass through un
 
 Each component type has two methods with different patterns:
 
-| Method | Pattern | Purpose |
-|--------|---------|---------|
-| `list_tools(tools)` | Pure function | Transform the sequence of tools |
-| `get_tool(name, call_next)` | Middleware | Transform lookup by name |
-| `list_resources(resources)` | Pure function | Transform the sequence of resources |
-| `get_resource(uri, call_next)` | Middleware | Transform lookup by URI |
-| `list_resource_templates(templates)` | Pure function | Transform the sequence of templates |
-| `get_resource_template(uri, call_next)` | Middleware | Transform template lookup by URI |
-| `list_prompts(prompts)` | Pure function | Transform the sequence of prompts |
-| `get_prompt(name, call_next)` | Middleware | Transform lookup by name |
+| Method                                  | Pattern       | Purpose                             |
+| --------------------------------------- | ------------- | ----------------------------------- |
+| `list_tools(tools)`                     | Pure function | Transform the sequence of tools     |
+| `get_tool(name, call_next)`             | Middleware    | Transform lookup by name            |
+| `list_resources(resources)`             | Pure function | Transform the sequence of resources |
+| `get_resource(uri, call_next)`          | Middleware    | Transform lookup by URI             |
+| `list_resource_templates(templates)`    | Pure function | Transform the sequence of templates |
+| `get_resource_template(uri, call_next)` | Middleware    | Transform template lookup by URI    |
+| `list_prompts(prompts)`                 | Pure function | Transform the sequence of prompts   |
+| `get_prompt(name, call_next)`           | Middleware    | Transform lookup by name            |
 
 List methods receive sequences directly and return transformed sequences. Get methods use `call_next` for routing flexibility—when a client requests "new_name", your transform maps it back to "original_name" before calling `call_next()`.
 

@@ -1,13 +1,13 @@
-import { MCPServerRegistry } from '../orchestration/mcp-registry';
-import { IMCPTransport } from '../orchestration/interfaces/mcp.interface';
+import { MCPServerRegistry } from "../orchestration/mcp-registry";
+import { IMCPTransport } from "../orchestration/interfaces/mcp.interface";
 
 class MockMCPTransport implements IMCPTransport {
   private connected = false;
-  
+
   async connect(): Promise<void> {
     this.connected = true;
   }
-  
+
   async disconnect(): Promise<void> {
     this.connected = false;
   }
@@ -27,13 +27,16 @@ describe("Milestone 1: MCP Server Registry & Transport Core", () => {
     const registry = new MCPServerRegistry();
     const transport = new MockMCPTransport();
 
-    await registry.registerServer({
-      name: "financial-calculator",
-      transportType: "http",
-      endpoint: "http://localhost:8080/mcp",
-      status: "inactive",
-      tools: ["calculate_compound_interest", "calculate_yield"]
-    }, transport);
+    await registry.registerServer(
+      {
+        name: "financial-calculator",
+        transportType: "http",
+        endpoint: "http://localhost:8080/mcp",
+        status: "inactive",
+        tools: ["calculate_compound_interest", "calculate_yield"]
+      },
+      transport
+    );
 
     const servers = await registry.listServers();
     expect(servers.length).toBe(1);
@@ -42,7 +45,7 @@ describe("Milestone 1: MCP Server Registry & Transport Core", () => {
 
     const entry = await registry.getServer("financial-calculator");
     expect(entry).toBeDefined();
-    
+
     // Connect transport
     await entry?.transport.connect();
     expect((entry?.transport as MockMCPTransport).isConnected()).toBe(true);

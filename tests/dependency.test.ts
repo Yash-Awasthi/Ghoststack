@@ -1,5 +1,5 @@
-import { TaskDependencyResolver } from '../orchestration/dependency-resolver';
-import { Task } from '../orchestration/task-router';
+import { TaskDependencyResolver } from "../orchestration/dependency-resolver";
+import { Task } from "../orchestration/task-router";
 
 describe("Milestone 1: Dependency Resolver & Cycle Detection", () => {
   it("should successfully sort independent tasks in basic dependency order", () => {
@@ -12,9 +12,9 @@ describe("Milestone 1: Dependency Resolver & Cycle Detection", () => {
     ];
 
     const sorted = resolver.resolveOrder(tasks);
-    
+
     // B must be first, then A, then C
-    expect(sorted.map(t => t.id)).toEqual(["task-B", "task-A", "task-C"]);
+    expect(sorted.map((t) => t.id)).toEqual(["task-B", "task-A", "task-C"]);
   });
 
   it("should detect simple and transient circular dependencies", () => {

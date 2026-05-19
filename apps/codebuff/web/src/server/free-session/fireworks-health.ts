@@ -1,6 +1,9 @@
 import { env } from '@codebuff/internal/env'
 
-import { FIREWORKS_ACCOUNT_ID, FIREWORKS_DEPLOYMENT_MAP } from '@/llm-api/fireworks-config'
+import {
+  FIREWORKS_ACCOUNT_ID,
+  FIREWORKS_DEPLOYMENT_MAP,
+} from '@/llm-api/fireworks-config'
 import { logger } from '@/util/logger'
 
 /**
@@ -115,7 +118,9 @@ async function probe(): Promise<FleetHealth> {
   }
 
   const fleet: FleetHealth = {}
-  for (const [modelId, deploymentName] of Object.entries(FIREWORKS_DEPLOYMENT_MAP)) {
+  for (const [modelId, deploymentName] of Object.entries(
+    FIREWORKS_DEPLOYMENT_MAP,
+  )) {
     const deploymentId = deploymentName.split('/').pop()!
     fleet[modelId] = classifyOne(samples, deploymentId)
   }
@@ -130,7 +135,10 @@ function allDeploymentsAt(health: FireworksHealth): FleetHealth {
   return out
 }
 
-export function classifyOne(samples: PromSample[], deploymentId: string): FireworksHealth {
+export function classifyOne(
+  samples: PromSample[],
+  deploymentId: string,
+): FireworksHealth {
   const kvBlocks = scalarFor(
     samples,
     'generator_kv_blocks_fraction:avg_by_deployment',
@@ -206,7 +214,11 @@ function errorRateFor(
   )?.value
 }
 
-type PromSample = { name: string; labels: Record<string, string>; value: number }
+type PromSample = {
+  name: string
+  labels: Record<string, string>
+  value: number
+}
 
 function parsePrometheus(text: string): {
   samples: PromSample[]
@@ -236,7 +248,10 @@ function parsePrometheus(text: string): {
     // Prometheus text exposition: "<name>{<labels>} <value> [<timestamp_ms>]"
     if (tokens.length >= 2) {
       const ts = Number(tokens[1])
-      if (Number.isFinite(ts) && (newestTimestampMs === undefined || ts > newestTimestampMs)) {
+      if (
+        Number.isFinite(ts) &&
+        (newestTimestampMs === undefined || ts > newestTimestampMs)
+      ) {
         newestTimestampMs = ts
       }
     }
@@ -272,7 +287,8 @@ function histogramPercentile(
       (s) => s.name === bucketMetric && s.labels.deployment_id === deploymentId,
     )
     .map((s) => ({
-      le: s.labels.le === '+Inf' ? Number.POSITIVE_INFINITY : Number(s.labels.le),
+      le:
+        s.labels.le === '+Inf' ? Number.POSITIVE_INFINITY : Number(s.labels.le),
       cum: s.value,
     }))
     .sort((a, b) => a.le - b.le)

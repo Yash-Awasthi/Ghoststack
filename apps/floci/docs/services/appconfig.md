@@ -36,10 +36,10 @@ The data plane is used by applications to retrieve the active configuration for 
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_APPCONFIG_ENABLED` | `true` | Enable or disable the AppConfig management plane |
-| `FLOCI_SERVICES_APPCONFIGDATA_ENABLED` | `true` | Enable or disable the AppConfigData retrieval plane |
+| Variable                               | Default | Description                                         |
+| -------------------------------------- | ------- | --------------------------------------------------- |
+| `FLOCI_SERVICES_APPCONFIG_ENABLED`     | `true`  | Enable or disable the AppConfig management plane    |
+| `FLOCI_SERVICES_APPCONFIGDATA_ENABLED` | `true`  | Enable or disable the AppConfigData retrieval plane |
 
 ## Example Usage
 

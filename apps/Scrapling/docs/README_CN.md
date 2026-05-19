@@ -60,7 +60,9 @@ p = StealthyFetcher.fetch('https://example.com', headless=True, network_idle=Tru
 products = p.css('.product', auto_save=True)                                        # 抓取在网站设计变更后仍能存活的数据！
 products = p.css('.product', adaptive=True)                                         # 之后，如果网站结构改变，传递 `adaptive=True` 来找到它们！
 ```
+
 或扩展为完整爬取
+
 ```python
 from scrapling.spiders import Spider, Response
 
@@ -82,6 +84,7 @@ MySpider().start()
 </p>
 
 # 铂金赞助商
+
 <table>
   <tr>
     <td width="200">
@@ -201,9 +204,11 @@ MySpider().start()
 </table>
 
 <i><sub>想在这里展示您的广告吗？点击 [这里](https://github.com/sponsors/D4Vinci/sponsorships?tier_id=586646)</sub></i>
+
 # 赞助商
 
 <!-- sponsors -->
+
 <a href="https://www.crawleo.dev/?utm_source=github&utm_medium=sponsor&utm_campaign=scrapling" target="_blank" title="Supercharge your AI with Real-Time Web Intelligence"><img src="https://raw.githubusercontent.com/D4Vinci/Scrapling/main/images/crawleo.png"></a>
 <br/>
 
@@ -216,7 +221,6 @@ MySpider().start()
 <a href="https://www.ipcook.com/?ref=EAENO9&utm_source=github&utm_medium=referral&utm_campaign=d4vinci_scrapling" target="_blank" title="Fast Proxies. Smart Pricing. Premium Performance."><img src="https://raw.githubusercontent.com/D4Vinci/Scrapling/main/images/IPCook.png"></a>
 <a href="https://proxiware.com/?ref=scrapling" target="_blank" title="Collect Any Data. At Any Scale."><img src="https://raw.githubusercontent.com/D4Vinci/Scrapling/main/images/proxiware.png"></a>
 
-
 <!-- /sponsors -->
 
 <i><sub>想在这里展示您的广告吗？点击 [这里](https://github.com/sponsors/D4Vinci) 并选择适合您的级别！</sub></i>
@@ -226,6 +230,7 @@ MySpider().start()
 ## 主要特性
 
 ### Spider - 完整的爬取框架
+
 - 🕷️ **类 Scrapy 的 Spider API**：使用 `start_urls`、async `parse` callback 和`Request`/`Response` 对象定义 Spider。
 - ⚡ **并发爬取**：可配置的并发限制、按域名节流和下载延迟。
 - 🔄 **多 Session 支持**：统一接口，支持 HTTP 请求和隐秘无头浏览器在同一个 Spider 中使用--通过 ID 将请求路由到不同的 Session。
@@ -237,6 +242,7 @@ MySpider().start()
 - 📦 **内置导出**：通过钩子和您自己的管道导出结果，或使用内置的 JSON/JSONL，分别通过 `result.items.to_json()`/`result.items.to_jsonl()`。
 
 ### 支持 Session 的高级网站获取
+
 - **HTTP 请求**：使用 `Fetcher` 类进行快速和隐秘的 HTTP 请求。可以模拟浏览器的 TLS fingerprint、标头并使用 HTTP/3。
 - **动态加载**：通过 `DynamicFetcher` 类使用完整的浏览器自动化获取动态网站，支持 Playwright 的 Chromium 和 Google Chrome。
 - **反机器人绕过**：使用 `StealthyFetcher` 的高级隐秘功能和 fingerprint 伪装。可以轻松自动绕过所有类型的 Cloudflare Turnstile/Interstitial。
@@ -247,18 +253,21 @@ MySpider().start()
 - **Async 支持**：所有 Fetcher 和专用 async Session 类的完整 async 支持。
 
 ### 自适应抓取和 AI 集成
+
 - 🔄 **智能元素跟踪**：使用智能相似性算法在网站更改后重新定位元素。
 - 🎯 **智能灵活选择**：CSS 选择器、XPath 选择器、基于过滤器的搜索、文本搜索、正则表达式搜索等。
 - 🔍 **查找相似元素**：自动定位与已找到元素相似的元素。
 - 🤖 **与 AI 一起使用的 MCP 服务器**：内置 MCP 服务器用于 AI 辅助 Web Scraping 和数据提取。MCP 服务器具有强大的自定义功能，利用 Scrapling 在将内容传递给 AI（Claude/Cursor 等）之前提取目标内容，从而加快操作并通过最小化 token 使用来降低成本。（[演示视频](https://www.youtube.com/watch?v=qyFk3ZNwOxE)）
 
 ### 高性能和经过实战测试的架构
+
 - 🚀 **闪电般快速**：优化性能超越大多数 Python 抓取库。
 - 🔋 **内存高效**：优化的数据结构和延迟加载，最小内存占用。
 - ⚡ **快速 JSON 序列化**：比标准库快 10 倍。
 - 🏗️ **经过实战测试**：Scrapling 不仅拥有 92% 的测试覆盖率和完整的类型提示覆盖率，而且在过去一年中每天被数百名 Web Scraper 使用。
 
 ### 对开发者/Web Scraper 友好的体验
+
 - 🎯 **交互式 Web Scraping Shell**：可选的内置 IPython Shell，具有 Scrapling 集成、快捷方式和新工具，可加快 Web Scraping 脚本开发，例如将 curl 请求转换为 Scrapling 请求并在浏览器中查看请求结果。
 - 🚀 **直接从终端使用**：可选地，您可以使用 Scrapling 抓取 URL 而无需编写任何代码！
 - 🛠️ **丰富的导航 API**：使用父级、兄弟级和子级导航方法进行高级 DOM 遍历。
@@ -273,7 +282,9 @@ MySpider().start()
 让我们快速展示 Scrapling 的功能，无需深入了解。
 
 ### 基本用法
+
 支持 Session 的 HTTP 请求
+
 ```python
 from scrapling.fetchers import Fetcher, FetcherSession
 
@@ -285,7 +296,9 @@ with FetcherSession(impersonate='chrome') as session:  # 使用 Chrome 的最新
 page = Fetcher.get('https://quotes.toscrape.com/')
 quotes = page.css('.quote .text::text').getall()
 ```
+
 高级隐秘模式
+
 ```python
 from scrapling.fetchers import StealthyFetcher, StealthySession
 
@@ -297,7 +310,9 @@ with StealthySession(headless=True, solve_cloudflare=True) as session:  # 保持
 page = StealthyFetcher.fetch('https://nopecha.com/demo/cloudflare')
 data = page.css('#padded_content a').getall()
 ```
+
 完整的浏览器自动化
+
 ```python
 from scrapling.fetchers import DynamicFetcher, DynamicSession
 
@@ -311,7 +326,9 @@ data = page.css('.quote .text::text').getall()
 ```
 
 ### Spider
+
 构建具有并发请求、多种 Session 类型和暂停/恢复功能的完整爬虫：
+
 ```python
 from scrapling.spiders import Spider, Request, Response
 
@@ -335,7 +352,9 @@ result = QuotesSpider().start()
 print(f"抓取了 {len(result.items)} 条引用")
 result.items.to_json("quotes.json")
 ```
+
 在单个 Spider 中使用多种 Session 类型：
+
 ```python
 from scrapling.spiders import Spider, Request, Response
 from scrapling.fetchers import FetcherSession, AsyncStealthySession
@@ -356,13 +375,17 @@ class MultiSessionSpider(Spider):
             else:
                 yield Request(link, sid="fast", callback=self.parse)  # 显式 callback
 ```
+
 通过如下方式运行 Spider 来暂停和恢复长时间爬取，使用 Checkpoint：
+
 ```python
 QuotesSpider(crawldir="./crawl_data").start()
 ```
+
 按 Ctrl+C 优雅暂停--进度会自动保存。之后，当您再次启动 Spider 时，传递相同的 `crawldir`，它将从上次停止的地方继续。
 
 ### 高级解析与导航
+
 ```python
 from scrapling.fetchers import Fetcher
 
@@ -391,15 +414,19 @@ parent_container = first_quote.parent
 similar_elements = first_quote.find_similar()
 below_elements = first_quote.below_elements()
 ```
+
 如果您不想获取网站，可以直接使用解析器，如下所示：
+
 ```python
 from scrapling.parser import Selector
 
 page = Selector("<html>...</html>")
 ```
+
 用法完全相同！
 
 ### Async Session 管理示例
+
 ```python
 import asyncio
 from scrapling.fetchers import FetcherSession, AsyncStealthySession, AsyncDynamicSession
@@ -429,10 +456,13 @@ Scrapling 包含强大的命令行界面：
 [![asciicast](https://asciinema.org/a/736339.svg)](https://asciinema.org/a/736339)
 
 启动交互式 Web Scraping Shell
+
 ```bash
 scrapling shell
 ```
+
 直接将页面提取到文件而无需编程（默认提取 `body` 标签内的内容）。如果输出文件以`.txt` 结尾，则将提取目标的文本内容。如果以`.md` 结尾，它将是 HTML 内容的 Markdown 表示；如果以`.html` 结尾，它将是 HTML 内容本身。
+
 ```bash
 scrapling extract get 'https://example.com' content.md
 scrapling extract get 'https://example.com' content.txt --css-selector '#fromSkipToProducts' --impersonate 'chrome'  # 所有匹配 CSS 选择器'#fromSkipToProducts' 的元素
@@ -449,27 +479,25 @@ Scrapling 不仅功能强大--它还速度极快。以下基准测试将 Scrapli
 
 ### 文本提取速度测试（5000 个嵌套元素）
 
-| # |         库         | 时间 (ms)  | vs Scrapling |
-|---|:-----------------:|:---------:|:------------:|
-| 1 |     Scrapling     |   2.02    |     1.0x     |
-| 2 |   Parsel/Scrapy   |   2.04    |     1.01     |
-| 3 |     Raw Lxml      |   2.54    |    1.257     |
-| 4 |      PyQuery      |   24.17   |     ~12x     |
-| 5 |    Selectolax     |   82.63   |     ~41x     |
-| 6 |  MechanicalSoup   |  1549.71  |   ~767.1x    |
-| 7 |   BS4 with Lxml   |  1584.31  |   ~784.3x    |
-| 8 | BS4 with html5lib |  3391.91  |   ~1679.1x   |
-
+| #   |        库         | 时间 (ms) | vs Scrapling |
+| --- | :---------------: | :-------: | :----------: |
+| 1   |     Scrapling     |   2.02    |     1.0x     |
+| 2   |   Parsel/Scrapy   |   2.04    |     1.01     |
+| 3   |     Raw Lxml      |   2.54    |    1.257     |
+| 4   |      PyQuery      |   24.17   |     ~12x     |
+| 5   |    Selectolax     |   82.63   |     ~41x     |
+| 6   |  MechanicalSoup   |  1549.71  |   ~767.1x    |
+| 7   |   BS4 with Lxml   |  1584.31  |   ~784.3x    |
+| 8   | BS4 with html5lib |  3391.91  |   ~1679.1x   |
 
 ### 元素相似性和文本搜索性能
 
 Scrapling 的自适应元素查找功能明显优于替代方案：
 
-| 库           | 时间 (ms) | vs Scrapling |
-|-------------|:---------:|:------------:|
+| 库          | 时间 (ms) | vs Scrapling |
+| ----------- | :-------: | :----------: |
 | Scrapling   |   2.39    |     1.0x     |
 | AutoScraper |   12.45   |    5.209x    |
-
 
 > 所有基准测试代表 100+ 次运行的平均值。请参阅 [benchmarks.py](https://github.com/D4Vinci/Scrapling/blob/main/benchmarks.py) 了解方法。
 
@@ -486,47 +514,54 @@ pip install scrapling
 ### 可选依赖项
 
 1. 如果您要使用以下任何额外功能、Fetcher 或它们的类，您将需要安装 Fetcher 的依赖项和它们的浏览器依赖项，如下所示：
-    ```bash
-    pip install "scrapling[fetchers]"
 
-    scrapling install           # normal install
-    scrapling install  --force  # force reinstall
-    ```
+   ```bash
+   pip install "scrapling[fetchers]"
 
-    这会下载所有浏览器，以及它们的系统依赖项和 fingerprint 操作依赖项。
+   scrapling install           # normal install
+   scrapling install  --force  # force reinstall
+   ```
 
-    或者你可以从代码中安装，而不是运行命令：
-    ```python
-    from scrapling.cli import install
+   这会下载所有浏览器，以及它们的系统依赖项和 fingerprint 操作依赖项。
 
-    install([], standalone_mode=False)          # normal install
-    install(["--force"], standalone_mode=False) # force reinstall
-    ```
+   或者你可以从代码中安装，而不是运行命令：
+
+   ```python
+   from scrapling.cli import install
+
+   install([], standalone_mode=False)          # normal install
+   install(["--force"], standalone_mode=False) # force reinstall
+   ```
 
 2. 额外功能：
    - 安装 MCP 服务器功能：
-       ```bash
-       pip install "scrapling[ai]"
-       ```
+     ```bash
+     pip install "scrapling[ai]"
+     ```
    - 安装 Shell 功能（Web Scraping Shell 和 `extract` 命令）：
-       ```bash
-       pip install "scrapling[shell]"
-       ```
+     ```bash
+     pip install "scrapling[shell]"
+     ```
    - 安装所有内容：
-       ```bash
-       pip install "scrapling[all]"
-       ```
-   请记住，在安装任何这些额外功能后（如果您还没有安装），您需要使用 `scrapling install` 安装浏览器依赖项
+     `bash
+    pip install "scrapling[all]"
+    `
+     请记住，在安装任何这些额外功能后（如果您还没有安装），您需要使用 `scrapling install` 安装浏览器依赖项
 
 ### Docker
+
 您还可以使用以下命令从 DockerHub 安装包含所有额外功能和浏览器的 Docker 镜像：
+
 ```bash
 docker pull pyd4vinci/scrapling
 ```
+
 或从 GitHub 注册表下载：
+
 ```bash
 docker pull ghcr.io/d4vinci/scrapling:latest
 ```
+
 此镜像使用 GitHub Actions 和仓库主分支自动构建和推送。
 
 ## 贡献
@@ -539,7 +574,9 @@ docker pull ghcr.io/d4vinci/scrapling:latest
 > 此库仅用于教育和研究目的。使用此库即表示您同意遵守本地和国际数据抓取和隐私法律。作者和贡献者对本软件的任何滥用不承担责任。始终尊重网站的服务条款和 robots.txt 文件。
 
 ## 🎓 引用
+
 如果您将我们的库用于研究目的，请使用以下参考文献引用我们：
+
 ```text
   @misc{scrapling,
     author = {Karim Shoair},
@@ -557,7 +594,9 @@ docker pull ghcr.io/d4vinci/scrapling:latest
 ## 致谢
 
 此项目包含改编自以下内容的代码：
+
 - Parsel（BSD 许可证）--用于 [translator](https://github.com/D4Vinci/Scrapling/blob/main/scrapling/core/translator.py)子模块
 
 ---
+
 <div align="center"><small>由 Karim Shoair 用❤️设计和制作。</small></div><br>

@@ -1,5 +1,5 @@
-import { IEventBus } from './event-bus';
-import { IEventStore } from './interfaces/persistence.interface';
+import { IEventBus } from "./event-bus";
+import { IEventStore } from "./interfaces/persistence.interface";
 
 export interface Task {
   id: string;
@@ -23,25 +23,25 @@ export class TaskRouter {
   async route(task: Task): Promise<Task> {
     task.status = "routed";
     this.queue.push(task);
-    
+
     if (this.eventStore) {
-      await this.eventStore.saveEvent('task_routed', task);
+      await this.eventStore.saveEvent("task_routed", task);
     }
-    
-    await this.bus.publish('task_routed', task);
+
+    await this.bus.publish("task_routed", task);
     return task;
   }
 
   async replayEvent(eventRecord: { event: string; payload: any }): Promise<void> {
     const { event, payload } = eventRecord;
-    if (event === 'task_routed') {
+    if (event === "task_routed") {
       const task = payload as Task;
-      if (!this.queue.some(t => t.id === task.id)) {
+      if (!this.queue.some((t) => t.id === task.id)) {
         this.queue.push(task);
       }
-    } else if (event === 'task_completed') {
+    } else if (event === "task_completed") {
       const task = payload as { id: string };
-      this.queue = this.queue.filter(t => t.id !== task.id);
+      this.queue = this.queue.filter((t) => t.id !== task.id);
     }
   }
 

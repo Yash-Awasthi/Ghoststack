@@ -6,25 +6,25 @@
 
 ## Supported Actions
 
-| Action | Description |
-| --- | --- |
-| `CreateRepository` | Create a new repository (lazy-starts the backing registry on first call) |
-| `DescribeRepositories` | List repositories or fetch by name |
-| `DeleteRepository` | Delete a repository (with `force=true` semantics for non-empty repos) |
-| `GetAuthorizationToken` | Returns a docker-login token + proxy endpoint |
-| `ListImages` | Enumerate tags and digests in a repository |
-| `DescribeImages` | Image metadata: digest, size, push timestamp, manifest media type |
-| `BatchGetImage` | Fetch image manifests, honoring `acceptedMediaTypes` |
-| `BatchDeleteImage` | Delete images by tag or digest |
-| `PutImageTagMutability` | Set tag mutability (round-trip; not enforced on push) |
-| `TagResource` / `UntagResource` / `ListTagsForResource` | Resource tagging |
-| `PutLifecyclePolicy` / `GetLifecyclePolicy` / `DeleteLifecyclePolicy` | Lifecycle policy round-trip (stored, not enforced) |
-| `SetRepositoryPolicy` / `GetRepositoryPolicy` / `DeleteRepositoryPolicy` | Repository policy round-trip (stored, not enforced) |
+| Action                                                                   | Description                                                              |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| `CreateRepository`                                                       | Create a new repository (lazy-starts the backing registry on first call) |
+| `DescribeRepositories`                                                   | List repositories or fetch by name                                       |
+| `DeleteRepository`                                                       | Delete a repository (with `force=true` semantics for non-empty repos)    |
+| `GetAuthorizationToken`                                                  | Returns a docker-login token + proxy endpoint                            |
+| `ListImages`                                                             | Enumerate tags and digests in a repository                               |
+| `DescribeImages`                                                         | Image metadata: digest, size, push timestamp, manifest media type        |
+| `BatchGetImage`                                                          | Fetch image manifests, honoring `acceptedMediaTypes`                     |
+| `BatchDeleteImage`                                                       | Delete images by tag or digest                                           |
+| `PutImageTagMutability`                                                  | Set tag mutability (round-trip; not enforced on push)                    |
+| `TagResource` / `UntagResource` / `ListTagsForResource`                  | Resource tagging                                                         |
+| `PutLifecyclePolicy` / `GetLifecyclePolicy` / `DeleteLifecyclePolicy`    | Lifecycle policy round-trip (stored, not enforced)                       |
+| `SetRepositoryPolicy` / `GetRepositoryPolicy` / `DeleteRepositoryPolicy` | Repository policy round-trip (stored, not enforced)                      |
 
 ### Admin Endpoints
 
-| Endpoint | Description |
-| --- | --- |
+| Endpoint              | Description                                                                                        |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
 | `POST /_floci/ecr/gc` | Run garbage collection on the backing `registry:2` container to reclaim disk after image deletions |
 
 ## Emulation Behavior
@@ -39,17 +39,17 @@
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_ECR_ENABLED` | `true` | Enable the ECR control plane and lazy registry start |
-| `FLOCI_SERVICES_ECR_REGISTRY_IMAGE` | `registry:2` | Backing OCI registry image |
-| `FLOCI_SERVICES_ECR_REGISTRY_CONTAINER_NAME` | `floci-ecr-registry` | Container name used for idempotent reuse across restarts |
-| `FLOCI_SERVICES_ECR_REGISTRY_BASE_PORT` | `5100` | First port in the registry port range |
-| `FLOCI_SERVICES_ECR_REGISTRY_MAX_PORT` | `5199` | Last port in the registry port range |
-| `FLOCI_SERVICES_ECR_DATA_PATH` | `./data/ecr` | Bind-mount root for the registry data directory |
-| `FLOCI_SERVICES_ECR_KEEP_RUNNING_ON_SHUTDOWN` | `true` | Leave the registry container running so the next Floci start adopts it |
-| `FLOCI_SERVICES_ECR_URI_STYLE` | `hostname` | `hostname` = `*.dkr.ecr.<region>.localhost`; `path` = `localhost:<port>/<account>/<region>/<repo>` |
-| `FLOCI_SERVICES_ECR_TLS_ENABLED` | `false` | Reserved for future ACM-backed TLS |
+| Variable                                      | Default              | Description                                                                                        |
+| --------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------- |
+| `FLOCI_SERVICES_ECR_ENABLED`                  | `true`               | Enable the ECR control plane and lazy registry start                                               |
+| `FLOCI_SERVICES_ECR_REGISTRY_IMAGE`           | `registry:2`         | Backing OCI registry image                                                                         |
+| `FLOCI_SERVICES_ECR_REGISTRY_CONTAINER_NAME`  | `floci-ecr-registry` | Container name used for idempotent reuse across restarts                                           |
+| `FLOCI_SERVICES_ECR_REGISTRY_BASE_PORT`       | `5100`               | First port in the registry port range                                                              |
+| `FLOCI_SERVICES_ECR_REGISTRY_MAX_PORT`        | `5199`               | Last port in the registry port range                                                               |
+| `FLOCI_SERVICES_ECR_DATA_PATH`                | `./data/ecr`         | Bind-mount root for the registry data directory                                                    |
+| `FLOCI_SERVICES_ECR_KEEP_RUNNING_ON_SHUTDOWN` | `true`               | Leave the registry container running so the next Floci start adopts it                             |
+| `FLOCI_SERVICES_ECR_URI_STYLE`                | `hostname`           | `hostname` = `*.dkr.ecr.<region>.localhost`; `path` = `localhost:<port>/<account>/<region>/<repo>` |
+| `FLOCI_SERVICES_ECR_TLS_ENABLED`              | `false`              | Reserved for future ACM-backed TLS                                                                 |
 
 ### Docker Compose port mapping
 
@@ -62,8 +62,8 @@ services:
     image: floci/floci:latest
     ports:
       - "4566:4566"
-      - "6379-6399:6379-6399"   # ElastiCache
-      - "7001-7099:7001-7099"   # RDS
+      - "6379-6399:6379-6399" # ElastiCache
+      - "7001-7099:7001-7099" # RDS
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 ```
@@ -157,11 +157,11 @@ ecr.deleteRepository(req -> req.repositoryName("floci-it/app").force(true));
 CDK's `DockerImageFunction` works against Floci unchanged:
 
 ```typescript
-import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
-new lambda.DockerImageFunction(this, 'MyFn', {
-  functionName: 'hello',
-  code: lambda.DockerImageCode.fromImageAsset('./docker-fn'),  // local Dockerfile
+new lambda.DockerImageFunction(this, "MyFn", {
+  functionName: "hello",
+  code: lambda.DockerImageCode.fromImageAsset("./docker-fn") // local Dockerfile
 });
 ```
 
@@ -180,7 +180,7 @@ The following ECR features are **not** implemented. Stored values for policies a
 
 ## Troubleshooting
 
-**`Function.TimedOut` when invoking image-backed Lambdas on native Linux Docker.** Lambda containers reach Floci's Runtime API server via the docker bridge gateway. On Ubuntu / Pop!_OS / Debian with UFW enabled, the default `INPUT DROP` policy blocks this path. See [Quick Start → Lambda on native Linux Docker](../getting-started/quick-start.md#lambda-on-native-linux-docker-ufw) for the one-line `ufw allow in on docker0` fix.
+**`Function.TimedOut` when invoking image-backed Lambdas on native Linux Docker.** Lambda containers reach Floci's Runtime API server via the docker bridge gateway. On Ubuntu / Pop!\_OS / Debian with UFW enabled, the default `INPUT DROP` policy blocks this path. See [Quick Start → Lambda on native Linux Docker](../getting-started/quick-start.md#lambda-on-native-linux-docker-ufw) for the one-line `ufw allow in on docker0` fix.
 
 **`docker login` fails with TLS errors.** Floci's emulated registry serves plain HTTP. Docker auto-trusts loopback addresses (`127.0.0.1`, `*.localhost`) as insecure registries, so this should not normally happen. If your URIs end up pointing somewhere non-loopback (e.g. you set `FLOCI_HOSTNAME=floci` for Docker Compose), add the hostname to the daemon's `insecure-registries` array in `/etc/docker/daemon.json`.
 

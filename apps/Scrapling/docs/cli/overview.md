@@ -19,12 +19,17 @@ scrapling extract --help
 ```
 
 ## Requirements
+
 This section requires you to install the extra `shell` dependency group, like the following:
+
 ```bash
 pip install "scrapling[shell]"
 ```
+
 and the installation of the fetchers' dependencies with the following command
+
 ```bash
 scrapling install
 ```
+
 This downloads all browsers, along with their system dependencies and fingerprint manipulation dependencies.

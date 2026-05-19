@@ -95,8 +95,8 @@ Configure log rotation for all containers spawned by Floci:
 ```yaml
 floci:
   docker:
-    log-max-size: "10m"   # Max size per log file before rotation (Docker json-file format)
-    log-max-file: "3"     # Number of rotated log files to retain per container
+    log-max-size: "10m" # Max size per log file before rotation (Docker json-file format)
+    log-max-file: "3" # Number of rotated log files to retain per container
 ```
 
 ## Docker Network
@@ -118,17 +118,17 @@ Environment variable: `FLOCI_SERVICES_DOCKER_NETWORK`
 Individual services can override the network with their own `docker-network` setting (e.g. `floci.services.lambda.docker-network`).
 
 !!! tip
-    In Docker Compose, the default network name is `<project-name>_default`. If your compose file is in a directory named `myapp`, the network is `myapp_default`.
+In Docker Compose, the default network name is `<project-name>_default`. If your compose file is in a directory named `myapp`, the network is `myapp_default`.
 
 ## Full Reference
 
-| Environment variable | Default | Description |
-|---|---|---|
-| `FLOCI_DOCKER_DOCKER_HOST` | `unix:///var/run/docker.sock` | Docker daemon socket |
-| `FLOCI_DOCKER_DOCKER_CONFIG_PATH` | _(unset)_ | Path to directory containing Docker's `config.json` |
-| `FLOCI_DOCKER_REGISTRY_CREDENTIALS_0__SERVER` | _(unset)_ | Registry hostname for credential entry 0 |
-| `FLOCI_DOCKER_REGISTRY_CREDENTIALS_0__USERNAME` | _(unset)_ | Username for credential entry 0 |
-| `FLOCI_DOCKER_REGISTRY_CREDENTIALS_0__PASSWORD` | _(unset)_ | Password for credential entry 0 |
-| `FLOCI_DOCKER_LOG_MAX_SIZE` | `10m` | Max container log file size before rotation |
-| `FLOCI_DOCKER_LOG_MAX_FILE` | `3` | Number of rotated log files to retain |
-| `FLOCI_SERVICES_DOCKER_NETWORK` | _(unset)_ | Shared Docker network for all container-based services |
+| Environment variable                            | Default                       | Description                                            |
+| ----------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
+| `FLOCI_DOCKER_DOCKER_HOST`                      | `unix:///var/run/docker.sock` | Docker daemon socket                                   |
+| `FLOCI_DOCKER_DOCKER_CONFIG_PATH`               | _(unset)_                     | Path to directory containing Docker's `config.json`    |
+| `FLOCI_DOCKER_REGISTRY_CREDENTIALS_0__SERVER`   | _(unset)_                     | Registry hostname for credential entry 0               |
+| `FLOCI_DOCKER_REGISTRY_CREDENTIALS_0__USERNAME` | _(unset)_                     | Username for credential entry 0                        |
+| `FLOCI_DOCKER_REGISTRY_CREDENTIALS_0__PASSWORD` | _(unset)_                     | Password for credential entry 0                        |
+| `FLOCI_DOCKER_LOG_MAX_SIZE`                     | `10m`                         | Max container log file size before rotation            |
+| `FLOCI_DOCKER_LOG_MAX_FILE`                     | `3`                           | Number of rotated log files to retain                  |
+| `FLOCI_SERVICES_DOCKER_NETWORK`                 | _(unset)_                     | Shared Docker network for all container-based services |

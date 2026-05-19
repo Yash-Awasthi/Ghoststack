@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 0.1.11). Leave empty to auto-increment patch version.'
+        description: "Version to release (e.g., 0.1.11). Leave empty to auto-increment patch version."
         required: false
         type: string
 

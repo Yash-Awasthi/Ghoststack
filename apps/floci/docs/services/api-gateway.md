@@ -9,26 +9,26 @@ Floci supports both API Gateway v1 (REST APIs) and API Gateway v2 (HTTP APIs).
 
 ### Supported Operations
 
-| Category | Operations |
-|---|---|
-| **APIs** | CreateRestApi, ImportRestApi, PutRestApi, GetRestApi, GetRestApis, UpdateRestApi, DeleteRestApi |
-| **Resources** | CreateResource, GetResource, GetResources, UpdateResource, DeleteResource |
-| **Methods** | PutMethod, GetMethod, UpdateMethod, DeleteMethod |
-| **Method Responses** | PutMethodResponse, GetMethodResponse |
-| **Integrations** | PutIntegration, GetIntegration, UpdateIntegration, DeleteIntegration |
-| **Integration Responses** | PutIntegrationResponse, GetIntegrationResponse |
-| **Deployments** | CreateDeployment, GetDeployments |
-| **Stages** | CreateStage, GetStage, GetStages, UpdateStage, DeleteStage |
-| **Authorizers** | CreateAuthorizer, GetAuthorizer, GetAuthorizers |
-| **API Keys** | CreateApiKey, GetApiKeys |
-| **Usage Plans** | CreateUsagePlan, GetUsagePlans, DeleteUsagePlan |
-| **Usage Plan Keys** | CreateUsagePlanKey, GetUsagePlanKey, GetUsagePlanKeys, DeleteUsagePlanKey |
-| **Request Validators** | CreateRequestValidator, GetRequestValidator, GetRequestValidators, DeleteRequestValidator |
-| **Models** | CreateModel, GetModel, GetModels, DeleteModel |
-| **Domain Names** | CreateDomainName, GetDomainName, GetDomainNames, DeleteDomainName |
-| **Base Path Mappings** | CreateBasePathMapping, GetBasePathMapping, GetBasePathMappings, DeleteBasePathMapping |
-| **Account** | GetAccount, UpdateAccount |
-| **Tags** | TagResource, UntagResource, GetTags (ListTagsForResource) |
+| Category                  | Operations                                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------------------------- |
+| **APIs**                  | CreateRestApi, ImportRestApi, PutRestApi, GetRestApi, GetRestApis, UpdateRestApi, DeleteRestApi |
+| **Resources**             | CreateResource, GetResource, GetResources, UpdateResource, DeleteResource                       |
+| **Methods**               | PutMethod, GetMethod, UpdateMethod, DeleteMethod                                                |
+| **Method Responses**      | PutMethodResponse, GetMethodResponse                                                            |
+| **Integrations**          | PutIntegration, GetIntegration, UpdateIntegration, DeleteIntegration                            |
+| **Integration Responses** | PutIntegrationResponse, GetIntegrationResponse                                                  |
+| **Deployments**           | CreateDeployment, GetDeployments                                                                |
+| **Stages**                | CreateStage, GetStage, GetStages, UpdateStage, DeleteStage                                      |
+| **Authorizers**           | CreateAuthorizer, GetAuthorizer, GetAuthorizers                                                 |
+| **API Keys**              | CreateApiKey, GetApiKeys                                                                        |
+| **Usage Plans**           | CreateUsagePlan, GetUsagePlans, DeleteUsagePlan                                                 |
+| **Usage Plan Keys**       | CreateUsagePlanKey, GetUsagePlanKey, GetUsagePlanKeys, DeleteUsagePlanKey                       |
+| **Request Validators**    | CreateRequestValidator, GetRequestValidator, GetRequestValidators, DeleteRequestValidator       |
+| **Models**                | CreateModel, GetModel, GetModels, DeleteModel                                                   |
+| **Domain Names**          | CreateDomainName, GetDomainName, GetDomainNames, DeleteDomainName                               |
+| **Base Path Mappings**    | CreateBasePathMapping, GetBasePathMapping, GetBasePathMappings, DeleteBasePathMapping           |
+| **Account**               | GetAccount, UpdateAccount                                                                       |
+| **Tags**                  | TagResource, UntagResource, GetTags (ListTagsForResource)                                       |
 
 ### Not Implemented
 
@@ -104,10 +104,10 @@ curl http://localhost:4566/restapis/$API_ID/dev/_user_request_/users
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_APIGATEWAY_ENABLED` | `true` | Enable or disable API Gateway v1 (REST APIs) |
-| `FLOCI_SERVICES_APIGATEWAYV2_ENABLED` | `true` | Enable or disable API Gateway v2 (HTTP and WebSocket APIs) |
+| Variable                              | Default | Description                                                |
+| ------------------------------------- | ------- | ---------------------------------------------------------- |
+| `FLOCI_SERVICES_APIGATEWAY_ENABLED`   | `true`  | Enable or disable API Gateway v1 (REST APIs)               |
+| `FLOCI_SERVICES_APIGATEWAYV2_ENABLED` | `true`  | Enable or disable API Gateway v2 (HTTP and WebSocket APIs) |
 
 ## API Gateway v2 (HTTP and WebSocket APIs) {#v2}
 
@@ -118,18 +118,18 @@ Both HTTP and WebSocket protocol types are fully supported, including the WebSoc
 
 ### Supported Operations
 
-| Category | Operations |
-|---|---|
-| **APIs** | CreateApi, GetApi, GetApis, UpdateApi, DeleteApi |
-| **Routes** | CreateRoute, GetRoute, GetRoutes, UpdateRoute, DeleteRoute |
-| **Route Responses** | CreateRouteResponse, GetRouteResponse, GetRouteResponses, UpdateRouteResponse, DeleteRouteResponse |
-| **Integrations** | CreateIntegration, GetIntegration, GetIntegrations, UpdateIntegration, DeleteIntegration |
+| Category                  | Operations                                                                                                                       |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **APIs**                  | CreateApi, GetApi, GetApis, UpdateApi, DeleteApi                                                                                 |
+| **Routes**                | CreateRoute, GetRoute, GetRoutes, UpdateRoute, DeleteRoute                                                                       |
+| **Route Responses**       | CreateRouteResponse, GetRouteResponse, GetRouteResponses, UpdateRouteResponse, DeleteRouteResponse                               |
+| **Integrations**          | CreateIntegration, GetIntegration, GetIntegrations, UpdateIntegration, DeleteIntegration                                         |
 | **Integration Responses** | CreateIntegrationResponse, GetIntegrationResponse, GetIntegrationResponses, UpdateIntegrationResponse, DeleteIntegrationResponse |
-| **Authorizers** | CreateAuthorizer, GetAuthorizer, GetAuthorizers, UpdateAuthorizer, DeleteAuthorizer |
-| **Stages** | CreateStage, GetStage, GetStages, UpdateStage, DeleteStage |
-| **Deployments** | CreateDeployment, GetDeployment, GetDeployments, UpdateDeployment, DeleteDeployment |
-| **Models** | CreateModel, GetModel, GetModels, UpdateModel, DeleteModel |
-| **Tags** | TagResource, UntagResource, GetTags |
+| **Authorizers**           | CreateAuthorizer, GetAuthorizer, GetAuthorizers, UpdateAuthorizer, DeleteAuthorizer                                              |
+| **Stages**                | CreateStage, GetStage, GetStages, UpdateStage, DeleteStage                                                                       |
+| **Deployments**           | CreateDeployment, GetDeployment, GetDeployments, UpdateDeployment, DeleteDeployment                                              |
+| **Models**                | CreateModel, GetModel, GetModels, UpdateModel, DeleteModel                                                                       |
+| **Tags**                  | TagResource, UntagResource, GetTags                                                                                              |
 
 ### WebSocket Data-Plane {#websocket-data-plane}
 
@@ -141,30 +141,30 @@ ws://localhost:4566/ws/{apiId}/{stageName}
 
 #### Supported Features
 
-| Feature | Status |
-|---------|--------|
-| `$connect` route with Lambda integration | ✅ |
-| `$disconnect` route with Lambda integration | ✅ |
-| `$default` route (fallback) | ✅ |
-| Custom routes via `routeSelectionExpression` | ✅ |
-| Route response selection expression | ✅ |
-| Lambda REQUEST authorizer on `$connect` | ✅ |
-| Identity source validation (header/querystring) | ✅ |
-| `@connections` POST (send message to client) | ✅ |
-| `@connections` GET (get connection info) | ✅ |
-| `@connections` DELETE (disconnect client) | ✅ |
-| Stage variable substitution in integration URIs | ✅ |
-| AWS_PROXY integration (Lambda) | ✅ |
-| AWS integration (Lambda with VTL templates) | ✅ |
-| HTTP_PROXY integration | ✅ |
-| HTTP integration (with VTL templates) | ✅ |
-| MOCK integration | ✅ |
-| GoneException (410) for disconnected connections | ✅ |
-| Binary frame support (`isBase64Encoded: true`) | ✅ |
-| `$connect` response headers propagation | ✅ |
-| 128 KB payload size limit enforcement | ✅ |
-| 10-minute idle timeout | ✅ |
-| 2-hour max connection duration | ✅ |
+| Feature                                          | Status |
+| ------------------------------------------------ | ------ |
+| `$connect` route with Lambda integration         | ✅     |
+| `$disconnect` route with Lambda integration      | ✅     |
+| `$default` route (fallback)                      | ✅     |
+| Custom routes via `routeSelectionExpression`     | ✅     |
+| Route response selection expression              | ✅     |
+| Lambda REQUEST authorizer on `$connect`          | ✅     |
+| Identity source validation (header/querystring)  | ✅     |
+| `@connections` POST (send message to client)     | ✅     |
+| `@connections` GET (get connection info)         | ✅     |
+| `@connections` DELETE (disconnect client)        | ✅     |
+| Stage variable substitution in integration URIs  | ✅     |
+| AWS_PROXY integration (Lambda)                   | ✅     |
+| AWS integration (Lambda with VTL templates)      | ✅     |
+| HTTP_PROXY integration                           | ✅     |
+| HTTP integration (with VTL templates)            | ✅     |
+| MOCK integration                                 | ✅     |
+| GoneException (410) for disconnected connections | ✅     |
+| Binary frame support (`isBase64Encoded: true`)   | ✅     |
+| `$connect` response headers propagation          | ✅     |
+| 128 KB payload size limit enforcement            | ✅     |
+| 10-minute idle timeout                           | ✅     |
+| 2-hour max connection duration                   | ✅     |
 
 #### @connections Management API
 

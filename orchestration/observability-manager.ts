@@ -1,20 +1,20 @@
-import { IMetricsCollector, ITraceRecorder, ITraceSpan } from './interfaces/observability.interface';
+import { IMetricsCollector, ITraceRecorder, ITraceSpan } from "./interfaces/observability.interface";
 
 export class MetricsCollector implements IMetricsCollector {
   private metrics: Record<string, any> = {};
 
-  increment(metricName: string, amount: number = 1, tags?: Record<string, string>): void {
+  increment(metricName: string, amount: number = 1, _tags?: Record<string, string>): void {
     if (!this.metrics[metricName]) {
       this.metrics[metricName] = 0;
     }
     this.metrics[metricName] += amount;
   }
 
-  recordGauge(metricName: string, value: number, tags?: Record<string, string>): void {
+  recordGauge(metricName: string, value: number, _tags?: Record<string, string>): void {
     this.metrics[metricName] = value;
   }
 
-  recordTiming(metricName: string, durationMs: number, tags?: Record<string, string>): void {
+  recordTiming(metricName: string, durationMs: number, _tags?: Record<string, string>): void {
     if (!this.metrics[metricName]) {
       this.metrics[metricName] = [];
     }
@@ -46,7 +46,7 @@ export class TraceRecorder implements ITraceRecorder {
   }
 
   endSpan(spanId: string, metadata?: Record<string, any>): void {
-    const span = this.spans.find(s => s.spanId === spanId);
+    const span = this.spans.find((s) => s.spanId === spanId);
     if (span) {
       span.endTime = new Date();
       if (metadata) {

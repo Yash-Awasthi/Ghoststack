@@ -1,27 +1,27 @@
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
-import { BrowserExecutionAdapter } from '../orchestration/browser-adapter';
-import { ScrapingExecutionAdapter } from '../orchestration/scraping-adapter';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import * as path from 'path';
-import * as fs from 'fs';
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
+import { LocalAgentRegistry } from "../orchestration/agent-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
+import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
+import { ScrapingExecutionAdapter } from "../orchestration/scraping-adapter";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Phase 7: Controlled Runtime Environment Integration E2E", () => {
-  const testDir = path.join(__dirname, '../temp-env-integration-db');
-  const eventLogPath = path.join(testDir, 'env_integration_events.jsonl');
-  const cacheDbPath = path.join(testDir, 'env_integration_cache.json');
+  const testDir = path.join(__dirname, "../temp-env-integration-db");
+  const eventLogPath = path.join(testDir, "env_integration_events.jsonl");
+  const cacheDbPath = path.join(testDir, "env_integration_cache.json");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -37,10 +37,10 @@ describe("Phase 7: Controlled Runtime Environment Integration E2E", () => {
 
   it("should process browser and scraping tasks end-to-end and telemetry-inspect outputs", async () => {
     const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+      portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+      servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+      healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+      runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
     });
 
     const logger = new StructuredLogger();

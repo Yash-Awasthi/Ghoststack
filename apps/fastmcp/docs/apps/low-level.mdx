@@ -5,7 +5,7 @@ description: Build apps with your own HTML, CSS, and JavaScript using the MCP Ap
 icon: code
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -89,17 +89,18 @@ def refresh_data() -> str:
 
 ### AppConfig fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `resource_uri` | `str` | URI of the UI resource. Tools only. |
-| `visibility` | `list[str]` | Where the tool appears: `"model"`, `"app"`, or both. Tools only. |
-| `csp` | `ResourceCSP` | Content Security Policy for the iframe. |
-| `permissions` | `ResourcePermissions` | Iframe sandbox permissions. |
-| `domain` | `str` | Stable sandbox origin for the iframe. |
-| `prefers_border` | `bool` | Whether the UI prefers a visible border. |
+| Field            | Type                  | Description                                                      |
+| ---------------- | --------------------- | ---------------------------------------------------------------- |
+| `resource_uri`   | `str`                 | URI of the UI resource. Tools only.                              |
+| `visibility`     | `list[str]`           | Where the tool appears: `"model"`, `"app"`, or both. Tools only. |
+| `csp`            | `ResourceCSP`         | Content Security Policy for the iframe.                          |
+| `permissions`    | `ResourcePermissions` | Iframe sandbox permissions.                                      |
+| `domain`         | `str`                 | Stable sandbox origin for the iframe.                            |
+| `prefers_border` | `bool`                | Whether the UI prefers a visible border.                         |
 
 <Note>
-On **resources**, `resource_uri` and `visibility` must not be set — the resource *is* the UI. Use `AppConfig` on resources only for `csp`, `permissions`, and other display settings.
+  On **resources**, `resource_uri` and `visibility` must not be set — the resource *is* the UI. Use `AppConfig` on
+  resources only for `csp`, `permissions`, and other display settings.
 </Note>
 
 ## UI resources
@@ -126,9 +127,9 @@ Your HTML app communicates with the host using the [`@modelcontextprotocol/ext-a
 
   // Receive tool results pushed by the host
   app.ontoolresult = ({ content }) => {
-    const text = content?.find(c => c.type === 'text');
+    const text = content?.find((c) => c.type === "text");
     if (text) {
-      document.getElementById('output').textContent = text.text;
+      document.getElementById("output").textContent = text.text;
     }
   };
 
@@ -147,7 +148,8 @@ The `App` object provides:
 See the full [ext-apps SDK documentation](https://github.com/modelcontextprotocol/ext-apps) for the complete API reference.
 
 <Note>
-If your HTML loads external scripts, styles, or makes API calls, you need to declare those domains in the CSP configuration. See [Security](#security) below.
+  If your HTML loads external scripts, styles, or makes API calls, you need to declare those domains in the CSP
+  configuration. See [Security](#security) below.
 </Note>
 
 ## Security
@@ -174,12 +176,12 @@ def my_view() -> str:
     return "<html>...</html>"
 ```
 
-| CSP Field | Controls |
-|-----------|----------|
-| `connect_domains` | `fetch`, XHR, WebSocket (`connect-src`) |
+| CSP Field          | Controls                                            |
+| ------------------ | --------------------------------------------------- |
+| `connect_domains`  | `fetch`, XHR, WebSocket (`connect-src`)             |
 | `resource_domains` | Scripts, images, styles, fonts (`script-src`, etc.) |
-| `frame_domains` | Nested iframes (`frame-src`) |
-| `base_uri_domains` | Document base URI (`base-uri`) |
+| `frame_domains`    | Nested iframes (`frame-src`)                        |
+| `base_uri_domains` | Document base URI (`base-uri`)                      |
 
 ### Permissions
 

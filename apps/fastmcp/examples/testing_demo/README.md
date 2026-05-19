@@ -5,6 +5,7 @@ A comprehensive example demonstrating FastMCP testing patterns with pytest-async
 ## Overview
 
 This example shows how to:
+
 - Set up pytest-asyncio configuration in `pyproject.toml`
 - Write async test fixtures for MCP clients
 - Test tools, resources, and prompts
@@ -38,6 +39,7 @@ This eliminates the need for `@pytest.mark.asyncio` decorators on every async te
 ### Server Components
 
 The demo server (`server.py`) includes:
+
 - **Tools**: `add`, `greet`, `async_multiply`
 - **Resources**: `demo://info`, `demo://greeting/{name}`
 - **Prompts**: `hello`, `explain`
@@ -45,6 +47,7 @@ The demo server (`server.py`) includes:
 ### Test Patterns
 
 The test suite demonstrates:
+
 1. **Async fixture pattern**: Proper client fixture using `async with`
 2. **Tool testing**: Calling tools and checking results via `.data` attribute
 3. **Resource testing**: Reading static and templated resources

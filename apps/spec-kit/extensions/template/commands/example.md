@@ -2,7 +2,7 @@
 description: "Example command that demonstrates extension functionality"
 # CUSTOMIZE: List MCP tools this command uses
 tools:
-  - 'example-mcp-server/example_tool'
+  - "example-mcp-server/example_tool"
 ---
 
 # Example Command
@@ -39,9 +39,9 @@ Load extension configuration from the project:
 config_file=".specify/extensions/my-extension/my-extension-config.yml"
 
 if [ ! -f "$config_file" ]; then
-  echo "❌ Error: Configuration not found at $config_file"
-  echo "Run 'specify extension add my-extension' to install and configure"
-  exit 1
+echo "❌ Error: Configuration not found at $config_file"
+echo "Run 'specify extension add my-extension' to install and configure"
+exit 1
 fi
 
 # Read configuration values
@@ -55,9 +55,9 @@ setting_value="${SPECKIT_MY_EXTENSION_KEY:-$setting_value}"
 # Validate configuration
 
 if [ -z "$setting_value" ]; then
-  echo "❌ Error: Configuration value not set"
-  echo "Edit $config_file and set 'settings.key'"
-  exit 1
+echo "❌ Error: Configuration value not set"
+echo "Edit $config_file and set 'settings.key'"
+exit 1
 fi
 
 echo "📋 Configuration loaded: $setting_value"
@@ -84,15 +84,14 @@ This calls the MCP server tool to execute the operation.
 
 Process the results and provide output:
 
-`` bash
+`bash
 echo ""
 echo "✅ Command completed successfully!"
 echo ""
 echo "Results:"
 echo "  • Item 1: Value"
 echo "  • Item 2: Value"
-echo ""
-``
+echo ""`
 
 ### Step 4: Save Output (Optional)
 
@@ -104,8 +103,8 @@ output_file=".specify/my-extension-output.json"
 cat > "$output_file" <<EOF
 {
   "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-  "setting": "$setting_value",
-  "results": []
+"setting": "$setting_value",
+"results": []
 }
 EOF
 
@@ -139,9 +138,9 @@ Configuration can be overridden with environment variables:
 - `SPECKIT_MY_EXTENSION_ANOTHER_KEY` - Overrides `settings.another_key`
 
 Example:
-``bash
+`bash
 export SPECKIT_MY_EXTENSION_KEY="override-value"
-``
+`
 
 ## Troubleshooting
 
@@ -150,11 +149,11 @@ export SPECKIT_MY_EXTENSION_KEY="override-value"
 ### "Configuration not found"
 
 **Solution**: Install the extension and create configuration:
-``bash
+`bash
 specify extension add my-extension
 cp .specify/extensions/my-extension/config-template.yml \
    .specify/extensions/my-extension/my-extension-config.yml
-``
+`
 
 ### "MCP tool not available"
 
@@ -181,9 +180,9 @@ cp .specify/extensions/my-extension/config-template.yml \
 ``bash
 
 # Run with default configuration
->
+
 > /speckit.my-extension.example
-``
+> ``
 
 ### Example 2: With Environment Override
 
@@ -192,19 +191,20 @@ cp .specify/extensions/my-extension/config-template.yml \
 # Override configuration with environment variable
 
 export SPECKIT_MY_EXTENSION_KEY="custom-value"
+
 > /speckit.my-extension.example
-``
+> ``
 
 ### Example 3: After Core Command
 
 ``bash
 
 # Use as part of a workflow
->
+
 > /speckit.tasks
 > /speckit.my-extension.example
-``
+> ``
 
 ---
 
-*For more information, see the extension README or run `specify extension info my-extension`*
+_For more information, see the extension README or run `specify extension info my-extension`_

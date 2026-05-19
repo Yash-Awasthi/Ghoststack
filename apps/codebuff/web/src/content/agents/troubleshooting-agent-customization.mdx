@@ -82,7 +82,7 @@ Error: Cannot resolve prompt file './my-prompt.md'
 // ❌ Missing required fields for new agents
 const definition = {
   id: 'my-agent',
-  displayName: 'My Agent'
+  displayName: 'My Agent',
 }
 ```
 
@@ -96,7 +96,7 @@ const definition: AgentDefinition = {
   displayName: 'My Agent',
   model: 'anthropic/claude-sonnet-4.5',
   toolNames: ['read_files', 'write_file', 'end_turn'],
-  instructionsPrompt: 'Process the user\'s request...',
+  instructionsPrompt: "Process the user's request...",
 }
 
 export default definition
@@ -224,11 +224,11 @@ codebuff
 ```markdown
 your-project/
 ├── .agents/
-│   ├── my-agent.ts
-│   ├── types/
-│   │   └── agent-definition.ts
-│   └── prompts/
-│       └── my-prompts.md
+│ ├── my-agent.ts
+│ ├── types/
+│ │ └── agent-definition.ts
+│ └── prompts/
+│ └── my-prompts.md
 ```
 
 2. Verify file permissions:
@@ -307,7 +307,7 @@ git commit -m "Add custom reviewer agent"
 ### Required Fields for New Agents
 
 - `id` — Unique identifier
-- `displayName` — Human-readable name  
+- `displayName` — Human-readable name
 - `model` — The LLM to use (e.g., `anthropic/claude-sonnet-4.5`)
 - `toolNames` — Array of tools the agent can use
 - `instructionsPrompt` — What the agent should do

@@ -1,6 +1,1 @@
-[
-  {"Value": "Linux"},
-  {"Value": "Windows"},
-  {"Value": "RHEL"},
-  {"Value": "SUSE"}
-]
+[{ "Value": "Linux" }, { "Value": "Windows" }, { "Value": "RHEL" }, { "Value": "SUSE" }]

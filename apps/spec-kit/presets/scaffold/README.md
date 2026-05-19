@@ -4,12 +4,12 @@ A custom preset for Spec Kit. Copy this directory and customize it to create you
 
 ## Templates Included
 
-| Template | Type | Description |
-|----------|------|-------------|
-| `spec-template` | template | Custom feature specification template (overrides core and extensions) |
-| `myext-template` | template | Override of the myext extension's report template |
-| `speckit.specify` | command | Custom specification command (overrides core) |
-| `speckit.myext.myextcmd` | command | Override of the myext extension's myextcmd command |
+| Template                 | Type     | Description                                                           |
+| ------------------------ | -------- | --------------------------------------------------------------------- |
+| `spec-template`          | template | Custom feature specification template (overrides core and extensions) |
+| `myext-template`         | template | Override of the myext extension's report template                     |
+| `speckit.specify`        | command  | Custom specification command (overrides core)                         |
+| `speckit.myext.myextcmd` | command  | Override of the myext extension's myextcmd command                    |
 
 ## Development
 
@@ -23,6 +23,7 @@ A custom preset for Spec Kit. Copy this directory and customize it to create you
 ## Manifest Reference (`preset.yml`)
 
 Required fields:
+
 - `schema_version` — always `"1.0"`
 - `preset.id` — lowercase alphanumeric with hyphens
 - `preset.name` — human-readable name

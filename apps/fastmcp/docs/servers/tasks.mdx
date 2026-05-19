@@ -6,26 +6,30 @@ icon: clock
 tag: "NEW"
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.14.0" />
 
 <Tip>
-Background tasks require the `tasks` optional extra. See [installation instructions](#enabling-background-tasks) below.
+  Background tasks require the `tasks` optional extra. See [installation instructions](#enabling-background-tasks)
+  below.
 </Tip>
 
 FastMCP implements the MCP background task protocol ([SEP-1686](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks)), giving your servers a production-ready distributed task scheduler with a single decorator change.
 
 <Tip>
-**What is Docket?** FastMCP's task system is powered by [Docket](https://github.com/chrisguidry/docket), originally built by [Prefect](https://prefect.io) to power [Prefect Cloud](https://www.prefect.io/prefect/cloud)'s managed task scheduling and execution service, where it processes millions of concurrent tasks every day. Docket is now open-sourced for the community.
+  **What is Docket?** FastMCP's task system is powered by [Docket](https://github.com/chrisguidry/docket), originally
+  built by [Prefect](https://prefect.io) to power [Prefect Cloud](https://www.prefect.io/prefect/cloud)'s managed task
+  scheduling and execution service, where it processes millions of concurrent tasks every day. Docket is now
+  open-sourced for the community.
 </Tip>
-
 
 ## What Are MCP Background Tasks?
 
 In MCP, all component interactions are blocking by default. When a client calls a tool, reads a resource, or fetches a prompt, it sends a request and waits for the response. For operations that take seconds or minutes, this creates a poor user experience.
 
 The MCP background task protocol solves this by letting clients:
+
 1. **Start** an operation and receive a task ID immediately
 2. **Track** progress as the operation runs
 3. **Retrieve** the result when ready
@@ -65,18 +69,19 @@ async def slow_computation(duration: int) -> str:
 When a client requests background execution, the call returns immediately with a task ID. The work executes in a background worker, and the client can poll for status or wait for the result.
 
 <Warning>
-Background tasks require async functions. Attempting to use `task=True` with a sync function raises a `ValueError` at registration time.
+  Background tasks require async functions. Attempting to use `task=True` with a sync function raises a `ValueError` at
+  registration time.
 </Warning>
 
 ## Execution Modes
 
 For fine-grained control over task execution behavior, use `TaskConfig` instead of the boolean shorthand. The MCP task protocol defines three execution modes:
 
-| Mode | Client calls without task | Client calls with task |
-|------|--------------------------|------------------------|
-| `"forbidden"` | Executes synchronously | Error: task not supported |
-| `"optional"` | Executes synchronously | Executes as background task |
-| `"required"` | Error: task required | Executes as background task |
+| Mode          | Client calls without task | Client calls with task      |
+| ------------- | ------------------------- | --------------------------- |
+| `"forbidden"` | Executes synchronously    | Error: task not supported   |
+| `"optional"`  | Executes synchronously    | Executes as background task |
+| `"required"`  | Error: task required      | Executes as background task |
 
 ```python
 from fastmcp import FastMCP
@@ -101,6 +106,7 @@ async def sync_only() -> str:
 ```
 
 The boolean shortcuts map to these modes:
+
 - `task=True` → `TaskConfig(mode="optional")`
 - `task=False` → `TaskConfig(mode="forbidden")`
 
@@ -139,7 +145,8 @@ mcp = FastMCP("MyServer", tasks=True)
 ```
 
 <Warning>
-If your server defines any synchronous tools, resources, or prompts, you will need to explicitly set `task=False` on their decorators to avoid an error.
+  If your server defines any synchronous tools, resources, or prompts, you will need to explicitly set `task=False` on
+  their decorators to avoid an error.
 </Warning>
 
 ### Graceful Degradation
@@ -150,8 +157,8 @@ Conversely, when a component has `mode="required"` but the client doesn't reques
 
 ### Configuration
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
+| Environment Variable | Default     | Description                                         |
+| -------------------- | ----------- | --------------------------------------------------- |
 | `FASTMCP_DOCKET_URL` | `memory://` | Backend URL (`memory://` or `redis://host:port/db`) |
 
 ## Backends
@@ -163,10 +170,12 @@ FastMCP supports two backends for task execution, each with different tradeoffs.
 The in-memory backend (`memory://`) requires zero configuration and works out of the box.
 
 **Advantages:**
+
 - No external dependencies
 - Simple single-process deployment
 
 **Disadvantages:**
+
 - **Ephemeral**: If the server restarts, all pending tasks are lost
 - **Higher latency**: ~250ms task pickup time vs single-digit milliseconds with Redis
 - **No horizontal scaling**: Single process only—you cannot add additional workers
@@ -176,6 +185,7 @@ The in-memory backend (`memory://`) requires zero configuration and works out of
 For production deployments, use Redis (or Valkey) as your backend by setting `FASTMCP_DOCKET_URL=redis://localhost:6379`.
 
 **Advantages:**
+
 - **Persistent**: Tasks survive server restarts
 - **Fast**: Single-digit millisecond task pickup latency
 - **Scalable**: Add workers to distribute load across processes or machines
@@ -197,12 +207,11 @@ export FASTMCP_DOCKET_CONCURRENCY=20
 fastmcp tasks worker server.py
 ```
 
-<Note>
-Additional workers only work with Redis/Valkey backends. The in-memory backend is single-process only.
-</Note>
+<Note>Additional workers only work with Redis/Valkey backends. The in-memory backend is single-process only.</Note>
 
 <Warning>
-Task-enabled components must be defined at server startup to be registered with all workers. Components added dynamically after the server starts will not be available for background execution.
+  Task-enabled components must be defined at server startup to be registered with all workers. Components added
+  dynamically after the server starts will not be available for background execution.
 </Warning>
 
 ## Progress Reporting
@@ -228,6 +237,7 @@ async def process_files(files: list[str], progress: Progress = Progress()) -> st
 ```
 
 The progress API:
+
 - `await progress.set_total(n)` — Set the total number of steps
 - `await progress.increment(amount=1)` — Increment progress
 - `await progress.set_message(text)` — Update the status message

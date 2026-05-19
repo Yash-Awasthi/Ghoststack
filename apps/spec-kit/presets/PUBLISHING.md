@@ -58,16 +58,16 @@ Verify your manifest is valid:
 schema_version: "1.0"
 
 preset:
-  id: "your-preset"               # Unique lowercase-hyphenated ID
-  name: "Your Preset Name"        # Human-readable name
-  version: "1.0.0"                # Semantic version
+  id: "your-preset" # Unique lowercase-hyphenated ID
+  name: "Your Preset Name" # Human-readable name
+  version: "1.0.0" # Semantic version
   description: "Brief description (one sentence)"
   author: "Your Name or Organization"
   repository: "https://github.com/your-org/spec-kit-preset-your-preset"
   license: "MIT"
 
 requires:
-  speckit_version: ">=0.1.0"      # Required spec-kit version
+  speckit_version: ">=0.1.0" # Required spec-kit version
 
 provides:
   templates:
@@ -77,7 +77,7 @@ provides:
       description: "Custom spec template"
       replaces: "spec-template"
 
-tags:                              # 2-5 relevant tags
+tags: # 2-5 relevant tags
   - "category"
   - "workflow"
 ```
@@ -194,10 +194,7 @@ Edit `presets/catalog.community.json` and add your preset.
         "templates": 3,
         "commands": 1
       },
-      "tags": [
-        "category",
-        "workflow"
-      ],
+      "tags": ["category", "workflow"],
       "created_at": "2026-03-10T00:00:00Z",
       "updated_at": "2026-03-10T00:00:00Z"
     }
@@ -241,6 +238,7 @@ git push origin add-your-preset
 **Repository**: https://github.com/your-org/spec-kit-preset-your-preset
 
 ### Checklist
+
 - [ ] Valid preset.yml manifest
 - [ ] README.md with description and usage
 - [ ] LICENSE file included

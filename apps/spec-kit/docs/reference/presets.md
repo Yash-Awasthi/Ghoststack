@@ -8,10 +8,10 @@ Presets customize how Spec Kit works — overriding templates, commands, and ter
 specify preset search [query]
 ```
 
-| Option     | Description          |
-| ---------- | -------------------- |
-| `--tag`    | Filter by tag        |
-| `--author` | Filter by author     |
+| Option     | Description      |
+| ---------- | ---------------- |
+| `--tag`    | Filter by tag    |
+| `--author` | Filter by author |
 
 Searches all active catalogs for presets matching the query. Without a query, lists all available presets.
 
@@ -21,10 +21,10 @@ Searches all active catalogs for presets matching the query. Without a query, li
 specify preset add [<preset_id>]
 ```
 
-| Option           | Description                                              |
-| ---------------- | -------------------------------------------------------- |
-| `--dev <path>`   | Install from a local directory (for development)         |
-| `--from <url>`   | Install from a custom URL instead of the catalog         |
+| Option           | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| `--dev <path>`   | Install from a local directory (for development)             |
+| `--from <url>`   | Install from a custom URL instead of the catalog             |
 | `--priority <N>` | Resolution priority (default: 10; lower = higher precedence) |
 
 Installs a preset from the catalog, a URL, or a local directory. Preset commands are automatically registered with the currently installed AI coding agent integration.
@@ -98,12 +98,12 @@ Shows all active catalogs with their priorities and install permissions.
 specify preset catalog add <url>
 ```
 
-| Option                                       | Description                                        |
-| -------------------------------------------- | -------------------------------------------------- |
-| `--name <name>`                              | Required. Unique name for the catalog              |
-| `--priority <N>`                             | Priority (default: 10; lower = higher precedence)  |
-| `--install-allowed / --no-install-allowed`   | Whether presets can be installed from this catalog (default: discovery only) |
-| `--description <text>`                       | Optional description                               |
+| Option                                     | Description                                                                  |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `--name <name>`                            | Required. Unique name for the catalog                                        |
+| `--priority <N>`                           | Priority (default: 10; lower = higher precedence)                            |
+| `--install-allowed / --no-install-allowed` | Whether presets can be installed from this catalog (default: discovery only) |
+| `--description <text>`                     | Optional description                                                         |
 
 Adds a catalog to the project's `.specify/preset-catalogs.yml`.
 
@@ -172,11 +172,11 @@ flowchart TB
 
 Within each layer, files are organized by type:
 
-| Type      | Subdirectory   | Override path                              |
-| --------- | -------------- | ------------------------------------------ |
-| Templates | `templates/`   | `.specify/templates/overrides/`            |
-| Commands  | `commands/`    | `.specify/templates/overrides/`            |
-| Scripts   | `scripts/`     | `.specify/templates/overrides/scripts/`    |
+| Type      | Subdirectory | Override path                           |
+| --------- | ------------ | --------------------------------------- |
+| Templates | `templates/` | `.specify/templates/overrides/`         |
+| Commands  | `commands/`  | `.specify/templates/overrides/`         |
+| Scripts   | `scripts/`   | `.specify/templates/overrides/scripts/` |
 
 ### Resolution in Action
 

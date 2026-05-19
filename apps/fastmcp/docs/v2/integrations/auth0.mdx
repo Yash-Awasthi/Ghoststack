@@ -6,7 +6,7 @@ icon: shield-check
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.12.4" />
 
@@ -17,6 +17,7 @@ This guide shows you how to secure your FastMCP server using **Auth0 OAuth**. Wh
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. An **[Auth0 Account](https://auth0.com/)** with access to create Applications
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 
@@ -29,12 +30,12 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     Go to **Applications → Applications** in your Auth0 account.
 
     Click **"+ Create Application"** to create a new application.
+
 </Step>
 
 <Step title="Create Your Application">
-    - **Name**: Choose a name users will recognize (e.g., "My FastMCP Server")
-    - **Choose an application type**: Choose "Single Page Web Applications"
-    - Click **Create** to create the application
+  - **Name**: Choose a name users will recognize (e.g., "My FastMCP Server") - **Choose an application type**: Choose
+  "Single Page Web Applications" - Click **Create** to create the application
 </Step>
 
 <Step title="Configure Your Application">
@@ -50,6 +51,7 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     <Tip>
     If you want to use a custom callback path (e.g., `/auth/auth0/callback`), make sure to set the same path in both your Auth0 Application settings and the `redirect_path` parameter when configuring the Auth0Provider.
     </Tip>
+
 </Step>
 
 <Step title="Save Your Credentials">
@@ -61,6 +63,7 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     <Tip>
     Store these credentials securely. Never commit them to version control. Use environment variables or a secrets manager in production.
     </Tip>
+
 </Step>
 
 <Step title="Select Your Audience">
@@ -72,6 +75,7 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     <Tip>
     Store this along with of the credentials above. Never commit this to version control. Use environment variables or a secrets manager in production.
     </Tip>
+
 </Step>
 </Steps>
 
@@ -145,6 +149,7 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to Auth0's authorization page
 2. After you authorize the app, you'll be redirected back
 3. The client receives the token and can make authenticated requests
@@ -189,10 +194,12 @@ mcp = FastMCP(name="Production Auth0 App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/v2/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>
 
 ## Environment Variables
@@ -204,9 +211,9 @@ For production deployments, use environment variables instead of hardcoding cred
 Setting this environment variable allows the Auth0 provider to be used automatically without explicitly instantiating it in code.
 
 <Card>
-<ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
-Set to `fastmcp.server.auth.providers.auth0.Auth0Provider` to use Auth0 authentication.
-</ParamField>
+  <ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
+    Set to `fastmcp.server.auth.providers.auth0.Auth0Provider` to use Auth0 authentication.
+  </ParamField>
 </Card>
 
 ### Auth0-Specific Configuration
@@ -219,27 +226,28 @@ Your Auth0 Application Configuration URL (e.g., `https://.../.well-known/openid-
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_CLIENT_ID" required>
-Your Auth0 Application Client ID (e.g., `tv2ObNgaZAWWhhycr7Bz1LU2mxlnsmsB`)
+  Your Auth0 Application Client ID (e.g., `tv2ObNgaZAWWhhycr7Bz1LU2mxlnsmsB`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_CLIENT_SECRET" required>
-Your Auth0 Application Client Secret (e.g., `vPYqbjemq...`)
+  Your Auth0 Application Client Secret (e.g., `vPYqbjemq...`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_AUDIENCE" required>
-Your Auth0 API Audience
+  Your Auth0 API Audience
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_BASE_URL" required>
-Public URL where OAuth endpoints will be accessible (includes any mount path)
+  Public URL where OAuth endpoints will be accessible (includes any mount path)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_ISSUER_URL" default="Uses BASE_URL">
-Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
+  Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to
+  avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_REDIRECT_PATH" default="/auth/callback">
-Redirect path configured in your Auth0 Application
+  Redirect path configured in your Auth0 Application
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AUTH0_REQUIRED_SCOPES" default='["openid"]'>
@@ -248,6 +256,7 @@ Comma-, space-, or JSON-separated list of required AUth0 scopes (e.g., `openid e
 </Card>
 
 Example `.env` file:
+
 ```bash
 # Use the Auth0 provider
 FASTMCP_SERVER_AUTH=fastmcp.server.auth.providers.auth0.Auth0Provider

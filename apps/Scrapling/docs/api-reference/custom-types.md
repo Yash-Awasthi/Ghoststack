@@ -14,13 +14,16 @@ from scrapling.core.custom_types import TextHandler, TextHandlers, AttributesHan
 ```
 
 ## ::: scrapling.core.custom_types.TextHandler
+
     handler: python
     :docstring:
 
 ## ::: scrapling.core.custom_types.TextHandlers
+
     handler: python
     :docstring:
 
 ## ::: scrapling.core.custom_types.AttributesHandler
+
     handler: python
     :docstring:

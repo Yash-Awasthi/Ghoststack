@@ -5,7 +5,7 @@ description: Create and validate CIMD documents for OAuth
 icon: key
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -34,15 +34,15 @@ The generated document includes a placeholder `client_id` — update it to match
 
 ### Options
 
-| Option | Flag | Description |
-| ------ | ---- | ----------- |
-| Name | `--name` | **Required.** Human-readable client name |
+| Option       | Flag             | Description                                      |
+| ------------ | ---------------- | ------------------------------------------------ |
+| Name         | `--name`         | **Required.** Human-readable client name         |
 | Redirect URI | `--redirect-uri` | **Required.** Allowed redirect URIs (repeatable) |
-| Client URI | `--client-uri` | Client's home page URL |
-| Logo URI | `--logo-uri` | Client's logo URL |
-| Scope | `--scope` | Space-separated list of scopes |
-| Output | `--output`, `-o` | Save to file (default: stdout) |
-| Pretty | `--pretty` | Pretty-print JSON (default: true) |
+| Client URI   | `--client-uri`   | Client's home page URL                           |
+| Logo URI     | `--logo-uri`     | Client's logo URL                                |
+| Scope        | `--scope`        | Space-separated list of scopes                   |
+| Output       | `--output`, `-o` | Save to file (default: stdout)                   |
+| Pretty       | `--pretty`       | Pretty-print JSON (default: true)                |
 
 ### Example
 
@@ -80,6 +80,6 @@ Document details:
     • http://localhost:*/callback
 ```
 
-| Option | Flag | Description |
-| ------ | ---- | ----------- |
+| Option  | Flag              | Description                                   |
+| ------- | ----------------- | --------------------------------------------- |
 | Timeout | `--timeout`, `-t` | HTTP request timeout in seconds (default: 10) |

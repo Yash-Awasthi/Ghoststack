@@ -6,25 +6,25 @@ Runs 313 tests across 16 test classes against a live Floci instance — no mocks
 
 ## Services Covered
 
-| Test class                       | Description                                              |
-| -------------------------------- | -------------------------------------------------------- |
-| `SsmTest`                        | Parameter Store — put, get, path, tags                   |
-| `SqsTest`                        | Queues, send/receive/delete, DLQ, visibility             |
-| `SnsTest`                        | Topics, subscriptions, publish, SQS delivery             |
-| `S3Test`                         | Buckets, objects, tagging, copy, multipart, batch delete |
-| `DynamoDbTest`                   | Tables, CRUD, batch, TTL, tags, streams                  |
-| `DynamoDbScanConditionTests`     | Scan filter and condition expressions                    |
-| `LambdaTest`                     | Create/invoke/update/delete functions                    |
-| `IamTest`                        | Users, roles, policies, access keys                      |
-| `StsTest`                        | GetCallerIdentity, AssumeRole, GetSessionToken           |
-| `SecretsManagerTest`             | Create/get/put/list/delete secrets, versioning, tags     |
-| `KmsTest`                        | Keys, aliases, encrypt/decrypt, data keys, sign/verify   |
-| `CloudWatchTest`                 | PutMetricData, ListMetrics, GetMetricStatistics, alarms  |
-| `CloudFormationVirtualHostTests` | Virtual host style S3 access via CloudFormation          |
-| `ApigwSfnJsonataCrudlTests`      | API Gateway + Step Functions JSONata CRUDL integration   |
+| Test class                                | Description                                                                        |
+| ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| `SsmTest`                                 | Parameter Store — put, get, path, tags                                             |
+| `SqsTest`                                 | Queues, send/receive/delete, DLQ, visibility                                       |
+| `SnsTest`                                 | Topics, subscriptions, publish, SQS delivery                                       |
+| `S3Test`                                  | Buckets, objects, tagging, copy, multipart, batch delete                           |
+| `DynamoDbTest`                            | Tables, CRUD, batch, TTL, tags, streams                                            |
+| `DynamoDbScanConditionTests`              | Scan filter and condition expressions                                              |
+| `LambdaTest`                              | Create/invoke/update/delete functions                                              |
+| `IamTest`                                 | Users, roles, policies, access keys                                                |
+| `StsTest`                                 | GetCallerIdentity, AssumeRole, GetSessionToken                                     |
+| `SecretsManagerTest`                      | Create/get/put/list/delete secrets, versioning, tags                               |
+| `KmsTest`                                 | Keys, aliases, encrypt/decrypt, data keys, sign/verify                             |
+| `CloudWatchTest`                          | PutMetricData, ListMetrics, GetMetricStatistics, alarms                            |
+| `CloudFormationVirtualHostTests`          | Virtual host style S3 access via CloudFormation                                    |
+| `ApigwSfnJsonataCrudlTests`               | API Gateway + Step Functions JSONata CRUDL integration                             |
 | `ApiGatewayV2WebSocketAndExtendedOpsTest` | API GW v2 WebSocket APIs, Update ops, Route/Integration Responses, Models, Tagging |
-| `Ec2Tests`                       | EC2 instances, VPCs, security groups, subnets            |
-| `EcsTests`                       | ECS clusters, task definitions, services                 |
+| `Ec2Tests`                                | EC2 instances, VPCs, security groups, subnets                                      |
+| `EcsTests`                                | ECS clusters, task definitions, services                                           |
 
 ## Adding a New Test
 

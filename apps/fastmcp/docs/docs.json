@@ -20,10 +20,7 @@
     "primary": "#2d00f7"
   },
   "contextual": {
-    "options": [
-      "copy",
-      "view"
-    ]
+    "options": ["copy", "view"]
   },
   "description": "The fast, Pythonic way to build MCP servers and clients.",
   "errors": {
@@ -85,11 +82,7 @@
             "groups": [
               {
                 "group": "Get Started",
-                "pages": [
-                  "getting-started/welcome",
-                  "getting-started/installation",
-                  "getting-started/quickstart"
-                ]
+                "pages": ["getting-started/welcome", "getting-started/installation", "getting-started/quickstart"]
               },
               {
                 "group": "Servers",
@@ -99,12 +92,7 @@
                     "collapsed": true,
                     "group": "Core Components",
                     "icon": "toolbox",
-                    "pages": [
-                      "servers/tools",
-                      "servers/resources",
-                      "servers/prompts",
-                      "servers/context"
-                    ]
+                    "pages": ["servers/tools", "servers/resources", "servers/prompts", "servers/context"]
                   },
                   {
                     "collapsed": true,
@@ -259,11 +247,7 @@
                     "collapsed": true,
                     "group": "Authentication",
                     "icon": "key",
-                    "pages": [
-                      "clients/auth/oauth",
-                      "clients/auth/cimd",
-                      "clients/auth/bearer"
-                    ],
+                    "pages": ["clients/auth/oauth", "clients/auth/cimd", "clients/auth/bearer"],
                     "tag": "UPDATED"
                   }
                 ]
@@ -298,10 +282,7 @@
                     "collapsed": true,
                     "group": "Web Frameworks",
                     "icon": "code",
-                    "pages": [
-                      "integrations/fastapi",
-                      "integrations/openapi"
-                    ]
+                    "pages": ["integrations/fastapi", "integrations/openapi"]
                   },
                   {
                     "collapsed": true,
@@ -373,10 +354,7 @@
                     "collapsed": true,
                     "group": "What's New",
                     "icon": "sparkles",
-                    "pages": [
-                      "updates",
-                      "changelog"
-                    ]
+                    "pages": ["updates", "changelog"]
                   }
                 ]
               }

@@ -27,6 +27,7 @@ server.serve(http=False, host="0.0.0.0", port=8000)
 The standardized response structure that's returned by all MCP server tools:
 
 ## ::: scrapling.core.ai.ResponseModel
+
     handler: python
     :docstring:
 
@@ -35,14 +36,17 @@ The standardized response structure that's returned by all MCP server tools:
 Model classes for session management:
 
 ## ::: scrapling.core.ai.SessionInfo
+
     handler: python
     :docstring:
 
 ## ::: scrapling.core.ai.SessionCreatedModel
+
     handler: python
     :docstring:
 
 ## ::: scrapling.core.ai.SessionClosedModel
+
     handler: python
     :docstring:
 
@@ -51,5 +55,6 @@ Model classes for session management:
 The main MCP server class that provides all web scraping tools:
 
 ## ::: scrapling.core.ai.ScraplingMCPServer
+
     handler: python
     :docstring:

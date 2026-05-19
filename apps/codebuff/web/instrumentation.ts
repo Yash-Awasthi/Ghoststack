@@ -50,9 +50,8 @@ export async function register() {
   // like `crypto`. Gate on NEXT_RUNTIME so the edge bundle doesn't try to
   // resolve them.
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { startFreeSessionAdmission } = await import(
-      '@/server/free-session/admission'
-    )
+    const { startFreeSessionAdmission } =
+      await import('@/server/free-session/admission')
     startFreeSessionAdmission()
   }
 }

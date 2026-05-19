@@ -5,7 +5,7 @@ description: Secure your FastMCP server with OCI IAM OAuth
 icon: shield-check
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.13.0" />
 
@@ -26,12 +26,13 @@ This guide shows you how to secure your FastMCP server using **OCI IAM OAuth**. 
     Login to OCI console (https://cloud.oracle.com for OCI commercial cloud).
     From "Identity & Security" menu, open Domains page.
     On the Domains list page, select the domain that you are using for MCP Authentication.
-    Open Settings tab. 
+    Open Settings tab.
     Click on "Edit Domain Settings" button.
 
     <Frame>
         <img src="/integrations/images/oci/ocieditdomainsettingsbutton.png" alt="OCI console showing the Edit Domain Settings button in the IAM Domain settings page" />
     </Frame>
+
 </Step>
 
 <Step title="Update Domain Setting">
@@ -41,6 +42,7 @@ This guide shows you how to secure your FastMCP server using **OCI IAM OAuth**. 
     <Frame>
         <img src="/integrations/images/oci/ocieditdomainsettings.png" alt="OCI IAM Domain Settings" />
     </Frame>
+
 </Step>
 </Steps>
 
@@ -55,6 +57,7 @@ Follow the Steps as mentioned below to create an OAuth client.
     From "Identity & Security" menu, open Domains page.
     On the Domains list page, select the domain in which you want to create MCP server OAuth client. If you need help finding the list page for the domain, see [Listing Identity Domains.](https://docs.oracle.com/en-us/iaas/Content/Identity/domains/to-view-identity-domains.htm#view-identity-domains).
     On the details page, select Integrated applications. A list of applications in the domain is displayed.
+
 </Step>
 
 <Step title="Add an Integrated Application">
@@ -67,6 +70,7 @@ Follow the Steps as mentioned below to create an OAuth client.
     <Frame>
         <img src="/integrations/images/oci/ociaddapplication.png" alt="Adding a Confidential Integrated Application in OCI IAM Domain" />
     </Frame>
+
 </Step>
 
 <Step title="Update OAuth Configuration for an Integrated Application">
@@ -80,14 +84,16 @@ Follow the Steps as mentioned below to create an OAuth client.
     <Frame>
         <img src="/integrations/images/oci/ocioauthconfiguration.png" alt="OAuth Configuration for an Integrated Application in OCI IAM Domain" />
     </Frame>
+
 </Step>
 
 <Step title="Activate the Integrated Application">
 
-    Click on "Submit" button to update OAuth configuration for the client application. 
+    Click on "Submit" button to update OAuth configuration for the client application.
     **Note: You don't need to do any special configuration to support PKCE for the OAuth client.**
     Make sure to Activate the client application.
     Note down client ID and client secret for the application. You'll use these values when configuring the OCIProvider in your code.
+
 </Step>
 </Steps>
 
@@ -113,7 +119,7 @@ oci identity-domains identity-propagation-trust create \
 --oauth-clients '["<CLIENT_ID>"]'
 ```
 
-To exchange access token for OCI token and create a signer object, you need to add below code in MCP server. You can then use the signer object to create any OCI control plane client. 
+To exchange access token for OCI token and create a signer object, you need to add below code in MCP server. You can then use the signer object to create any OCI control plane client.
 
 ```python
 
@@ -130,13 +136,13 @@ OCI_CLIENT_ID = os.environ.get("OCI_CLIENT_ID")
 OCI_CLIENT_SECRET = os.environ.get("OCI_CLIENT_SECRET")
 
 _global_token_cache = {} #In memory cache for OCI session token signer
-    
+
 def get_oci_signer() -> TokenExchangeSigner:
 
     authntoken = get_access_token()
     tokenID = authntoken.claims.get("jti")
     token = authntoken.token
-    
+
     #Check if the signer exists for the token ID in memory cache
     cached_signer = _global_token_cache.get(tokenID)
     logger.debug(f"Global cached signer: {cached_signer}")
@@ -153,7 +159,7 @@ def get_oci_signer() -> TokenExchangeSigner:
         client_secret=OCI_CLIENT_SECRET,
     )
     logger.debug(f"Signer {signer} created for token ID: {tokenID}")
-        
+
     #Cache the signer object in memory cache
     _global_token_cache[tokenID] = signer
     logger.debug(f"Signer cached for token ID: {tokenID}")
@@ -164,16 +170,19 @@ def get_oci_signer() -> TokenExchangeSigner:
 ## Running MCP server
 
 Once the setup is complete, to run the MCP server, run the below command.
+
 ```bash
 fastmcp run server.py:mcp --transport http --port 8000
 ```
 
 To run MCP client, run the below command.
+
 ```bash
 python3 client.py
 ```
 
 MCP Client sample is as below.
+
 ```python client.py
 from fastmcp import Client
 import asyncio
@@ -194,6 +203,7 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to OCI IAM's login page
 2. Sign in with your OCI account and grant the requested consent
 3. After authorization, you'll be redirected back to the redirect path
@@ -241,8 +251,10 @@ mcp = FastMCP(name="Production OCI App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at Rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>

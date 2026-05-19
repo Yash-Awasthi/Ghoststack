@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "js-yaml";
 
 function runHealthcheck() {
   console.log("\x1b[36m=========================================================================");
@@ -45,8 +45,8 @@ function runHealthcheck() {
 }
 
 function checkFolders(): boolean {
-  const root = path.join(__dirname, '..');
-  const required = ['orchestration', 'runtime', 'schemas', 'tests'];
+  const root = path.join(__dirname, "..");
+  const required = ["orchestration", "runtime", "schemas", "tests"];
   for (const folder of required) {
     const p = path.join(root, folder);
     if (!fs.existsSync(p) || !fs.statSync(p).isDirectory()) {
@@ -59,8 +59,8 @@ function checkFolders(): boolean {
 }
 
 function checkYAMLConfigs(): boolean {
-  const root = path.join(__dirname, '..', 'runtime');
-  const files = ['ports.yaml', 'services.yaml', 'healthchecks.yaml', 'ghoststack.runtime.yaml'];
+  const root = path.join(__dirname, "..", "runtime");
+  const files = ["ports.yaml", "services.yaml", "healthchecks.yaml", "ghoststack.runtime.yaml"];
   for (const file of files) {
     const p = path.join(root, file);
     if (!fs.existsSync(p)) {
@@ -68,7 +68,7 @@ function checkYAMLConfigs(): boolean {
       return false;
     }
     try {
-      const content = fs.readFileSync(p, 'utf8');
+      const content = fs.readFileSync(p, "utf8");
       yaml.load(content);
       console.log(`  [OK] Parsed valid YAML config: ${file}`);
     } catch (err: any) {
@@ -80,8 +80,8 @@ function checkYAMLConfigs(): boolean {
 }
 
 function checkCompilationIntegrity(): boolean {
-  const root = path.join(__dirname, '..', 'orchestration');
-  const files = ['event-bus.ts', 'task-router.ts', 'task-executor.ts', 'persistence-manager.ts', 'logger.ts'];
+  const root = path.join(__dirname, "..", "orchestration");
+  const files = ["event-bus.ts", "task-router.ts", "task-executor.ts", "persistence-manager.ts", "logger.ts"];
   for (const file of files) {
     const p = path.join(root, file);
     if (!fs.existsSync(p)) {
@@ -94,8 +94,16 @@ function checkCompilationIntegrity(): boolean {
 }
 
 function checkSchemas(): boolean {
-  const root = path.join(__dirname, '..', 'schemas');
-  const files = ['orchestration.schema.json', 'task.schema.json', 'agent-message.schema.json'];
+  const root = path.join(__dirname, "..", "schemas");
+  const files = [
+    "orchestration.schema.json",
+    "task.schema.json",
+    "agent-message.schema.json",
+    "spec.schema.json",
+    "artifact.schema.json",
+    "memory.schema.json",
+    "runtime-state.schema.json"
+  ];
   for (const file of files) {
     const p = path.join(root, file);
     if (!fs.existsSync(p)) {
@@ -103,7 +111,7 @@ function checkSchemas(): boolean {
       return false;
     }
     try {
-      const content = fs.readFileSync(p, 'utf8');
+      const content = fs.readFileSync(p, "utf8");
       JSON.parse(content);
       console.log(`  [OK] Loaded valid JSON schema: ${file}`);
     } catch (err: any) {

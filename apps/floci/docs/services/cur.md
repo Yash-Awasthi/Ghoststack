@@ -10,13 +10,13 @@ real Parquet artifacts in Floci's S3 service via the `floci-duck` sidecar.
 
 ## Supported Operations
 
-| Operation | Notes |
-|-----------|-------|
-| `PutReportDefinition` | Creates a new report; rejects duplicates with `DuplicateReportNameException`; enforces a 5-report-per-account limit |
-| `ModifyReportDefinition` | Replaces an existing report's mutable fields |
-| `DescribeReportDefinitions` | Returns every report owned by the calling account |
-| `DeleteReportDefinition` | Idempotent; removing a missing report returns 200 |
-| `TagResource` / `UntagResource` / `ListTagsForResource` | Stub responses (empty bodies) so SDK clients that probe for them succeed |
+| Operation                                               | Notes                                                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `PutReportDefinition`                                   | Creates a new report; rejects duplicates with `DuplicateReportNameException`; enforces a 5-report-per-account limit |
+| `ModifyReportDefinition`                                | Replaces an existing report's mutable fields                                                                        |
+| `DescribeReportDefinitions`                             | Returns every report owned by the calling account                                                                   |
+| `DeleteReportDefinition`                                | Idempotent; removing a missing report returns 200                                                                   |
+| `TagResource` / `UntagResource` / `ListTagsForResource` | Stub responses (empty bodies) so SDK clients that probe for them succeed                                            |
 
 ## Validation rules
 
@@ -57,11 +57,11 @@ The pipeline:
 
 ### `FLOCI_SERVICES_CUR_EMIT_MODE`
 
-| Value | Behavior |
-|-------|----------|
-| `synchronous` (default) | Emit on every `PutReportDefinition` / `ModifyReportDefinition` |
-| `daily` | Emit every 24h via a CUR-owned scheduled executor (separate from EventBridge Scheduler) |
-| `off` | Management plane only — no emission |
+| Value                   | Behavior                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `synchronous` (default) | Emit on every `PutReportDefinition` / `ModifyReportDefinition`                          |
+| `daily`                 | Emit every 24h via a CUR-owned scheduled executor (separate from EventBridge Scheduler) |
+| `off`                   | Management plane only — no emission                                                     |
 
 `synchronous` mode swallows emission errors so the management mutation
 always succeeds; the failure is reflected in
@@ -69,10 +69,10 @@ always succeeds; the failure is reflected in
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_CUR_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_CUR_EMIT_MODE` | `synchronous` | Run mode (see above) |
+| Variable                            | Default             | Description                                                 |
+| ----------------------------------- | ------------------- | ----------------------------------------------------------- |
+| `FLOCI_SERVICES_CUR_ENABLED`        | `true`              | Enable or disable the service                               |
+| `FLOCI_SERVICES_CUR_EMIT_MODE`      | `synchronous`       | Run mode (see above)                                        |
 | `FLOCI_SERVICES_CUR_STAGING_BUCKET` | `floci-cur-staging` | S3 bucket used to stage NDJSON before DuckDB writes Parquet |
 
 The `floci-duck` sidecar is started lazily on the first emission, the

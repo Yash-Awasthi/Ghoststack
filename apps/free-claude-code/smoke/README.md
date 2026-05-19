@@ -42,31 +42,31 @@ configured, live product smoke fails as `missing_env` unless you explicitly set
 
 Default targets do not send real bot messages or load voice backends:
 
-| Target | Product scenarios | Required environment |
-| --- | --- | --- |
-| `api` | messages, count_tokens full payload, errors, `/stop`, optimizations | configured provider only for streaming messages |
-| `auth` | x-api-key, bearer, anthropic-auth-token, invalid/missing auth | none; test sets an isolated token |
-| `cli` | `fcc-init`, server entrypoint, Claude CLI adaptive thinking, session cleanup | Claude CLI binary and provider only for real CLI |
-| `clients` | VS Code and JetBrains protocol payloads | configured provider |
-| `config` | env precedence, removed-env migration, proxy/timeouts | none |
-| `extensibility` | provider registry and platform factory construction | none |
-| `messaging` | fake Discord/Telegram full flow, commands, trees, persistence, voice cancel | none |
-| `providers` | multi-turn text, adaptive thinking history, tools, disconnect, errors | configured providers, optional `FCC_SMOKE_MODEL_*` |
-| `tools` | forced tool_use and tool_result continuation | tool-capable configured provider |
-| `rate_limit` | disconnect cleanup and follow-up request | configured provider |
-| `lmstudio` | local `/models` plus native `/messages` through proxy | running LM Studio server |
-| `llamacpp` | local `/models` plus native `/messages` through proxy | running llama-server |
-| `ollama` | local `/api/tags` plus native Anthropic messages through proxy | running Ollama server |
+| Target          | Product scenarios                                                            | Required environment                               |
+| --------------- | ---------------------------------------------------------------------------- | -------------------------------------------------- |
+| `api`           | messages, count_tokens full payload, errors, `/stop`, optimizations          | configured provider only for streaming messages    |
+| `auth`          | x-api-key, bearer, anthropic-auth-token, invalid/missing auth                | none; test sets an isolated token                  |
+| `cli`           | `fcc-init`, server entrypoint, Claude CLI adaptive thinking, session cleanup | Claude CLI binary and provider only for real CLI   |
+| `clients`       | VS Code and JetBrains protocol payloads                                      | configured provider                                |
+| `config`        | env precedence, removed-env migration, proxy/timeouts                        | none                                               |
+| `extensibility` | provider registry and platform factory construction                          | none                                               |
+| `messaging`     | fake Discord/Telegram full flow, commands, trees, persistence, voice cancel  | none                                               |
+| `providers`     | multi-turn text, adaptive thinking history, tools, disconnect, errors        | configured providers, optional `FCC_SMOKE_MODEL_*` |
+| `tools`         | forced tool_use and tool_result continuation                                 | tool-capable configured provider                   |
+| `rate_limit`    | disconnect cleanup and follow-up request                                     | configured provider                                |
+| `lmstudio`      | local `/models` plus native `/messages` through proxy                        | running LM Studio server                           |
+| `llamacpp`      | local `/models` plus native `/messages` through proxy                        | running llama-server                               |
+| `ollama`        | local `/api/tags` plus native Anthropic messages through proxy               | running Ollama server                              |
 
 Heavy/side-effectful targets are opt-in:
 
-| Target | Product scenarios | Required environment |
-| --- | --- | --- |
-| `nvidia_nim_cli` | Claude Code CLI feature matrix across NIM models | `NVIDIA_NIM_API_KEY`, Claude CLI |
-| `openrouter_free_cli` | Claude Code CLI feature matrix across OpenRouter free models | `OPENROUTER_API_KEY`, Claude CLI |
-| `telegram` | getMe, send, edit, delete, optional manual inbound | token and chat/user ID |
-| `discord` | channel access, send, edit, delete, optional manual inbound | token and channel ID |
-| `voice` | generated WAV through local Whisper or NVIDIA NIM transcription | `VOICE_NOTE_ENABLED=true`, `FCC_SMOKE_RUN_VOICE=1` |
+| Target                | Product scenarios                                               | Required environment                               |
+| --------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
+| `nvidia_nim_cli`      | Claude Code CLI feature matrix across NIM models                | `NVIDIA_NIM_API_KEY`, Claude CLI                   |
+| `openrouter_free_cli` | Claude Code CLI feature matrix across OpenRouter free models    | `OPENROUTER_API_KEY`, Claude CLI                   |
+| `telegram`            | getMe, send, edit, delete, optional manual inbound              | token and chat/user ID                             |
+| `discord`             | channel access, send, edit, delete, optional manual inbound     | token and channel ID                               |
+| `voice`               | generated WAV through local Whisper or NVIDIA NIM transcription | `VOICE_NOTE_ENABLED=true`, `FCC_SMOKE_RUN_VOICE=1` |
 
 ## Examples
 

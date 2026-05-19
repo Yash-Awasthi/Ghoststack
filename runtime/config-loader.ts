@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as yaml from 'js-yaml';
+import * as fs from "fs";
+import * as yaml from "js-yaml";
 
 export interface PortsConfig {
   floci: number;
@@ -12,7 +12,7 @@ export interface PortsConfig {
 export interface ServiceDefinition {
   cmd?: string;
   image?: string;
-  type: 'docker' | 'process' | 'external';
+  type: "docker" | "process" | "external";
   port: number;
 }
 
@@ -63,7 +63,7 @@ export class YAMLConfigLoader implements IConfigLoader {
 
   private readYamlFile(filePath: string): any {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
       return yaml.load(content);
     } catch (err) {
       throw new Error(`Failed to load or parse YAML file at ${filePath}: ${err}`);

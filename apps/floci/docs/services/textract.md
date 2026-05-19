@@ -7,14 +7,14 @@ Floci emulates the AWS Textract API with a dummy response stub. The response sha
 
 ## Supported Operations
 
-| Operation | Notes |
-|-----------|-------|
-| `DetectDocumentText` | Returns stub PAGE + LINE + WORD blocks |
-| `AnalyzeDocument` | Returns stub blocks; `FeatureTypes` accepted but ignored |
-| `StartDocumentTextDetection` | Returns a `JobId`; job is immediately SUCCEEDED |
-| `GetDocumentTextDetection` | Returns `SUCCEEDED` + stub blocks for a known `JobId` |
-| `StartDocumentAnalysis` | Returns a `JobId`; job is immediately SUCCEEDED |
-| `GetDocumentAnalysis` | Returns `SUCCEEDED` + stub blocks for a known `JobId` |
+| Operation                    | Notes                                                    |
+| ---------------------------- | -------------------------------------------------------- |
+| `DetectDocumentText`         | Returns stub PAGE + LINE + WORD blocks                   |
+| `AnalyzeDocument`            | Returns stub blocks; `FeatureTypes` accepted but ignored |
+| `StartDocumentTextDetection` | Returns a `JobId`; job is immediately SUCCEEDED          |
+| `GetDocumentTextDetection`   | Returns `SUCCEEDED` + stub blocks for a known `JobId`    |
+| `StartDocumentAnalysis`      | Returns a `JobId`; job is immediately SUCCEEDED          |
+| `GetDocumentAnalysis`        | Returns `SUCCEEDED` + stub blocks for a known `JobId`    |
 
 `Document` and `DocumentLocation` inputs (bytes or S3 references) are accepted but not parsed.
 
@@ -22,11 +22,11 @@ Floci emulates the AWS Textract API with a dummy response stub. The response sha
 
 Each response includes a 3-block hierarchy matching the [AWS Block API shape](https://docs.aws.amazon.com/textract/latest/dg/API_Block.html):
 
-| BlockType | Text | Relationships |
-|-----------|------|---------------|
-| `PAGE` | *(none)* | CHILD → LINE |
-| `LINE` | `"Floci"` | CHILD → WORD |
-| `WORD` | `"Floci"` | *(none)* |
+| BlockType | Text      | Relationships |
+| --------- | --------- | ------------- |
+| `PAGE`    | _(none)_  | CHILD → LINE  |
+| `LINE`    | `"Floci"` | CHILD → WORD  |
+| `WORD`    | `"Floci"` | _(none)_      |
 
 Every block includes: `Id` (UUID), `Confidence` (99.9), `Page` (1), and a `Geometry` with `BoundingBox` + 4-point `Polygon`.
 
@@ -36,9 +36,9 @@ Every block includes: `Id` (UUID), `Confidence` (99.9), `Page` (1), and a `Geome
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_TEXTRACT_ENABLED` | `true` | Enable or disable the service |
+| Variable                          | Default | Description                   |
+| --------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_TEXTRACT_ENABLED` | `true`  | Enable or disable the service |
 
 ## Examples
 
@@ -92,4 +92,3 @@ print(result["JobStatus"])  # SUCCEEDED
 - `GetAdapterVersion`, `CreateAdapter`, `ListAdapters` (Adapter management API).
 - `GetDocumentTextDetection` / `GetDocumentAnalysis` pagination via `NextToken`.
 - Persistent job storage across restarts.
-

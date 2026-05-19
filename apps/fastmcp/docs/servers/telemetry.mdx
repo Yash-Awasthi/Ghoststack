@@ -58,11 +58,11 @@ FastMCP creates spans for all MCP operations, providing end-to-end visibility in
 
 The server creates spans for each operation using [MCP semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/mcp/):
 
-| Span Name | Description |
-|-----------|-------------|
-| `tools/call {name}` | Tool execution (e.g., `tools/call get_weather`) |
-| `resources/read` | Resource read (URI in `mcp.resource.uri` attribute, not span name) |
-| `prompts/get {name}` | Prompt render (e.g., `prompts/get greeting`) |
+| Span Name            | Description                                                        |
+| -------------------- | ------------------------------------------------------------------ |
+| `tools/call {name}`  | Tool execution (e.g., `tools/call get_weather`)                    |
+| `resources/read`     | Resource read (URI in `mcp.resource.uri` attribute, not span name) |
+| `prompts/get {name}` | Prompt render (e.g., `prompts/get greeting`)                       |
 
 For mounted servers, an additional `delegate {name}` span shows the delegation to the child server.
 
@@ -116,7 +116,7 @@ def greet(name: str) -> str:
 ```
 
 <Tip>
-The SDK must be configured **before** importing FastMCP to ensure the tracer provider is set when FastMCP initializes.
+  The SDK must be configured **before** importing FastMCP to ensure the tracer provider is set when FastMCP initializes.
 </Tip>
 
 ### Local Development
@@ -261,50 +261,53 @@ def risky_operation() -> str:
 ## Attributes Reference
 
 <Warning>
-**Migrating from v3.1 or earlier:** The `rpc.system`, `rpc.service`, and `rpc.method` span attributes were removed in favor of the [MCP semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/mcp/) listed below. If you have dashboards or alerts keyed on those `rpc.*` attributes, update them to use `mcp.method.name` and the `fastmcp.*` attributes instead.
+  **Migrating from v3.1 or earlier:** The `rpc.system`, `rpc.service`, and `rpc.method` span attributes were removed in
+  favor of the [MCP semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/mcp/) listed below. If you
+  have dashboards or alerts keyed on those `rpc.*` attributes, update them to use `mcp.method.name` and the `fastmcp.*`
+  attributes instead.
 </Warning>
 
 ### MCP Semantic Conventions
 
 FastMCP implements the [OpenTelemetry MCP semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/mcp/):
 
-| Attribute | Description |
-|-----------|-------------|
-| `mcp.method.name` | The MCP method being called (`tools/call`, `resources/read`, `prompts/get`) |
-| `mcp.session.id` | Session identifier for the MCP connection |
-| `mcp.resource.uri` | The resource URI (for resource operations) |
-| `gen_ai.tool.name` | Tool name (on `tools/call` spans) |
-| `gen_ai.prompt.name` | Prompt name (on `prompts/get` spans) |
-| `error.type` | Error classification (`tool_error` for ToolError, otherwise exception class name) |
+| Attribute            | Description                                                                       |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `mcp.method.name`    | The MCP method being called (`tools/call`, `resources/read`, `prompts/get`)       |
+| `mcp.session.id`     | Session identifier for the MCP connection                                         |
+| `mcp.resource.uri`   | The resource URI (for resource operations)                                        |
+| `gen_ai.tool.name`   | Tool name (on `tools/call` spans)                                                 |
+| `gen_ai.prompt.name` | Prompt name (on `prompts/get` spans)                                              |
+| `error.type`         | Error classification (`tool_error` for ToolError, otherwise exception class name) |
 
 ### Auth Attributes
 
 Standard [identity attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/enduser/):
 
-| Attribute | Description |
-|-----------|-------------|
-| `enduser.id` | Client ID from access token (when authenticated) |
+| Attribute       | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `enduser.id`    | Client ID from access token (when authenticated)  |
 | `enduser.scope` | Space-separated OAuth scopes (when authenticated) |
 
 ### FastMCP Custom Attributes
 
 All custom attributes use the `fastmcp.` prefix for features unique to FastMCP:
 
-| Attribute | Description |
-|-----------|-------------|
-| `fastmcp.server.name` | Server name |
-| `fastmcp.component.type` | `tool`, `resource`, `prompt`, or `resource_template` |
-| `fastmcp.component.key` | Full component identifier (e.g., `tool:greet`) |
-| `fastmcp.provider.type` | Provider class (`LocalProvider`, `FastMCPProvider`, `ProxyProvider`) |
+| Attribute                | Description                                                          |
+| ------------------------ | -------------------------------------------------------------------- |
+| `fastmcp.server.name`    | Server name                                                          |
+| `fastmcp.component.type` | `tool`, `resource`, `prompt`, or `resource_template`                 |
+| `fastmcp.component.key`  | Full component identifier (e.g., `tool:greet`)                       |
+| `fastmcp.provider.type`  | Provider class (`LocalProvider`, `FastMCPProvider`, `ProxyProvider`) |
 
 Provider-specific attributes for delegation context:
 
-| Attribute | Description |
-|-----------|-------------|
+| Attribute                        | Description                                  |
+| -------------------------------- | -------------------------------------------- |
 | `fastmcp.delegate.original_name` | Original tool/prompt name before namespacing |
-| `fastmcp.delegate.original_uri` | Original resource URI before namespacing |
-| `fastmcp.proxy.backend_name` | Remote server tool/prompt name |
-| `fastmcp.proxy.backend_uri` | Remote server resource URI |
+| `fastmcp.delegate.original_uri`  | Original resource URI before namespacing     |
+| `fastmcp.proxy.backend_name`     | Remote server tool/prompt name               |
+| `fastmcp.proxy.backend_uri`      | Remote server resource URI                   |
 
 ## Testing with Telemetry
 

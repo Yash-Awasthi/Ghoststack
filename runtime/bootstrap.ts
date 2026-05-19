@@ -1,20 +1,20 @@
-import { GhostStackOrchestrator } from './orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { YAMLConfigLoader } from './config-loader';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { ApprovalWorkflow } from '../orchestration/approval-workflow';
-import { BrowserExecutionAdapter } from '../orchestration/browser-adapter';
-import { ScrapingExecutionAdapter } from '../orchestration/scraping-adapter';
-import { FlociExecutionAdapter } from '../orchestration/floci-adapter';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
+import { GhostStackOrchestrator } from "./orchestrator";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { YAMLConfigLoader } from "./config-loader";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
+import { LocalAgentRegistry } from "../orchestration/agent-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { ApprovalWorkflow } from "../orchestration/approval-workflow";
+import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
+import { ScrapingExecutionAdapter } from "../orchestration/scraping-adapter";
+import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
 import {
   WorkflowRegistry,
   WorkflowTelemetry,
@@ -23,9 +23,9 @@ import {
   LocalCloudProvisioningTemplate,
   DocumentProcessingTemplate,
   SpecToExecutionTemplate
-} from '../orchestration/workflow-engine';
-import * as path from 'path';
-import * as fs from 'fs';
+} from "../orchestration/workflow-engine";
+import * as path from "path";
+import * as fs from "fs";
 
 async function bootstrap() {
   console.log("\x1b[35m");
@@ -41,13 +41,13 @@ async function bootstrap() {
   console.log("===============================================================================");
   console.log("\x1b[0m");
 
-  const runtimeDbDir = path.join(__dirname, '../data-runtime');
+  const runtimeDbDir = path.join(__dirname, "../data-runtime");
   if (!fs.existsSync(runtimeDbDir)) {
     fs.mkdirSync(runtimeDbDir, { recursive: true });
   }
 
-  const eventLogPath = path.join(runtimeDbDir, 'events.jsonl');
-  const cacheDbPath = path.join(runtimeDbDir, 'cache.json');
+  const eventLogPath = path.join(runtimeDbDir, "events.jsonl");
+  const cacheDbPath = path.join(runtimeDbDir, "cache.json");
 
   console.log(`[BOOT] Initializing database directories at: ${runtimeDbDir}`);
   console.log(`[BOOT] Telemetry events log path: ${eventLogPath}`);
@@ -55,10 +55,10 @@ async function bootstrap() {
 
   // 1. Initialize Core Substrates
   const loader = new YAMLConfigLoader({
-    portsPath: path.join(__dirname, './ports.yaml'),
-    servicesPath: path.join(__dirname, './services.yaml'),
-    healthchecksPath: path.join(__dirname, './healthchecks.yaml'),
-    runtimePath: path.join(__dirname, './ghoststack.runtime.yaml'),
+    portsPath: path.join(__dirname, "./ports.yaml"),
+    servicesPath: path.join(__dirname, "./services.yaml"),
+    healthchecksPath: path.join(__dirname, "./healthchecks.yaml"),
+    runtimePath: path.join(__dirname, "./ghoststack.runtime.yaml")
   });
 
   const logger = new StructuredLogger();
@@ -72,7 +72,7 @@ async function bootstrap() {
   const metrics = new MetricsCollector();
   const tracer = new TraceRecorder();
   const queue = new MemoryQueueBackend();
-  const discovery = new LocalServiceDiscovery();
+  new LocalServiceDiscovery();
   const approval = new ApprovalWorkflow(eventStore, eventBus);
 
   const browserAdapter = new BrowserExecutionAdapter(new EnvironmentTelemetry(), true);
@@ -124,13 +124,13 @@ async function bootstrap() {
 
   // 3. Boot Unified Orchestrator Core
   const activeServices = await orchestrator.start();
-  console.log(`[BOOT] Active orchestration services loaded successfully: ${activeServices.join(', ')}`);
+  console.log(`[BOOT] Active orchestration services loaded successfully: ${activeServices.join(", ")}`);
 
   console.log("\n\x1b[32m[SHOWCASE] Running Governed Browser Research Showcase Workflow Demo...\x1b[0m");
 
   // Instantiate showcase template
   const browserTemplate = registry.getTemplate("browser-research-template")!;
-  
+
   // Safe run with normal limit quota (no approval needed)
   console.log("[SHOWCASE] 1. Instantiating SAFE Workflow (quota: 5000 bytes)...");
   const safeWorkflow = browserTemplate.createWorkflow({ id: "showcase-safe-research", limitBytes: 5000 });
@@ -149,32 +149,40 @@ async function bootstrap() {
 
   console.log("[SHOWCASE] Executing ILLEGAL Workflow...");
   const illegalExecResult = await engine.executeWorkflow("showcase-illegal-research", "exec-illegal-demo");
-  console.log(`[SHOWCASE] ILLEGAL Workflow execution blocked: status = \x1b[31m${illegalExecResult.status}\x1b[0m, reason = "${illegalExecResult.error}"`);
+  console.log(
+    `[SHOWCASE] ILLEGAL Workflow execution blocked: status = \x1b[31m${illegalExecResult.status}\x1b[0m, reason = "${illegalExecResult.error}"`
+  );
 
   // Approval run with large quota (triggers manual governance gate approval)
-  console.log("\n[SHOWCASE] 3. Instantiating SECURE Workflow (quota: 25000 bytes, triggers approval policy decider)...");
+  console.log(
+    "\n[SHOWCASE] 3. Instantiating SECURE Workflow (quota: 25000 bytes, triggers approval policy decider)..."
+  );
   const approvalWorkflow = browserTemplate.createWorkflow({ id: "showcase-approval-research", limitBytes: 25000 });
   registry.registerWorkflow(approvalWorkflow);
 
   console.log("[SHOWCASE] Executing SECURE Workflow...");
   const approvalExecResult = await engine.executeWorkflow("showcase-approval-research", "exec-approval-demo");
-  console.log(`[SHOWCASE] SECURE Workflow held in: status = \x1b[33m${approvalExecResult.status}\x1b[0m, approved = ${approvalExecResult.approved}`);
+  console.log(
+    `[SHOWCASE] SECURE Workflow held in: status = \x1b[33m${approvalExecResult.status}\x1b[0m, approved = ${approvalExecResult.approved}`
+  );
 
   const pendingApprovals = await approval.listRecords();
   console.log(`[SHOWCASE] Governance Registry pending approval records found:`, pendingApprovals);
 
-  const targetApproval = pendingApprovals.find(r => r.taskId === "exec-approval-demo")!;
+  const targetApproval = pendingApprovals.find((r) => r.taskId === "exec-approval-demo")!;
   console.log(`[SHOWCASE] Approving pending governance token request [${targetApproval.approvalId}]...`);
-  
+
   const approvedResult = await engine.approveAndTriggerWorkflow(targetApproval.approvalId);
-  console.log(`[SHOWCASE] SECURE Workflow execution completed after approval: status = \x1b[32m${approvedResult.status}\x1b[0m`);
+  console.log(
+    `[SHOWCASE] SECURE Workflow execution completed after approval: status = \x1b[32m${approvedResult.status}\x1b[0m`
+  );
 
   console.log("\n\x1b[35m===============================================================================");
   console.log("   GHOSTSTACK BOOTSTRAP DEMONSTRATION COMPLETE - ALL SYSTEMS RUNNING SAFELY");
   console.log("===============================================================================\x1b[0m\n");
 }
 
-bootstrap().catch(err => {
+bootstrap().catch((err) => {
   console.error("[CRITICAL] Bootstrap runtime crashed:", err);
   process.exit(1);
 });

@@ -209,12 +209,10 @@ Inserted at each agent step.
 Generator function for programmatic control over tool calls and LLM steps.
 
 <MarkdownTable>
-| Yield Value | What It Does |
-| --- | --- |
-| Tool call object | Execute a tool and get its result |
-| 'STEP' | Run one LLM generation step |
-| 'STEP_ALL' | Let the agent run until completion |
-| return | End the agent's turn immediately |
+  | Yield Value | What It Does | | --- | --- | | Tool call object | Execute a
+  tool and get its result | | 'STEP' | Run one LLM generation step | |
+  'STEP_ALL' | Let the agent run until completion | | return | End the agent's
+  turn immediately |
 </MarkdownTable>
 
 **Tool Call Pattern:**
@@ -309,37 +307,40 @@ JSON Schema for validating prompt and params when spawning the agent.
 import { AgentDefinition } from './types/agent-definition'
 
 const definition: AgentDefinition = {
-  id: "documentation-writer",
-  version: "1.0.0",
-  publisher: "mycompany",
+  id: 'documentation-writer',
+  version: '1.0.0',
+  publisher: 'mycompany',
 
-  displayName: "Documentation Writer",
-  spawnerPrompt: "Spawn this agent for writing documentation, API docs, or user guides",
-  model: "anthropic/claude-sonnet-4.5",
-  outputMode: "last_message",
+  displayName: 'Documentation Writer',
+  spawnerPrompt:
+    'Spawn this agent for writing documentation, API docs, or user guides',
+  model: 'anthropic/claude-sonnet-4.5',
+  outputMode: 'last_message',
   includeMessageHistory: true,
 
   toolNames: [
-    "read_files",
-    "write_file",
-    "code_search",
-    "spawn_agents",
-    "end_turn"
+    'read_files',
+    'write_file',
+    'code_search',
+    'spawn_agents',
+    'end_turn',
   ],
-  spawnableAgents: ["codebuff/researcher@0.0.1"],
+  spawnableAgents: ['codebuff/researcher@0.0.1'],
 
   inputSchema: {
     prompt: {
-      type: "string",
-      description: "What documentation to create or update"
-    }
+      type: 'string',
+      description: 'What documentation to create or update',
+    },
   },
 
   systemPrompt: {
-    path: "./prompts/doc-writer-system.md"
+    path: './prompts/doc-writer-system.md',
   },
-  instructionsPrompt: "Create documentation based on the user's request. Research existing code first.",
-  stepPrompt: "Continue working on the documentation. Use end_turn when complete."
+  instructionsPrompt:
+    "Create documentation based on the user's request. Research existing code first.",
+  stepPrompt:
+    'Continue working on the documentation. Use end_turn when complete.',
 }
 
 export default definition

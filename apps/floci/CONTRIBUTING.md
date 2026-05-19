@@ -49,11 +49,11 @@ If you prefer to use your own Maven installation (3.9+), you can use `mvn` inste
 
 Floci uses a **tag-driven release model**. Docker images are never published on PR merge — only when a maintainer pushes a version tag.
 
-| Branch | Purpose | Docker published? |
-|---|---|---|
-| `main` | Integration branch — all PRs merge here. Treated as unstable/nightly. | No (CI tests only) |
-| `release/x.y.x` | Stable line for a minor version. Receives cherry-picked fixes from `main`. | No (CI tests only) |
-| `X.Y.Z` tag | Signals a production release. Triggers the full Docker publish pipeline. | Yes (`x.y.z`, `latest`, `x.y.z-jvm`, `latest-jvm`) |
+| Branch          | Purpose                                                                    | Docker published?                                  |
+| --------------- | -------------------------------------------------------------------------- | -------------------------------------------------- |
+| `main`          | Integration branch — all PRs merge here. Treated as unstable/nightly.      | No (CI tests only)                                 |
+| `release/x.y.x` | Stable line for a minor version. Receives cherry-picked fixes from `main`. | No (CI tests only)                                 |
+| `X.Y.Z` tag     | Signals a production release. Triggers the full Docker publish pipeline.   | Yes (`x.y.z`, `latest`, `x.y.z-jvm`, `latest-jvm`) |
 
 ## Commit Message Format
 
@@ -72,20 +72,20 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) �
 - **description** — short summary in the imperative mood, no trailing period
 - Append `!` before the colon to signal a breaking change: `feat(api)!:`
 
-| Type | When to use | Version bump |
-|------|-------------|--------------|
-| `feat` | New AWS API action or service | minor |
-| `fix` | Bug fix or AWS compatibility correction | patch |
-| `perf` | Performance improvement | patch |
-| `revert` | Reverts a previous commit | patch |
-| `docs` | Documentation only | none |
-| `style` | Formatting, whitespace — no logic change | none |
-| `chore` | Build, CI, dependencies, housekeeping | none |
-| `refactor` | Code restructure without behavior change | none |
-| `test` | Adding or updating tests | none |
-| `build` | Build system or tooling changes | none |
-| `ci` | CI workflow changes | none |
-| `BREAKING CHANGE` | Footer or `!` suffix — incompatible change | major |
+| Type              | When to use                                | Version bump |
+| ----------------- | ------------------------------------------ | ------------ |
+| `feat`            | New AWS API action or service              | minor        |
+| `fix`             | Bug fix or AWS compatibility correction    | patch        |
+| `perf`            | Performance improvement                    | patch        |
+| `revert`          | Reverts a previous commit                  | patch        |
+| `docs`            | Documentation only                         | none         |
+| `style`           | Formatting, whitespace — no logic change   | none         |
+| `chore`           | Build, CI, dependencies, housekeeping      | none         |
+| `refactor`        | Code restructure without behavior change   | none         |
+| `test`            | Adding or updating tests                   | none         |
+| `build`           | Build system or tooling changes            | none         |
+| `ci`              | CI workflow changes                        | none         |
+| `BREAKING CHANGE` | Footer or `!` suffix — incompatible change | major        |
 
 ### Valid examples ✅
 

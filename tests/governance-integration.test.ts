@@ -1,37 +1,37 @@
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { PlanningEngine } from '../orchestration/planning-engine';
-import { 
-  GovernanceEngine, 
-  ResourceScopeConstraint, 
-  CostBudgetConstraint, 
-  DangerousOperationPolicy, 
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
+import { LocalAgentRegistry } from "../orchestration/agent-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { PlanningEngine } from "../orchestration/planning-engine";
+import {
+  GovernanceEngine,
+  ResourceScopeConstraint,
+  CostBudgetConstraint,
+  DangerousOperationPolicy,
   WildcardPermissionsPolicy,
   LoopDetectionGuardrail,
   RunawayRetriesGuardrail,
   TaskGraphLimitGuardrail
-} from '../orchestration/governance-engine';
-import { ApprovalWorkflow } from '../orchestration/approval-workflow';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { FlociExecutionAdapter } from '../orchestration/floci-adapter';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import * as path from 'path';
-import * as fs from 'fs';
+} from "../orchestration/governance-engine";
+import { ApprovalWorkflow } from "../orchestration/approval-workflow";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Milestone 4: End-to-End Orchestrator Governance & Diagnostics", () => {
-  const testDir = path.join(__dirname, '../temp-gov-integration-db');
-  const eventLogPath = path.join(testDir, 'gov_integration_events.jsonl');
-  const cacheDbPath = path.join(testDir, 'gov_integration_cache.json');
+  const testDir = path.join(__dirname, "../temp-gov-integration-db");
+  const eventLogPath = path.join(testDir, "gov_integration_events.jsonl");
+  const cacheDbPath = path.join(testDir, "gov_integration_cache.json");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -47,10 +47,10 @@ describe("Milestone 4: End-to-End Orchestrator Governance & Diagnostics", () => 
 
   it("should process safe planning objectives immediately, gate dangerous workflows, and expose cognitive diagnostics APIs", async () => {
     const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+      portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+      servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+      healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+      runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
     });
 
     const logger = new StructuredLogger();
@@ -70,10 +70,10 @@ describe("Milestone 4: End-to-End Orchestrator Governance & Diagnostics", () => 
     // Initialize Cognitive Governance Systems
     const planningEngine = new PlanningEngine();
     const governanceEngine = new GovernanceEngine();
-    
+
     // Register standard governance rules
     governanceEngine.registerConstraint(new ResourceScopeConstraint());
-    governanceEngine.registerConstraint(new CostBudgetConstraint(0.50));
+    governanceEngine.registerConstraint(new CostBudgetConstraint(0.5));
     governanceEngine.registerPolicy(new DangerousOperationPolicy());
     governanceEngine.registerPolicy(new WildcardPermissionsPolicy());
     governanceEngine.registerGuardrail(new LoopDetectionGuardrail());
@@ -84,13 +84,13 @@ describe("Milestone 4: End-to-End Orchestrator Governance & Diagnostics", () => 
 
     // Construct Inspector with Full Governance Modules
     const inspector = new RuntimeInspector(
-      metrics, 
-      queue, 
-      discovery, 
-      eventStore, 
-      undefined, 
-      undefined, 
-      governanceEngine, 
+      metrics,
+      queue,
+      discovery,
+      eventStore,
+      undefined,
+      undefined,
+      governanceEngine,
       approvalWorkflow
     );
 
@@ -137,7 +137,7 @@ describe("Milestone 4: End-to-End Orchestrator Governance & Diagnostics", () => 
 
     // Verify diagnostic APIs reflect active approvals and plans lists
     const api = new RuntimeDiagnosticAPI(inspector);
-    
+
     // GET /runtime/governance
     const govInfo = await api.handle("GET", "/runtime/governance");
     expect(govInfo.constraints).toContain("ResourceScopeConstraint");

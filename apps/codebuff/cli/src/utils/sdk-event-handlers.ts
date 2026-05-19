@@ -368,20 +368,27 @@ const updateSpawnAgentBlocks = (
       return block
     }
 
-    if (block.spawnToolCallId === toolCallId && block.spawnIndex !== undefined && block.blocks) {
+    if (
+      block.spawnToolCallId === toolCallId &&
+      block.spawnIndex !== undefined &&
+      block.blocks
+    ) {
       const result = results[block.spawnIndex]
 
       if (result?.value) {
-        const { content, hasError } = extractSpawnAgentResultContent(result.value)
+        const { content, hasError } = extractSpawnAgentResultContent(
+          result.value,
+        )
         // Check if the agent already streamed text content (e.g., basher).
         // Agents like thinker return all output at the end via lastMessage,
         // so we should add final content even if they have tool blocks.
         const hasStreamedTextContent = block.blocks.some(
-          (b) => b.type === 'text' && b.textType === 'text'
+          (b) => b.type === 'text' && b.textType === 'text',
         )
-        const finalBlocks = content && !hasStreamedTextContent
-          ? [...block.blocks, { type: 'text', content } as ContentBlock]
-          : block.blocks
+        const finalBlocks =
+          content && !hasStreamedTextContent
+            ? [...block.blocks, { type: 'text', content } as ContentBlock]
+            : block.blocks
         if (hasError || finalBlocks.length > 0) {
           return {
             ...block,
@@ -394,7 +401,11 @@ const updateSpawnAgentBlocks = (
 
     // Recursively process nested agent blocks
     if (block.blocks?.length) {
-      const updatedNestedBlocks = updateSpawnAgentBlocks(block.blocks, toolCallId, results)
+      const updatedNestedBlocks = updateSpawnAgentBlocks(
+        block.blocks,
+        toolCallId,
+        results,
+      )
       if (updatedNestedBlocks !== block.blocks) {
         return { ...block, blocks: updatedNestedBlocks }
       }
@@ -433,7 +444,8 @@ const handleToolResult = (
   )
 
   const firstOutput = event.output?.[0]
-  const firstOutputValue = firstOutput && 'value' in firstOutput ? firstOutput.value : undefined
+  const firstOutputValue =
+    firstOutput && 'value' in firstOutput ? firstOutput.value : undefined
   const isSpawnAgentsResult =
     Array.isArray(firstOutputValue) &&
     firstOutputValue.some((v: any) => v?.agentName || v?.agentType)

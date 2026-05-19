@@ -1,11 +1,11 @@
-import { IMCPServerRegistry, IMCPServerInfo, IMCPTransport } from './interfaces/mcp.interface';
+import { IMCPServerRegistry, IMCPServerInfo, IMCPTransport } from "./interfaces/mcp.interface";
 
 export class MCPServerRegistry implements IMCPServerRegistry {
   private servers: Map<string, { info: IMCPServerInfo; transport: IMCPTransport }> = new Map();
 
   async registerServer(info: IMCPServerInfo, transport: IMCPTransport): Promise<void> {
     const mutableInfo = { ...info };
-    mutableInfo.status = 'active';
+    mutableInfo.status = "active";
     this.servers.set(info.name, { info: mutableInfo, transport });
   }
 
@@ -14,6 +14,6 @@ export class MCPServerRegistry implements IMCPServerRegistry {
   }
 
   async listServers(): Promise<IMCPServerInfo[]> {
-    return Array.from(this.servers.values()).map(s => s.info);
+    return Array.from(this.servers.values()).map((s) => s.info);
   }
 }

@@ -60,7 +60,9 @@ p = StealthyFetcher.fetch('https://example.com', headless=True, network_idle=Tru
 products = p.css('.product', auto_save=True)                                        # Daten scrapen, die Website-Designänderungen überleben!
 products = p.css('.product', adaptive=True)                                         # Später, wenn sich die Website-Struktur ändert, `adaptive=True` übergeben, um sie zu finden!
 ```
+
 Oder auf vollständige Crawls hochskalieren
+
 ```python
 from scrapling.spiders import Spider, Response
 
@@ -82,6 +84,7 @@ MySpider().start()
 </p>
 
 # Platin-Sponsoren
+
 <table>
   <tr>
     <td width="200">
@@ -201,9 +204,11 @@ MySpider().start()
 </table>
 
 <i><sub>Möchten Sie Ihre Anzeige hier zeigen? Klicken Sie [hier](https://github.com/sponsors/D4Vinci/sponsorships?tier_id=586646)</sub></i>
+
 # Sponsoren
 
 <!-- sponsors -->
+
 <a href="https://www.crawleo.dev/?utm_source=github&utm_medium=sponsor&utm_campaign=scrapling" target="_blank" title="Supercharge your AI with Real-Time Web Intelligence"><img src="https://raw.githubusercontent.com/D4Vinci/Scrapling/main/images/crawleo.png"></a>
 <br/>
 
@@ -216,7 +221,6 @@ MySpider().start()
 <a href="https://www.ipcook.com/?ref=EAENO9&utm_source=github&utm_medium=referral&utm_campaign=d4vinci_scrapling" target="_blank" title="Fast Proxies. Smart Pricing. Premium Performance."><img src="https://raw.githubusercontent.com/D4Vinci/Scrapling/main/images/IPCook.png"></a>
 <a href="https://proxiware.com/?ref=scrapling" target="_blank" title="Collect Any Data. At Any Scale."><img src="https://raw.githubusercontent.com/D4Vinci/Scrapling/main/images/proxiware.png"></a>
 
-
 <!-- /sponsors -->
 
 <i><sub>Möchten Sie Ihre Anzeige hier zeigen? Klicken Sie [hier](https://github.com/sponsors/D4Vinci) und wählen Sie die Stufe, die zu Ihnen passt!</sub></i>
@@ -226,6 +230,7 @@ MySpider().start()
 ## Hauptmerkmale
 
 ### Spiders -- Ein vollständiges Crawling-Framework
+
 - 🕷️ **Scrapy-ähnliche Spider-API**: Definieren Sie Spiders mit `start_urls`, async `parse` Callbacks und `Request`/`Response`-Objekten.
 - ⚡ **Paralleles Crawling**: Konfigurierbare Parallelitätslimits, domainbezogenes Throttling und Download-Verzögerungen.
 - 🔄 **Multi-Session-Unterstützung**: Einheitliche Schnittstelle für HTTP-Anfragen und heimliche Headless-Browser in einem einzigen Spider -- leiten Sie Anfragen per ID an verschiedene Sessions weiter.
@@ -237,6 +242,7 @@ MySpider().start()
 - 📦 **Integrierter Export**: Ergebnisse über Hooks und Ihre eigene Pipeline oder den integrierten JSON/JSONL-Export mit `result.items.to_json()` / `result.items.to_jsonl()` exportieren.
 
 ### Erweitertes Website-Abrufen mit Session-Unterstützung
+
 - **HTTP-Anfragen**: Schnelle und heimliche HTTP-Anfragen mit der `Fetcher`-Klasse. Kann Browser-TLS-Fingerprints und Header imitieren und HTTP/3 verwenden.
 - **Dynamisches Laden**: Dynamische Websites mit vollständiger Browser-Automatisierung über die `DynamicFetcher`-Klasse abrufen, die Playwrights Chromium und Google Chrome unterstützt.
 - **Anti-Bot-Umgehung**: Erweiterte Stealth-Fähigkeiten mit `StealthyFetcher` und Fingerprint-Spoofing. Kann alle Arten von Cloudflares Turnstile/Interstitial einfach mit Automatisierung umgehen.
@@ -247,18 +253,21 @@ MySpider().start()
 - **Async-Unterstützung**: Vollständige async-Unterstützung über alle Fetcher und dedizierte async Session-Klassen hinweg.
 
 ### Adaptives Scraping & KI-Integration
+
 - 🔄 **Intelligente Element-Verfolgung**: Elemente nach Website-Änderungen mit intelligenten Ähnlichkeitsalgorithmen neu lokalisieren.
 - 🎯 **Intelligente flexible Auswahl**: CSS-Selektoren, XPath-Selektoren, filterbasierte Suche, Textsuche, Regex-Suche und mehr.
 - 🔍 **Ähnliche Elemente finden**: Elemente, die gefundenen Elementen ähnlich sind, automatisch lokalisieren.
 - 🤖 **MCP-Server für die Verwendung mit KI**: Integrierter MCP-Server für KI-unterstütztes Web Scraping und Datenextraktion. Der MCP-Server verfügt über leistungsstarke, benutzerdefinierte Funktionen, die Scrapling nutzen, um gezielten Inhalt zu extrahieren, bevor er an die KI (Claude/Cursor/etc.) übergeben wird, wodurch Vorgänge beschleunigt und Kosten durch Minimierung der Token-Nutzung gesenkt werden. ([Demo-Video](https://www.youtube.com/watch?v=qyFk3ZNwOxE))
 
 ### Hochleistungs- und praxiserprobte Architektur
+
 - 🚀 **Blitzschnell**: Optimierte Leistung, die die meisten Python-Scraping-Bibliotheken übertrifft.
 - 🔋 **Speichereffizient**: Optimierte Datenstrukturen und Lazy Loading für einen minimalen Speicher-Footprint.
 - ⚡ **Schnelle JSON-Serialisierung**: 10x schneller als die Standardbibliothek.
 - 🏗️ **Praxiserprobt**: Scrapling hat nicht nur eine Testabdeckung von 92% und eine vollständige Type-Hints-Abdeckung, sondern wird seit dem letzten Jahr täglich von Hunderten von Web Scrapern verwendet.
 
 ### Entwickler-/Web-Scraper-freundliche Erfahrung
+
 - 🎯 **Interaktive Web-Scraping-Shell**: Optionale integrierte IPython-Shell mit Scrapling-Integration, Shortcuts und neuen Tools zur Beschleunigung der Web-Scraping-Skriptentwicklung, wie das Konvertieren von Curl-Anfragen in Scrapling-Anfragen und das Anzeigen von Anfrageergebnissen in Ihrem Browser.
 - 🚀 **Direkt vom Terminal aus verwenden**: Optional können Sie Scrapling verwenden, um eine URL zu scrapen, ohne eine einzige Codezeile zu schreiben!
 - 🛠️ **Umfangreiche Navigations-API**: Erweiterte DOM-Traversierung mit Eltern-, Geschwister- und Kind-Navigationsmethoden.
@@ -273,7 +282,9 @@ MySpider().start()
 Hier ein kurzer Überblick über das, was Scrapling kann, ohne zu sehr ins Detail zu gehen.
 
 ### Grundlegende Verwendung
+
 HTTP-Anfragen mit Session-Unterstützung
+
 ```python
 from scrapling.fetchers import Fetcher, FetcherSession
 
@@ -285,7 +296,9 @@ with FetcherSession(impersonate='chrome') as session:  # Neueste Version von Chr
 page = Fetcher.get('https://quotes.toscrape.com/')
 quotes = page.css('.quote .text::text').getall()
 ```
+
 Erweiterter Stealth-Modus
+
 ```python
 from scrapling.fetchers import StealthyFetcher, StealthySession
 
@@ -297,7 +310,9 @@ with StealthySession(headless=True, solve_cloudflare=True) as session:  # Browse
 page = StealthyFetcher.fetch('https://nopecha.com/demo/cloudflare')
 data = page.css('#padded_content a').getall()
 ```
+
 Vollständige Browser-Automatisierung
+
 ```python
 from scrapling.fetchers import DynamicFetcher, DynamicSession
 
@@ -311,7 +326,9 @@ data = page.css('.quote .text::text').getall()
 ```
 
 ### Spiders
+
 Vollständige Crawler mit parallelen Anfragen, mehreren Session-Typen und Pause & Resume erstellen:
+
 ```python
 from scrapling.spiders import Spider, Request, Response
 
@@ -335,7 +352,9 @@ result = QuotesSpider().start()
 print(f"{len(result.items)} Zitate gescrapt")
 result.items.to_json("quotes.json")
 ```
+
 Mehrere Session-Typen in einem einzigen Spider verwenden:
+
 ```python
 from scrapling.spiders import Spider, Request, Response
 from scrapling.fetchers import FetcherSession, AsyncStealthySession
@@ -356,13 +375,17 @@ class MultiSessionSpider(Spider):
             else:
                 yield Request(link, sid="fast", callback=self.parse)  # Expliziter Callback
 ```
+
 Lange Crawls mit Checkpoints pausieren und fortsetzen, indem Sie den Spider so starten:
+
 ```python
 QuotesSpider(crawldir="./crawl_data").start()
 ```
+
 Drücken Sie Strg+C, um kontrolliert zu pausieren -- der Fortschritt wird automatisch gespeichert. Wenn Sie den Spider später erneut starten, übergeben Sie dasselbe `crawldir`, und er setzt dort fort, wo er aufgehört hat.
 
 ### Erweitertes Parsing & Navigation
+
 ```python
 from scrapling.fetchers import Fetcher
 
@@ -391,15 +414,19 @@ parent_container = first_quote.parent
 similar_elements = first_quote.find_similar()
 below_elements = first_quote.below_elements()
 ```
+
 Sie können den Parser direkt verwenden, wenn Sie keine Websites abrufen möchten, wie unten gezeigt:
+
 ```python
 from scrapling.parser import Selector
 
 page = Selector("<html>...</html>")
 ```
+
 Und es funktioniert genau auf die gleiche Weise!
 
 ### Beispiele für async Session-Verwaltung
+
 ```python
 import asyncio
 from scrapling.fetchers import FetcherSession, AsyncStealthySession, AsyncDynamicSession
@@ -429,10 +456,13 @@ Scrapling enthält eine leistungsstarke Befehlszeilenschnittstelle:
 [![asciicast](https://asciinema.org/a/736339.svg)](https://asciinema.org/a/736339)
 
 Interaktive Web-Scraping-Shell starten
+
 ```bash
 scrapling shell
 ```
+
 Seiten direkt ohne Programmierung in eine Datei extrahieren (extrahiert standardmäßig den Inhalt im `body`-Tag). Wenn die Ausgabedatei mit `.txt` endet, wird der Textinhalt des Ziels extrahiert. Wenn sie mit `.md` endet, ist es eine Markdown-Darstellung des HTML-Inhalts; wenn sie mit `.html` endet, ist es der HTML-Inhalt selbst.
+
 ```bash
 scrapling extract get 'https://example.com' content.md
 scrapling extract get 'https://example.com' content.txt --css-selector '#fromSkipToProducts' --impersonate 'chrome'  # Alle Elemente, die dem CSS-Selektor '#fromSkipToProducts' entsprechen
@@ -449,27 +479,25 @@ Scrapling ist nicht nur leistungsstark -- es ist auch blitzschnell. Die folgende
 
 ### Textextraktions-Geschwindigkeitstest (5000 verschachtelte Elemente)
 
-| # |    Bibliothek     | Zeit (ms) | vs Scrapling |
-|---|:-----------------:|:---------:|:------------:|
-| 1 |     Scrapling     |   2.02    |     1.0x     |
-| 2 |   Parsel/Scrapy   |   2.04    |     1.01     |
-| 3 |     Raw Lxml      |   2.54    |    1.257     |
-| 4 |      PyQuery      |   24.17   |     ~12x     |
-| 5 |    Selectolax     |   82.63   |     ~41x     |
-| 6 |  MechanicalSoup   |  1549.71  |   ~767.1x    |
-| 7 |   BS4 with Lxml   |  1584.31  |   ~784.3x    |
-| 8 | BS4 with html5lib |  3391.91  |   ~1679.1x   |
-
+| #   |    Bibliothek     | Zeit (ms) | vs Scrapling |
+| --- | :---------------: | :-------: | :----------: |
+| 1   |     Scrapling     |   2.02    |     1.0x     |
+| 2   |   Parsel/Scrapy   |   2.04    |     1.01     |
+| 3   |     Raw Lxml      |   2.54    |    1.257     |
+| 4   |      PyQuery      |   24.17   |     ~12x     |
+| 5   |    Selectolax     |   82.63   |     ~41x     |
+| 6   |  MechanicalSoup   |  1549.71  |   ~767.1x    |
+| 7   |   BS4 with Lxml   |  1584.31  |   ~784.3x    |
+| 8   | BS4 with html5lib |  3391.91  |   ~1679.1x   |
 
 ### Element-Ähnlichkeit & Textsuche-Leistung
 
 Scraplings adaptive Element-Finding-Fähigkeiten übertreffen Alternativen deutlich:
 
 | Bibliothek  | Zeit (ms) | vs Scrapling |
-|-------------|:---------:|:------------:|
+| ----------- | :-------: | :----------: |
 | Scrapling   |   2.39    |     1.0x     |
 | AutoScraper |   12.45   |    5.209x    |
-
 
 > Alle Benchmarks stellen Durchschnittswerte von über 100 Durchläufen dar. Siehe [benchmarks.py](https://github.com/D4Vinci/Scrapling/blob/main/benchmarks.py) für die Methodik.
 
@@ -486,47 +514,54 @@ Diese Installation enthält nur die Parser-Engine und ihre Abhängigkeiten, ohne
 ### Optionale Abhängigkeiten
 
 1. Wenn Sie eine der folgenden zusätzlichen Funktionen, die Fetcher oder ihre Klassen verwenden möchten, müssen Sie die Abhängigkeiten der Fetcher und ihre Browser-Abhängigkeiten wie folgt installieren:
-    ```bash
-    pip install "scrapling[fetchers]"
 
-    scrapling install           # normal install
-    scrapling install  --force  # force reinstall
-    ```
+   ```bash
+   pip install "scrapling[fetchers]"
 
-    Dies lädt alle Browser zusammen mit ihren Systemabhängigkeiten und Fingerprint-Manipulationsabhängigkeiten herunter.
+   scrapling install           # normal install
+   scrapling install  --force  # force reinstall
+   ```
 
-    Oder Sie können sie aus dem Code heraus installieren, anstatt einen Befehl auszuführen:
-    ```python
-    from scrapling.cli import install
+   Dies lädt alle Browser zusammen mit ihren Systemabhängigkeiten und Fingerprint-Manipulationsabhängigkeiten herunter.
 
-    install([], standalone_mode=False)          # normal install
-    install(["--force"], standalone_mode=False) # force reinstall
-    ```
+   Oder Sie können sie aus dem Code heraus installieren, anstatt einen Befehl auszuführen:
+
+   ```python
+   from scrapling.cli import install
+
+   install([], standalone_mode=False)          # normal install
+   install(["--force"], standalone_mode=False) # force reinstall
+   ```
 
 2. Zusätzliche Funktionen:
    - MCP-Server-Funktion installieren:
-       ```bash
-       pip install "scrapling[ai]"
-       ```
+     ```bash
+     pip install "scrapling[ai]"
+     ```
    - Shell-Funktionen installieren (Web-Scraping-Shell und der `extract`-Befehl):
-       ```bash
-       pip install "scrapling[shell]"
-       ```
+     ```bash
+     pip install "scrapling[shell]"
+     ```
    - Alles installieren:
-       ```bash
-       pip install "scrapling[all]"
-       ```
-   Denken Sie daran, dass Sie nach einem dieser Extras (falls noch nicht geschehen) die Browser-Abhängigkeiten mit `scrapling install` installieren müssen
+     `bash
+    pip install "scrapling[all]"
+    `
+     Denken Sie daran, dass Sie nach einem dieser Extras (falls noch nicht geschehen) die Browser-Abhängigkeiten mit `scrapling install` installieren müssen
 
 ### Docker
+
 Sie können auch ein Docker-Image mit allen Extras und Browsern mit dem folgenden Befehl von DockerHub installieren:
+
 ```bash
 docker pull pyd4vinci/scrapling
 ```
+
 Oder laden Sie es aus der GitHub-Registry herunter:
+
 ```bash
 docker pull ghcr.io/d4vinci/scrapling:latest
 ```
+
 Dieses Image wird automatisch mit GitHub Actions und dem Hauptzweig des Repositorys erstellt und gepusht.
 
 ## Beitragen
@@ -539,7 +574,9 @@ Wir freuen uns über Beiträge! Bitte lesen Sie unsere [Beitragsrichtlinien](htt
 > Diese Bibliothek wird nur zu Bildungs- und Forschungszwecken bereitgestellt. Durch die Nutzung dieser Bibliothek erklären Sie sich damit einverstanden, lokale und internationale Gesetze zum Daten-Scraping und Datenschutz einzuhalten. Die Autoren und Mitwirkenden sind nicht verantwortlich für Missbrauch dieser Software. Respektieren Sie immer die Nutzungsbedingungen von Websites und robots.txt-Dateien.
 
 ## 🎓 Zitierungen
+
 Wenn Sie unsere Bibliothek für Forschungszwecke verwendet haben, zitieren Sie uns bitte mit der folgenden Referenz:
+
 ```text
   @misc{scrapling,
     author = {Karim Shoair},
@@ -557,7 +594,9 @@ Diese Arbeit ist unter der BSD-3-Clause-Lizenz lizenziert.
 ## Danksagungen
 
 Dieses Projekt enthält angepassten Code von:
+
 - Parsel (BSD-Lizenz) -- Verwendet für das [translator](https://github.com/D4Vinci/Scrapling/blob/main/scrapling/core/translator.py)-Submodul
 
 ---
+
 <div align="center"><small>Entworfen und hergestellt mit ❤️ von Karim Shoair.</small></div><br>

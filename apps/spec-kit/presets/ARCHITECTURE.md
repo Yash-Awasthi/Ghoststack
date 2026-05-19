@@ -27,16 +27,17 @@ flowchart TD
     style H fill:#9e9e9e,color:#fff
 ```
 
-| Priority | Source | Path | Use case |
-|----------|--------|------|----------|
-| 1 (highest) | Override | `.specify/templates/overrides/` | One-off project-local tweaks |
-| 2 | Preset | `.specify/presets/<id>/templates/` | Shareable, stackable customizations |
-| 3 | Extension | `.specify/extensions/<id>/templates/` | Extension-provided templates |
-| 4 (lowest) | Core | `.specify/templates/` | Shipped defaults |
+| Priority    | Source    | Path                                  | Use case                            |
+| ----------- | --------- | ------------------------------------- | ----------------------------------- |
+| 1 (highest) | Override  | `.specify/templates/overrides/`       | One-off project-local tweaks        |
+| 2           | Preset    | `.specify/presets/<id>/templates/`    | Shareable, stackable customizations |
+| 3           | Extension | `.specify/extensions/<id>/templates/` | Extension-provided templates        |
+| 4 (lowest)  | Core      | `.specify/templates/`                 | Shipped defaults                    |
 
 When multiple presets are installed, they're sorted by their `priority` field (lower number = higher precedence). This is set via `--priority` on `specify preset add`.
 
 The resolution is implemented three times to ensure consistency:
+
 - **Python**: `PresetResolver` in `src/specify_cli/presets.py`
 - **Bash**: `resolve_template()` in `scripts/bash/common.sh`
 - **PowerShell**: `Resolve-Template` in `scripts/powershell/common.ps1`
@@ -45,16 +46,17 @@ The resolution is implemented three times to ensure consistency:
 
 Templates, commands, and scripts support a `strategy` field that controls how a preset's content is combined with lower-priority content instead of fully replacing it:
 
-| Strategy | Description | Templates | Commands | Scripts |
-|----------|-------------|-----------|----------|---------|
-| `replace` (default) | Fully replaces lower-priority content | ✓ | ✓ | ✓ |
-| `prepend` | Places content before lower-priority content (separated by a blank line) | ✓ | ✓ | — |
-| `append` | Places content after lower-priority content (separated by a blank line) | ✓ | ✓ | — |
-| `wrap` | Content contains `{CORE_TEMPLATE}` (templates/commands) or `$CORE_SCRIPT` (scripts) placeholder replaced with lower-priority content | ✓ | ✓ | ✓ |
+| Strategy            | Description                                                                                                                          | Templates | Commands | Scripts |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------- |
+| `replace` (default) | Fully replaces lower-priority content                                                                                                | ✓         | ✓        | ✓       |
+| `prepend`           | Places content before lower-priority content (separated by a blank line)                                                             | ✓         | ✓        | —       |
+| `append`            | Places content after lower-priority content (separated by a blank line)                                                              | ✓         | ✓        | —       |
+| `wrap`              | Content contains `{CORE_TEMPLATE}` (templates/commands) or `$CORE_SCRIPT` (scripts) placeholder replaced with lower-priority content | ✓         | ✓        | ✓       |
 
 Composition is recursive — multiple composing presets chain. The `PresetResolver.resolve_content()` method walks the full priority stack bottom-up and applies each layer's strategy.
 
 Content resolution functions for composition:
+
 - **Python**: `PresetResolver.resolve_content()` in `src/specify_cli/presets.py` (templates, commands, and scripts)
 - **Bash**: `resolve_template_content()` in `scripts/bash/common.sh` (templates only; command/script composition is handled by the Python resolver)
 - **PowerShell**: `Resolve-TemplateContent` in `scripts/powershell/common.ps1` (templates only; command/script composition is handled by the Python resolver)
@@ -97,11 +99,11 @@ Core commands (e.g. `speckit.specify`, with only 2 segments) are always register
 
 The `CommandRegistrar` renders commands differently per agent:
 
-| Agent | Format | Extension | Arg placeholder |
-|-------|--------|-----------|-----------------|
-| Claude, Cursor, opencode, Windsurf, etc. | Markdown | `.md` | `$ARGUMENTS` |
-| Copilot | Markdown | `.agent.md` + `.prompt.md` | `$ARGUMENTS` |
-| Gemini, Qwen, Tabnine | TOML | `.toml` | `{{args}}` |
+| Agent                                    | Format   | Extension                  | Arg placeholder |
+| ---------------------------------------- | -------- | -------------------------- | --------------- |
+| Claude, Cursor, opencode, Windsurf, etc. | Markdown | `.md`                      | `$ARGUMENTS`    |
+| Copilot                                  | Markdown | `.agent.md` + `.prompt.md` | `$ARGUMENTS`    |
+| Gemini, Qwen, Tabnine                    | TOML     | `.toml`                    | `{{args}}`      |
 
 ### Cleanup on removal
 

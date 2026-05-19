@@ -16,10 +16,11 @@ from scrapling.parser import Selector
 ```
 
 ## ::: scrapling.parser.Selector
+
     handler: python
     :docstring:
 
 ## ::: scrapling.parser.Selectors
+
     handler: python
     :docstring:
-

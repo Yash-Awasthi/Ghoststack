@@ -5,13 +5,11 @@ description: Authenticate your FastMCP client with a Bearer token.
 icon: key
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.6.0" />
 
-<Tip>
-Bearer Token authentication is only relevant for HTTP-based transports.
-</Tip>
+<Tip>Bearer Token authentication is only relevant for HTTP-based transports.</Tip>
 
 You can configure your FastMCP client to use **bearer authentication** by supplying a valid access token. This is most appropriate for service accounts, long-lived API keys, CI/CD, applications where authentication is managed separately, or other non-interactive authentication methods.
 
@@ -21,20 +19,17 @@ A Bearer token is a JSON Web Token (JWT) that is used to authenticate a request.
 Authorization: Bearer <token>
 ```
 
-
 ## Client Usage
 
 The most straightforward way to use a pre-existing Bearer token is to provide it as a string to the `auth` parameter of the `fastmcp.Client` or transport instance. FastMCP will automatically format it correctly for the `Authorization` header and bearer scheme.
 
-<Tip>
-If you're using a string token, do not include the `Bearer` prefix. FastMCP will add it for you.
-</Tip>
+<Tip>If you're using a string token, do not include the `Bearer` prefix. FastMCP will add it for you.</Tip>
 
 ```python {5}
 from fastmcp import Client
 
 async with Client(
-    "https://your-server.fastmcp.app/mcp", 
+    "https://your-server.fastmcp.app/mcp",
     auth="<your-token>",
 ) as client:
     await client.ping()
@@ -47,7 +42,7 @@ from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 
 transport = StreamableHttpTransport(
-    "http://your-server.fastmcp.app/mcp", 
+    "http://your-server.fastmcp.app/mcp",
     auth="<your-token>",
 )
 
@@ -64,7 +59,7 @@ from fastmcp import Client
 from fastmcp.client.auth import BearerAuth
 
 async with Client(
-    "https://your-server.fastmcp.app/mcp", 
+    "https://your-server.fastmcp.app/mcp",
     auth=BearerAuth(token="<your-token>"),
 ) as client:
     await client.ping()
@@ -80,7 +75,7 @@ from fastmcp.client.transports import StreamableHttpTransport
 
 async with Client(
     transport=StreamableHttpTransport(
-        "https://your-server.fastmcp.app/mcp", 
+        "https://your-server.fastmcp.app/mcp",
         headers={"X-API-Key": "<your-token>"},
     ),
 ) as client:

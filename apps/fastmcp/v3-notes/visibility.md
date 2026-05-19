@@ -21,21 +21,26 @@ Provider A (filters) → Provider B (filters) → Server (filters) → Client se
 The `VisibilityFilter` class (`src/fastmcp/utilities/visibility.py`) provides:
 
 ### Blocklist (disable)
+
 ```python
 server.disable(keys=["tool:my_tool"])  # Hide specific component
 server.disable(tags={"internal"})       # Hide all components with tag
 ```
 
 ### Allowlist (enable with only=True)
+
 ```python
 server.enable(tags={"public"}, only=True)  # Show ONLY components with tag
 ```
 
 ### Blocklist Wins
+
 If a component is in both blocklist and allowlist, blocklist wins. This ensures you can always hide something regardless of other filters.
 
 ### Change Detection
+
 The `VisibilityFilter` only sends notifications when visibility actually changes:
+
 - Disabling an already-disabled component: no notification
 - Enabling an already-enabled component: no notification
 - Actual state change: notification sent
@@ -43,6 +48,7 @@ The `VisibilityFilter` only sends notifications when visibility actually changes
 ## Vocabulary
 
 Consistent verbs throughout the codebase:
+
 - `enable()` / `disable()` - methods on servers and providers
 - `is_enabled()` - check if component is visible
 - `_disabled_keys`, `_disabled_tags` - blocklist state
@@ -52,6 +58,7 @@ Consistent verbs throughout the codebase:
 ## Notifications
 
 `VisibilityFilter` handles notifications directly via `_send_notification()`. This:
+
 1. Gets the current request context (if any)
 2. Queues the appropriate list-changed notification
 3. No-ops gracefully outside request context
@@ -98,6 +105,7 @@ mcp.disable(tags={"internal"})
 ## Component Keys
 
 Components use prefixed keys for enable/disable:
+
 - Tools: `"tool:function_name"`
 - Prompts: `"prompt:prompt_name"`
 - Resources: `"resource:resource://uri"`

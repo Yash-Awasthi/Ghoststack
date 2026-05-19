@@ -4,7 +4,7 @@ description: "Testing patterns and requirements for FastMCP"
 icon: vial
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 Good tests are the foundation of reliable software. In FastMCP, we treat tests as first-class documentation that demonstrates how features work while protecting against regressions. Every new capability needs comprehensive tests that demonstrate correctness.
 
@@ -46,7 +46,7 @@ async def test_github_api_integration():
     token = os.getenv("FASTMCP_GITHUB_TOKEN")
     if not token:
         pytest.skip("FASTMCP_GITHUB_TOKEN not available")
-    
+
     # Test against real GitHub API
     client = GitHubClient(token)
     repos = await client.list_repos("prefecthq")
@@ -63,7 +63,6 @@ async def test_stdio_transport():
 
 ## Writing Tests
 
-
 ### Test Requirements
 
 Following these practices creates maintainable, debuggable test suites that serve as both documentation and regression protection.
@@ -78,11 +77,11 @@ Each test should verify exactly one behavior. When it fails, you need to know im
 async def test_tool_registration():
     """Test that tools are properly registered with the server."""
     mcp = FastMCP("test-server")
-    
+
     @mcp.tool
     def add(a: int, b: int) -> int:
         return a + b
-    
+
     tools = mcp.list_tools()
     assert len(tools) == 1
     assert tools[0].name == "add"
@@ -92,20 +91,20 @@ async def test_tool_registration():
 async def test_server_functionality():
     """Test multiple server features at once."""
     mcp = FastMCP("test-server")
-    
+
     # Tool registration
     @mcp.tool
     def add(a: int, b: int) -> int:
         return a + b
-    
+
     # Resource creation
     @mcp.resource("config://app")
     def get_config():
         return {"version": "1.0"}
-    
+
     # Authentication setup
     mcp.auth = BearerTokenProvider({"token": "user"})
-    
+
     # What exactly are we testing? If this fails, what broke?
     assert mcp.list_tools()
     assert mcp.list_resources()
@@ -124,13 +123,13 @@ Every test must create its own setup. Tests should be runnable in any order, in 
 async def test_tool_execution_with_error():
     """Test that tool errors are properly handled."""
     mcp = FastMCP("test-server")
-    
+
     @mcp.tool
     def divide(a: int, b: int) -> float:
         if b == 0:
             raise ValueError("Cannot divide by zero")
         return a / b
-    
+
     async with Client(mcp) as client:
         with pytest.raises(Exception):
             await client.call_tool("divide", {"a": 10, "b": 0})
@@ -162,11 +161,11 @@ async def test_authenticated_tool_requires_valid_token():
     """Test that authenticated users can access protected tools."""
     mcp = FastMCP("test-server")
     mcp.auth = BearerTokenProvider({"secret-token": "test-user"})
-    
+
     @mcp.tool
     def protected_action() -> str:
         return "success"
-    
+
     async with Client(mcp, auth=BearerAuth("secret-token")) as client:
         result = await client.call_tool("protected_action", {})
         assert result.content[0].text == "success"
@@ -183,12 +182,12 @@ from fastmcp import FastMCP, Client
 @pytest.fixture
 def weather_server():
     server = FastMCP("WeatherServer")
-    
+
     @server.tool
     def get_temperature(city: str) -> dict:
         temps = {"NYC": 72, "LA": 85, "Chicago": 68}
         return {"city": city, "temp": temps.get(city, 70)}
-    
+
     return server
 
 async def test_temperature_tool(weather_server):
@@ -221,23 +220,23 @@ from inline_snapshot import snapshot
 async def test_tool_schema_generation():
     """Test that tool schemas are generated correctly."""
     mcp = FastMCP("test-server")
-    
+
     @mcp.tool
     def calculate_tax(amount: float, rate: float = 0.1) -> dict:
         """Calculate tax on an amount."""
         return {"amount": amount, "tax": amount * rate, "total": amount * (1 + rate)}
-    
+
     tools = mcp.list_tools()
     schema = tools[0].inputSchema
-    
+
     # First run: snapshot() is empty, gets auto-populated
     # Subsequent runs: compares against stored snapshot
     assert schema == snapshot({
-        "type": "object", 
+        "type": "object",
         "properties": {
-            "amount": {"type": "number"}, 
+            "amount": {"type": "number"},
             "rate": {"type": "number", "default": 0.1}
-        }, 
+        },
         "required": ["amount"]
     })
 ```
@@ -278,18 +277,18 @@ from unittest.mock import AsyncMock
 
 async def test_database_tool():
     server = FastMCP("DataServer")
-    
+
     # Mock the database
     mock_db = AsyncMock()
     mock_db.fetch_users.return_value = [
         {"id": 1, "name": "Alice"},
         {"id": 2, "name": "Bob"}
     ]
-    
+
     @server.tool
     async def list_users() -> list:
         return await mock_db.fetch_users()
-    
+
     async with Client(server) as client:
         result = await client.call_tool("list_users", {})
         assert len(result.data) == 2
@@ -357,11 +356,11 @@ from fastmcp.client.transports import StreamableHttpTransport
 def run_server(host: str, port: int) -> None:
     """Function to run in subprocess."""
     server = FastMCP("TestServer")
-    
+
     @server.tool
     def greet(name: str) -> str:
         return f"Hello, {name}!"
-    
+
     server.run(host=host, port=port)
 
 @pytest.fixture

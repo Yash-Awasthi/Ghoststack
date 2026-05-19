@@ -5,37 +5,47 @@
 ## Supported Actions
 
 ### Users
+
 `CreateUser` · `GetUser` · `DeleteUser` · `ListUsers` · `UpdateUser` · `TagUser` · `UntagUser` · `ListUserTags`
 
 ### Groups
+
 `CreateGroup` · `GetGroup` · `DeleteGroup` · `ListGroups` · `AddUserToGroup` · `RemoveUserFromGroup` · `ListGroupsForUser`
 
 ### Roles
+
 `CreateRole` · `GetRole` · `DeleteRole` · `ListRoles` · `UpdateRole` · `UpdateAssumeRolePolicy` · `TagRole` · `UntagRole` · `ListRoleTags`
 
 ### Policies
+
 `CreatePolicy` · `GetPolicy` · `DeletePolicy` · `ListPolicies` · `CreatePolicyVersion` · `GetPolicyVersion` · `DeletePolicyVersion` · `ListPolicyVersions` · `SetDefaultPolicyVersion` · `TagPolicy` · `UntagPolicy` · `ListPolicyTags`
 
 ### Permission Boundaries
+
 `PutUserPermissionsBoundary` · `DeleteUserPermissionsBoundary` · `PutRolePermissionsBoundary` · `DeleteRolePermissionsBoundary`
 
 ### Policy Attachments
+
 `AttachUserPolicy` · `DetachUserPolicy` · `ListAttachedUserPolicies`
 `AttachGroupPolicy` · `DetachGroupPolicy` · `ListAttachedGroupPolicies`
 `AttachRolePolicy` · `DetachRolePolicy` · `ListAttachedRolePolicies`
 
 ### Inline Policies
+
 `PutUserPolicy` · `GetUserPolicy` · `DeleteUserPolicy` · `ListUserPolicies`
 `PutGroupPolicy` · `GetGroupPolicy` · `DeleteGroupPolicy` · `ListGroupPolicies`
 `PutRolePolicy` · `GetRolePolicy` · `DeleteRolePolicy` · `ListRolePolicies`
 
 ### Instance Profiles
+
 `CreateInstanceProfile` · `GetInstanceProfile` · `DeleteInstanceProfile` · `ListInstanceProfiles` · `AddRoleToInstanceProfile` · `RemoveRoleFromInstanceProfile` · `ListInstanceProfilesForRole`
 
 ### Access Keys
+
 `CreateAccessKey` · `GetAccessKeyLastUsed` · `ListAccessKeys` · `UpdateAccessKey` · `DeleteAccessKey`
 
 ### Login Profiles
+
 `CreateLoginProfile` · `DeleteLoginProfile` · `UpdateLoginProfile`
 
 ## AWS Managed Policies
@@ -65,11 +75,13 @@ Setting `enforcement-enabled: true` activates the policy evaluator as a JAX-RS r
 ### Enable enforcement
 
 **Environment variable:**
+
 ```bash
 FLOCI_SERVICES_IAM_ENFORCEMENT_ENABLED=true
 ```
 
 Docker Compose:
+
 ```yaml
 environment:
   FLOCI_SERVICES_IAM_ENFORCEMENT_ENABLED: "true"
@@ -87,12 +99,12 @@ Policy evaluation follows the standard AWS precedence:
 
 These identities always bypass enforcement (backward-compatible defaults):
 
-| Identity | Behaviour |
-|---|---|
-| Access key `test` (the default dev credential) | Always allowed — no policy lookup |
-| Unknown access key (not in IAM store) | Always allowed — backward-compatible with pre-existing keys |
-| No `Authorization` header | Allowed — unauthenticated path (e.g. health checks) |
-| Unresolvable IAM action for the request | Allowed — unknown mappings are permissive |
+| Identity                                       | Behaviour                                                   |
+| ---------------------------------------------- | ----------------------------------------------------------- |
+| Access key `test` (the default dev credential) | Always allowed — no policy lookup                           |
+| Unknown access key (not in IAM store)          | Always allowed — backward-compatible with pre-existing keys |
+| No `Authorization` header                      | Allowed — unauthenticated path (e.g. health checks)         |
+| Unresolvable IAM action for the request        | Allowed — unknown mappings are permissive                   |
 
 ### Supported policy features
 
@@ -104,6 +116,7 @@ These identities always bypass enforcement (backward-compatible defaults):
 - **Effects**: `Allow` and `Deny`.
 
 #### Supported Condition Operators:
+
 - `StringEquals`, `StringNotEquals`, `StringEqualsIgnoreCase`, `StringNotEqualsIgnoreCase`
 - `StringLike`, `StringNotLike`
 - `ArnEquals`, `ArnLike`, `ArnNotEquals`, `ArnNotLike`
@@ -117,6 +130,7 @@ These identities always bypass enforcement (backward-compatible defaults):
 ### Assumed roles
 
 When a caller uses `sts:AssumeRole` the returned session credentials are registered internally. Subsequent requests signed with those session credentials are evaluated against:
+
 1. The **role's** attached and inline policies.
 2. The **session policy** (if provided during `AssumeRole`), acting as an intersection filter.
 
@@ -146,9 +160,9 @@ AWS_ACCESS_KEY_ID=$AKID AWS_SECRET_ACCESS_KEY=$SECRET \
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_IAM_ENABLED` | `true` | Enable or disable the service |
+| Variable                                 | Default | Description                                  |
+| ---------------------------------------- | ------- | -------------------------------------------- |
+| `FLOCI_SERVICES_IAM_ENABLED`             | `true`  | Enable or disable the service                |
 | `FLOCI_SERVICES_IAM_ENFORCEMENT_ENABLED` | `false` | Enforce IAM policies on all inbound requests |
 
 ## Examples

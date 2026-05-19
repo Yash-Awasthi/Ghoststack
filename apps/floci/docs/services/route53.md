@@ -4,25 +4,25 @@ Route53 management-plane emulation. Supports hosted zones, resource record sets,
 
 ## Supported Operations
 
-| Operation | Method | Path |
-|---|---|---|
-| CreateHostedZone | POST | `/2013-04-01/hostedzone` |
-| GetHostedZone | GET | `/2013-04-01/hostedzone/{Id}` |
-| DeleteHostedZone | DELETE | `/2013-04-01/hostedzone/{Id}` |
-| ListHostedZones | GET | `/2013-04-01/hostedzone` |
-| ListHostedZonesByName | GET | `/2013-04-01/hostedzonesbyname` |
-| GetHostedZoneCount | GET | `/2013-04-01/hostedzonecount` |
-| ChangeResourceRecordSets | POST | `/2013-04-01/hostedzone/{Id}/rrset` |
-| ListResourceRecordSets | GET | `/2013-04-01/hostedzone/{Id}/rrset` |
-| GetChange | GET | `/2013-04-01/change/{Id}` |
-| CreateHealthCheck | POST | `/2013-04-01/healthcheck` |
-| GetHealthCheck | GET | `/2013-04-01/healthcheck/{HealthCheckId}` |
-| DeleteHealthCheck | DELETE | `/2013-04-01/healthcheck/{HealthCheckId}` |
-| ListHealthChecks | GET | `/2013-04-01/healthcheck` |
-| UpdateHealthCheck | POST | `/2013-04-01/healthcheck/{HealthCheckId}` |
-| ListTagsForResource | GET | `/2013-04-01/tags/{ResourceType}/{ResourceId}` |
-| ChangeTagsForResource | POST | `/2013-04-01/tags/{ResourceType}/{ResourceId}` |
-| GetAccountLimit | GET | `/2013-04-01/accountlimit/{Type}` |
+| Operation                | Method | Path                                           |
+| ------------------------ | ------ | ---------------------------------------------- |
+| CreateHostedZone         | POST   | `/2013-04-01/hostedzone`                       |
+| GetHostedZone            | GET    | `/2013-04-01/hostedzone/{Id}`                  |
+| DeleteHostedZone         | DELETE | `/2013-04-01/hostedzone/{Id}`                  |
+| ListHostedZones          | GET    | `/2013-04-01/hostedzone`                       |
+| ListHostedZonesByName    | GET    | `/2013-04-01/hostedzonesbyname`                |
+| GetHostedZoneCount       | GET    | `/2013-04-01/hostedzonecount`                  |
+| ChangeResourceRecordSets | POST   | `/2013-04-01/hostedzone/{Id}/rrset`            |
+| ListResourceRecordSets   | GET    | `/2013-04-01/hostedzone/{Id}/rrset`            |
+| GetChange                | GET    | `/2013-04-01/change/{Id}`                      |
+| CreateHealthCheck        | POST   | `/2013-04-01/healthcheck`                      |
+| GetHealthCheck           | GET    | `/2013-04-01/healthcheck/{HealthCheckId}`      |
+| DeleteHealthCheck        | DELETE | `/2013-04-01/healthcheck/{HealthCheckId}`      |
+| ListHealthChecks         | GET    | `/2013-04-01/healthcheck`                      |
+| UpdateHealthCheck        | POST   | `/2013-04-01/healthcheck/{HealthCheckId}`      |
+| ListTagsForResource      | GET    | `/2013-04-01/tags/{ResourceType}/{ResourceId}` |
+| ChangeTagsForResource    | POST   | `/2013-04-01/tags/{ResourceType}/{ResourceId}` |
+| GetAccountLimit          | GET    | `/2013-04-01/accountlimit/{Type}`              |
 
 ## Behavior
 
@@ -48,13 +48,13 @@ ns-4.awsdns-04.co.uk
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_ROUTE53_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER1` | `ns-1.awsdns-01.org` | First default nameserver returned in delegation sets |
-| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER2` | `ns-2.awsdns-02.net` | Second default nameserver |
-| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER3` | `ns-3.awsdns-03.com` | Third default nameserver |
-| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER4` | `ns-4.awsdns-04.co.uk` | Fourth default nameserver |
+| Variable                                     | Default                | Description                                          |
+| -------------------------------------------- | ---------------------- | ---------------------------------------------------- |
+| `FLOCI_SERVICES_ROUTE53_ENABLED`             | `true`                 | Enable or disable the service                        |
+| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER1` | `ns-1.awsdns-01.org`   | First default nameserver returned in delegation sets |
+| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER2` | `ns-2.awsdns-02.net`   | Second default nameserver                            |
+| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER3` | `ns-3.awsdns-03.com`   | Third default nameserver                             |
+| `FLOCI_SERVICES_ROUTE53_DEFAULT_NAMESERVER4` | `ns-4.awsdns-04.co.uk` | Fourth default nameserver                            |
 
 ## CLI Examples
 

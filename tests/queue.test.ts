@@ -1,5 +1,5 @@
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { QueueJob } from '../orchestration/interfaces/queue.interface';
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { QueueJob } from "../orchestration/interfaces/queue.interface";
 
 describe("Milestone 2: Resilient Priority Queue Engine", () => {
   it("should push jobs and pop them sorted strictly by priority first, then creation time", async () => {

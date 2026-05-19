@@ -8,11 +8,11 @@ Extensions add new capabilities to Spec Kit — domain-specific commands, extern
 specify extension search [query]
 ```
 
-| Option       | Description                          |
-| ------------ | ------------------------------------ |
-| `--tag`      | Filter by tag                        |
-| `--author`   | Filter by author                     |
-| `--verified` | Show only verified extensions        |
+| Option       | Description                   |
+| ------------ | ----------------------------- |
+| `--tag`      | Filter by tag                 |
+| `--author`   | Filter by author              |
+| `--verified` | Show only verified extensions |
 
 Searches all active catalogs for extensions matching the query. Without a query, lists all available extensions.
 
@@ -22,11 +22,11 @@ Searches all active catalogs for extensions matching the query. Without a query,
 specify extension add <name>
 ```
 
-| Option          | Description                                              |
-| --------------- | -------------------------------------------------------- |
-| `--dev`         | Install from a local directory (for development)         |
-| `--from <url>`  | Install from a custom URL instead of the catalog         |
-| `--priority <N>`| Resolution priority (default: 10; lower = higher precedence) |
+| Option           | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| `--dev`          | Install from a local directory (for development)             |
+| `--from <url>`   | Install from a custom URL instead of the catalog             |
+| `--priority <N>` | Resolution priority (default: 10; lower = higher precedence) |
 
 Installs an extension from the catalog, a URL, or a local directory. Extension commands are automatically registered with the currently installed AI coding agent integration.
 
@@ -38,10 +38,10 @@ Installs an extension from the catalog, a URL, or a local directory. Extension c
 specify extension remove <name>
 ```
 
-| Option          | Description                                    |
-| --------------- | ---------------------------------------------- |
-| `--keep-config` | Preserve configuration files during removal    |
-| `--force`       | Skip confirmation prompt                       |
+| Option          | Description                                 |
+| --------------- | ------------------------------------------- |
+| `--keep-config` | Preserve configuration files during removal |
+| `--force`       | Skip confirmation prompt                    |
 
 Removes an installed extension. Configuration files are backed up by default; use `--keep-config` to leave them in place or `--force` to skip the confirmation.
 
@@ -51,10 +51,10 @@ Removes an installed extension. Configuration files are backed up by default; us
 specify extension list
 ```
 
-| Option        | Description                                        |
-| ------------- | -------------------------------------------------- |
-| `--available` | Show available (uninstalled) extensions            |
-| `--all`       | Show both installed and available extensions       |
+| Option        | Description                                  |
+| ------------- | -------------------------------------------- |
+| `--available` | Show available (uninstalled) extensions      |
+| `--all`       | Show both installed and available extensions |
 
 Lists installed extensions with their status, version, and command counts.
 
@@ -109,12 +109,12 @@ Shows all active catalogs in the stack with their priorities and install permiss
 specify extension catalog add <url>
 ```
 
-| Option                               | Description                                        |
-| ------------------------------------ | -------------------------------------------------- |
-| `--name <name>`                      | Required. Unique name for the catalog              |
-| `--priority <N>`                     | Priority (default: 10; lower = higher precedence)  |
+| Option                                     | Description                                           |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `--name <name>`                            | Required. Unique name for the catalog                 |
+| `--priority <N>`                           | Priority (default: 10; lower = higher precedence)     |
 | `--install-allowed / --no-install-allowed` | Whether extensions can be installed from this catalog |
-| `--description <text>`               | Optional description                               |
+| `--description <text>`                     | Optional description                                  |
 
 Adds a catalog to the project's `.specify/extension-catalogs.yml`.
 

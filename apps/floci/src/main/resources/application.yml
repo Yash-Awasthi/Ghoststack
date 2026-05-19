@@ -12,7 +12,7 @@ quarkus:
     limits:
       max-body-size: ${floci.max-request-size}M
   security:
-     security-providers: BC
+    security-providers: BC
   shutdown:
     # Enables the pre-shutdown phase so stop hooks run before the HTTP server stops.
     # No 'delay' value is set - observers run synchronously, no artificial sleep is introduced.
@@ -44,13 +44,12 @@ quarkus:
       - --initialize-at-run-time=io.github.hectorvent.floci.services.route53.Route53Service
       - --initialize-at-run-time=io.github.hectorvent.floci.services.kms.KmsService
 
-
 floci:
   port: 4566
   max-request-size: 512
   base-url: "http://localhost:4566"
   # hostname: ""  # When set, overrides the hostname in response URLs (e.g. SQS QueueUrl).
-                   # Needed for multi-container Docker setups. Example: FLOCI_HOSTNAME=floci
+  # Needed for multi-container Docker setups. Example: FLOCI_HOSTNAME=floci
   default-region: us-east-1
   default-account-id: "000000000000"
   storage:
@@ -97,10 +96,10 @@ floci:
     presign-secret: local-emulator-secret
 
   tls:
-    enabled: false                     # FLOCI_TLS_ENABLED (default: false)
+    enabled: false # FLOCI_TLS_ENABLED (default: false)
     # cert-path: ""                    # FLOCI_TLS_CERT_PATH (PEM certificate file)
     # key-path: ""                     # FLOCI_TLS_KEY_PATH (PEM private key file)
-    self-signed: true                  # FLOCI_TLS_SELF_SIGNED — auto-generate a self-signed cert if no cert-path provided
+    self-signed: true # FLOCI_TLS_SELF_SIGNED — auto-generate a self-signed cert if no cert-path provided
 
   docker:
     log-max-size: "10m"

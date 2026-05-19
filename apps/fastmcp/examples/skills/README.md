@@ -20,6 +20,7 @@ skills/
 ## Running the Example
 
 1. Start the server:
+
    ```bash
    uv run python examples/skills/server.py
    ```
@@ -38,6 +39,7 @@ The skills provider system has a two-layer architecture:
 - **`ClaudeSkillsProvider`** - Convenience subclass for Claude Code skills (~/.claude/skills/)
 
 For each skill, the provider exposes:
+
 - A **Resource** for the main file (`skill://{name}/SKILL.md`)
 - A **Resource** for a synthetic manifest (`skill://{name}/_manifest`)
 - Supporting files via **ResourceTemplate** or **Resources** (configurable)
@@ -60,8 +62,8 @@ The `_manifest` resource provides a JSON listing of all files in a skill:
 {
   "skill": "pdf-processing",
   "files": [
-    {"path": "SKILL.md", "size": 1234, "hash": "sha256:abc..."},
-    {"path": "reference.md", "size": 5678, "hash": "sha256:def..."}
+    { "path": "SKILL.md", "size": 1234, "hash": "sha256:abc..." },
+    { "path": "reference.md", "size": 5678, "hash": "sha256:def..." }
   ]
 }
 ```

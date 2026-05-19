@@ -5,7 +5,7 @@ export interface ITaskSynthesisResult {
   action: string;
   arguments: any;
   dependencies: string[];
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   governanceMetadata?: {
     dangerous?: boolean;
     costEstimate?: number;
@@ -38,7 +38,7 @@ export interface IExecutionPolicy {
 export interface IApprovalRecord {
   approvalId: string;
   taskId: string;
-  status: 'pending' | 'approved' | 'denied' | 'expired';
+  status: "pending" | "approved" | "denied" | "expired";
   requestTimestamp: Date;
   decisionTimestamp?: Date;
   decidedBy?: string;

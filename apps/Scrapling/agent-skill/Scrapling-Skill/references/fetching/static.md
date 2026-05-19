@@ -3,14 +3,17 @@
 The `Fetcher` class provides rapid and lightweight HTTP requests using the high-performance `curl_cffi` library with a lot of stealth capabilities.
 
 ## Basic Usage
+
 Import the Fetcher (same import pattern for all fetchers):
 
 ```python
 from scrapling.fetchers import Fetcher
 ```
+
 Check out how to configure the parsing options [here](choosing.md#parser-configuration-in-all-fetchers)
 
 ### Shared arguments
+
 All methods for making requests here share some arguments, so let's discuss them first.
 
 - **url**: The targeted URL
@@ -33,6 +36,7 @@ All methods for making requests here share some arguments, so let's discuss them
 - **selector_config**: A dictionary of custom parsing arguments to be used when creating the final `Selector`/`Response` class.
 
 **Notes:**
+
 1. The currently available browsers to impersonate are (`"edge"`, `"chrome"`, `"chrome_android"`, `"safari"`, `"safari_beta"`, `"safari_ios"`, `"safari_ios_beta"`, `"firefox"`, `"tor"`)
 2. The available browsers to impersonate, along with their corresponding versions, are automatically displayed in the argument autocompletion and updated with each `curl_cffi` update.
 3. If any of the arguments `impersonate` or `stealthy_headers` are enabled, the fetchers will automatically generate real browser headers that match the browser version used.
@@ -40,12 +44,15 @@ All methods for making requests here share some arguments, so let's discuss them
 Other than this, for further customization, you can pass any arguments that `curl_cffi` supports for any method if that method doesn't already support them.
 
 ### HTTP Methods
+
 There are additional arguments for each method, depending on the method, such as `params` for GET requests and `data`/`json` for POST/PUT/DELETE requests.
 
 Examples are the best way to explain this:
 
 > Hence: `OPTIONS` and `HEAD` methods are not supported.
+
 #### GET
+
 ```python
 from scrapling.fetchers import Fetcher
 # Basic GET
@@ -64,7 +71,9 @@ page = Fetcher.get('https://example.com', impersonate='chrome')
 # HTTP/3 support
 page = Fetcher.get('https://example.com', http3=True)
 ```
-And for asynchronous requests, it's a small adjustment 
+
+And for asynchronous requests, it's a small adjustment
+
 ```python
 from scrapling.fetchers import AsyncFetcher
 # Basic GET
@@ -83,7 +92,9 @@ page = await AsyncFetcher.get('https://example.com', impersonate='chrome110')
 # HTTP/3 support
 page = await AsyncFetcher.get('https://example.com', http3=True)
 ```
+
 The `page` object in all cases is a [Response](choosing.md#response-object) object, which is a [Selector](parsing/main_classes.md#selector), so you can use it directly
+
 ```python
 >>> page.css('.something.something')
 
@@ -100,7 +111,9 @@ The `page` object in all cases is a [Response](choosing.md#response-object) obje
   'repo': {'id': '<redacted>',
 ...
 ```
+
 #### POST
+
 ```python
 from scrapling.fetchers import Fetcher
 # Basic POST
@@ -112,7 +125,9 @@ page = Fetcher.post('https://example.com/submit', data={'username': 'user', 'pas
 # JSON data
 page = Fetcher.post('https://example.com/api', json={'key': 'value'})
 ```
+
 And for asynchronous requests, it's a small adjustment
+
 ```python
 from scrapling.fetchers import AsyncFetcher
 # Basic POST
@@ -124,7 +139,9 @@ page = await AsyncFetcher.post('https://example.com/submit', data={'username': '
 # JSON data
 page = await AsyncFetcher.post('https://example.com/api', json={'key': 'value'})
 ```
+
 #### PUT
+
 ```python
 from scrapling.fetchers import Fetcher
 # Basic PUT
@@ -134,7 +151,9 @@ page = Fetcher.put('https://example.com/update', data={'status': 'updated'}, pro
 # Another example of form-encoded data
 page = Fetcher.put("https://scrapling.requestcatcher.com/put", data={'key': ['value1', 'value2']})
 ```
+
 And for asynchronous requests, it's a small adjustment
+
 ```python
 from scrapling.fetchers import AsyncFetcher
 # Basic PUT
@@ -146,13 +165,16 @@ page = await AsyncFetcher.put("https://scrapling.requestcatcher.com/put", data={
 ```
 
 #### DELETE
+
 ```python
 from scrapling.fetchers import Fetcher
 page = Fetcher.delete('https://example.com/resource/123')
 page = Fetcher.delete('https://example.com/resource/123', stealthy_headers=True, impersonate="chrome")
 page = Fetcher.delete('https://example.com/resource/123', proxy='http://username:password@localhost:8030')
 ```
+
 And for asynchronous requests, it's a small adjustment
+
 ```python
 from scrapling.fetchers import AsyncFetcher
 page = await AsyncFetcher.delete('https://example.com/resource/123')
@@ -226,7 +248,9 @@ async with FetcherSession(impersonate='firefox', http3=True) as session:
     response = await session.put('https://scrapling.requestcatcher.com/put', data={'update': 'info'})
     response = await session.delete('https://scrapling.requestcatcher.com/delete')
 ```
+
 or better
+
 ```python
 import asyncio
 from scrapling.fetchers import FetcherSession
@@ -252,6 +276,7 @@ The `Fetcher` class uses `FetcherSession` to create a temporary session with eac
 - **Centralized configuration**: Single place to manage request settings
 
 ## Examples
+
 Some well-rounded examples to aid newcomers to Web Scraping
 
 ### Basic HTTP Request
@@ -280,10 +305,10 @@ from scrapling.fetchers import Fetcher
 
 def scrape_products():
     page = Fetcher.get('https://example.com/products')
-    
+
     # Find all product elements
     products = page.css('.product')
-    
+
     results = []
     for product in products:
         results.append({
@@ -292,7 +317,7 @@ def scrape_products():
             'description': product.css('.description::text').get(),
             'in_stock': product.has_class('in-stock')
         })
-    
+
     return results
 ```
 
@@ -315,26 +340,26 @@ def scrape_all_pages():
     base_url = 'https://example.com/products?page={}'
     page_num = 1
     all_products = []
-    
+
     while True:
         # Get current page
         page = Fetcher.get(base_url.format(page_num))
-        
+
         # Find products
         products = page.css('.product')
         if not products:
             break
-            
+
         # Process products
         for product in products:
             all_products.append({
                 'name': product.css('.name::text').get(),
                 'price': product.css('.price::text').get()
             })
-            
+
         # Next page
         page_num += 1
-        
+
     return all_products
 ```
 
@@ -366,21 +391,21 @@ from scrapling.fetchers import Fetcher
 
 def extract_table():
     page = Fetcher.get('https://example.com/data')
-    
+
     # Find table
     table = page.css('table')[0]
-    
+
     # Extract headers
     headers = [
         th.text for th in table.css('thead th')
     ]
-    
+
     # Extract rows
     rows = []
     for row in table.css('tbody tr'):
         cells = [td.text for td in row.css('td')]
         rows.append(dict(zip(headers, cells)))
-        
+
     return rows
 ```
 
@@ -391,10 +416,10 @@ from scrapling.fetchers import Fetcher
 
 def extract_menu():
     page = Fetcher.get('https://example.com')
-    
+
     # Find navigation
     nav = page.css('nav')[0]
-    
+
     menu = {}
     for item in nav.css('li'):
         links = item.css('a')
@@ -404,7 +429,7 @@ def extract_menu():
                 'url': link['href'],
                 'has_submenu': bool(item.css('.submenu'))
             }
-            
+
     return menu
 ```
 

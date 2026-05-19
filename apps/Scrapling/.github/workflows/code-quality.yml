@@ -6,28 +6,28 @@ on:
       - main
       - dev
     paths-ignore:
-      - '*.md'
-      - '**/*.md'
-      - 'docs/**'
-      - 'images/**'
-      - '.github/**'
-      - 'agent-skill/**'
-      - '!.github/workflows/code-quality.yml'  # Always run when this workflow changes
+      - "*.md"
+      - "**/*.md"
+      - "docs/**"
+      - "images/**"
+      - ".github/**"
+      - "agent-skill/**"
+      - "!.github/workflows/code-quality.yml" # Always run when this workflow changes
   pull_request:
     branches:
       - main
       - dev
     paths-ignore:
-      - '*.md'
-      - '**/*.md'
-      - 'docs/**'
-      - 'images/**'
-      - '.github/**'
-      - 'agent-skill/**'
-      - '*.yml'
-      - '*.yaml'
-      - 'ruff.toml'
-  workflow_dispatch:  # Allow manual triggering
+      - "*.md"
+      - "**/*.md"
+      - "docs/**"
+      - "images/**"
+      - ".github/**"
+      - "agent-skill/**"
+      - "*.yml"
+      - "*.yaml"
+      - "ruff.toml"
+  workflow_dispatch: # Allow manual triggering
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -39,19 +39,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write  # For PR annotations
+      pull-requests: write # For PR annotations
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # Full history for better analysis
+          fetch-depth: 0 # Full history for better analysis
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install dependencies
         run: |

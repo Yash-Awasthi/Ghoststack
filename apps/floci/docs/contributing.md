@@ -2,7 +2,7 @@
 
 Floci is MIT licensed and welcomes contributions of all kinds.
 
-## Ways to Help 
+## Ways to Help
 
 - **Bug reports** — open a [GitHub issue](https://github.com/floci-io/floci/issues/new?template=bug_report.md) with a minimal reproduction
 - **Missing API actions** — open a [feature request](https://github.com/floci-io/floci/issues/new?template=feature_request.md)
@@ -38,20 +38,20 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) �
 <type>[optional scope]: <description>
 ```
 
-| Type | Effect |
-|---|---|
-| `feat` | New feature → minor version bump |
-| `fix` | Bug fix → patch version bump |
-| `perf` | Performance improvement → patch |
-| `revert` | Reverts a previous commit → patch |
-| `docs` | Documentation only → no version bump |
-| `style` | Formatting, whitespace → no version bump |
-| `chore` | Build/CI/housekeeping → no version bump |
-| `refactor` | Code restructure → no version bump |
-| `test` | Adding/updating tests → no version bump |
-| `build` | Build system changes → no version bump |
-| `ci` | CI workflow changes → no version bump |
-| `feat!:` or `BREAKING CHANGE:` | Breaking change → major bump |
+| Type                           | Effect                                   |
+| ------------------------------ | ---------------------------------------- |
+| `feat`                         | New feature → minor version bump         |
+| `fix`                          | Bug fix → patch version bump             |
+| `perf`                         | Performance improvement → patch          |
+| `revert`                       | Reverts a previous commit → patch        |
+| `docs`                         | Documentation only → no version bump     |
+| `style`                        | Formatting, whitespace → no version bump |
+| `chore`                        | Build/CI/housekeeping → no version bump  |
+| `refactor`                     | Code restructure → no version bump       |
+| `test`                         | Adding/updating tests → no version bump  |
+| `build`                        | Build system changes → no version bump   |
+| `ci`                           | CI workflow changes → no version bump    |
+| `feat!:` or `BREAKING CHANGE:` | Breaking change → major bump             |
 
 ### Valid examples ✅
 

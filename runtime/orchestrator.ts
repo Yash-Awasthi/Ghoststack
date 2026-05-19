@@ -1,14 +1,18 @@
-import { IRuntimeManager } from '../orchestration/runtime-manager';
-import { IEventBus } from '../orchestration/event-bus';
-import { TaskRouter, Task } from '../orchestration/task-router';
-import { IAgentRegistry } from '../orchestration/agent-registry';
-import { IEventStore } from '../orchestration/interfaces/persistence.interface';
-import { ILogger } from '../orchestration/interfaces/logger.interface';
-import { TaskDependencyResolver } from '../orchestration/dependency-resolver';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { IMetricsCollector, ITraceRecorder } from '../orchestration/interfaces/observability.interface';
-import { IPlanningEngine, IGovernanceEngine, IApprovalWorkflow } from '../orchestration/interfaces/governance.interface';
+import { IRuntimeManager } from "../orchestration/runtime-manager";
+import { IEventBus } from "../orchestration/event-bus";
+import { TaskRouter, Task } from "../orchestration/task-router";
+import { IAgentRegistry } from "../orchestration/agent-registry";
+import { IEventStore } from "../orchestration/interfaces/persistence.interface";
+import { ILogger } from "../orchestration/interfaces/logger.interface";
+import { TaskDependencyResolver } from "../orchestration/dependency-resolver";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { IMetricsCollector, ITraceRecorder } from "../orchestration/interfaces/observability.interface";
+import {
+  IPlanningEngine,
+  IGovernanceEngine,
+  IApprovalWorkflow
+} from "../orchestration/interfaces/governance.interface";
 
 export class GhostStackOrchestrator {
   private runtimeManager: IRuntimeManager;
@@ -17,7 +21,7 @@ export class GhostStackOrchestrator {
   private agentRegistry: IAgentRegistry;
   private eventStore?: IEventStore;
   private logger?: ILogger;
-  
+
   private resolver: TaskDependencyResolver;
   private queue: MemoryQueueBackend;
   private executor?: TaskExecutor;
@@ -55,7 +59,7 @@ export class GhostStackOrchestrator {
     this.logger = logger;
     this.metrics = metrics;
     this.tracer = tracer;
-    
+
     this.resolver = new TaskDependencyResolver();
     this.queue = queue || new MemoryQueueBackend();
     this.executor = executor;
@@ -85,7 +89,7 @@ export class GhostStackOrchestrator {
 
     const services = await this.runtimeManager.getActiveServices();
     this.logger?.info("Active services boot-checked successfully", { services });
-    
+
     const bootstrapDuration = Date.now() - startTimeMs;
     this.metrics?.recordTiming("bootstrap.duration", bootstrapDuration);
     this.metrics?.recordGauge("orchestrator.uptime", 1);
@@ -100,9 +104,9 @@ export class GhostStackOrchestrator {
   async submitAndExecuteTasks(tasks: Task[]): Promise<void> {
     this.logger?.info(`Submitting ${tasks.length} tasks to dependency validation loop...`);
     const traceSpan = this.tracer?.startSpan("submit.tasks", undefined, { count: tasks.length });
-    
+
     const sortedTasks = this.resolver.resolveOrder(tasks);
-    this.logger?.info("Tasks sorted in topological order", { sorted: sortedTasks.map(t => t.id) });
+    this.logger?.info("Tasks sorted in topological order", { sorted: sortedTasks.map((t) => t.id) });
 
     for (const task of sortedTasks) {
       await this.taskRouter.route(task);
@@ -115,9 +119,7 @@ export class GhostStackOrchestrator {
         payloadType = "browser";
         payloadPayload = {
           url: task.description.includes("illegal") ? "file:///etc/passwd" : "https://github.com",
-          actions: [
-            { type: "navigate", value: "https://news.ycombinator.com" }
-          ],
+          actions: [{ type: "navigate", value: "https://news.ycombinator.com" }],
           timeoutMs: 5000
         };
       } else if (task.description.includes("scraping")) {
@@ -131,29 +133,29 @@ export class GhostStackOrchestrator {
         payloadPayload = task.description.includes("bucket")
           ? { action: "create_s3_bucket", bucketName: task.id }
           : task.description.includes("queue")
-          ? { action: "create_sqs_queue", queueName: task.id }
-          : { action: "create_dynamodb_table", tableName: task.id };
+            ? { action: "create_sqs_queue", queueName: task.id }
+            : { action: "create_dynamodb_table", tableName: task.id };
       }
-      
+
       await this.queue.push({
         id: task.id,
         payload: {
           type: payloadType,
           payload: payloadPayload
         },
-        priority: task.priority as any || "medium",
+        priority: (task.priority as any) || "medium",
         retries: 0,
         maxRetries: 3,
         createdAt: new Date()
       });
-      
+
       const length = await this.queue.getQueueLength();
       this.metrics?.recordGauge("queue.size", length);
     }
 
     if (this.executor) {
       this.logger?.info("Driving executor task processing loop...");
-      while (await this.queue.getQueueLength() > 0) {
+      while ((await this.queue.getQueueLength()) > 0) {
         await this.executor.executeNext();
       }
       this.logger?.info("All queued tasks executed successfully.");
@@ -170,7 +172,7 @@ export class GhostStackOrchestrator {
     }
 
     const plan = await this.planningEngine.generatePlan(objective);
-    if (this.inspector && typeof this.inspector.recordPlan === 'function') {
+    if (this.inspector && typeof this.inspector.recordPlan === "function") {
       this.inspector.recordPlan(plan);
     }
 

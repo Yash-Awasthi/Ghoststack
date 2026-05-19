@@ -6,12 +6,12 @@ icon: window
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.6.0" />
 
 <Tip>
-OAuth authentication is only relevant for HTTP-based transports and requires user interaction via a web browser.
+  OAuth authentication is only relevant for HTTP-based transports and requires user interaction via a web browser.
 </Tip>
 
 When your FastMCP client needs to access an MCP server protected by OAuth 2.1, and the process requires user interaction (like logging in and granting consent), you should use the Authorization Code Flow. FastMCP provides the `fastmcp.client.auth.OAuth` helper to simplify this entire process.
@@ -19,7 +19,6 @@ When your FastMCP client needs to access an MCP server protected by OAuth 2.1, a
 This flow is common for user-facing applications where the application acts on behalf of the user.
 
 ## Client Usage
-
 
 ### Default Configuration
 
@@ -32,7 +31,6 @@ from fastmcp import Client
 async with Client("https://your-server.fastmcp.app/mcp", auth="oauth") as client:
     await client.ping()
 ```
-
 
 ### `OAuth` Helper
 
@@ -56,7 +54,6 @@ async with Client("https://your-server.fastmcp.app/mcp", auth=oauth) as client:
 - **`token_storage`** (`AsyncKeyValue`, optional): Storage backend for persisting OAuth tokens. Defaults to in-memory storage (tokens lost on restart). See [Token Storage](#token-storage) for encrypted storage options
 - **`additional_client_metadata`** (`dict[str, Any]`, optional): Extra metadata for client registration
 - **`callback_port`** (`int`, optional): Fixed port for OAuth callback server. If not specified, uses a random available port
-
 
 ## OAuth Flow
 
@@ -99,7 +96,8 @@ If the access token expires, the client will automatically use the refresh token
 By default, tokens are stored in memory and lost when your application restarts. For persistent storage, pass an `AsyncKeyValue`-compatible storage backend to the `token_storage` parameter.
 
 <Warning>
-**Security Consideration**: Use encrypted storage for production. MCP clients can accumulate OAuth credentials for many servers over time, and a compromised token store could expose access to multiple services.
+  **Security Consideration**: Use encrypted storage for production. MCP clients can accumulate OAuth credentials for
+  many servers over time, and a compromised token store could expose access to multiple services.
 </Warning>
 
 ```python
@@ -128,5 +126,7 @@ async with Client("https://your-server.fastmcp.app/mcp", auth=oauth) as client:
 You can use any `AsyncKeyValue`-compatible backend from the [key-value library](https://github.com/strawgate/py-key-value) including Redis, DynamoDB, and more. Wrap your storage in `FernetEncryptionWrapper` for encryption.
 
 <Note>
-When selecting a storage backend, review the [py-key-value documentation](https://github.com/strawgate/py-key-value) to understand the maturity level and limitations of your chosen backend. Some backends may be in preview or have constraints that affect production suitability.
+  When selecting a storage backend, review the [py-key-value documentation](https://github.com/strawgate/py-key-value)
+  to understand the maturity level and limitations of your chosen backend. Some backends may be in preview or have
+  constraints that affect production suitability.
 </Note>

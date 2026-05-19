@@ -5,10 +5,12 @@ description: Send log messages back to MCP clients through the context.
 icon: receipt
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <Tip>
-This documentation covers **MCP client logging** - sending messages from your server to MCP clients. For standard server-side logging (e.g., writing to files, console), use `fastmcp.utilities.logging.get_logger()` or Python's built-in `logging` module.
+  This documentation covers **MCP client logging** - sending messages from your server to MCP clients. For standard
+  server-side logging (e.g., writing to files, console), use `fastmcp.utilities.logging.get_logger()` or Python's
+  built-in `logging` module.
 </Tip>
 
 Server logging allows MCP tools to send debug, info, warning, and error messages back to the client. This provides visibility into function execution and helps with debugging during development and operation.
@@ -38,16 +40,16 @@ async def analyze_data(data: list[float], ctx: Context) -> dict:
     """Analyze numerical data with comprehensive logging."""
     await ctx.debug("Starting analysis of numerical data")
     await ctx.info(f"Analyzing {len(data)} data points")
-    
+
     try:
         if not data:
             await ctx.warning("Empty data list provided")
             return {"error": "Empty data list"}
-        
+
         result = sum(data) / len(data)
         await ctx.info(f"Analysis complete, average: {result}")
         return {"average": result, "count": len(data)}
-        
+
     except Exception as e:
         await ctx.error(f"Analysis failed: {str(e)}")
         raise
@@ -157,6 +159,7 @@ to_client_logger.setLevel(level=logging.DEBUG)
     <ResponseField name="extra" type="dict | None" default="None">
       Optional dictionary for structured logging data
     </ResponseField>
+
   </Expandable>
 </ResponseField>
 </Card>
@@ -164,21 +167,23 @@ to_client_logger.setLevel(level=logging.DEBUG)
 ## Log Levels
 
 ### Debug
+
 Use for detailed information that's typically only useful when diagnosing problems:
 
-```python 
+```python
 @mcp.tool
 async def process_file(file_path: str, ctx: Context) -> str:
     """Process a file with detailed debug logging."""
     await ctx.debug(f"Starting to process file: {file_path}")
     await ctx.debug("Checking file permissions")
-    
+
     # File processing logic
     await ctx.debug("File processing completed successfully")
     return "File processed"
 ```
 
 ### Info
+
 Use for general information about normal program execution:
 
 ```python
@@ -192,6 +197,7 @@ async def backup_database(ctx: Context) -> str:
 ```
 
 ### Warning
+
 Use for potentially harmful situations that don't prevent execution:
 
 ```python
@@ -203,17 +209,18 @@ async def validate_config(config: dict, ctx: Context) -> dict:
             "Using deprecated 'old_api_key' field. Please use 'api_key' instead",
             extra={"deprecated_field": "old_api_key"}
         )
-    
+
     if config.get("timeout", 30) > 300:
         await ctx.warning(
             "Timeout value is very high (>5 minutes), this may cause issues",
             extra={"timeout_value": config.get("timeout")}
         )
-    
+
     return {"status": "valid", "warnings": "see logs"}
 ```
 
 ### Error
+
 Use for error events that might still allow the application to continue:
 
 ```python
@@ -222,7 +229,7 @@ async def batch_process(items: list[str], ctx: Context) -> dict:
     """Process multiple items, logging errors for failed items."""
     successful = 0
     failed = 0
-    
+
     for item in items:
         try:
             # Process item
@@ -233,10 +240,9 @@ async def batch_process(items: list[str], ctx: Context) -> dict:
                 extra={"failed_item": item}
             )
             failed += 1
-    
+
     return {"successful": successful, "failed": failed}
 ```
-
 
 ## Client Handling
 

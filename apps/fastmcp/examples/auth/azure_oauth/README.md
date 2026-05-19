@@ -48,4 +48,3 @@ The `tenant_id` parameter is **required** and controls which accounts can authen
 - **Your tenant ID**: Single organization (most common)
 - **`organizations`**: Any work/school account
 - **`consumers`**: Personal Microsoft accounts only
-

@@ -7,16 +7,16 @@ Floci emulates Amazon Athena with **real SQL execution** powered by a [floci-duc
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `StartQueryExecution` | Submits a SQL query; executed asynchronously via DuckDB |
-| `GetQueryExecution` | Returns query status (`QUEUED`, `RUNNING`, `SUCCEEDED`, `FAILED`) |
-| `GetQueryResults` | Returns the result set for a completed query |
-| `ListQueryExecutions` | Returns a list of past query executions |
-| `StopQueryExecution` | Cancels a running query |
-| `CreateWorkGroup` | Creates a new workgroup |
-| `GetWorkGroup` | Returns information about a workgroup |
-| `ListWorkGroups` | Lists all workgroups |
+| Action                | Description                                                       |
+| --------------------- | ----------------------------------------------------------------- |
+| `StartQueryExecution` | Submits a SQL query; executed asynchronously via DuckDB           |
+| `GetQueryExecution`   | Returns query status (`QUEUED`, `RUNNING`, `SUCCEEDED`, `FAILED`) |
+| `GetQueryResults`     | Returns the result set for a completed query                      |
+| `ListQueryExecutions` | Returns a list of past query executions                           |
+| `StopQueryExecution`  | Cancels a running query                                           |
+| `CreateWorkGroup`     | Creates a new workgroup                                           |
+| `GetWorkGroup`        | Returns information about a workgroup                             |
+| `ListWorkGroups`      | Lists all workgroups                                              |
 
 ## How it works
 
@@ -29,20 +29,20 @@ Floci emulates Amazon Athena with **real SQL execution** powered by a [floci-duc
 
 The DuckDB read function is chosen from the Glue table's `StorageDescriptor`:
 
-| Condition | Read function |
-|---|---|
-| `InputFormat` or `SerializationLibrary` contains `parquet` | `read_parquet` |
-| `InputFormat` or `SerializationLibrary` contains `json` | `read_json_auto` |
-| `InputFormat` contains `hive` | `read_json_auto` |
-| Anything else | `read_csv_auto` |
+| Condition                                                  | Read function    |
+| ---------------------------------------------------------- | ---------------- |
+| `InputFormat` or `SerializationLibrary` contains `parquet` | `read_parquet`   |
+| `InputFormat` or `SerializationLibrary` contains `json`    | `read_json_auto` |
+| `InputFormat` contains `hive`                              | `read_json_auto` |
+| Anything else                                              | `read_csv_auto`  |
 
 ## Configuration
 
-| Property | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_ATHENA_MOCK` | `false` | Set to `true` to disable DuckDB execution — queries immediately succeed with empty results |
-| `FLOCI_SERVICES_DUCK_DEFAULT_IMAGE` | `floci/floci-duck:latest` | DuckDB sidecar image pulled on first use |
-| `FLOCI_SERVICES_DUCK_URL` | *(unset)* | Point to an existing floci-duck instance and skip container management |
+| Property                            | Default                   | Description                                                                                |
+| ----------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------ |
+| `FLOCI_SERVICES_ATHENA_MOCK`        | `false`                   | Set to `true` to disable DuckDB execution — queries immediately succeed with empty results |
+| `FLOCI_SERVICES_DUCK_DEFAULT_IMAGE` | `floci/floci-duck:latest` | DuckDB sidecar image pulled on first use                                                   |
+| `FLOCI_SERVICES_DUCK_URL`           | _(unset)_                 | Point to an existing floci-duck instance and skip container management                     |
 
 ## Example — simple query
 

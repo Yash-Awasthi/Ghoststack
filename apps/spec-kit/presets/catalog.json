@@ -19,12 +19,7 @@
         "commands": 5,
         "templates": 0
       },
-      "tags": [
-        "lean",
-        "minimal",
-        "workflow",
-        "core"
-      ]
+      "tags": ["lean", "minimal", "workflow", "core"]
     }
   }
 }

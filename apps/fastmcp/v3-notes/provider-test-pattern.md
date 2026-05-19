@@ -13,6 +13,7 @@ async with Client(mcp) as client:
 ```
 
 This conflated two concerns:
+
 1. Does the provider/server work correctly?
 2. Does the Client-Server interaction work correctly?
 
@@ -28,6 +29,7 @@ assert result.structured_content == {"result": 3}
 ```
 
 This establishes clear test ownership:
+
 - **Provider tests** → verify server functionality
 - **Integration tests** → verify Client-Server interaction
 
@@ -35,15 +37,16 @@ This establishes clear test ownership:
 
 Direct server calls return canonical FastMCP types, not MCP protocol types:
 
-| Component | Access Pattern |
-|-----------|----------------|
-| Tool | `result.structured_content` or `result.text` |
-| Resource | `result.contents[0].content` |
-| Prompt | `result.messages[0].content.text` |
+| Component | Access Pattern                               |
+| --------- | -------------------------------------------- |
+| Tool      | `result.structured_content` or `result.text` |
+| Resource  | `result.contents[0].content`                 |
+| Prompt    | `result.messages[0].content.text`            |
 
 ## Error Types
 
 Direct calls raise FastMCP exceptions:
+
 - `NotFoundError` - component not found
 - `DisabledError` - component disabled by visibility
 

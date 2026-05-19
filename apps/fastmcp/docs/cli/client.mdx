@@ -5,7 +5,7 @@ description: List tools, call them, and discover configured servers
 icon: satellite-dish
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -45,17 +45,17 @@ fastmcp list server.py --json
 
 ### Options
 
-| Option | Flag | Description |
-| ------ | ---- | ----------- |
-| Command | `--command` | Connect via stdio (e.g., `'npx -y @mcp/server'`) |
-| Transport | `--transport`, `-t` | Force `http` or `sse` for URL targets |
-| Resources | `--resources` | Include resources in output |
-| Prompts | `--prompts` | Include prompts in output |
-| Input Schema | `--input-schema` | Show full input schemas |
-| Output Schema | `--output-schema` | Show full output schemas |
-| JSON | `--json` | Structured JSON output |
-| Timeout | `--timeout` | Connection timeout in seconds |
-| Auth | `--auth` | `oauth` (default for HTTP), a bearer token, or `none` |
+| Option        | Flag                | Description                                           |
+| ------------- | ------------------- | ----------------------------------------------------- |
+| Command       | `--command`         | Connect via stdio (e.g., `'npx -y @mcp/server'`)      |
+| Transport     | `--transport`, `-t` | Force `http` or `sse` for URL targets                 |
+| Resources     | `--resources`       | Include resources in output                           |
+| Prompts       | `--prompts`         | Include prompts in output                             |
+| Input Schema  | `--input-schema`    | Show full input schemas                               |
+| Output Schema | `--output-schema`   | Show full output schemas                              |
+| JSON          | `--json`            | Structured JSON output                                |
+| Timeout       | `--timeout`         | Connection timeout in seconds                         |
+| Auth          | `--auth`            | `oauth` (default for HTTP), a bearer token, or `none` |
 
 ## Calling Tools
 
@@ -100,14 +100,14 @@ Some tools request additional input during execution through MCP's elicitation m
 
 ### Options
 
-| Option | Flag | Description |
-| ------ | ---- | ----------- |
-| Command | `--command` | Connect via stdio |
-| Transport | `--transport`, `-t` | Force `http` or `sse` |
-| Input JSON | `--input-json` | Base arguments as JSON (merged with `key=value`) |
-| JSON | `--json` | Raw JSON output |
-| Timeout | `--timeout` | Connection timeout in seconds |
-| Auth | `--auth` | `oauth`, a bearer token, or `none` |
+| Option     | Flag                | Description                                      |
+| ---------- | ------------------- | ------------------------------------------------ |
+| Command    | `--command`         | Connect via stdio                                |
+| Transport  | `--transport`, `-t` | Force `http` or `sse`                            |
+| Input JSON | `--input-json`      | Base arguments as JSON (merged with `key=value`) |
+| JSON       | `--json`            | Raw JSON output                                  |
+| Timeout    | `--timeout`         | Connection timeout in seconds                    |
+| Auth       | `--auth`            | `oauth`, a bearer token, or `none`               |
 
 ## Discovering Configured Servers
 

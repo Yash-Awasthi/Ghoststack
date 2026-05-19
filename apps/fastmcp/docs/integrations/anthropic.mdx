@@ -5,13 +5,15 @@ description: Connect FastMCP servers to the Anthropic API
 icon: message-code
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
-
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 Anthropic's [Messages API](https://docs.anthropic.com/en/api/messages) supports MCP servers as remote tool sources. This tutorial will show you how to create a FastMCP server and deploy it to a public URL, then how to call it from the Messages API.
 
 <Tip>
-Currently, the MCP connector only accesses **tools** from MCP servers—it queries the `list_tools` endpoint and exposes those functions to Claude. Other MCP features like resources and prompts are not currently supported. You can read more about the MCP connector in the [Anthropic documentation](https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector).
+  Currently, the MCP connector only accesses **tools** from MCP servers—it queries the `list_tools` endpoint and exposes
+  those functions to Claude. Other MCP features like resources and prompts are not currently supported. You can read
+  more about the MCP connector in the [Anthropic
+  documentation](https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector).
 </Tip>
 
 ## Create a Server
@@ -49,10 +51,12 @@ python server.py
 ```bash ngrok
 ngrok http 8000
 ```
+
 </CodeGroup>
 
 <Warning>
-This exposes your unauthenticated server to the internet. Only run this command in a safe environment if you understand the risks.
+  This exposes your unauthenticated server to the internet. Only run this command in a safe environment if you
+  understand the risks.
 </Warning>
 
 ## Call the Server
@@ -109,7 +113,6 @@ I rolled 3 dice and got: 4, 2, 6
 The results were 4, 2, and 6. Would you like me to roll again or roll a different number of dice?
 ```
 
-
 ## Authentication
 
 <VersionBadge version="2.6.0" />
@@ -118,9 +121,9 @@ The MCP connector supports OAuth authentication through authorization tokens, wh
 
 ### Server Authentication
 
-The simplest way to add authentication to the server is to use a bearer token scheme. 
+The simplest way to add authentication to the server is to use a bearer token scheme.
 
-For this example, we'll quickly generate our own tokens with FastMCP's `RSAKeyPair` utility, but this may not be appropriate for production use. For more details, see the complete server-side [Token Verification](/servers/auth/token-verification) documentation. 
+For this example, we'll quickly generate our own tokens with FastMCP's `RSAKeyPair` utility, but this may not be appropriate for production use. For more details, see the complete server-side [Token Verification](/servers/auth/token-verification) documentation.
 
 We'll start by creating an RSA key pair to sign and verify tokens.
 
@@ -131,11 +134,9 @@ key_pair = RSAKeyPair.generate()
 access_token = key_pair.create_token(audience="dice-server")
 ```
 
-<Warning>
-FastMCP's `RSAKeyPair` utility is for development and testing only.
-</Warning> 
+<Warning>FastMCP's `RSAKeyPair` utility is for development and testing only.</Warning>
 
-Next, we'll create a `JWTVerifier` to authenticate the server. 
+Next, we'll create a `JWTVerifier` to authenticate the server.
 
 ```python
 from fastmcp import FastMCP
@@ -183,9 +184,9 @@ If you try to call the authenticated server with the same Anthropic code we wrot
 
 ```text
 Error code: 400 - {
-    "type": "error", 
+    "type": "error",
     "error": {
-        "type": "invalid_request_error", 
+        "type": "invalid_request_error",
         "message": "MCP server 'dice-server' requires authentication. Please provide an authorization_token.",
     },
 }

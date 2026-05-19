@@ -24,7 +24,8 @@ export const generateMetadata = async ({
 
   return {
     title,
-    description: 'Install Codebuff and start building with AI in your terminal.',
+    description:
+      'Install Codebuff and start building with AI in your terminal.',
   }
 }
 

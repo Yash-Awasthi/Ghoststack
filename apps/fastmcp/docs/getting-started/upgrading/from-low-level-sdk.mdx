@@ -5,16 +5,15 @@ description: Upgrade your MCP server from the low-level Python SDK's Server clas
 icon: up
 ---
 
-If you've been building MCP servers directly on the `mcp` package's `Server` class — writing `list_tools()` and `call_tool()` handlers, hand-crafting JSON Schema dicts, and wiring up transport boilerplate — this guide is for you. FastMCP replaces all of that machinery with a declarative, Pythonic API where your functions *are* the protocol surface.
+If you've been building MCP servers directly on the `mcp` package's `Server` class — writing `list_tools()` and `call_tool()` handlers, hand-crafting JSON Schema dicts, and wiring up transport boilerplate — this guide is for you. FastMCP replaces all of that machinery with a declarative, Pythonic API where your functions _are_ the protocol surface.
 
 The core idea: instead of telling the SDK what your tools look like and then separately implementing them, you write ordinary Python functions and let FastMCP derive the protocol layer from your code. Type hints become JSON Schema. Docstrings become descriptions. Return values are serialized automatically. The plumbing you wrote to satisfy the protocol just disappears.
 
-<Note>
-This guide covers upgrading from **v1** of the `mcp` package. We'll provide a separate guide when v2 ships.
-</Note>
+<Note>This guide covers upgrading from **v1** of the `mcp` package. We'll provide a separate guide when v2 ships.</Note>
 
 <Note>
-Already using FastMCP 1.0 via `from mcp.server.fastmcp import FastMCP`? Your upgrade is simpler — see the [FastMCP 1.0 upgrade guide](/getting-started/upgrading/from-mcp-sdk) instead.
+  Already using FastMCP 1.0 via `from mcp.server.fastmcp import FastMCP`? Your upgrade is simpler — see the [FastMCP 1.0
+  upgrade guide](/getting-started/upgrading/from-mcp-sdk) instead.
 </Note>
 
 <Prompt description="Copy this prompt into any LLM along with your server code to get automated upgrade guidance.">
@@ -68,6 +67,7 @@ UPGRADE RULES:
    - Progress reporting → `await ctx.report_progress(current, total)`
 
 For each change, show the original code, explain what it did, and provide the FastMCP equivalent.
+
 </Prompt>
 
 ## Install
@@ -203,15 +203,15 @@ Each `@mcp.tool` function is self-contained: its name becomes the tool name, its
 
 When converting your `inputSchema` to Python type hints:
 
-| JSON Schema | Python Type |
-|---|---|
-| `{"type": "string"}` | `str` |
-| `{"type": "number"}` | `float` |
-| `{"type": "integer"}` | `int` |
-| `{"type": "boolean"}` | `bool` |
-| `{"type": "array", "items": {"type": "string"}}` | `list[str]` |
-| `{"type": "object"}` | `dict` |
-| Optional property (not in `required`) | `param: str \| None = None` |
+| JSON Schema                                      | Python Type                 |
+| ------------------------------------------------ | --------------------------- |
+| `{"type": "string"}`                             | `str`                       |
+| `{"type": "number"}`                             | `float`                     |
+| `{"type": "integer"}`                            | `int`                       |
+| `{"type": "boolean"}`                            | `bool`                      |
+| `{"type": "array", "items": {"type": "string"}}` | `list[str]`                 |
+| `{"type": "object"}`                             | `dict`                      |
+| Optional property (not in `required`)            | `param: str \| None = None` |
 
 ### Return Values
 

@@ -14,76 +14,76 @@ Floci implements the EC2 Auto Scaling API — stored-state management for launch
 
 ### Launch Configurations
 
-| Operation | Notes |
-|---|---|
-| `CreateLaunchConfiguration` | Stores template: `ImageId`, `InstanceType`, `KeyName`, `SecurityGroups`, `UserData`, `IamInstanceProfile` |
-| `DescribeLaunchConfigurations` | Filtered by name list; returns all if no filter |
-| `DeleteLaunchConfiguration` | Removes the named launch configuration |
+| Operation                      | Notes                                                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `CreateLaunchConfiguration`    | Stores template: `ImageId`, `InstanceType`, `KeyName`, `SecurityGroups`, `UserData`, `IamInstanceProfile` |
+| `DescribeLaunchConfigurations` | Filtered by name list; returns all if no filter                                                           |
+| `DeleteLaunchConfiguration`    | Removes the named launch configuration                                                                    |
 
 ### Auto Scaling Groups
 
-| Operation | Notes |
-|---|---|
-| `CreateAutoScalingGroup` | Creates a group with min/max/desired capacity, AZs, tags; starts capacity reconciliation loop |
+| Operation                   | Notes                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `CreateAutoScalingGroup`    | Creates a group with min/max/desired capacity, AZs, tags; starts capacity reconciliation loop        |
 | `DescribeAutoScalingGroups` | Filtered by name list; returns all if no filter; includes current instance list with lifecycle state |
-| `UpdateAutoScalingGroup` | Updates capacity bounds, cooldown, launch configuration, AZs |
-| `DeleteAutoScalingGroup` | `ForceDelete=true` terminates all instances before deletion |
+| `UpdateAutoScalingGroup`    | Updates capacity bounds, cooldown, launch configuration, AZs                                         |
+| `DeleteAutoScalingGroup`    | `ForceDelete=true` terminates all instances before deletion                                          |
 
 ### Instance Management
 
-| Operation | Notes |
-|---|---|
-| `DescribeAutoScalingInstances` | Returns all ASG-tracked instances with lifecycle state and health status |
-| `SetDesiredCapacity` | Updates desired count; reconciler handles scale-out / scale-in within 10 s |
-| `AttachInstances` | Attaches existing EC2 instances to a group; sets lifecycle state to `InService` |
-| `DetachInstances` | Detaches instances from a group; optionally decrements desired capacity |
-| `TerminateInstanceInAutoScalingGroup` | Terminates a specific instance; optionally decrements desired capacity |
+| Operation                             | Notes                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `DescribeAutoScalingInstances`        | Returns all ASG-tracked instances with lifecycle state and health status        |
+| `SetDesiredCapacity`                  | Updates desired count; reconciler handles scale-out / scale-in within 10 s      |
+| `AttachInstances`                     | Attaches existing EC2 instances to a group; sets lifecycle state to `InService` |
+| `DetachInstances`                     | Detaches instances from a group; optionally decrements desired capacity         |
+| `TerminateInstanceInAutoScalingGroup` | Terminates a specific instance; optionally decrements desired capacity          |
 
 ### Load Balancer Attachment
 
-| Operation | Notes |
-|---|---|
-| `AttachLoadBalancerTargetGroups` | Attaches ELB v2 target group ARNs; new instances auto-registered on InService |
-| `DetachLoadBalancerTargetGroups` | Detaches target groups; instances deregistered |
-| `DescribeLoadBalancerTargetGroups` | Lists target groups attached to a group |
-| `AttachLoadBalancers` | Classic ELB attachment (stored; no ELB v1 routing) |
-| `DetachLoadBalancers` | Classic ELB detachment |
-| `DescribeLoadBalancers` | Lists classic ELBs attached to a group |
+| Operation                          | Notes                                                                         |
+| ---------------------------------- | ----------------------------------------------------------------------------- |
+| `AttachLoadBalancerTargetGroups`   | Attaches ELB v2 target group ARNs; new instances auto-registered on InService |
+| `DetachLoadBalancerTargetGroups`   | Detaches target groups; instances deregistered                                |
+| `DescribeLoadBalancerTargetGroups` | Lists target groups attached to a group                                       |
+| `AttachLoadBalancers`              | Classic ELB attachment (stored; no ELB v1 routing)                            |
+| `DetachLoadBalancers`              | Classic ELB detachment                                                        |
+| `DescribeLoadBalancers`            | Lists classic ELBs attached to a group                                        |
 
 ### Lifecycle Hooks
 
-| Operation | Notes |
-|---|---|
-| `PutLifecycleHook` | Creates or updates a hook: `LifecycleTransition`, `DefaultResult`, `HeartbeatTimeout` |
-| `DescribeLifecycleHooks` | Lists hooks for a group |
-| `DeleteLifecycleHook` | Removes a hook |
-| `CompleteLifecycleAction` | Signals `CONTINUE` or `ABANDON` for a pending lifecycle action |
-| `RecordLifecycleActionHeartbeat` | Extends the heartbeat timeout for an in-progress lifecycle action |
+| Operation                        | Notes                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| `PutLifecycleHook`               | Creates or updates a hook: `LifecycleTransition`, `DefaultResult`, `HeartbeatTimeout` |
+| `DescribeLifecycleHooks`         | Lists hooks for a group                                                               |
+| `DeleteLifecycleHook`            | Removes a hook                                                                        |
+| `CompleteLifecycleAction`        | Signals `CONTINUE` or `ABANDON` for a pending lifecycle action                        |
+| `RecordLifecycleActionHeartbeat` | Extends the heartbeat timeout for an in-progress lifecycle action                     |
 
 ### Scaling Policies
 
-| Operation | Notes |
-|---|---|
+| Operation          | Notes                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
 | `PutScalingPolicy` | Creates or updates a policy: `SimpleScaling`, `AdjustmentType`, `ScalingAdjustment`, `Cooldown` |
-| `DescribePolicies` | Lists policies filtered by group or policy name |
-| `DeletePolicy` | Removes a scaling policy |
+| `DescribePolicies` | Lists policies filtered by group or policy name                                                 |
+| `DeletePolicy`     | Removes a scaling policy                                                                        |
 
 ### Activities
 
-| Operation | Notes |
-|---|---|
+| Operation                   | Notes                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
 | `DescribeScalingActivities` | Returns the activity log for a group; activities recorded on scale-out and scale-in events |
 
 ### Metadata
 
-| Operation | Notes |
-|---|---|
-| `DescribeTerminationPolicyTypes` | Returns the standard termination policy names |
-| `DescribeAccountLimits` | Returns max group / config / instance limits |
-| `DescribeLifecycleHookTypes` | Returns `autoscaling:EC2_INSTANCE_LAUNCHING` and `autoscaling:EC2_INSTANCE_TERMINATING` |
-| `DescribeAdjustmentTypes` | Returns the four standard adjustment types |
-| `DescribeMetricCollectionTypes` | Returns standard metric and granularity names |
-| `DescribeAutoScalingNotificationTypes` | Returns all notification type names |
+| Operation                              | Notes                                                                                   |
+| -------------------------------------- | --------------------------------------------------------------------------------------- |
+| `DescribeTerminationPolicyTypes`       | Returns the standard termination policy names                                           |
+| `DescribeAccountLimits`                | Returns max group / config / instance limits                                            |
+| `DescribeLifecycleHookTypes`           | Returns `autoscaling:EC2_INSTANCE_LAUNCHING` and `autoscaling:EC2_INSTANCE_TERMINATING` |
+| `DescribeAdjustmentTypes`              | Returns the four standard adjustment types                                              |
+| `DescribeMetricCollectionTypes`        | Returns standard metric and granularity names                                           |
+| `DescribeAutoScalingNotificationTypes` | Returns all notification type names                                                     |
 
 ## Capacity Reconciler (Phase 2)
 
@@ -95,9 +95,9 @@ Floci runs a background reconciler (10 s fixed rate) that keeps each group's InS
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_AUTOSCALING_ENABLED` | `true` | Enable or disable the service |
+| Variable                             | Default | Description                   |
+| ------------------------------------ | ------- | ----------------------------- |
+| `FLOCI_SERVICES_AUTOSCALING_ENABLED` | `true`  | Enable or disable the service |
 
 ## Usage Example
 

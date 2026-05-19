@@ -5,7 +5,7 @@ description: The core FastMCP server class for building MCP applications
 icon: server
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 The `FastMCP` class is the central piece of every FastMCP application. It acts as the container for your tools, resources, and prompts, managing communication with MCP clients and orchestrating the entire server lifecycle.
 
@@ -79,6 +79,7 @@ if __name__ == "__main__":
 ```
 
 FastMCP supports several transports:
+
 - **STDIO** (default): For local integrations and CLI tools
 - **HTTP**: For web services using the Streamable HTTP protocol
 - **SSE**: Legacy web transport (deprecated)
@@ -89,7 +90,6 @@ mcp.run(transport="http", host="127.0.0.1", port=9000)
 ```
 
 The server can also be run using the FastMCP CLI. For detailed information on transports and deployment, see [Running Your Server](/deployment/running-server).
-
 
 ## Configuration Reference
 
@@ -105,7 +105,8 @@ These parameters control how your server presents itself to clients.
 </ParamField>
 
 <ParamField body="instructions" type="str | None">
-  Description of how to interact with this server. Clients surface these instructions to help LLMs understand the server's purpose and available functionality
+  Description of how to interact with this server. Clients surface these instructions to help LLMs understand the
+  server's purpose and available functionality
 </ParamField>
 
 <ParamField body="version" type="str | None">
@@ -115,19 +116,22 @@ These parameters control how your server presents itself to clients.
 <ParamField body="website_url" type="str | None">
   <VersionBadge version="2.13.0" />
 
-  URL to a website with more information about your server. Displayed in client applications
+URL to a website with more information about your server. Displayed in client applications
+
 </ParamField>
 
 <ParamField body="icons" type="list[Icon] | None">
   <VersionBadge version="2.13.0" />
 
-  List of icon representations for your server. See [Icons](/servers/icons) for details
+List of icon representations for your server. See [Icons](/servers/icons) for details
+
 </ParamField>
 
 <ParamField body="experimental_capabilities" type="dict[str, dict[str, Any]] | None">
   <VersionBadge version="3.2.5" />
 
-  Arbitrary experimental capabilities to advertise in the MCP `initialize` response. Use this to declare cross-server interop conventions or draft extensions that follow the MCP spec's `experimental` field. Keys are capability names; values are free-form dicts. FastMCP's built-in derived capabilities (`tools`, `resources`, etc.) are unaffected — this only populates `capabilities.experimental`
+Arbitrary experimental capabilities to advertise in the MCP `initialize` response. Use this to declare cross-server interop conventions or draft extensions that follow the MCP spec's `experimental` field. Keys are capability names; values are free-form dicts. FastMCP's built-in derived capabilities (`tools`, `resources`, etc.) are unaffected — this only populates `capabilities.experimental`
+
 </ParamField>
 </Card>
 
@@ -141,21 +145,26 @@ These parameters control what your server is built from — its components, midd
 </ParamField>
 
 <ParamField body="auth" type="OAuthProvider | TokenVerifier | None">
-  Authentication provider for securing HTTP-based transports. See [Authentication](/servers/auth/authentication) for configuration
+  Authentication provider for securing HTTP-based transports. See [Authentication](/servers/auth/authentication) for
+  configuration
 </ParamField>
 
 <ParamField body="middleware" type="list[Middleware] | None">
-  [Middleware](/servers/middleware) that intercepts and transforms every MCP message flowing through the server — requests, responses, and notifications in both directions. Use for cross-cutting concerns like logging, error handling, and rate limiting
+  [Middleware](/servers/middleware) that intercepts and transforms every MCP message flowing through the server —
+  requests, responses, and notifications in both directions. Use for cross-cutting concerns like logging, error
+  handling, and rate limiting
 </ParamField>
 
 <ParamField body="providers" type="list[Provider] | None">
-  [Providers](/servers/providers) that supply tools, resources, and prompts dynamically. Providers are queried at request time, so they can serve components from databases, APIs, or other external sources
+  [Providers](/servers/providers) that supply tools, resources, and prompts dynamically. Providers are queried at
+  request time, so they can serve components from databases, APIs, or other external sources
 </ParamField>
 
 <ParamField body="transforms" type="list[Transform] | None">
   <VersionBadge version="3.1.0" />
 
-  Server-level [transforms](/servers/transforms/transforms) to apply to all components. Transforms modify how tools, resources, and prompts are presented to clients — for example, [search transforms](/servers/transforms/tool-search) replace large catalogs with on-demand discovery
+Server-level [transforms](/servers/transforms/transforms) to apply to all components. Transforms modify how tools, resources, and prompts are presented to clients — for example, [search transforms](/servers/transforms/tool-search) replace large catalogs with on-demand discovery
+
 </ParamField>
 
 <ParamField body="lifespan" type="Lifespan | AsyncContextManager | None">
@@ -175,27 +184,32 @@ These parameters tune how the server processes requests and communicates with cl
 <ParamField body="strict_input_validation" type="bool" default="False">
   <VersionBadge version="2.13.0" />
 
-  When `False` (default), FastMCP uses Pydantic's flexible validation that coerces compatible inputs (e.g., `"10"` → `10` for int parameters). When `True`, validates inputs against the exact JSON Schema before calling your function, rejecting type mismatches. See [Input Validation Modes](/servers/tools#input-validation-modes) for details
+When `False` (default), FastMCP uses Pydantic's flexible validation that coerces compatible inputs (e.g., `"10"` → `10` for int parameters). When `True`, validates inputs against the exact JSON Schema before calling your function, rejecting type mismatches. See [Input Validation Modes](/servers/tools#input-validation-modes) for details
+
 </ParamField>
 
 <ParamField body="mask_error_details" type="bool | None">
-  When `True`, replaces internal error details in tool/resource responses with a generic message to avoid leaking implementation details to clients. Defaults to the `FASTMCP_MASK_ERROR_DETAILS` environment variable
+  When `True`, replaces internal error details in tool/resource responses with a generic message to avoid leaking
+  implementation details to clients. Defaults to the `FASTMCP_MASK_ERROR_DETAILS` environment variable
 </ParamField>
 
 <ParamField body="list_page_size" type="int | None" default="None">
   <VersionBadge version="3.0.0" />
 
-  Maximum items per page for list operations (`tools/list`, `resources/list`, etc.). When `None`, all results are returned in a single response. See [Pagination](/servers/pagination) for details
+Maximum items per page for list operations (`tools/list`, `resources/list`, etc.). When `None`, all results are returned in a single response. See [Pagination](/servers/pagination) for details
+
 </ParamField>
 
 <ParamField body="tasks" type="bool | None" default="False">
-  Enable background task support. When `True`, tools and resources can return `CreateTaskResult` to run work asynchronously while the client polls for results
+  Enable background task support. When `True`, tools and resources can return `CreateTaskResult` to run work
+  asynchronously while the client polls for results
 </ParamField>
 
 <ParamField body="client_log_level" type="LoggingLevel | None">
   <VersionBadge version="3.2.0" />
 
-  Default minimum log level for messages sent to MCP clients via `context.log()`. When set, messages below this level are suppressed. Individual clients can override this per-session using the MCP `logging/setLevel` request. One of `"debug"`, `"info"`, `"notice"`, `"warning"`, `"error"`, `"critical"`, `"alert"`, or `"emergency"`
+Default minimum log level for messages sent to MCP clients via `context.log()`. When set, messages below this level are suppressed. Individual clients can override this per-session using the MCP `logging/setLevel` request. One of `"debug"`, `"info"`, `"notice"`, `"warning"`, `"error"`, `"critical"`, `"alert"`, or `"emergency"`
+
 </ParamField>
 
 <ParamField body="dereference_schemas" type="bool" default="True">
@@ -213,14 +227,14 @@ These parameters provide custom handlers for MCP capabilities and persistent sto
 </ParamField>
 
 <ParamField body="sampling_handler_behavior" type='Literal["always", "fallback"] | None' default="fallback">
-  When `"fallback"`, the sampling handler is used only when no tool-specific handler exists. When `"always"`, this handler is used for all sampling requests
+  When `"fallback"`, the sampling handler is used only when no tool-specific handler exists. When `"always"`, this
+  handler is used for all sampling requests
 </ParamField>
 
 <ParamField body="session_state_store" type="AsyncKeyValue | None">
   Persistent key-value store for session state that survives across requests. Defaults to an in-memory store. Provide a custom implementation for persistence across server restarts
 </ParamField>
 </Card>
-
 
 ## Tag-Based Filtering
 
@@ -239,12 +253,14 @@ def admin_tool() -> str:
 ```
 
 The filtering logic works as follows:
+
 - **Enable with `only=True`**: Switches to allowlist mode — only components with at least one matching tag are exposed
 - **Disable**: Components with any matching tag are hidden
 - **Precedence**: Later calls override earlier ones, so call `disable` after `enable` to exclude from an allowlist
 
 <Tip>
-To ensure a component is never exposed, you can set `enabled=False` on the component itself. See the component-specific documentation for details.
+  To ensure a component is never exposed, you can set `enabled=False` on the component itself. See the
+  component-specific documentation for details.
 </Tip>
 
 ```python

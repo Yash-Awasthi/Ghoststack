@@ -48,7 +48,9 @@
   letter-spacing: 0.005em;
   text-wrap: balance;
   font-kerning: normal;
-  font-feature-settings: 'kern' 1, 'liga' 1;
+  font-feature-settings:
+    'kern' 1,
+    'liga' 1;
   text-rendering: optimizeLegibility;
 }
 
@@ -61,7 +63,9 @@
 }
 
 .hover-glow-flare {
-  transition: text-shadow 0.5s ease, filter 0.5s ease;
+  transition:
+    text-shadow 0.5s ease,
+    filter 0.5s ease;
 }
 
 .hover-glow-flare:hover {
@@ -80,11 +84,16 @@
 }
 
 @keyframes install-glow-breathe {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(124, 255, 63, 0.25), 0 0 40px rgba(124, 255, 63, 0.1);
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(124, 255, 63, 0.25),
+      0 0 40px rgba(124, 255, 63, 0.1);
   }
   50% {
-    box-shadow: 0 0 25px rgba(124, 255, 63, 0.35), 0 0 50px rgba(124, 255, 63, 0.15);
+    box-shadow:
+      0 0 25px rgba(124, 255, 63, 0.35),
+      0 0 50px rgba(124, 255, 63, 0.15);
   }
 }
 
@@ -117,13 +126,15 @@
 .keyword-hollow {
   color: transparent;
   -webkit-text-stroke: 1.5px rgba(124, 255, 63, 0.45);
-  transition: color 0.5s ease, -webkit-text-stroke-color 0.5s ease, text-shadow 0.5s ease;
+  transition:
+    color 0.5s ease,
+    -webkit-text-stroke-color 0.5s ease,
+    text-shadow 0.5s ease;
 }
 
-
 .keyword-filled {
-  color: #7CFF3F;
-  -webkit-text-stroke: 1.5px #7CFF3F;
+  color: #7cff3f;
+  -webkit-text-stroke: 1.5px #7cff3f;
   text-shadow:
     0 0 40px rgba(124, 255, 63, 0.3),
     0 0 80px rgba(124, 255, 63, 0.1);
@@ -149,7 +160,6 @@
       0 0 80px rgba(124, 255, 63, 0.1);
   }
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .animate-glow-pulse,

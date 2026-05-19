@@ -1,7 +1,7 @@
 # Authentication
 
 Specify CLI uses **opt-in authentication** for HTTP requests to catalog
-sources, extension downloads, and release checks.  No credentials are
+sources, extension downloads, and release checks. No credentials are
 sent unless you explicitly configure them.
 
 ## Configuration
@@ -22,6 +22,7 @@ Create `~/.specify/auth.json` to enable authentication:
 ```
 
 > **Security:** Restrict the file to owner-only access:
+>
 > ```bash
 > chmod 600 ~/.specify/auth.json
 > ```
@@ -32,21 +33,21 @@ Without this file, all HTTP requests are unauthenticated.
 
 Each entry in the `providers` array has the following fields:
 
-| Field | Required | Description |
-|---|---|---|
-| `hosts` | Yes | Array of hostnames this entry applies to. Supports exact hostnames, or a leading `*.` wildcard for subdomains only (for example, `*.visualstudio.com`). `*.visualstudio.com` matches `foo.visualstudio.com`, but not `visualstudio.com`. Other glob patterns such as `*github.com` or `gith?b.com` are not supported. |
-| `provider` | Yes | Built-in provider key: `github` or `azure-devops`. |
-| `auth` | Yes | Auth scheme (see below). |
-| `token` | No | Token value (inline). Use `token_env` instead when possible. |
-| `token_env` | No | Environment variable name to read the token from. |
+| Field       | Required | Description                                                                                                                                                                                                                                                                                                           |
+| ----------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hosts`     | Yes      | Array of hostnames this entry applies to. Supports exact hostnames, or a leading `*.` wildcard for subdomains only (for example, `*.visualstudio.com`). `*.visualstudio.com` matches `foo.visualstudio.com`, but not `visualstudio.com`. Other glob patterns such as `*github.com` or `gith?b.com` are not supported. |
+| `provider`  | Yes      | Built-in provider key: `github` or `azure-devops`.                                                                                                                                                                                                                                                                    |
+| `auth`      | Yes      | Auth scheme (see below).                                                                                                                                                                                                                                                                                              |
+| `token`     | No       | Token value (inline). Use `token_env` instead when possible.                                                                                                                                                                                                                                                          |
+| `token_env` | No       | Environment variable name to read the token from.                                                                                                                                                                                                                                                                     |
 
 For `azure-ad` auth, additional fields are required:
 
-| Field | Required | Description |
-|---|---|---|
-| `tenant_id` | Yes | Azure AD tenant ID. |
-| `client_id` | Yes | Service principal client ID. |
-| `client_secret_env` | Yes | Environment variable containing the client secret. |
+| Field               | Required | Description                                        |
+| ------------------- | -------- | -------------------------------------------------- |
+| `tenant_id`         | Yes      | Azure AD tenant ID.                                |
+| `client_id`         | Yes      | Service principal client ID.                       |
+| `client_secret_env` | Yes      | Environment variable containing the client secret. |
 
 Either `token` or `token_env` must be set for `bearer` and `basic-pat` schemes.
 
@@ -54,8 +55,8 @@ Either `token` or `token_env` must be set for `bearer` and `basic-pat` schemes.
 
 ### GitHub (`github`)
 
-| Scheme | Header | Use for |
-|---|---|---|
+| Scheme   | Header                          | Use for                                                  |
+| -------- | ------------------------------- | -------------------------------------------------------- |
 | `bearer` | `Authorization: Bearer <token>` | PATs, fine-grained PATs, OAuth tokens, GitHub App tokens |
 
 **Example — PAT via environment variable:**
@@ -71,12 +72,12 @@ Either `token` or `token_env` must be set for `bearer` and `basic-pat` schemes.
 
 ### Azure DevOps (`azure-devops`)
 
-| Scheme | Header | Use for |
-|---|---|---|
-| `basic-pat` | `Authorization: Basic base64(:<PAT>)` | Personal Access Tokens |
-| `bearer` | `Authorization: Bearer <token>` | Pre-acquired OAuth / Azure AD tokens |
-| `azure-cli` | `Authorization: Bearer <token>` | Token acquired via `az account get-access-token` |
-| `azure-ad` | `Authorization: Bearer <token>` | Token acquired via OAuth2 client credentials flow |
+| Scheme      | Header                                | Use for                                           |
+| ----------- | ------------------------------------- | ------------------------------------------------- |
+| `basic-pat` | `Authorization: Basic base64(:<PAT>)` | Personal Access Tokens                            |
+| `bearer`    | `Authorization: Bearer <token>`       | Pre-acquired OAuth / Azure AD tokens              |
+| `azure-cli` | `Authorization: Bearer <token>`       | Token acquired via `az account get-access-token`  |
+| `azure-ad`  | `Authorization: Bearer <token>`       | Token acquired via OAuth2 client credentials flow |
 
 **Example — PAT via environment variable:**
 
@@ -158,12 +159,7 @@ A reference `auth.json` with GitHub pre-configured:
 {
   "providers": [
     {
-      "hosts": [
-        "github.com",
-        "api.github.com",
-        "raw.githubusercontent.com",
-        "codeload.github.com"
-      ],
+      "hosts": ["github.com", "api.github.com", "raw.githubusercontent.com", "codeload.github.com"],
       "provider": "github",
       "auth": "bearer",
       "token_env": "GH_TOKEN"

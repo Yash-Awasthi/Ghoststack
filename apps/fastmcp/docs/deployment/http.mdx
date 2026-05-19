@@ -8,7 +8,8 @@ icon: server
 import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <Tip>
-STDIO transport is perfect for local development and desktop applications. But to unlock the full potential of MCP—centralized services, multi-client access, and network availability—you need remote HTTP deployment.
+  STDIO transport is perfect for local development and desktop applications. But to unlock the full potential of
+  MCP—centralized services, multi-client access, and network availability—you need remote HTTP deployment.
 </Tip>
 
 This guide walks you through deploying your FastMCP server as a remote MCP service that's accessible via a URL. Once deployed, your MCP server will be available over the network, allowing multiple clients to connect simultaneously and enabling integration with cloud-based LLM applications. This guide focuses specifically on remote MCP deployment, not local STDIO servers.
@@ -40,6 +41,7 @@ if __name__ == "__main__":
 ```
 
 Run your server with a simple Python command:
+
 ```bash
 python server.py
 ```
@@ -67,6 +69,7 @@ app = mcp.http_app()
 ```
 
 Run with any ASGI server - here's an example with Uvicorn:
+
 ```bash
 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
@@ -94,7 +97,8 @@ Now your server is accessible at `http://localhost:8000/api/mcp/`.
 ### Authentication
 
 <Warning>
-Authentication is **highly recommended** for remote MCP servers. Some LLM clients require authentication for remote servers and will refuse to connect without it.
+  Authentication is **highly recommended** for remote MCP servers. Some LLM clients require authentication for remote
+  servers and will refuse to connect without it.
 </Warning>
 
 FastMCP supports multiple authentication methods to secure your remote server. See the [Authentication Overview](/servers/auth/authentication) for complete configuration options including Bearer tokens, JWT, and OAuth.
@@ -116,11 +120,13 @@ async def health_check(request):
 This health endpoint will be available at `http://localhost:8000/health` and can be used by load balancers, monitoring systems, or deployment platforms to verify your server is running.
 
 <Note>
-Custom routes are never protected by the server's authentication middleware, even when an `AuthProvider` is configured. This is by design — the primary use case for custom routes is unauthenticated operational endpoints like health checks and readiness probes. If you need authenticated HTTP endpoints alongside your MCP server, [mount it in a FastAPI app](/integrations/fastapi) and use FastAPI's `Depends()` for auth on your routes.
+  Custom routes are never protected by the server's authentication middleware, even when an `AuthProvider` is
+  configured. This is by design — the primary use case for custom routes is unauthenticated operational endpoints like
+  health checks and readiness probes. If you need authenticated HTTP endpoints alongside your MCP server, [mount it in a
+  FastAPI app](/integrations/fastapi) and use FastAPI's `Depends()` for auth on your routes.
 </Note>
 
 ### Custom Middleware
-
 
 <VersionBadge version="2.3.2" />
 
@@ -151,7 +157,9 @@ http_app = mcp.http_app(middleware=middleware)
 ### CORS for Browser-Based Clients
 
 <Tip>
-Most MCP clients, including those that you access through a browser like ChatGPT or Claude, don't need CORS configuration. Only enable CORS if you're working with an MCP client that connects directly from a browser, such as debugging tools or inspectors.
+  Most MCP clients, including those that you access through a browser like ChatGPT or Claude, don't need CORS
+  configuration. Only enable CORS if you're working with an MCP client that connects directly from a browser, such as
+  debugging tools or inspectors.
 </Tip>
 
 CORS (Cross-Origin Resource Sharing) is needed when JavaScript running in a web browser connects directly to your MCP server. This is different from using an LLM through a browser—in that case, the browser connects to the LLM service, and the LLM service connects to your MCP server (no CORS needed).
@@ -198,7 +206,8 @@ app = mcp.http_app(middleware=middleware)
 Without `expose_headers=["mcp-session-id"]`, browsers will receive the session ID but JavaScript won't be able to access it, causing session management to fail.
 
 <Warning>
-**Production Security**: Never use `allow_origins=["*"]` in production. Specify the exact origins of your browser-based clients. Using wildcards exposes your server to unauthorized access from any website.
+  **Production Security**: Never use `allow_origins=["*"]` in production. Specify the exact origins of your
+  browser-based clients. Using wildcards exposes your server to unauthorized access from any website.
 </Warning>
 
 ### SSE Polling for Long-Running Operations
@@ -206,7 +215,8 @@ Without `expose_headers=["mcp-session-id"]`, browsers will receive the session I
 <VersionBadge version="2.14.0" />
 
 <Note>
-This feature only applies to the **StreamableHTTP transport** (the default for `http_app()`). It does not apply to the legacy SSE transport (`transport="sse"`).
+  This feature only applies to the **StreamableHTTP transport** (the default for `http_app()`). It does not apply to the
+  legacy SSE transport (`transport="sse"`).
 </Note>
 
 When running tools that take a long time to complete, you may encounter issues with load balancers or proxies terminating connections that stay idle too long. [SEP-1699](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1699) introduces SSE polling to solve this by allowing the server to gracefully close connections and have clients automatically reconnect.
@@ -252,7 +262,8 @@ app = mcp.http_app(
 The `retry_interval` parameter (in milliseconds) controls how long clients wait before reconnecting. Choose a value that balances responsiveness with server load.
 
 <Note>
-`close_sse_stream()` is a no-op if called without an `EventStore` configured, so you can safely include it in tools that may run in different deployment configurations.
+  `close_sse_stream()` is a no-op if called without an `EventStore` configured, so you can safely include it in tools
+  that may run in different deployment configurations.
 </Note>
 
 #### Custom Storage Backends
@@ -310,7 +321,9 @@ app = Starlette(
 The MCP endpoint will be available at `/mcp-server/mcp/` of the resulting Starlette app.
 
 <Warning>
-For Streamable HTTP transport, you **must** pass the lifespan context from the FastMCP app to the resulting Starlette app, as nested lifespans are not recognized. Otherwise, the FastMCP server's session manager will not be properly initialized.
+  For Streamable HTTP transport, you **must** pass the lifespan context from the FastMCP app to the resulting Starlette
+  app, as nested lifespans are not recognized. Otherwise, the FastMCP server's session manager will not be properly
+  initialized.
 </Warning>
 
 #### Nested Mounts
@@ -375,7 +388,8 @@ api.mount("/mcp", mcp_app)
 Your existing API remains at `http://localhost:8000/api` while MCP is available at `http://localhost:8000/mcp`.
 
 <Warning>
-Just like with Starlette, you **must** pass the lifespan from the MCP app to FastAPI. Without this, the session manager won't initialize properly and requests will fail.
+  Just like with Starlette, you **must** pass the lifespan from the MCP app to FastAPI. Without this, the session
+  manager won't initialize properly and requests will fail.
 </Warning>
 
 ## Mounting Authenticated Servers
@@ -386,6 +400,7 @@ Just like with Starlette, you **must** pass the lifespan from the MCP app to Fas
 This section only applies if you're **mounting an OAuth-protected FastMCP server under a path prefix** (like `/api`) inside another application using `Mount()`.
 
 If you're deploying your FastMCP server at root level without any `Mount()` prefix, the well-known routes are automatically included in `mcp.http_app()` and you don't need to do anything special.
+
 </Tip>
 
 OAuth specifications (RFC 8414 and RFC 9728) require discovery metadata to be accessible at well-known paths under the root level of your domain. When you mount an OAuth-protected FastMCP server under a path prefix like `/api`, this creates a routing challenge: your operational OAuth endpoints move under the prefix, but discovery endpoints must remain at the root.
@@ -398,6 +413,7 @@ OAuth specifications (RFC 8414 and RFC 9728) require discovery metadata to be ac
 2. **Including mount prefix in both base_url AND mcp_path** - The mount prefix (like `/api`) should only be in `base_url`, not in `mcp_path`. Otherwise you'll get double paths.
 
    ✅ **Correct:**
+
    ```python
    base_url = "http://localhost:8000/api"
    mcp_path = "/mcp"
@@ -405,6 +421,7 @@ OAuth specifications (RFC 8414 and RFC 9728) require discovery metadata to be ac
    ```
 
    ❌ **Wrong:**
+
    ```python
    base_url = "http://localhost:8000/api"
    mcp_path = "/api/mcp"
@@ -412,6 +429,7 @@ OAuth specifications (RFC 8414 and RFC 9728) require discovery metadata to be ac
    ```
 
 Follow the configuration instructions below to set up mounting correctly.
+
 </Warning>
 
 <Warning>
@@ -420,6 +438,7 @@ Follow the configuration instructions below to set up mounting correctly.
 If you're integrating FastMCP into an existing application with its own CORS middleware, be aware that layering CORS middleware can cause conflicts (such as 404 errors on `.well-known` routes or OPTIONS requests).
 
 FastMCP and the MCP SDK already handle CORS for OAuth routes. If you need CORS on your own application routes, consider using the sub-app pattern: mount FastMCP and your routes as separate apps, each with their own middleware, rather than adding application-wide CORS middleware.
+
 </Warning>
 
 ### Route Types
@@ -427,12 +446,14 @@ FastMCP and the MCP SDK already handle CORS for OAuth routes. If you need CORS o
 OAuth-protected MCP servers expose two categories of routes:
 
 **Operational routes** handle the OAuth flow and MCP protocol:
+
 - `/authorize` - OAuth authorization endpoint
 - `/token` - Token exchange endpoint
 - `/auth/callback` - OAuth callback handler
 - `/mcp` - MCP protocol endpoint
 
 **Discovery routes** provide metadata for OAuth clients:
+
 - `/.well-known/oauth-authorization-server` - Authorization server metadata
 - `/.well-known/oauth-protected-resource/*` - Protected resource metadata
 
@@ -466,6 +487,7 @@ When `issuer_url` has a path (either explicitly or by defaulting from `base_url`
 **Key Invariant:** `base_url + mcp_path = actual externally-accessible MCP URL`
 
 Example:
+
 - `base_url`: `http://localhost:8000/api` (mount prefix `/api`)
 - `mcp_path`: `/mcp` (internal path)
 - Result: `http://localhost:8000/api/mcp` (final MCP endpoint)
@@ -622,7 +644,10 @@ When running multiple server instances behind a load balancer (Traefik, nginx, H
 You might expect sticky sessions (session affinity) to solve this, but they don't work reliably with MCP clients.
 
 <Warning>
-**Why sticky sessions don't work:** Most MCP clients—including Cursor and Claude Code—use `fetch()` internally and don't properly forward `Set-Cookie` headers. Without cookies, load balancers can't identify which instance should handle subsequent requests. This is a limitation in how these clients implement HTTP, not something you can fix with load balancer configuration.
+  **Why sticky sessions don't work:** Most MCP clients—including Cursor and Claude Code—use `fetch()` internally and
+  don't properly forward `Set-Cookie` headers. Without cookies, load balancers can't identify which instance should
+  handle subsequent requests. This is a limitation in how these clients implement HTTP, not something you can fix with
+  load balancer configuration.
 </Warning>
 
 #### Enabling Stateless Mode
@@ -679,6 +704,7 @@ app = mcp.http_app()
 ```
 
 Deploy with your secrets safely stored in environment variables:
+
 ```bash
 MCP_AUTH_TOKEN=secret uvicorn app:app --host 0.0.0.0 --port 8000
 ```
@@ -692,6 +718,7 @@ If you're using the [OAuth Proxy](/servers/auth/oauth-proxy), FastMCP issues its
 **Default Behavior (Development Only):**
 
 By default, FastMCP automatically manages cryptographic keys:
+
 - **Mac/Windows**: Keys are generated and stored in your system keyring, surviving server restarts. Suitable **only** for development and local testing.
 - **Linux**: Keys are ephemeral (random salt at startup), so tokens are invalidated on restart.
 
@@ -702,7 +729,7 @@ This automatic approach is convenient for development but not suitable for produ
 Production requires explicit key management to ensure tokens survive restarts and can be shared across multiple server instances. This requires the following two things working together:
 
 1. **Explicit JWT signing key** for signing tokens issued to clients
-3. **Persistent network-accessible storage** for upstream tokens (wrapped in `FernetEncryptionWrapper` to encrypt sensitive data at rest)
+2. **Persistent network-accessible storage** for upstream tokens (wrapped in `FernetEncryptionWrapper` to encrypt sensitive data at rest)
 
 **Configuration:**
 
@@ -820,7 +847,9 @@ sudo systemctl reload nginx
 Your FastMCP server is now accessible at `https://mcp.example.com/mcp`.
 
 <Warning>
-**SSE buffering is the most common issue.** If clients connect but never receive streaming responses (progress updates, tool results), verify that `proxy_buffering off` is set. Without it, nginx buffers the entire SSE stream and delivers it only when the connection closes, which breaks real-time communication.
+  **SSE buffering is the most common issue.** If clients connect but never receive streaming responses (progress
+  updates, tool results), verify that `proxy_buffering off` is set. Without it, nginx buffers the entire SSE stream and
+  delivers it only when the connection closes, which breaks real-time communication.
 </Warning>
 
 ### Key Considerations
@@ -866,7 +895,7 @@ Once your server is deployed, you'll need to verify it's accessible and function
 This guide has shown you how to create an HTTP-accessible MCP server, but you'll still need a hosting provider to make it available on the internet. Your FastMCP server can run anywhere that supports Python web applications:
 
 - **Cloud VMs** (AWS EC2, Google Compute Engine, Azure VMs)
-- **Container platforms** (Cloud Run, Container Instances, ECS)  
+- **Container platforms** (Cloud Run, Container Instances, ECS)
 - **Platform-as-a-Service** (Railway, Render, Vercel)
 - **Edge platforms** (Cloudflare Workers)
 - **Kubernetes clusters** (self-managed or managed)

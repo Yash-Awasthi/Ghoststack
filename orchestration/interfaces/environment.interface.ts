@@ -1,10 +1,10 @@
-import { IExecutionAdapter } from './execution.interface';
+import { IExecutionAdapter } from "./execution.interface";
 
 export interface IBrowserTask {
   id: string;
   url: string;
   actions: Array<{
-    type: 'navigate' | 'click' | 'type' | 'screenshot';
+    type: "navigate" | "click" | "type" | "screenshot";
     selector?: string;
     value?: string;
   }>;
@@ -20,19 +20,19 @@ export interface IScrapingTask {
 }
 
 export interface IBrowserExecutionAdapter extends IExecutionAdapter {
-  executeBrowserTask(task: IBrowserTask): Promise<{ 
-    success: boolean; 
-    screenshotUrl?: string; 
-    content?: string; 
+  executeBrowserTask(task: IBrowserTask): Promise<{
+    success: boolean;
+    screenshotUrl?: string;
+    content?: string;
     logs: string[];
   }>;
 }
 
 export interface IScrapingExecutionAdapter extends IExecutionAdapter {
-  executeScrapingTask(task: IScrapingTask): Promise<{ 
-    success: boolean; 
-    data: Record<string, string>; 
-    requestsCount: number; 
+  executeScrapingTask(task: IScrapingTask): Promise<{
+    success: boolean;
+    data: Record<string, string>;
+    requestsCount: number;
     bytesFetched: number;
   }>;
 }
@@ -70,8 +70,11 @@ export interface IExecutionEnvironment {
 }
 
 export interface ICapabilityPolicy {
-  evaluateCapability(taskType: string, environment: IExecutionEnvironment): Promise<{ 
-    allowed: boolean; 
-    reason?: string; 
+  evaluateCapability(
+    taskType: string,
+    environment: IExecutionEnvironment
+  ): Promise<{
+    allowed: boolean;
+    reason?: string;
   }>;
 }

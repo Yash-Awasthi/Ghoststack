@@ -10,6 +10,7 @@ ResourceResult now enforces strict typing to catch errors at development time (v
 ## What Changed
 
 ### Before (v2.x)
+
 ```python
 @mcp.resource("data://config")
 def get_config() -> dict:  # Auto-serialized to JSON
@@ -24,6 +25,7 @@ ResourceResult(["a", "b"])         # List split into items
 ```
 
 ### After (v3.0)
+
 ```python
 @mcp.resource("data://config")
 def get_config() -> str:  # Explicit JSON serialization
@@ -44,21 +46,25 @@ ResourceResult([ResourceContent(...)])  # Explicit list wrapping
 ## Type Constraints
 
 ### Resource.read() Return Type
+
 ```python
 str | bytes | ResourceResult
 ```
 
 **Valid:**
+
 - `return "text content"`
 - `return b"binary data"`
 - `return ResourceResult([ResourceContent(...)])`
 
 **Invalid (now raises TypeError):**
+
 - `return {"key": "value"}` → Use `json.dumps()` instead
 - `return ["item1", "item2"]` → Use `ResourceResult([ResourceContent(...)])`
 - `return ResourceContent(...)` → Use `ResourceResult([ResourceContent(...)])`
 
 ### ResourceResult Type Signature
+
 ```python
 ResourceResult(
     contents: str | bytes | list[ResourceContent],
@@ -67,16 +73,19 @@ ResourceResult(
 ```
 
 **Valid:**
+
 - `ResourceResult("plain text")`
 - `ResourceResult(b"binary")`
 - `ResourceResult([ResourceContent(...), ResourceContent(...)])`
 
 **Invalid (now raises TypeError):**
+
 - `ResourceResult({"key": "value"})` → Dict not supported
 - `ResourceResult(["a", "b"])` → Bare list not supported (must be list[ResourceContent])
 - `ResourceResult(resource_content_obj)` → Single item must be in list
 
 ### ResourceContent Type Signature
+
 ```python
 ResourceContent(
     content: Any,  # Auto-serializes non-str/bytes to JSON
@@ -85,7 +94,8 @@ ResourceContent(
 )
 ```
 
-**Auto-Serialization in ResourceContent.__init__:**
+**Auto-Serialization in ResourceContent.**init**:**
+
 - `str` → passes through (mime_type defaults to "text/plain")
 - `bytes` → passes through (mime_type defaults to "application/octet-stream")
 - `dict` → JSON-serialized string (mime_type defaults to "application/json")
@@ -114,13 +124,16 @@ Type checkers now catch return type mismatches during development rather than at
 ## Migration Guide
 
 ### Returning JSON Data
+
 **Before:**
+
 ```python
 def get_config() -> dict:
     return {"key": "value", "nested": {"a": 1}}
 ```
 
 **After:**
+
 ```python
 import json
 
@@ -129,13 +142,16 @@ def get_config() -> str:
 ```
 
 ### Returning Multiple Items
+
 **Before:**
+
 ```python
 def get_items() -> list:
     return ["user1", "user2", "user3"]
 ```
 
 **After (Option 1: Single JSON array):**
+
 ```python
 import json
 
@@ -144,6 +160,7 @@ def get_items() -> str:
 ```
 
 **After (Option 2: Multiple content items):**
+
 ```python
 from fastmcp.resources import ResourceContent, ResourceResult
 
@@ -156,13 +173,16 @@ def get_items() -> ResourceResult:
 ```
 
 ### Returning Structured Data with Custom MIME Types
+
 **Before:**
+
 ```python
 def get_html() -> dict:
     return {"html": "<div>content</div>"}
 ```
 
 **After:**
+
 ```python
 from fastmcp.resources import ResourceContent, ResourceResult
 
@@ -190,6 +210,7 @@ This is intentional. The type system enforces correct typing at development time
 ## Backward Compatibility
 
 **This is a breaking change.** Code that returns dict or list from resources will:
+
 1. **Pass type checking**: If you ignore type warnings
 2. **Fail at runtime**: Raises `TypeError` when client reads the resource
 

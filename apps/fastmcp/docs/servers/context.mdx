@@ -5,12 +5,14 @@ description: Access MCP capabilities like logging, progress, and resources withi
 icon: rectangle-code
 tag: NEW
 ---
-import { VersionBadge } from '/snippets/version-badge.mdx'
+
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 When defining FastMCP [tools](/servers/tools), [resources](/servers/resources), resource templates, or [prompts](/servers/prompts), your functions might need to interact with the underlying MCP session or access advanced server capabilities. FastMCP provides the `Context` object for this purpose.
 
 <Note>
-You access Context through FastMCP's dependency injection system. For other injectable values like HTTP requests, access tokens, and custom dependencies, see [Dependency Injection](/servers/dependency-injection).
+  You access Context through FastMCP's dependency injection system. For other injectable values like HTTP requests,
+  access tokens, and custom dependencies, see [Dependency Injection](/servers/dependency-injection).
 </Note>
 
 ## What Is Context?
@@ -132,12 +134,13 @@ Send debug, info, warning, and error messages back to the MCP client for visibil
 
 ```python
 await ctx.debug("Starting analysis")
-await ctx.info(f"Processing {len(data)} items") 
+await ctx.info(f"Processing {len(data)} items")
 await ctx.warning("Deprecated parameter used")
 await ctx.error("Processing failed")
 ```
 
 See [Server Logging](/servers/logging) for complete documentation and examples.
+
 ### Client Elicitation
 
 <VersionBadge version="2.10.0" />
@@ -164,7 +167,6 @@ response = await ctx.sample("Analyze this data", temperature=0.7)
 
 See [LLM Sampling](/servers/sampling) for comprehensive usage and advanced techniques.
 
-
 ### Progress Reporting
 
 Update clients on the progress of long-running operations, enabling progress indicators and better user experience.
@@ -189,6 +191,7 @@ content = content_list[0].content
 ```
 
 **Method signatures:**
+
 - **`ctx.list_resources() -> list[MCPResource]`**: <VersionBadge version="2.13.0" /> Returns list of all available resources
 - **`ctx.read_resource(uri: str | AnyUrl) -> list[ReadResourceContents]`**: Returns a list of resource content parts
 
@@ -208,6 +211,7 @@ messages = result.messages
 ```
 
 **Method signatures:**
+
 - **`ctx.list_prompts() -> list[MCPPrompt]`**: Returns list of all available prompts
 - **`ctx.get_prompt(name: str, arguments: dict[str, Any] | None = None) -> GetPromptResult`**: Get a specific prompt with optional arguments
 
@@ -238,13 +242,12 @@ async def get_counter(ctx: Context) -> int:
 Each client session has its own isolated state—two different clients calling `increment_counter` will each have their own counter.
 
 **Method signatures:**
+
 - **`await ctx.set_state(key, value, *, serializable=True)`**: Store a value in session state
 - **`await ctx.get_state(key)`**: Retrieve a value (returns None if not found)
 - **`await ctx.delete_state(key)`**: Remove a value from session state
 
-<Note>
-State methods are async and require `await`. State expires after 1 day to prevent unbounded memory growth.
-</Note>
+<Note>State methods are async and require `await`. State expires after 1 day to prevent unbounded memory growth.</Note>
 
 #### Non-Serializable Values
 
@@ -475,6 +478,6 @@ def send_email(to: str, subject: str, body: str, ctx: Context) -> str:
 ```
 
 <Warning>
-The MCP request is part of the low-level MCP SDK and intended for advanced use cases. Most users will not need to use it directly.
+  The MCP request is part of the low-level MCP SDK and intended for advanced use cases. Most users will not need to use
+  it directly.
 </Warning>
-

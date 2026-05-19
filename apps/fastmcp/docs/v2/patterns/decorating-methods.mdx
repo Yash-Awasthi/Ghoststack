@@ -36,6 +36,7 @@ class MyClass:
 obj = MyClass()
 obj.my_method(5)  # Fails - my_method is a Tool, not a function
 ```
+
 </Warning>
 
 This is another important reason to register methods functionally after defining the class.
@@ -57,6 +58,7 @@ class MyClass:
     def add(self, x, y):
         return x + y
 ```
+
 </Warning>
 When the decorator is applied this way, it captures the unbound method. When the LLM later tries to use this component, it will see `self` as a required parameter, but it won't know what to provide for it, causing errors or unexpected behavior.
 
@@ -79,9 +81,11 @@ mcp.tool(obj.add)
 # Now you can call it without 'self' showing up as a parameter
 await mcp._mcp_call_tool('add', {'x': 1, 'y': 2})  # Returns 3
 ```
+
 </Check>
 
 This approach works because:
+
 1. You first create an instance of the class (`obj`)
 2. When you access the method through the instance (`obj.add`), Python creates a bound method where `self` is already set to that instance
 3. When you register this bound method, the system sees a callable that only expects the appropriate parameters, not `self`
@@ -103,12 +107,13 @@ class MyClass:
     @mcp.tool  # This won't work but won't raise an error
     def from_string_v1(cls, s):
         return cls(s)
-    
+
     @mcp.tool
     @classmethod  # This will raise a helpful ValueError
     def from_string_v2(cls, s):
         return cls(s)
 ```
+
 </Warning>
 
 - If `@classmethod` comes first, then `@mcp.tool`: No error is raised, but it won't work correctly
@@ -130,9 +135,11 @@ class MyClass:
 # Register the class method after the class is defined
 mcp.tool(MyClass.from_string)
 ```
+
 </Check>
 
 This works because:
+
 1. The `@classmethod` decorator is applied properly during class definition
 2. When you access `MyClass.from_string`, Python provides a special method object that automatically binds the class to the `cls` parameter
 3. When registered, only the appropriate parameters are exposed to the LLM, hiding the implementation detail of the `cls` parameter
@@ -155,6 +162,7 @@ class MyClass:
     def utility(x, y):
         return x + y
 ```
+
 </Warning>
 
 This works because `@staticmethod` converts the method to a regular function, which the FastMCP decorator can then properly process. However, this is not recommended because the FastMCP decorator will not return a callable staticmethod. Therefore, you should register static methods the same way as other methods.
@@ -175,6 +183,7 @@ class MyClass:
 # This also works
 mcp.tool(MyClass.utility)
 ```
+
 </Check>
 
 ## Additional Patterns
@@ -193,10 +202,10 @@ class ComponentProvider:
         # Register methods
         mcp_instance.tool(self.tool_method)
         mcp_instance.resource("resource://data")(self.resource_method)
-    
+
     def tool_method(self, x):
         return x * 2
-    
+
     def resource_method(self):
         return "Resource data"
 
@@ -205,6 +214,7 @@ provider = ComponentProvider(mcp)
 ```
 
 This pattern is useful when:
+
 - You want to encapsulate registration logic within the class itself
 - You have multiple related components that should be registered together
 - You want to ensure that methods are always properly registered when creating an instance
@@ -220,6 +230,5 @@ The current behavior of FastMCP decorators with methods is:
 - **Instance methods**: Should be registered after creating an instance using the decorator calls
 
 For class and instance methods, you should register them after creating the instance or class to ensure proper method binding. This ensures that the methods are properly bound before being registered.
-
 
 Understanding these patterns allows you to effectively organize your components into classes while maintaining proper method binding, giving you the benefits of object-oriented design without sacrificing the simplicity of FastMCP's decorator system.

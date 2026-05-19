@@ -1,4 +1,4 @@
-import { IRuntimeInspector } from './interfaces/observability.interface';
+import { IRuntimeInspector } from "./interfaces/observability.interface";
 
 export class RuntimeDiagnosticAPI {
   private inspector: IRuntimeInspector;
@@ -8,74 +8,76 @@ export class RuntimeDiagnosticAPI {
   }
 
   async handle(method: string, path: string): Promise<any> {
-    if (method !== 'GET') {
+    if (method !== "GET") {
       throw new Error(`Unsupported method: ${method}`);
     }
 
     // Dynamic Parameter Route Resolution: /runtime/workflows/:id
-    if (path.startsWith('/runtime/workflows/')) {
-      const parts = path.split('/');
+    if (path.startsWith("/runtime/workflows/")) {
+      const parts = path.split("/");
       const last = parts[parts.length - 1];
-      if (last === 'replays') {
+      if (last === "replays") {
         return (this.inspector as any).getWorkflowReplays ? (this.inspector as any).getWorkflowReplays() : [];
       }
-      if (last === 'templates') {
+      if (last === "templates") {
         return (this.inspector as any).getWorkflowTemplates ? (this.inspector as any).getWorkflowTemplates() : [];
       }
-      if (last === 'telemetry') {
-        return (this.inspector as any).getWorkflowTelemetryStats ? (this.inspector as any).getWorkflowTelemetryStats() : {};
+      if (last === "telemetry") {
+        return (this.inspector as any).getWorkflowTelemetryStats
+          ? (this.inspector as any).getWorkflowTelemetryStats()
+          : {};
       }
       return (this.inspector as any).getWorkflowExecution ? (this.inspector as any).getWorkflowExecution(last) : null;
     }
 
     switch (path) {
-      case '/health':
+      case "/health":
         return this.inspector.getHealth();
-      case '/metrics':
+      case "/metrics":
         return this.inspector.getMetrics();
-      case '/runtime/state':
+      case "/runtime/state":
         return this.inspector.getSnapshots();
-      case '/runtime/tasks':
+      case "/runtime/tasks":
         return this.inspector.getTasks();
-      case '/runtime/events':
+      case "/runtime/events":
         return this.inspector.getEvents();
-      case '/runtime/queues':
+      case "/runtime/queues":
         return this.inspector.getQueues();
-      case '/runtime/services':
+      case "/runtime/services":
         return this.inspector.getServices();
-      case '/runtime/snapshots':
+      case "/runtime/snapshots":
         return this.inspector.getSnapshots();
-      case '/runtime/mcp':
+      case "/runtime/mcp":
         return (this.inspector as any).getMCPSummary ? (this.inspector as any).getMCPSummary() : {};
-      case '/runtime/mcp/servers':
+      case "/runtime/mcp/servers":
         return (this.inspector as any).getMCPServers ? (this.inspector as any).getMCPServers() : [];
-      case '/runtime/mcp/tools':
+      case "/runtime/mcp/tools":
         return (this.inspector as any).getMCPTools ? (this.inspector as any).getMCPTools() : [];
-      case '/runtime/mcp/executions':
+      case "/runtime/mcp/executions":
         return (this.inspector as any).getMCPExecutions ? (this.inspector as any).getMCPExecutions() : [];
-      
+
       // Phase 6 Cognitive Governance Endpoints
-      case '/runtime/governance':
+      case "/runtime/governance":
         return (this.inspector as any).getGovernanceInfo ? (this.inspector as any).getGovernanceInfo() : {};
-      case '/runtime/approvals':
+      case "/runtime/approvals":
         return (this.inspector as any).getApprovalsList ? (this.inspector as any).getApprovalsList() : [];
-      case '/runtime/plans':
+      case "/runtime/plans":
         return (this.inspector as any).getPlansList ? (this.inspector as any).getPlansList() : [];
-      case '/runtime/guardrails':
+      case "/runtime/guardrails":
         return (this.inspector as any).getGuardrailsInfo ? (this.inspector as any).getGuardrailsInfo() : {};
 
       // Phase 7 Controlled Execution Subsystem Endpoints
-      case '/runtime/browser':
+      case "/runtime/browser":
         return (this.inspector as any).getBrowserMetrics ? (this.inspector as any).getBrowserMetrics() : {};
-      case '/runtime/scraping':
+      case "/runtime/scraping":
         return (this.inspector as any).getScrapingMetrics ? (this.inspector as any).getScrapingMetrics() : {};
-      case '/runtime/sandbox':
+      case "/runtime/sandbox":
         return (this.inspector as any).getSandboxMetrics ? (this.inspector as any).getSandboxMetrics() : {};
-      case '/runtime/environments':
+      case "/runtime/environments":
         return (this.inspector as any).getEnvironmentsList ? (this.inspector as any).getEnvironmentsList() : [];
 
       // Phase 8 Workflow Observability Endpoints
-      case '/runtime/workflows':
+      case "/runtime/workflows":
         return (this.inspector as any).getWorkflowsList ? (this.inspector as any).getWorkflowsList() : [];
 
       default:

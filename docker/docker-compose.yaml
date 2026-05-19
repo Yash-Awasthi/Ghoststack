@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  orchestrator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ghoststack-core-runner
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - STORAGE_PATH=/app/data-runtime
+    volumes:
+      - ghoststack-data:/app/data-runtime
+      - ghoststack-logs:/app/logs
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "dist/runtime/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ghoststack-data:
+    driver: local
+  ghoststack-logs:
+    driver: local

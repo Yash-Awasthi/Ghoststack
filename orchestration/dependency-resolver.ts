@@ -1,5 +1,5 @@
-import { ITaskDependencyResolver } from './interfaces/execution.interface';
-import { Task } from './task-router';
+import { ITaskDependencyResolver } from "./interfaces/execution.interface";
+import { Task } from "./task-router";
 
 export class TaskDependencyResolver implements ITaskDependencyResolver {
   detectCycles(tasks: Task[]): boolean {

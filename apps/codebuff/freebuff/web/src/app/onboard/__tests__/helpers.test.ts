@@ -122,9 +122,7 @@ describe('freebuff onboard/_helpers', () => {
         '1704067200000',
         'a'.repeat(64),
       )
-      const legacyAuthCode = `1234567890abcdef-1704067200000-${'b'.repeat(
-        64,
-      )}`
+      const legacyAuthCode = `1234567890abcdef-1704067200000-${'b'.repeat(64)}`
 
       expect(isCliAuthCodeCandidate(opaqueToken)).toBe(true)
       expect(isCliAuthCodeCandidate(signedAuthCode)).toBe(true)

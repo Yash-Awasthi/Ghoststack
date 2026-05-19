@@ -5,15 +5,13 @@ description: Add cross-cutting functionality to your MCP server with middleware 
 icon: layer-group
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.9.0" />
 
 Middleware adds behavior that applies across multiple operations—authentication, logging, rate limiting, or request transformation—without modifying individual tools or resources.
 
-<Tip>
-MCP middleware is a FastMCP-specific concept and is not part of the official MCP protocol specification.
-</Tip>
+<Tip>MCP middleware is a FastMCP-specific concept and is not part of the official MCP protocol specification.</Tip>
 
 ## Overview
 
@@ -24,6 +22,7 @@ Request → Middleware A → Middleware B → Handler → Middleware B → Middl
 ```
 
 This bidirectional flow means middleware can:
+
 - **Pre-process**: Validate authentication, log incoming requests, check rate limits
 - **Post-process**: Transform responses, record timing metrics, handle errors consistently
 
@@ -90,11 +89,11 @@ Middleware-stored state does not automatically cross mount boundaries. If `AuthM
 
 Rather than processing every message identically, FastMCP provides specialized hooks at different levels of specificity. Multiple hooks fire for a single request, going from general to specific:
 
-| Level | Hooks | Purpose |
-|-------|-------|---------|
-| Message | `on_message` | All MCP traffic (requests and notifications) |
-| Type | `on_request`, `on_notification` | Requests expecting responses vs fire-and-forget |
-| Operation | `on_call_tool`, `on_read_resource`, `on_get_prompt`, etc. | Specific MCP operations |
+| Level     | Hooks                                                     | Purpose                                         |
+| --------- | --------------------------------------------------------- | ----------------------------------------------- |
+| Message   | `on_message`                                              | All MCP traffic (requests and notifications)    |
+| Type      | `on_request`, `on_notification`                           | Requests expecting responses vs fire-and-forget |
+| Operation | `on_call_tool`, `on_read_resource`, `on_get_prompt`, etc. | Specific MCP operations                         |
 
 When a client calls a tool, the middleware chain processes `on_message` first, then `on_request`, then `on_call_tool`. This hierarchy lets you target exactly the right scope—use `on_message` for logging everything, `on_request` for authentication, and `on_call_tool` for tool-specific behavior.
 
@@ -111,6 +110,7 @@ async def hook_name(self, context: MiddlewareContext, call_next) -> result_type:
 ```
 
 **Parameters:**
+
 - `context` — `MiddlewareContext` containing request information
 - `call_next` — Async function to continue the middleware chain
 
@@ -120,14 +120,14 @@ async def hook_name(self, context: MiddlewareContext, call_next) -> result_type:
 
 The `context` parameter provides access to request details:
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `method` | `str` | MCP method name (e.g., `"tools/call"`) |
-| `source` | `str` | Origin: `"client"` or `"server"` |
-| `type` | `str` | Message type: `"request"` or `"notification"` |
-| `message` | `object` | The MCP message data |
-| `timestamp` | `datetime` | When the request was received |
-| `fastmcp_context` | `Context` | FastMCP context object (if available) |
+| Attribute         | Type       | Description                                   |
+| ----------------- | ---------- | --------------------------------------------- |
+| `method`          | `str`      | MCP method name (e.g., `"tools/call"`)        |
+| `source`          | `str`      | Origin: `"client"` or `"server"`              |
+| `type`            | `str`      | Message type: `"request"` or `"notification"` |
+| `message`         | `object`   | The MCP message data                          |
+| `timestamp`       | `datetime` | When the request was received                 |
+| `fastmcp_context` | `Context`  | FastMCP context object (if available)         |
 
 ### Message Hooks
 
@@ -283,7 +283,8 @@ async def on_initialize(self, context: MiddlewareContext, call_next):
 **Returns:** `None` — The initialization response is handled internally by the MCP protocol.
 
 <Warning>
-Raising `McpError` after `call_next()` will only log the error, not send it to the client. The response has already been sent. Always reject **before** `call_next()`.
+  Raising `McpError` after `call_next()` will only log the error, not send it to the client. The response has already
+  been sent. Always reject **before** `call_next()`.
 </Warning>
 
 ### Raw Handler
@@ -351,11 +352,11 @@ mcp.add_middleware(LoggingMiddleware(
 ))
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `include_payloads` | `bool` | `False` | Log request/response content |
-| `max_payload_length` | `int` | `500` | Truncate payloads beyond this length |
-| `logger` | `Logger` | module logger | Custom logger instance |
+| Parameter            | Type     | Default       | Description                          |
+| -------------------- | -------- | ------------- | ------------------------------------ |
+| `include_payloads`   | `bool`   | `False`       | Log request/response content         |
+| `max_payload_length` | `int`    | `500`         | Truncate payloads beyond this length |
+| `logger`             | `Logger` | module logger | Custom logger instance               |
 
 ### Timing
 
@@ -406,16 +407,17 @@ mcp.add_middleware(ResponseCachingMiddleware(
 ))
 ```
 
-| Settings Class | Configures |
-|----------------|------------|
-| `ListToolsSettings` | `on_list_tools` caching |
-| `CallToolSettings` | `on_call_tool` caching |
+| Settings Class          | Configures                  |
+| ----------------------- | --------------------------- |
+| `ListToolsSettings`     | `on_list_tools` caching     |
+| `CallToolSettings`      | `on_call_tool` caching      |
 | `ListResourcesSettings` | `on_list_resources` caching |
-| `ReadResourceSettings` | `on_read_resource` caching |
-| `ListPromptsSettings` | `on_list_prompts` caching |
-| `GetPromptSettings` | `on_get_prompt` caching |
+| `ReadResourceSettings`  | `on_read_resource` caching  |
+| `ListPromptsSettings`   | `on_list_prompts` caching   |
+| `GetPromptSettings`     | `on_get_prompt` caching     |
 
 Each settings class accepts:
+
 - `enabled` — Enable/disable caching for this operation
 - `ttl` — Time-to-live in seconds
 - `included_*` / `excluded_*` — Whitelist or blacklist specific items
@@ -444,7 +446,10 @@ mcp.add_middleware(ResponseCachingMiddleware(
 See [Storage Backends](/servers/storage-backends) for complete options.
 
 <Note>
-Cache keys are based on the operation name and arguments only — they do not include user or session identity. If your tools return user-specific data derived from auth context (e.g., headers or session state) rather than from the request arguments, you should either disable caching for those tools or ensure user identity is part of the tool arguments.
+  Cache keys are based on the operation name and arguments only — they do not include user or session identity. If your
+  tools return user-specific data derived from auth context (e.g., headers or session state) rather than from the
+  request arguments, you should either disable caching for those tools or ensure user identity is part of the tool
+  arguments.
 </Note>
 
 ### Rate Limiting
@@ -469,11 +474,11 @@ mcp.add_middleware(RateLimitingMiddleware(
 ))
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `max_requests_per_second` | `float` | `10.0` | Sustained request rate |
-| `burst_capacity` | `int` | `20` | Maximum burst size |
-| `client_id_func` | `Callable` | `None` | Custom client identification |
+| Parameter                 | Type       | Default | Description                  |
+| ------------------------- | ---------- | ------- | ---------------------------- |
+| `max_requests_per_second` | `float`    | `10.0`  | Sustained request rate       |
+| `burst_capacity`          | `int`      | `20`    | Maximum burst size           |
+| `client_id_func`          | `Callable` | `None`  | Custom client identification |
 
 For sliding window rate limiting:
 
@@ -506,11 +511,11 @@ mcp.add_middleware(ErrorHandlingMiddleware(
 ))
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `include_traceback` | `bool` | `False` | Include stack traces in logs |
-| `transform_errors` | `bool` | `False` | Convert exceptions to MCP errors |
-| `error_callback` | `Callable` | `None` | Custom callback on errors |
+| Parameter           | Type       | Default | Description                      |
+| ------------------- | ---------- | ------- | -------------------------------- |
+| `include_traceback` | `bool`     | `False` | Include stack traces in logs     |
+| `transform_errors`  | `bool`     | `False` | Convert exceptions to MCP errors |
+| `error_callback`    | `Callable` | `None`  | Custom callback on errors        |
 
 For automatic retries:
 
@@ -541,8 +546,8 @@ mcp = FastMCP("MyServer")
 mcp.add_middleware(PingMiddleware(interval_ms=5000))
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
+| Parameter     | Type  | Default | Description                   |
+| ------------- | ----- | ------- | ----------------------------- |
 | `interval_ms` | `int` | `30000` | Ping interval in milliseconds |
 
 The ping task starts on the first message and stops automatically when the session ends. Most useful for stateful HTTP connections; has no effect on stateless connections.
@@ -578,7 +583,9 @@ def search(query: str) -> str:
 When a response exceeds the limit, the middleware extracts all text content, joins it together, truncates to fit within the limit, and returns a single `TextContent` block. For non-text responses, the serialized JSON is used as the text source.
 
 <Note>
-If a tool defines an `output_schema`, truncated responses will no longer conform to that schema — the client will receive a plain `TextContent` block instead of the expected structured output. Keep this in mind when setting size limits for tools with structured responses.
+  If a tool defines an `output_schema`, truncated responses will no longer conform to that schema — the client will
+  receive a plain `TextContent` block instead of the expected structured output. Keep this in mind when setting size
+  limits for tools with structured responses.
 </Note>
 
 ```python
@@ -589,11 +596,11 @@ mcp.add_middleware(ResponseLimitingMiddleware(
 ))
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `max_size` | `int` | `1_000_000` | Maximum response size in bytes (1MB default) |
-| `truncation_suffix` | `str` | `"\n\n[Response truncated due to size limit]"` | Suffix appended to truncated responses |
-| `tools` | `list[str] \| None` | `None` | Limit only these tools (None = all tools) |
+| Parameter           | Type                | Default                                        | Description                                  |
+| ------------------- | ------------------- | ---------------------------------------------- | -------------------------------------------- |
+| `max_size`          | `int`               | `1_000_000`                                    | Maximum response size in bytes (1MB default) |
+| `truncation_suffix` | `str`               | `"\n\n[Response truncated due to size limit]"` | Suffix appended to truncated responses       |
+| `tools`             | `list[str] \| None` | `None`                                         | Limit only these tools (None = all tools)    |
 
 ### Combining Middleware
 
@@ -661,12 +668,12 @@ class AuthMiddleware(Middleware):
         return await call_next(context)
 ```
 
-| Operation | Error Type |
-|-----------|------------|
-| Tool calls | `ToolError` |
-| Resource reads | `ResourceError` |
-| Prompt retrieval | `PromptError` |
-| General requests | `McpError` |
+| Operation        | Error Type      |
+| ---------------- | --------------- |
+| Tool calls       | `ToolError`     |
+| Resource reads   | `ResourceError` |
+| Prompt retrieval | `PromptError`   |
+| General requests | `McpError`      |
 
 Do not return error values or skip `call_next()` to indicate errors—raise exceptions for proper error propagation.
 

@@ -5,7 +5,7 @@ description: Combine multiple servers into one
 icon: puzzle-piece
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.2.0" />
 
@@ -135,11 +135,11 @@ main.mount(calendar, namespace="calendar")
 ### How Namespacing Works
 
 | Component Type | Without Namespace | With `namespace="api"` |
-|----------------|-------------------|------------------------|
-| Tool | `my_tool` | `api_my_tool` |
-| Prompt | `my_prompt` | `api_my_prompt` |
-| Resource | `data://info` | `data://api/info` |
-| Template | `data://{id}` | `data://api/{id}` |
+| -------------- | ----------------- | ---------------------- |
+| Tool           | `my_tool`         | `api_my_tool`          |
+| Prompt         | `my_prompt`       | `api_my_prompt`        |
+| Resource       | `data://info`     | `data://api/info`      |
+| Template       | `data://{id}`     | `data://api/{id}`      |
 
 Namespacing uses [transforms](/servers/transforms/transforms) under the hood.
 

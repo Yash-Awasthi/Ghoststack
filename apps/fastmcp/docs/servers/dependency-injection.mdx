@@ -13,7 +13,8 @@ FastMCP uses dependency injection to provide runtime values to your tools, resou
 The dependency injection system is powered by [Docket](https://github.com/chrisguidry/docket) and its dependency system [uncalled-for](https://github.com/chrisguidry/uncalled-for). Core DI features like `Depends()` and `CurrentContext()` work without installing Docket. For background tasks and advanced task-related dependencies, install `fastmcp[tasks]`. For comprehensive coverage of dependency patterns, see the [Docket dependency documentation](https://docket.lol/en/latest/dependency-injection/).
 
 <Note>
-Dependency parameters are automatically excluded from the MCP schema—clients never see them as callable parameters. This separation keeps your function signatures clean while giving you access to the runtime context you need.
+  Dependency parameters are automatically excluded from the MCP schema—clients never see them as callable parameters.
+  This separation keeps your function signatures clean while giving you access to the runtime context you need.
 </Note>
 
 ## How Dependency Injection Works
@@ -160,10 +161,9 @@ def get_client_ip() -> str:
 ```
 
 <Note>
-Both raise `RuntimeError` when called outside an HTTP context (e.g., STDIO transport).
-For background tasks created from an HTTP request, FastMCP restores a minimal request
-backed by the originating request's snapshotted headers. Use HTTP Headers if you need
-graceful fallback.
+  Both raise `RuntimeError` when called outside an HTTP context (e.g., STDIO transport). For background tasks created
+  from an HTTP request, FastMCP restores a minimal request backed by the originating request's snapshotted headers. Use
+  HTTP Headers if you need graceful fallback.
 </Note>
 
 ### HTTP Headers
@@ -267,12 +267,12 @@ async def add_expense(
 
 Common claims vary by identity provider:
 
-| Provider | User ID Claim | Email Claim | Name Claim |
-|----------|--------------|-------------|------------|
-| Azure/Entra | `oid` | `email` | `name` |
-| GitHub | `sub` | `email` | `name` |
-| Google | `sub` | `email` | `name` |
-| Auth0 | `sub` | `email` | `name` |
+| Provider    | User ID Claim | Email Claim | Name Claim |
+| ----------- | ------------- | ----------- | ---------- |
+| Azure/Entra | `oid`         | `email`     | `name`     |
+| GitHub      | `sub`         | `email`     | `name`     |
+| Google      | `sub`         | `email`     | `name`     |
+| Auth0       | `sub`         | `email`     | `name`     |
 
 ### Background Task Dependencies
 
@@ -309,7 +309,9 @@ async def long_running_task(
 - **`Progress()`**: Track task progress with atomic updates
 
 <Note>
-Task dependencies require `pip install 'fastmcp[tasks]'`. They're only available within task-enabled components (`task=True`). For comprehensive task patterns, see the [Docket documentation](https://chrisguidry.github.io/docket/dependencies/).
+  Task dependencies require `pip install 'fastmcp[tasks]'`. They're only available within task-enabled components
+  (`task=True`). For comprehensive task patterns, see the [Docket
+  documentation](https://chrisguidry.github.io/docket/dependencies/).
 </Note>
 
 ## Custom Dependencies

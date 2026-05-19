@@ -127,9 +127,7 @@ client = Client(
 )
 ```
 
-<Note>
-Install the OpenAI handler with `pip install fastmcp[openai]`.
-</Note>
+<Note>Install the OpenAI handler with `pip install fastmcp[openai]`.</Note>
 
 ### Anthropic Handler
 
@@ -145,9 +143,7 @@ client = Client(
 )
 ```
 
-<Note>
-Install the Anthropic handler with `pip install fastmcp[anthropic]`.
-</Note>
+<Note>Install the Anthropic handler with `pip install fastmcp[anthropic]`.</Note>
 
 ### Google Gemini Handler
 
@@ -163,9 +159,7 @@ client = Client(
 )
 ```
 
-<Note>
-Install the Google Gemini handler with `pip install fastmcp[gemini]`.
-</Note>
+<Note>Install the Google Gemini handler with `pip install fastmcp[gemini]`.</Note>
 
 ## Sampling Capabilities
 
@@ -186,5 +180,6 @@ client = Client(
 Tool execution happens on the server side. The client's role is to pass tools to the LLM and return the LLM's response (which may include tool use requests). The server then executes the tools and may send follow-up sampling requests with tool results.
 
 <Tip>
-To implement a custom sampling handler, see the [handler source code](https://github.com/PrefectHQ/fastmcp/tree/main/fastmcp_slim/fastmcp/client/sampling/handlers) as a reference.
+  To implement a custom sampling handler, see the [handler source
+  code](https://github.com/PrefectHQ/fastmcp/tree/main/fastmcp_slim/fastmcp/client/sampling/handlers) as a reference.
 </Tip>

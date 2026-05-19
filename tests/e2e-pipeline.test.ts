@@ -1,21 +1,21 @@
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter, Task } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { FlociExecutionAdapter } from '../orchestration/floci-adapter';
-import * as path from 'path';
-import * as fs from 'fs';
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter, Task } from "../orchestration/task-router";
+import { LocalAgentRegistry } from "../orchestration/agent-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("GhostStack Phase 3: E2E Pipeline Vertical Slice & Crash Recovery Integration", () => {
-  const testDir = path.join(__dirname, '../temp-e2e-db');
-  const eventLogPath = path.join(testDir, 'e2e_events.jsonl');
-  const cacheDbPath = path.join(testDir, 'e2e_cache.json');
+  const testDir = path.join(__dirname, "../temp-e2e-db");
+  const eventLogPath = path.join(testDir, "e2e_events.jsonl");
+  const cacheDbPath = path.join(testDir, "e2e_cache.json");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -31,10 +31,10 @@ describe("GhostStack Phase 3: E2E Pipeline Vertical Slice & Crash Recovery Integ
 
   it("should validate dependencies, execute S3/SQS/DynamoDB actions in order, and persist execution states cleanly", async () => {
     const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+      portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+      servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+      healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+      runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
     });
 
     const rm = new RuntimeManager(loader);
@@ -43,15 +43,13 @@ describe("GhostStack Phase 3: E2E Pipeline Vertical Slice & Crash Recovery Integ
     const router = new TaskRouter(bus, eventStore);
     const registry = new LocalAgentRegistry();
     const logger = new StructuredLogger();
-    
+
     const queue = new MemoryQueueBackend();
     const persistence = new FileRuntimePersistence(cacheDbPath);
     const flociAdapter = new FlociExecutionAdapter();
     const executor = new TaskExecutor(queue, bus, persistence, logger, [flociAdapter]);
 
-    const orchestrator = new GhostStackOrchestrator(
-      rm, bus, router, registry, eventStore, logger, queue, executor
-    );
+    const orchestrator = new GhostStackOrchestrator(rm, bus, router, registry, eventStore, logger, queue, executor);
 
     await orchestrator.start();
 

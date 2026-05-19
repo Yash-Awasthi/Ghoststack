@@ -23,7 +23,7 @@ async def message_handler(message):
     if hasattr(message, 'root'):
         method = message.root.method
         print(f"Received: {method}")
-        
+
         # Handle specific notifications
         if method == "notifications/tools/list_changed":
             print("Tools have changed - might want to refresh tool cache")
@@ -107,7 +107,7 @@ import mcp.types
 class ToolCacheHandler(MessageHandler):
     def __init__(self):
         self.cached_tools = []
-    
+
     async def on_tool_list_changed(
         self, notification: mcp.types.ToolListChangedNotification
     ) -> None:
@@ -123,7 +123,7 @@ client = Client("server.py", message_handler=ToolCacheHandler())
 While the message handler receives server-initiated requests, for most use cases you should use the dedicated callback parameters instead:
 
 - **Sampling requests**: Use [`sampling_handler`](/v2/clients/sampling)
-- **Progress requests**: Use [`progress_handler`](/v2/clients/progress)  
+- **Progress requests**: Use [`progress_handler`](/v2/clients/progress)
 - **Log requests**: Use [`log_handler`](/v2/clients/logging)
 
 The message handler is primarily for monitoring and handling notifications rather than responding to requests.

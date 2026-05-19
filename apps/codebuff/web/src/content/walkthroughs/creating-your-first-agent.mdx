@@ -137,15 +137,11 @@ const definition: AgentDefinition = {
 }
 ```
 
-
-
 ## Publish
 
 ```bash
 codebuff publish simple-code-reviewer
 ```
-
-
 
 ## Use Your Published Agent
 
@@ -257,12 +253,12 @@ export default definition
 
 **`yield` tool calls** - execute tools:
 
-   ```typescript
-   const { toolResult, toolError } = yield {
-     toolName: 'run_terminal_command',
-     input: { command: 'git status' }
-   }
-   ```
+```typescript
+const { toolResult, toolError } = yield {
+  toolName: 'run_terminal_command',
+  input: { command: 'git status' }
+}
+```
 
 **`yield 'STEP_ALL'`** - LLM runs until completion
 
@@ -292,5 +288,3 @@ spawnableAgents: [
   'codebuff/file-explorer@0.0.4', // ✅ Also correct: you can mix local and published agents.
 ]
 ```
-
-

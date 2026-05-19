@@ -1,4 +1,4 @@
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
 
 describe("Milestone 1: Observability Core (Metrics & Tracing)", () => {
   describe("MetricsCollector", () => {
@@ -34,7 +34,7 @@ describe("Milestone 1: Observability Core (Metrics & Tracing)", () => {
       const spans = recorder.getSpans();
       expect(spans.length).toBe(2);
 
-      const retrievedB = spans.find(s => s.spanId === spanB.spanId);
+      const retrievedB = spans.find((s) => s.spanId === spanB.spanId);
       expect(retrievedB?.endTime).toBeDefined();
       expect(retrievedB?.metadata?.status).toBe("success");
     });

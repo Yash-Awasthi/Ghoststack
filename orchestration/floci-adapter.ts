@@ -1,4 +1,4 @@
-import { IExecutionAdapter, IExecutionContext } from './interfaces/execution.interface';
+import { IExecutionAdapter, IExecutionContext } from "./interfaces/execution.interface";
 
 export class FlociExecutionAdapter implements IExecutionAdapter {
   private endpoint = "http://localhost:4566";
@@ -30,7 +30,9 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
           };
         }
       } catch (err) {
-        context.logger?.warn?.(`Floci S3 endpoint connection refused. Falling back to local offline mock.`, { error: err });
+        context.logger?.warn?.(`Floci S3 endpoint connection refused. Falling back to local offline mock.`, {
+          error: err
+        });
       }
 
       return {
@@ -68,7 +70,9 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
           };
         }
       } catch (err) {
-        context.logger?.warn?.(`Floci SQS endpoint connection refused. Falling back to local offline mock.`, { error: err });
+        context.logger?.warn?.(`Floci SQS endpoint connection refused. Falling back to local offline mock.`, {
+          error: err
+        });
       }
 
       return {
@@ -107,7 +111,9 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
           };
         }
       } catch (err) {
-        context.logger?.warn?.(`Floci DynamoDB endpoint connection refused. Falling back to local offline mock.`, { error: err });
+        context.logger?.warn?.(`Floci DynamoDB endpoint connection refused. Falling back to local offline mock.`, {
+          error: err
+        });
       }
 
       return {

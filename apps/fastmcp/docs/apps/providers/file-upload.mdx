@@ -6,14 +6,17 @@ icon: upload
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.2.0" />
 
 `FileUpload` adds drag-and-drop file upload to any server. Users upload files through an interactive UI, bypassing the LLM context window entirely. The LLM can then list and read uploaded files through model-visible tools.
 
 <Frame>
-  <img src="/apps/images/app-file-upload.png" alt="The FileUpload provider shown in Goose, with a drag-and-drop zone for uploading files" />
+  <img
+    src="/apps/images/app-file-upload.png"
+    alt="The FileUpload provider shown in Goose, with a drag-and-drop zone for uploading files"
+  />
 </Frame>
 
 ```python
@@ -26,12 +29,12 @@ mcp.add_provider(FileUpload())
 
 This registers four tools:
 
-| Tool | Visibility | Purpose |
-|------|-----------|---------|
-| `file_manager` | Model | Opens the drag-and-drop upload UI |
-| `store_files` | App only | Called by the UI when the user clicks Upload |
-| `list_files` | Model | Returns metadata for all uploaded files |
-| `read_file` | Model | Returns a file's contents by name |
+| Tool           | Visibility | Purpose                                      |
+| -------------- | ---------- | -------------------------------------------- |
+| `file_manager` | Model      | Opens the drag-and-drop upload UI            |
+| `store_files`  | App only   | Called by the UI when the user clicks Upload |
+| `list_files`   | Model      | Returns metadata for all uploaded files      |
+| `read_file`    | Model      | Returns a file's contents by name            |
 
 The LLM sees `file_manager`, `list_files`, and `read_file`. It calls `file_manager` to show the upload interface, then uses `list_files` and `read_file` to work with whatever the user uploaded. `store_files` is app-only — the UI calls it directly and the LLM never needs to know about it.
 
@@ -56,7 +59,9 @@ By default, files are stored in memory and scoped by MCP session ID. Each sessio
 This works with **stdio**, **SSE**, and **stateful HTTP** transports, where sessions persist across requests.
 
 <Warning>
-In **stateless HTTP** mode, each request creates a new session object with a new ID. Files stored during one request (e.g. the UI upload) will be invisible to the next request (e.g. the LLM calling `list_files`). You **must** override `_get_scope_key` to use a stable identifier like a user ID from your auth token.
+  In **stateless HTTP** mode, each request creates a new session object with a new ID. Files stored during one request
+  (e.g. the UI upload) will be invisible to the next request (e.g. the LLM calling `list_files`). You **must** override
+  `_get_scope_key` to use a stable identifier like a user ID from your auth token.
 </Warning>
 
 For stateless deployments, override `_get_scope_key` to return a stable identifier. For example, to scope files by authenticated user:

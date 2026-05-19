@@ -89,8 +89,8 @@ Invoke an installed Spec Kit command by name via the integration CLI:
   command: speckit.specify
   input:
     args: "{{ inputs.spec }}"
-  integration: claude        # Optional: override workflow default
-  model: "claude-sonnet-4-20250514"   # Optional: override model
+  integration: claude # Optional: override workflow default
+  model: "claude-sonnet-4-20250514" # Optional: override model
 ```
 
 ### Prompt Steps
@@ -261,10 +261,10 @@ inputs:
     enum: ["full", "backend-only", "frontend-only"]
 ```
 
-| Type | Accepts | Example |
-|------|---------|---------|
-| `string` | Any string | `"user-auth"` |
-| `number` | Numeric strings → int/float | `"42"` → `42` |
+| Type      | Accepts                                               | Example           |
+| --------- | ----------------------------------------------------- | ----------------- |
+| `string`  | Any string                                            | `"user-auth"`     |
+| `number`  | Numeric strings → int/float                           | `"42"` → `42`     |
 | `boolean` | `true`/`1`/`yes` → `True`, `false`/`0`/`no` → `False` | `"true"` → `True` |
 
 ## State and Resume
@@ -314,16 +314,16 @@ specify workflow catalog remove <index>
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
+| Variable                       | Description                                      |
+| ------------------------------ | ------------------------------------------------ |
 | `SPECKIT_WORKFLOW_CATALOG_URL` | Override the catalog URL (replaces all defaults) |
 
 ## Configuration Files
 
-| File | Scope | Description |
-|------|-------|-------------|
-| `.specify/workflow-catalogs.yml` | Project | Custom catalog stack for this project |
-| `~/.specify/workflow-catalogs.yml` | User | Custom catalog stack for all projects |
+| File                               | Scope   | Description                           |
+| ---------------------------------- | ------- | ------------------------------------- |
+| `.specify/workflow-catalogs.yml`   | Project | Custom catalog stack for this project |
+| `~/.specify/workflow-catalogs.yml` | User    | Custom catalog stack for all projects |
 
 ## Repository Layout
 

@@ -93,13 +93,13 @@ Copy an existing service pattern before introducing a new one.
 
 Floci must implement real AWS wire protocols.
 
-| Protocol | Services | Request Format | Response Format | Implementation |
-|----------|----------|----------------|-----------------|----------------|
-| Query | SQS, SNS, IAM, STS, RDS, ElastiCache, CloudFormation, CloudWatch Metrics | form-encoded POST + `Action` | XML | `AwsQueryController` |
-| JSON 1.1 | SSM, EventBridge, CloudWatch Logs, Kinesis, KMS, Cognito, Secrets Manager, ACM | POST + `X-Amz-Target` | JSON | `AwsJson11Controller` |
-| REST JSON | Lambda, API Gateway, SES V2 | REST paths | JSON | JAX-RS |
-| REST XML | S3 | REST paths | XML | JAX-RS |
-| TCP | ElastiCache, RDS | raw protocol | native | proxies |
+| Protocol  | Services                                                                       | Request Format               | Response Format | Implementation        |
+| --------- | ------------------------------------------------------------------------------ | ---------------------------- | --------------- | --------------------- |
+| Query     | SQS, SNS, IAM, STS, RDS, ElastiCache, CloudFormation, CloudWatch Metrics       | form-encoded POST + `Action` | XML             | `AwsQueryController`  |
+| JSON 1.1  | SSM, EventBridge, CloudWatch Logs, Kinesis, KMS, Cognito, Secrets Manager, ACM | POST + `X-Amz-Target`        | JSON            | `AwsJson11Controller` |
+| REST JSON | Lambda, API Gateway, SES V2                                                    | REST paths                   | JSON            | JAX-RS                |
+| REST XML  | S3                                                                             | REST paths                   | XML             | JAX-RS                |
+| TCP       | ElastiCache, RDS                                                               | raw protocol                 | native          | proxies               |
 
 ### Important exceptions
 

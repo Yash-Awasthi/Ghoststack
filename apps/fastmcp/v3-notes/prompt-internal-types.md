@@ -10,6 +10,7 @@ Prompts now use FastMCP's `Message` and `PromptResult` types internally, followi
 ## What Changed
 
 ### Before (v2.x)
+
 ```python
 from mcp.types import PromptMessage, TextContent
 
@@ -22,6 +23,7 @@ def my_prompt() -> PromptMessage:
 ```
 
 ### After (v3.0)
+
 ```python
 from fastmcp.prompts import Message
 
@@ -33,21 +35,25 @@ def my_prompt() -> Message:
 ## Type Constraints
 
 ### Prompt Function Return Types
+
 ```python
 str | list[Message | str] | PromptResult
 ```
 
 **Valid:**
+
 - `return "Hello"` → wrapped as single user Message
 - `return [Message("Hi"), Message("Response", role="assistant")]`
 - `return ["Hi", "Response"]` → strings auto-wrapped as user Messages
 - `return PromptResult(messages=[...], meta={...})`
 
 **Invalid (now raises error):**
+
 - `return PromptMessage(...)` → Use `Message` instead
 - `return Message(...)` as single value → Use `PromptResult([Message(...)])` or return a list
 
 ### Message Class
+
 ```python
 Message(
     content: Any,  # Auto-serializes non-str to JSON
@@ -56,6 +62,7 @@ Message(
 ```
 
 **Auto-Serialization:**
+
 - `str` → passes through as TextContent
 - `dict` → JSON-serialized to text
 - `list` → JSON-serialized to text
@@ -63,6 +70,7 @@ Message(
 - `TextContent` / `EmbeddedResource` → passes through directly
 
 ### PromptResult Class
+
 ```python
 PromptResult(
     messages: str | list[Message],  # str wrapped as single Message
@@ -81,6 +89,7 @@ PromptResult(
 ## Migration Guide
 
 ### Simple Message
+
 ```python
 # Before
 from mcp.types import PromptMessage, TextContent
@@ -92,6 +101,7 @@ return Message("Hello")
 ```
 
 ### Conversation
+
 ```python
 # Before
 return [
@@ -107,6 +117,7 @@ return [
 ```
 
 ### With Metadata
+
 ```python
 from fastmcp.prompts import Message, PromptResult
 

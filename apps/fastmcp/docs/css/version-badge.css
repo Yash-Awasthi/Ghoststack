@@ -5,7 +5,9 @@
   color: #ff5400 !important;
   background: #fef2f2 !important;
   border: 1px solid rgba(220, 38, 38, 0.3) !important;
-  transition: box-shadow 0.2s, transform 0.15s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.15s;
 }
 
 .version-badge:hover {
@@ -20,4 +22,3 @@
   background: #334155 !important;
   border: 1px solid #64748b !important;
 }
-

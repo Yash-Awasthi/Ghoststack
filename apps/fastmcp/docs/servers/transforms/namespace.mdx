@@ -5,7 +5,7 @@ description: Prefix component names to prevent conflicts
 icon: tag
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -13,12 +13,12 @@ The `Namespace` transform prefixes all component names, preventing conflicts whe
 
 Tools and prompts receive an underscore-separated prefix. Resources and templates receive a path-segment prefix in their URIs.
 
-| Component | Original | With `Namespace("api")` |
-|-----------|----------|-------------------------|
-| Tool | `my_tool` | `api_my_tool` |
-| Prompt | `my_prompt` | `api_my_prompt` |
-| Resource | `data://info` | `data://api/info` |
-| Template | `data://{id}` | `data://api/{id}` |
+| Component | Original      | With `Namespace("api")` |
+| --------- | ------------- | ----------------------- |
+| Tool      | `my_tool`     | `api_my_tool`           |
+| Prompt    | `my_prompt`   | `api_my_prompt`         |
+| Resource  | `data://info` | `data://api/info`       |
+| Template  | `data://{id}` | `data://api/{id}`       |
 
 The most common use is through the `mount()` method's `namespace` parameter.
 

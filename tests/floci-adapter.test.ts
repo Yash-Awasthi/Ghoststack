@@ -1,5 +1,5 @@
-import { FlociExecutionAdapter } from '../orchestration/floci-adapter';
-import { IExecutionContext } from '../orchestration/interfaces/execution.interface';
+import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import { IExecutionContext } from "../orchestration/interfaces/execution.interface";
 
 describe("Milestone 2: Floci Client & Execution Adapter", () => {
   const context: IExecutionContext = {

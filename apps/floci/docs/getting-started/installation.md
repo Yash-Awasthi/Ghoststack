@@ -19,12 +19,12 @@ docker pull floci/floci:latest
 
 Each tag combines a **variant** (what's inside) and a **channel** (how stable).
 
-|  | Standard | Compat (+ AWS CLI + boto3) |
-|---|---|---|
-| **Release (latest)** | `latest` ✅ | `latest-compat` |
-| **Release (pinned)** | `x.y.z` | `x.y.z-compat` |
-| **Nightly (floating)** | `nightly` | `nightly-compat` |
-| **Nightly (dated)** | `nightly-mmddyyyy` | `nightly-mmddyyyy-compat` |
+|                        | Standard           | Compat (+ AWS CLI + boto3) |
+| ---------------------- | ------------------ | -------------------------- |
+| **Release (latest)**   | `latest` ✅        | `latest-compat`            |
+| **Release (pinned)**   | `x.y.z`            | `x.y.z-compat`             |
+| **Nightly (floating)** | `nightly`          | `nightly-compat`           |
+| **Nightly (dated)**    | `nightly-mmddyyyy` | `nightly-mmddyyyy-compat`  |
 
 For the full breakdown see [Docker Images](../configuration/docker-images.md).
 
@@ -82,4 +82,4 @@ mvn clean package -Pnative -DskipTests
 ```
 
 !!! note
-    Native compilation requires GraalVM or Mandrel with the `native-image` tool on your PATH. Build time is typically 2–5 minutes.
+Native compilation requires GraalVM or Mandrel with the `native-image` tool on your PATH. Build time is typically 2–5 minutes.

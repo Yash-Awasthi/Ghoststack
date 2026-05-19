@@ -6,7 +6,7 @@ export interface RetryPolicy {
 export interface QueueJob<T = any> {
   id: string;
   payload: T;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   retries: number;
   maxRetries: number;
   createdAt: Date;

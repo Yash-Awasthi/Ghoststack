@@ -19,11 +19,7 @@
             {
               "group": "Core Components",
               "icon": "toolbox",
-              "pages": [
-                "v2/servers/tools",
-                "v2/servers/resources",
-                "v2/servers/prompts"
-              ]
+              "pages": ["v2/servers/tools", "v2/servers/resources", "v2/servers/prompts"]
             },
             {
               "group": "Advanced Features",
@@ -72,19 +68,12 @@
             {
               "group": "Essentials",
               "icon": "cube",
-              "pages": [
-                "v2/clients/client",
-                "v2/clients/transports"
-              ]
+              "pages": ["v2/clients/client", "v2/clients/transports"]
             },
             {
               "group": "Core Operations",
               "icon": "handshake",
-              "pages": [
-                "v2/clients/tools",
-                "v2/clients/resources",
-                "v2/clients/prompts"
-              ]
+              "pages": ["v2/clients/tools", "v2/clients/resources", "v2/clients/prompts"]
             },
             {
               "group": "Advanced Features",
@@ -102,10 +91,7 @@
             {
               "group": "Authentication",
               "icon": "user-shield",
-              "pages": [
-                "v2/clients/auth/oauth",
-                "v2/clients/auth/bearer"
-              ]
+              "pages": ["v2/clients/auth/oauth", "v2/clients/auth/bearer"]
             }
           ]
         },
@@ -133,10 +119,7 @@
             {
               "group": "Authorization",
               "icon": "shield-check",
-              "pages": [
-                "v2/integrations/eunomia-authorization",
-                "v2/integrations/permit"
-              ]
+              "pages": ["v2/integrations/eunomia-authorization", "v2/integrations/permit"]
             },
             {
               "group": "AI Assistants",
@@ -153,19 +136,12 @@
             {
               "group": "AI SDKs",
               "icon": "code",
-              "pages": [
-                "v2/integrations/anthropic",
-                "v2/integrations/gemini",
-                "v2/integrations/openai"
-              ]
+              "pages": ["v2/integrations/anthropic", "v2/integrations/gemini", "v2/integrations/openai"]
             },
             {
               "group": "API Integration",
               "icon": "globe",
-              "pages": [
-                "v2/integrations/fastapi",
-                "v2/integrations/openapi"
-              ]
+              "pages": ["v2/integrations/fastapi", "v2/integrations/openapi"]
             }
           ]
         },

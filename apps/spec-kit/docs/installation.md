@@ -91,7 +91,7 @@ This helps verify you are running the official Spec Kit build from GitHub, not a
 After initialization, you should see the following commands available in your coding agent:
 
 - `/speckit.specify` - Create specifications
-- `/speckit.plan` - Generate implementation plans  
+- `/speckit.plan` - Generate implementation plans
 - `/speckit.tasks` - Break down into actionable tasks
 
 Scripts are installed into a variant subdirectory matching the chosen script type:

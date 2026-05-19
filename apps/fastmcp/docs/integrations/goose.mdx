@@ -5,8 +5,8 @@ description: Install and use FastMCP servers in Goose
 icon: message-smile
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
-import { LocalFocusTip } from "/snippets/local-focus.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
+import { LocalFocusTip } from "/snippets/local-focus.mdx";
 
 <LocalFocusTip />
 
@@ -40,6 +40,7 @@ if __name__ == "__main__":
 ## Install the Server
 
 ### FastMCP CLI
+
 <VersionBadge version="3.0.0" />
 
 The easiest way to install a FastMCP server in Goose is using the `fastmcp install goose` command. This generates a `goose://` deeplink and opens it, prompting Goose to install the server.
@@ -97,7 +98,8 @@ fastmcp install goose server.py --python 3.11
 ```
 
 <Note>
-The Goose install uses `uvx`, which does not support `--project`, `--with-requirements`, or `--with-editable`. If you need these options, use `fastmcp install mcp-json` to generate a full configuration and add it to Goose manually.
+  The Goose install uses `uvx`, which does not support `--project`, `--with-requirements`, or `--with-editable`. If you
+  need these options, use `fastmcp install mcp-json` to generate a full configuration and add it to Goose manually.
 </Note>
 
 #### Environment Variables
@@ -158,7 +160,8 @@ extensions:
 You can also use `goose configure` to add extensions interactively, which prompts for environment variables.
 
 <Warning>
-**`uvx` (from `uv`) must be installed and available in your system PATH**. Goose uses `uvx` to run Python-based extensions in isolated environments.
+  **`uvx` (from `uv`) must be installed and available in your system PATH**. Goose uses `uvx` to run Python-based
+  extensions in isolated environments.
 </Warning>
 
 ## Using the Server

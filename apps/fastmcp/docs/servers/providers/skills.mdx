@@ -6,7 +6,7 @@ icon: wand-magic-sparkles
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -97,9 +97,9 @@ Reading the manifest returns structured file information.
 {
   "skill": "pdf-processing",
   "files": [
-    {"path": "SKILL.md", "size": 1234, "hash": "sha256:abc123..."},
-    {"path": "reference.md", "size": 567, "hash": "sha256:def456..."},
-    {"path": "examples/sample.pdf", "size": 89012, "hash": "sha256:ghi789..."}
+    { "path": "SKILL.md", "size": 1234, "hash": "sha256:abc123..." },
+    { "path": "reference.md", "size": 567, "hash": "sha256:def456..." },
+    { "path": "examples/sample.pdf", "size": 89012, "hash": "sha256:ghi789..." }
   ]
 }
 ```
@@ -164,16 +164,16 @@ mcp.add_provider(SkillsDirectoryProvider(roots=[
 
 FastMCP includes pre-configured providers for popular AI coding tools. Each vendor provider extends `SkillsDirectoryProvider` with the appropriate default directory for that platform.
 
-| Provider | Default Directory |
-|----------|-------------------|
-| `ClaudeSkillsProvider` | `~/.claude/skills/` |
-| `CursorSkillsProvider` | `~/.cursor/skills/` |
-| `VSCodeSkillsProvider` | `~/.copilot/skills/` |
-| `CodexSkillsProvider` | `/etc/codex/skills/` and `~/.codex/skills/` |
-| `GeminiSkillsProvider` | `~/.gemini/skills/` |
-| `GooseSkillsProvider` | `~/.config/agents/skills/` |
-| `CopilotSkillsProvider` | `~/.copilot/skills/` |
-| `OpenCodeSkillsProvider` | `~/.config/opencode/skills/` |
+| Provider                 | Default Directory                           |
+| ------------------------ | ------------------------------------------- |
+| `ClaudeSkillsProvider`   | `~/.claude/skills/`                         |
+| `CursorSkillsProvider`   | `~/.cursor/skills/`                         |
+| `VSCodeSkillsProvider`   | `~/.copilot/skills/`                        |
+| `CodexSkillsProvider`    | `/etc/codex/skills/` and `~/.codex/skills/` |
+| `GeminiSkillsProvider`   | `~/.gemini/skills/`                         |
+| `GooseSkillsProvider`    | `~/.config/agents/skills/`                  |
+| `CopilotSkillsProvider`  | `~/.copilot/skills/`                        |
+| `OpenCodeSkillsProvider` | `~/.config/opencode/skills/`                |
 
 Vendor providers accept the same configuration options as `SkillsDirectoryProvider` (except for `roots`, which is locked to the platform default).
 
@@ -245,7 +245,8 @@ provider = SkillsDirectoryProvider(
 With `reload=True`, the provider re-discovers skills on each `list_resources()` or `read_resource()` call. New skills appear, removed skills disappear, and modified content reflects current file state.
 
 <Warning>
-Reload mode adds overhead to every request. Use it during development when you're actively editing skills, but disable it in production.
+  Reload mode adds overhead to every request. Use it during development when you're actively editing skills, but disable
+  it in production.
 </Warning>
 
 ## Client Utilities

@@ -15,16 +15,19 @@ The new implementation uses a **stateless request building approach** with `open
 ### Key Architecture Principles
 
 #### 1. Stateless Performance
+
 - **Zero Startup Latency**: No code generation or heavy initialization
 - **RequestDirector**: Stateless HTTP request building using openapi-core
 - **Pre-calculated Schemas**: All complex processing done during parsing
 
 #### 2. Unified Implementation
+
 - **Single Code Path**: All components use RequestDirector consistently
 - **No Fallbacks**: Simplified architecture without hybrid complexity
 - **Performance First**: Optimized for cold starts and serverless deployments
 
 #### 3. OpenAPI Compliance
+
 - **openapi-core Integration**: Leverages proven library for parameter serialization
 - **Full Feature Support**: Complete OpenAPI 3.0/3.1 support including deepObject
 - **Error Handling**: Comprehensive HTTP error mapping to MCP errors
@@ -34,12 +37,14 @@ The new implementation uses a **stateless request building approach** with `open
 ### RequestDirector-Based Components
 
 #### `OpenAPITool`
+
 - Executes operations using RequestDirector for HTTP request building
 - Automatic parameter validation and OpenAPI-compliant serialization
 - Built-in error handling and structured response processing
 - **Advantages**: Zero latency, robust, comprehensive OpenAPI support
 
-#### `OpenAPIResource` / `OpenAPIResourceTemplate`  
+#### `OpenAPIResource` / `OpenAPIResourceTemplate`
+
 - Provides resource access using RequestDirector
 - Consistent parameter handling across all resource types
 - Support for complex parameter patterns and collision resolution
@@ -56,11 +61,11 @@ class FastMCPOpenAPI(FastMCP):
     def __init__(self, openapi_spec: dict, client: httpx.AsyncClient, **kwargs):
         # 1. Parse OpenAPI spec to HTTP routes with pre-calculated schemas
         self._routes = parse_openapi_to_http_routes(openapi_spec)
-        
+
         # 2. Initialize RequestDirector with openapi-core Spec
         self._spec = Spec.from_dict(openapi_spec)
         self._director = RequestDirector(self._spec)
-            
+
         # 3. Create components using RequestDirector
         self._create_components()
 ```
@@ -71,8 +76,8 @@ class FastMCPOpenAPI(FastMCP):
 def _create_tool(self, route: HTTPRoute) -> Tool:
     # All tools use RequestDirector for consistent, high-performance request building
     return OpenAPITool(
-        client=self._client, 
-        route=route, 
+        client=self._client,
+        route=route,
         director=self._director,
         name=tool_name,
         description=description,
@@ -100,11 +105,13 @@ OpenAPI Spec → HTTPRoute with Pre-calculated Fields → RequestDirector → HT
 ### 1. Enhanced Parameter Handling
 
 #### Parameter Collision Resolution
+
 - **Automatic Suffixing**: Colliding parameters get location-based suffixes
 - **Example**: `id` in path and body becomes `id__path` and `id`
 - **Transparent**: LLMs see suffixed parameters, implementation routes correctly
 
 #### DeepObject Style Support
+
 - **Native Support**: Generated client handles all deepObject variations
 - **Explode Handling**: Proper support for explode=true/false
 - **Complex Objects**: Nested object serialization works correctly
@@ -112,11 +119,13 @@ OpenAPI Spec → HTTPRoute with Pre-calculated Fields → RequestDirector → HT
 ### 2. Robust Error Handling
 
 #### HTTP Error Mapping
+
 - **Status Code Mapping**: HTTP errors mapped to appropriate MCP errors
 - **Structured Responses**: Error details preserved in tool results
 - **Timeout Handling**: Network timeouts handled gracefully
 
 #### Request Building Error Handling
+
 - **Parameter Validation**: Invalid parameters caught during request building
 - **Schema Validation**: openapi-core validates all OpenAPI constraints
 - **Graceful Degradation**: Missing optional parameters handled smoothly
@@ -124,11 +133,13 @@ OpenAPI Spec → HTTPRoute with Pre-calculated Fields → RequestDirector → HT
 ### 3. Performance Optimizations
 
 #### Efficient Client Reuse
+
 - **Connection Pooling**: HTTP connections reused across requests
 - **Client Caching**: Generated clients cached for performance
 - **Async Support**: Full async/await throughout
 
 #### Request Optimization
+
 - **Pre-calculated Schemas**: All complex processing done during initialization
 - **Parameter Mapping**: Collision resolution handled upfront
 - **Zero Latency**: No runtime code generation or complex schema processing
@@ -163,6 +174,7 @@ custom_routes = RouteMap({
 ### Test Structure
 
 Tests are organized by functionality:
+
 - `test_server.py` - Server integration and RequestDirector behavior
 - `test_parameter_collisions.py` - Parameter collision handling
 - `test_deepobject_style.py` - DeepObject parameter style support
@@ -180,13 +192,13 @@ Tests are organized by functionality:
 ```python
 async def test_stateless_request_building():
     """Test that server works with stateless RequestDirector approach."""
-    
+
     # Test server initialization is fast
     start_time = time.time()
     server = FastMCPOpenAPI(spec=valid_spec, client=client)
     init_time = time.time() - start_time
     assert init_time < 0.01  # Should be very fast
-    
+
     # Verify RequestDirector functionality
     assert hasattr(server, '_director')
     assert hasattr(server, '_spec')
@@ -219,6 +231,7 @@ logging.getLogger("fastmcp.server.openapi_new").setLevel(logging.DEBUG)
 ```
 
 ### Key Log Messages
+
 - **RequestDirector Initialization**: Success/failure of RequestDirector setup
 - **Schema Pre-calculation**: Pre-calculated schema and parameter map status
 - **Request Building**: Parameter mapping and URL construction details

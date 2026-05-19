@@ -283,16 +283,19 @@ Browse available MCP servers at:
 ## Troubleshooting
 
 **MCP tools not appearing:**
+
 - Check that `mcp.json` is valid JSON (no trailing commas, proper quoting)
 - Verify the file is in `.agents/mcp.json` (not just `.agents/`)
 - Restart Codebuff after adding or modifying `mcp.json`
 
 **Environment variable not found:**
+
 - Ensure the variable is exported in your shell
 - Restart your terminal after adding to `.bashrc`/`.zshrc`
 - Check for typos in the `$VAR_NAME` reference
 
 **Server not connecting:**
+
 - Verify the command and args are correct
 - Run the MCP server command manually to test it works
 - Check the server's documentation for required setup steps

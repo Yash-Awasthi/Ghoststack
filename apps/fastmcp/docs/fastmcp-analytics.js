@@ -4,8 +4,7 @@
   // Public browser key for the shared Prefect Amplitude project.
   // This is intentionally client-side; the secret key must never ship to the browser.
   var AMPLITUDE_API_KEY = "c361ed56e7bdc1a48a38773c40120b39";
-  var AMPLITUDE_SCRIPT_URL =
-    "https://cdn.amplitude.com/libs/analytics-browser-2.8.1-min.js.gz";
+  var AMPLITUDE_SCRIPT_URL = "https://cdn.amplitude.com/libs/analytics-browser-2.8.1-min.js.gz";
   var AMPLITUDE_SERVER_URL = "https://api2.amplitude.com/2/httpapi";
   var PAGE_VIEW_EVENT = "Page View: FastMCP Docs";
   var OUTBOUND_CLICK_EVENT = "Docs Outbound Clicked";
@@ -17,12 +16,7 @@
   var amplitudeInitialized = false;
   var lastTrackedUrl = null;
 
-  var PREFECT_DESTINATION_HOSTNAMES = [
-    "www.prefect.io",
-    "prefect.io",
-    "horizon.prefect.io",
-    "app.prefect.cloud",
-  ];
+  var PREFECT_DESTINATION_HOSTNAMES = ["www.prefect.io", "prefect.io", "horizon.prefect.io", "app.prefect.cloud"];
 
   var routeChangeCallbacks = [];
 
@@ -85,7 +79,7 @@
       path: normalizePathname(window.location.pathname),
       source: SOURCE,
       source_detail: SOURCE_DETAIL,
-      surface: SURFACE,
+      surface: SURFACE
     };
   }
 
@@ -170,9 +164,7 @@
   }
 
   function trackOutboundClick(event) {
-    var link = event.target && event.target.closest
-      ? event.target.closest("a[href]")
-      : null;
+    var link = event.target && event.target.closest ? event.target.closest("a[href]") : null;
 
     if (!link) {
       return;
@@ -208,17 +200,13 @@
       destination: destination.href,
       destination_domain: destination.hostname,
       link_text: (link.textContent || "").trim().slice(0, 200),
-      is_prefect_destination: isPrefectDestination(destination),
+      is_prefect_destination: isPrefectDestination(destination)
     });
   }
 
   function initializeAmplitude() {
     var amplitude = getAmplitude();
-    if (
-      amplitudeInitialized ||
-      !amplitude ||
-      typeof amplitude.init !== "function"
-    ) {
+    if (amplitudeInitialized || !amplitude || typeof amplitude.init !== "function") {
       return;
     }
 
@@ -229,14 +217,14 @@
         disabled: false,
         trackNewCampaigns: true,
         trackPageViews: true,
-        resetSessionOnNewCampaign: true,
+        resetSessionOnNewCampaign: true
       },
       defaultTracking: {
         pageViews: false,
         sessions: false,
         formInteractions: true,
-        fileDownloads: true,
-      },
+        fileDownloads: true
+      }
     });
 
     amplitudeInitialized = true;

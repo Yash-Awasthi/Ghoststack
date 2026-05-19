@@ -6,7 +6,7 @@ icon: rectangle-list
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.2.0" />
 
@@ -37,10 +37,10 @@ mcp.add_provider(FormInput(model=BugReport))
 
 This registers two tools:
 
-| Tool | Visibility | Purpose |
-|------|-----------|---------|
-| `collect_bugreport` | Model | Opens the form UI |
-| `submit_form` | App only | Validates and processes the submission |
+| Tool                | Visibility | Purpose                                |
+| ------------------- | ---------- | -------------------------------------- |
+| `collect_bugreport` | Model      | Opens the form UI                      |
+| `submit_form`       | App only   | Validates and processes the submission |
 
 The tool name is derived from the model class name, lowercased: `collect_{modelname}`. So `BugReport` becomes `collect_bugreport`, `ShippingAddress` becomes `collect_shippingaddress`. Use `tool_name` to override if needed. The LLM calls it with a prompt explaining what it needs, and the user gets a form with fields matching the model.
 
@@ -48,14 +48,14 @@ The tool name is derived from the model class name, lowercased: `collect_{modeln
 
 `FormInput` uses Prefab's `Form.from_model()`, which maps Pydantic types to form components:
 
-| Python type | Form component |
-|------------|---------------|
-| `str` | Text input |
-| `int`, `float` | Number input |
-| `bool` | Checkbox |
-| `datetime.date` | Date picker |
-| `Literal[...]` | Select dropdown |
-| `SecretStr` | Password input |
+| Python type     | Form component  |
+| --------------- | --------------- |
+| `str`           | Text input      |
+| `int`, `float`  | Number input    |
+| `bool`          | Checkbox        |
+| `datetime.date` | Date picker     |
+| `Literal[...]`  | Select dropdown |
+| `SecretStr`     | Password input  |
 
 Use `Field()` metadata to control labels (`title`), placeholders (`description`), and validation (`min_length`, `max_length`, `ge`, `le`). Use `json_schema_extra={"ui": {"type": "textarea"}}` for multiline text.
 

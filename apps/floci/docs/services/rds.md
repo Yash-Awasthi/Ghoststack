@@ -8,33 +8,33 @@ Floci manages real PostgreSQL, MySQL, and MariaDB Docker containers and proxies 
 
 ## Supported Management Actions
 
-| Action | Description |
-|---|---|
-| `CreateDBInstance` | Start a new database instance |
-| `DescribeDBInstances` | List instances and their connection info |
-| `DeleteDBInstance` | Stop and remove an instance |
-| `ModifyDBInstance` | Update instance settings |
-| `RebootDBInstance` | Restart a database instance |
-| `CreateDBCluster` | Create an Aurora-compatible cluster |
-| `DescribeDBClusters` | List clusters |
-| `DeleteDBCluster` | Delete a cluster |
-| `ModifyDBCluster` | Update cluster settings |
-| `CreateDBParameterGroup` | Create a parameter group |
-| `DescribeDBParameterGroups` | List parameter groups |
-| `DeleteDBParameterGroup` | Delete a parameter group |
-| `ModifyDBParameterGroup` | Update parameter group settings |
-| `DescribeDBParameters` | List parameters in a group |
+| Action                      | Description                              |
+| --------------------------- | ---------------------------------------- |
+| `CreateDBInstance`          | Start a new database instance            |
+| `DescribeDBInstances`       | List instances and their connection info |
+| `DeleteDBInstance`          | Stop and remove an instance              |
+| `ModifyDBInstance`          | Update instance settings                 |
+| `RebootDBInstance`          | Restart a database instance              |
+| `CreateDBCluster`           | Create an Aurora-compatible cluster      |
+| `DescribeDBClusters`        | List clusters                            |
+| `DeleteDBCluster`           | Delete a cluster                         |
+| `ModifyDBCluster`           | Update cluster settings                  |
+| `CreateDBParameterGroup`    | Create a parameter group                 |
+| `DescribeDBParameterGroups` | List parameter groups                    |
+| `DeleteDBParameterGroup`    | Delete a parameter group                 |
+| `ModifyDBParameterGroup`    | Update parameter group settings          |
+| `DescribeDBParameters`      | List parameters in a group               |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_RDS_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_RDS_PROXY_BASE_PORT` | `7000` | First host port in the RDS proxy range |
-| `FLOCI_SERVICES_RDS_PROXY_MAX_PORT` | `7099` | Last host port in the RDS proxy range |
-| `FLOCI_SERVICES_RDS_DEFAULT_POSTGRES_IMAGE` | `postgres:16-alpine` | Docker image for PostgreSQL instances |
-| `FLOCI_SERVICES_RDS_DEFAULT_MYSQL_IMAGE` | `mysql:8.0` | Docker image for MySQL instances |
-| `FLOCI_SERVICES_RDS_DEFAULT_MARIADB_IMAGE` | `mariadb:11` | Docker image for MariaDB instances |
+| Variable                                    | Default              | Description                            |
+| ------------------------------------------- | -------------------- | -------------------------------------- |
+| `FLOCI_SERVICES_RDS_ENABLED`                | `true`               | Enable or disable the service          |
+| `FLOCI_SERVICES_RDS_PROXY_BASE_PORT`        | `7000`               | First host port in the RDS proxy range |
+| `FLOCI_SERVICES_RDS_PROXY_MAX_PORT`         | `7099`               | Last host port in the RDS proxy range  |
+| `FLOCI_SERVICES_RDS_DEFAULT_POSTGRES_IMAGE` | `postgres:16-alpine` | Docker image for PostgreSQL instances  |
+| `FLOCI_SERVICES_RDS_DEFAULT_MYSQL_IMAGE`    | `mysql:8.0`          | Docker image for MySQL instances       |
+| `FLOCI_SERVICES_RDS_DEFAULT_MARIADB_IMAGE`  | `mariadb:11`         | Docker image for MariaDB instances     |
 
 ### Docker Compose
 
@@ -46,7 +46,7 @@ services:
     image: floci/floci:latest
     ports:
       - "4566:4566"
-      - "7001-7099:7001-7099"   # RDS proxy ports
+      - "7001-7099:7001-7099" # RDS proxy ports
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -94,11 +94,11 @@ mysql -h 127.0.0.1 -P 7002 -u root -psecret123
 
 ## Supported Engines
 
-| Engine | Default image |
-|---|---|
+| Engine     | Default image        |
+| ---------- | -------------------- |
 | `postgres` | `postgres:16-alpine` |
-| `mysql` | `mysql:8.0` |
-| `mariadb` | `mariadb:11` |
+| `mysql`    | `mysql:8.0`          |
+| `mariadb`  | `mariadb:11`         |
 
 Override the image per-instance with the `--engine-version` flag or globally via environment variables.
 
@@ -107,9 +107,9 @@ Override the image per-instance with the `--engine-version` flag or globally via
 Each DB instance and cluster gets its own named Docker volume (`floci-rds-{volumeId}`) created
 automatically. No configuration is required.
 
-| Scenario | Volume behavior |
-|---|---|
-| `memory` mode (default) | Volume is removed automatically when the instance is deleted |
+| Scenario                        | Volume behavior                                                     |
+| ------------------------------- | ------------------------------------------------------------------- |
+| `memory` mode (default)         | Volume is removed automatically when the instance is deleted        |
 | `persistent` / `hybrid` / `wal` | Volume is retained after delete — data survives for manual recovery |
 
 ```bash
@@ -131,7 +131,7 @@ FLOCI_STORAGE_HOST_PERSISTENT_PATH=/absolute/host/path/data
 ```
 
 !!! note "Docker Desktop on macOS"
-    Named volumes work correctly on Docker Desktop for macOS. Bind mounts to paths inside the Floci container are not supported — use named volumes (the default).
+Named volumes work correctly on Docker Desktop for macOS. Bind mounts to paths inside the Floci container are not supported — use named volumes (the default).
 
 ## Authentication
 

@@ -26,14 +26,14 @@ The middleware automatically maps MCP methods to Permit.io resources and actions
 
 ![Permit.io Policy Mapping Example](./images/permit/policy_mapping.png)
 
-*Example: In Permit.io, the 'Admin' role is granted permissions on resources and actions as mapped by the middleware. For example, 'greet', 'greet-jwt', and 'login' are actions on the 'mcp_server' resource, and 'list' is an action on the 'mcp_server_tools' resource.*
+_Example: In Permit.io, the 'Admin' role is granted permissions on resources and actions as mapped by the middleware. For example, 'greet', 'greet-jwt', and 'login' are actions on the 'mcp_server' resource, and 'list' is an action on the 'mcp_server_tools' resource._
 
 > **Note:**
 > Don't forget to assign the relevant role (e.g., Admin, User) to the user authenticating to your MCP server (such as the user in the JWT) in the Permit.io Directory. Without the correct role assignment, users will not have access to the resources and actions you've configured in your policies.
 >
 > ![Permit.io Directory Role Assignment Example](./images/permit/role_assignement.png)
 >
-> *Example: In Permit.io Directory, both 'client' and 'admin' users are assigned the 'Admin' role, granting them the permissions defined in your policy mapping.*
+> _Example: In Permit.io Directory, both 'client' and 'admin' users are assigned the 'Admin' role, granting them the permissions defined in your policy mapping._
 
 For detailed policy mapping examples and configuration, see [Detailed Policy Mapping](https://github.com/permitio/permit-fastmcp/blob/main/docs/policy-mapping.md).
 
@@ -79,7 +79,8 @@ sequenceDiagram
 ## Add Authorization to Your Server
 
 <Note>
-Permit.io is a cloud-native authorization service. You need a Permit.io account and a running Policy Decision Point (PDP) for the middleware to function. You can run the PDP locally with Docker or use Permit.io's cloud PDP.
+  Permit.io is a cloud-native authorization service. You need a Permit.io account and a running Policy Decision Point
+  (PDP) for the middleware to function. You can run the PDP locally with Docker or use Permit.io's cloud PDP.
 </Note>
 
 ### Prerequisites
@@ -154,13 +155,12 @@ For step-by-step setup instructions and troubleshooting, see [Getting Started & 
 
 Policies are defined in the Permit.io dashboard, but you can also use the [Permit.io Terraform provider](https://github.com/permitio/terraform-provider-permitio) to define policies in code.
 
-
 ```terraform
 # Resources
 resource "permitio_resource" "mcp_server" {
   name = "mcp_server"
   key  = "mcp_server"
-  
+
   actions = {
     "greet" = { name = "greet" }
     "add"   = { name = "add" }
@@ -170,7 +170,7 @@ resource "permitio_resource" "mcp_server" {
 resource "permitio_resource" "mcp_server_tools" {
   name = "mcp_server_tools"
   key  = "mcp_server_tools"
-  
+
   actions = {
     "list" = { name = "list" }
   }
@@ -182,7 +182,7 @@ resource "permitio_role" "Admin" {
   name        = "Admin"
   permissions = [
     "mcp_server:greet",
-    "mcp_server:add", 
+    "mcp_server:add",
     "mcp_server_tools:list"
   ]
 }
@@ -224,7 +224,7 @@ The middleware supports Attribute-Based Access Control (ABAC) policies that can 
 
 ![ABAC Condition Example](./images/permit/abac_condition_example.png)
 
-*Example: Create dynamic resources with conditions like `resource.arg_number greater-than 10` to allow the `conditional-greet` tool only when the number argument exceeds 10.*
+_Example: Create dynamic resources with conditions like `resource.arg_number greater-than 10` to allow the `conditional-greet` tool only when the number argument exceeds 10._
 
 #### Example: Conditional Access
 
@@ -239,7 +239,7 @@ def conditional_greet(name: str, number: int) -> str:
 
 ![ABAC Policy Example](./images/permit/abac_policy_example.png)
 
-*Example: The Admin role is granted access to the "conditional-greet" action on the "Big-greets" dynamic resource, while other tools like "greet", "greet-jwt", and "login" are granted on the base "mcp_server" resource.*
+_Example: The Admin role is granted access to the "conditional-greet" action on the "Big-greets" dynamic resource, while other tools like "greet", "greet-jwt", and "login" are granted on the base "mcp_server" resource._
 
 For comprehensive ABAC configuration and advanced policy examples, see [ABAC Policies with Tool Arguments](https://github.com/permitio/permit-fastmcp/blob/main/docs/policy-mapping.md#abac-policies-with-tool-arguments).
 
@@ -339,11 +339,10 @@ if __name__ == "__main__":
 ```
 
 <Tip>
-  For detailed policy configuration, custom authentication, and advanced
-  deployment patterns, visit the [Permit.io FastMCP Middleware
-  repository][permit-fastmcp-github]. For troubleshooting common issues, see [Troubleshooting](https://github.com/permitio/permit-fastmcp/blob/main/docs/troubleshooting.md).
+  For detailed policy configuration, custom authentication, and advanced deployment patterns, visit the [Permit.io
+  FastMCP Middleware repository][permit-fastmcp-github]. For troubleshooting common issues, see
+  [Troubleshooting](https://github.com/permitio/permit-fastmcp/blob/main/docs/troubleshooting.md).
 </Tip>
-
 
 [permit.io]: https://www.permit.io
 [permit-github]: https://github.com/permitio

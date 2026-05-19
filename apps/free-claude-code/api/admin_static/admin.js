@@ -3,7 +3,7 @@ const state = {
   fields: new Map(),
   localStatus: new Map(),
   modelOptions: [],
-  activeView: "providers",
+  activeView: "providers"
 };
 
 const MASKED_SECRET = "********";
@@ -13,22 +13,22 @@ const VIEW_GROUPS = [
     label: "Providers",
     title: "Providers",
     sections: ["providers", "runtime"],
-    containerId: "providersSections",
+    containerId: "providersSections"
   },
   {
     id: "model_config",
     label: "Model Config",
     title: "Model Config",
     sections: ["models", "thinking", "web_tools"],
-    containerId: "modelConfigSections",
+    containerId: "modelConfigSections"
   },
   {
     id: "messaging",
     label: "Messaging",
     title: "Messaging",
     sections: ["messaging", "voice"],
-    containerId: "messagingSections",
-  },
+    containerId: "messagingSections"
+  }
 ];
 
 const byId = (id) => document.getElementById(id);
@@ -40,7 +40,7 @@ function sourceLabel(source) {
     repo_env: "repo .env",
     managed_env: "",
     explicit_env_file: "FCC_ENV_FILE",
-    process: "process env",
+    process: "process env"
   };
   return Object.prototype.hasOwnProperty.call(labels, source) ? labels[source] : source;
 }
@@ -68,7 +68,7 @@ function providerName(providerId) {
     kimi: "Kimi",
     wafer: "Wafer",
     opencode: "OpenCode Zen",
-    zai: "Z.ai",
+    zai: "Z.ai"
   };
   if (names[providerId]) return names[providerId];
   return providerId
@@ -87,7 +87,7 @@ function statusClass(status) {
 async function api(path, options = {}) {
   const response = await fetch(path, {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
+    ...options
   });
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
@@ -131,8 +131,7 @@ function renderNav() {
 }
 
 function setActiveView(viewId, { scroll = false } = {}) {
-  const activeView =
-    VIEW_GROUPS.find((view) => view.id === viewId) || VIEW_GROUPS[0];
+  const activeView = VIEW_GROUPS.find((view) => view.id === viewId) || VIEW_GROUPS[0];
   state.activeView = activeView.id;
   byId("pageTitle").textContent = activeView.title;
 
@@ -177,9 +176,7 @@ function renderProviders(providerStatus) {
     const meta = document.createElement("div");
     meta.className = "provider-meta";
     meta.textContent =
-      provider.kind === "local"
-        ? provider.base_url || "No local URL configured"
-        : provider.credential_env;
+      provider.kind === "local" ? provider.base_url || "No local URL configured" : provider.credential_env;
 
     const button = document.createElement("button");
     button.type = "button";
@@ -309,7 +306,7 @@ function inputForField(field) {
     [
       ["", "Inherit"],
       ["true", "Enabled"],
-      ["false", "Disabled"],
+      ["false", "Disabled"]
     ].forEach(([value, label]) => select.appendChild(option(value, label)));
     select.value = field.value || "";
     return select;
@@ -332,9 +329,7 @@ function inputForField(field) {
   input.type = field.type === "number" ? "number" : "text";
   if (field.type === "secret") {
     input.type = "password";
-    input.placeholder = field.configured
-      ? "Configured - enter a new value to replace"
-      : "Not configured";
+    input.placeholder = field.configured ? "Configured - enter a new value to replace" : "Not configured";
     input.value = "";
     input.autocomplete = "off";
   } else {
@@ -375,15 +370,14 @@ function changedValues() {
 
 function updateDirtyState() {
   const count = Object.keys(changedValues()).length;
-  byId("dirtyState").textContent =
-    count === 0 ? "No changes" : `${count} unsaved change${count === 1 ? "" : "s"}`;
+  byId("dirtyState").textContent = count === 0 ? "No changes" : `${count} unsaved change${count === 1 ? "" : "s"}`;
   byId("applyButton").disabled = count === 0;
 }
 
 async function validate(showResult = true) {
   const result = await api("/admin/api/config/validate", {
     method: "POST",
-    body: JSON.stringify({ values: changedValues() }),
+    body: JSON.stringify({ values: changedValues() })
   });
   if (showResult) {
     showValidationResult(result);
@@ -402,7 +396,7 @@ function showValidationResult(result) {
 async function apply() {
   const result = await api("/admin/api/config/apply", {
     method: "POST",
-    body: JSON.stringify({ values: changedValues() }),
+    body: JSON.stringify({ values: changedValues() })
   });
   if (!result.applied) {
     showValidationResult(result);
@@ -419,12 +413,7 @@ async function apply() {
   }
   const pending = restart.required ? restart.fields || [] : result.pending_fields || [];
   await load();
-  showMessage(
-    pending.length
-      ? `Applied. Restart fcc-server to use: ${pending.join(", ")}`
-      : "Applied",
-    "ok",
-  );
+  showMessage(pending.length ? `Applied. Restart fcc-server to use: ${pending.join(", ")}` : "Applied", "ok");
 }
 
 async function refreshLocalStatus() {
@@ -445,20 +434,17 @@ async function testProvider(providerId, button) {
   try {
     const result = await api(`/admin/api/providers/${providerId}/test`, {
       method: "POST",
-      body: "{}",
+      body: "{}"
     });
     if (result.ok) {
       updateProviderCard(
         providerId,
         "reachable",
         `${result.models.length} models`,
-        result.models.slice(0, 3).join(", ") || "No models returned",
+        result.models.slice(0, 3).join(", ") || "No models returned"
       );
       state.modelOptions = Array.from(
-        new Set([
-          ...state.modelOptions,
-          ...result.models.map((model) => `${providerId}/${model}`),
-        ]),
+        new Set([...state.modelOptions, ...result.models.map((model) => `${providerId}/${model}`)])
       ).sort();
       syncModelDatalist();
     } else {

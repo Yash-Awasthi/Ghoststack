@@ -13,10 +13,12 @@ The monolithic `MountedProvider` was split into two focused, composable componen
 ## Why the Split?
 
 `MountedProvider` was doing two things:
+
 1. Wrapping a FastMCP server as a provider
 2. Transforming component names with prefixes
 
 Separating these concerns enables:
+
 - Reusing transformations on any provider (not just FastMCP servers)
 - Stacking transformations via composition
 - Clearer mental model

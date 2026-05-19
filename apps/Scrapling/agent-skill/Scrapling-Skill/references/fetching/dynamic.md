@@ -5,11 +5,13 @@
 As we will explain later, to automate the page, you need some knowledge of [Playwright's Page API](https://playwright.dev/python/docs/api/class-page).
 
 ## Basic Usage
+
 You have one primary way to import this Fetcher, which is the same for all fetchers.
 
 ```python
 from scrapling.fetchers import DynamicFetcher
 ```
+
 Check out how to configure the parsing options [here](choosing.md#parser-configuration-in-all-fetchers)
 
 **Note:** The async version of the `fetch` method is `async_fetch`.
@@ -19,39 +21,47 @@ This fetcher provides three main run options that can be combined as desired.
 Which are:
 
 ### 1. Vanilla Playwright
+
 ```python
 DynamicFetcher.fetch('https://example.com')
 ```
+
 Using it in that manner will open a Chromium browser and load the page. There are optimizations for speed, and some stealth goes automatically under the hood, but other than that, there are no tricks or extra features unless you enable some; it's just a plain PlayWright API.
 
 ### 2. Real Chrome
+
 ```python
 DynamicFetcher.fetch('https://example.com', real_chrome=True)
 ```
+
 If you have a Google Chrome browser installed, use this option. It's the same as the first option, but it will use the Google Chrome browser you installed on your device instead of Chromium. This will make your requests look more authentic, so they're less detectable for better results.
 
 If you don't have Google Chrome installed and want to use this option, you can use the command below in the terminal to install it for the library instead of installing it manually:
+
 ```commandline
 playwright install chrome
 ```
 
 ### 3. CDP Connection
+
 ```python
 DynamicFetcher.fetch('https://example.com', cdp_url='ws://localhost:9222')
 ```
+
 Instead of launching a browser locally (Chromium/Google Chrome), you can connect to a remote browser through the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/).
 
-
 **Notes:**
-* There was a `stealth` option here, but it was moved to the `StealthyFetcher` class, as explained on the next page, with additional features since version 0.3.13.
-* This makes it less confusing for new users, easier to maintain, and provides other benefits, as explained on the [StealthyFetcher page](stealthy.md).
+
+- There was a `stealth` option here, but it was moved to the `StealthyFetcher` class, as explained on the next page, with additional features since version 0.3.13.
+- This makes it less confusing for new users, easier to maintain, and provides other benefits, as explained on the [StealthyFetcher page](stealthy.md).
 
 ## Full list of arguments
+
 All arguments for `DynamicFetcher` and its session classes:
 
 |      Argument       | Description                                                                                                                                                                                                                         | Optional |
-|:-------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------:|
-|         url         | Target url                                                                                                                                                                                                                          |    ❌     |
+| :-----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+|         url         | Target url                                                                                                                                                                                                                          |    ❌    |
 |      headless       | Pass `True` to run the browser in headless/hidden (**default**) or `False` for headful/visible mode.                                                                                                                                |    ✔️    |
 |  disable_resources  | Drop requests for unnecessary resources for a speed boost. Requests dropped are of type `font`, `image`, `media`, `beacon`, `object`, `imageset`, `texttrack`, `websocket`, `csp_report`, and `stylesheet`.                         |    ✔️    |
 |       cookies       | Set cookies for the next request.                                                                                                                                                                                                   |    ✔️    |
@@ -65,8 +75,8 @@ All arguments for `DynamicFetcher` and its session classes:
 |    wait_selector    | Wait for a specific css selector to be in a specific state.                                                                                                                                                                         |    ✔️    |
 |     init_script     | An absolute path to a JavaScript file to be executed on page creation for all pages in this session.                                                                                                                                |    ✔️    |
 | wait_selector_state | Scrapling will wait for the given state to be fulfilled for the selector given with `wait_selector`. _Default state is `attached`._                                                                                                 |    ✔️    |
-|    google_search    | Enabled by default, Scrapling will set a Google referer header.                                                                                               |    ✔️    |
-|    extra_headers    | A dictionary of extra headers to add to the request. _The referer set by `google_search` takes priority over the referer set here if used together._                                                                   |    ✔️    |
+|    google_search    | Enabled by default, Scrapling will set a Google referer header.                                                                                                                                                                     |    ✔️    |
+|    extra_headers    | A dictionary of extra headers to add to the request. _The referer set by `google_search` takes priority over the referer set here if used together._                                                                                |    ✔️    |
 |        proxy        | The proxy to be used with requests. It can be a string or a dictionary with only the keys 'server', 'username', and 'password'.                                                                                                     |    ✔️    |
 |     real_chrome     | If you have a Chrome browser installed on your device, enable this, and the Fetcher will launch and use an instance of your browser.                                                                                                |    ✔️    |
 |       locale        | Specify user locale, for example, `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value, `Accept-Language` request header value, as well as number and date formatting rules. Defaults to the system default locale. |    ✔️    |
@@ -77,22 +87,22 @@ All arguments for `DynamicFetcher` and its session classes:
 |   additional_args   | Additional arguments to be passed to Playwright's context as additional settings, and they take higher priority than Scrapling's settings.                                                                                          |    ✔️    |
 |   selector_config   | A dictionary of custom parsing arguments to be used when creating the final `Selector`/`Response` class.                                                                                                                            |    ✔️    |
 |   blocked_domains   | A set of domain names to block requests to. Subdomains are also matched (e.g., `"example.com"` blocks `"sub.example.com"` too).                                                                                                     |    ✔️    |
-|     block_ads       | Block requests to ~3,500 known ad/tracking domains. Can be combined with `blocked_domains`.                                                                                                                                         |    ✔️    |
+|      block_ads      | Block requests to ~3,500 known ad/tracking domains. Can be combined with `blocked_domains`.                                                                                                                                         |    ✔️    |
 |   dns_over_https    | Route DNS queries through Cloudflare's DNS-over-HTTPS to prevent DNS leaks when using proxies.                                                                                                                                      |    ✔️    |
 |    proxy_rotator    | A `ProxyRotator` instance for automatic proxy rotation. Cannot be combined with `proxy`.                                                                                                                                            |    ✔️    |
 |       retries       | Number of retry attempts for failed requests. Defaults to 3.                                                                                                                                                                        |    ✔️    |
 |     retry_delay     | Seconds to wait between retry attempts. Defaults to 1.                                                                                                                                                                              |    ✔️    |
-|     capture_xhr     | Pass a regex URL pattern string to capture XHR/fetch requests matching it during page load. Captured responses are available via `response.captured_xhr`. Defaults to `None` (disabled).                                             |    ✔️    |
+|     capture_xhr     | Pass a regex URL pattern string to capture XHR/fetch requests matching it during page load. Captured responses are available via `response.captured_xhr`. Defaults to `None` (disabled).                                            |    ✔️    |
 |   executable_path   | Absolute path to a custom browser executable to use instead of the bundled Chromium. Useful for non-standard installations or custom browser builds.                                                                                |    ✔️    |
 
 In session classes, all these arguments can be set globally for the session. Still, you can configure each request individually by passing some of the arguments here that can be configured on the browser tab level like: `google_search`, `timeout`, `wait`, `page_action`, `page_setup`, `extra_headers`, `disable_resources`, `wait_selector`, `wait_selector_state`, `network_idle`, `load_dom`, `blocked_domains`, `proxy`, and `selector_config`.
 
 **Notes:**
+
 1. The `disable_resources` option made requests ~25% faster in tests for some websites and can help save proxy usage, but be careful with it, as it can cause some websites to never finish loading.
 2. The `google_search` argument is enabled by default for all requests, setting the referer to `https://www.google.com/`. If used together with `extra_headers`, it takes priority over the referer set there.
 3. Since version 0.3.13, the `stealth` option has been removed here in favor of the `StealthyFetcher` class, and the `hide_canvas` option has been moved to it. The `disable_webgl` argument has been moved to the `StealthyFetcher` class and renamed as `allow_webgl`.
 4. If you didn't set a user agent and enabled headless mode, the fetcher will generate a real user agent for the same browser version and use it. If you didn't set a user agent and didn't enable headless mode, the fetcher will use the browser's default user agent, which is the same as in standard browsers in the latest versions.
-
 
 ## Examples
 
@@ -158,6 +168,7 @@ with open(file='main_cover.png', mode='wb') as f:
 The `body` attribute of the `Response` object always returns `bytes`.
 
 ### Pre-Navigation Setup
+
 If you need to set up event listeners, routes, or scripts that must be registered before the page navigates, use `page_setup`. This function receives the `page` object and runs before `page.goto()` is called.
 
 ```python
@@ -168,7 +179,9 @@ def capture_websockets(page: Page):
 
 page = DynamicFetcher.fetch('https://example.com', page_setup=capture_websockets)
 ```
+
 Async version:
+
 ```python
 from playwright.async_api import Page
 
@@ -181,11 +194,13 @@ page = await DynamicFetcher.async_fetch('https://example.com', page_setup=captur
 You can combine it with `page_action` -- `page_setup` runs before navigation, `page_action` runs after.
 
 ### Browser Automation
+
 This is where your knowledge about [Playwright's Page API](https://playwright.dev/python/docs/api/class-page) comes into play. The function you pass here takes the page object from Playwright's API, performs the desired action, and then the fetcher continues.
 
 This function is executed immediately after waiting for `network_idle` (if enabled) and before waiting for the `wait_selector` argument, allowing it to be used for purposes beyond automation. You can alter the page as you want.
 
 In the example below, I used the pages' [mouse events](https://playwright.dev/python/docs/api/class-mouse) to scroll the page with the mouse wheel, then move the mouse.
+
 ```python
 from playwright.sync_api import Page
 
@@ -196,7 +211,9 @@ def scroll_page(page: Page):
 
 page = DynamicFetcher.fetch('https://example.com', page_action=scroll_page)
 ```
+
 Of course, if you use the async fetch version, the function must also be async.
+
 ```python
 from playwright.async_api import Page
 
@@ -218,6 +235,7 @@ page = DynamicFetcher.fetch(
     wait_selector_state='visible'
 )
 ```
+
 This is the last wait the fetcher will do before returning the response (if enabled). You pass a CSS selector to the `wait_selector` argument, and the fetcher will wait for the state you passed in the `wait_selector_state` argument to be fulfilled. If you didn't pass a state, the default would be `attached`, which means it will wait for the element to be present in the DOM.
 
 After that, if `load_dom` is enabled (the default), the fetcher will check again to see if all JavaScript files are loaded and executed (in the `domcontentloaded` state) or continue waiting. If you have enabled `network_idle`, the fetcher will wait for `network_idle` to be fulfilled again, as explained above.
@@ -259,6 +277,7 @@ page = DynamicFetcher.fetch(
 ```
 
 ### General example
+
 ```python
 from scrapling.fetchers import DynamicFetcher
 
@@ -269,10 +288,10 @@ def scrape_dynamic_content():
         network_idle=True,
         wait_selector='.content'
     )
-    
+
     # Extract dynamic content
     content = page.css('.content')
-    
+
     return {
         'title': content.css('h1::text').get(),
         'items': [
@@ -298,7 +317,7 @@ with DynamicSession(
     page1 = session.fetch('https://example1.com')
     page2 = session.fetch('https://example2.com')
     page3 = session.fetch('https://dynamic-site.com')
-    
+
     # All requests reuse the same tab on the same browser instance
 ```
 
@@ -347,6 +366,6 @@ Use DynamicFetcher when:
 - Want multiple browser options
 - Using a real Chrome browser
 - Need custom browser config
-- Want a few stealth options 
+- Want a few stealth options
 
 If you want more stealth and control without much config, check out the [StealthyFetcher](stealthy.md).

@@ -6,7 +6,7 @@
 
 ### Changed
 
-- refactor: extract _version.py from __init__.py (PR-3/8) (#2550)
+- refactor: extract \_version.py from **init**.py (PR-3/8) (#2550)
 - Add Time Machine extension to community catalog (#2580)
 - fix(powershell): ensure UTF-8 templates are written without BOM (#2280)
 - docs: document high-assurance spec workflow (#2518)
@@ -26,9 +26,9 @@
 - Add Agent Governance extension to community catalog (#2559)
 - Add Reqnroll BDD extension to community catalog (#2545)
 - fix(cli): harden extension registration and discovery workflows (#2499)
-- refactor: extract _assets.py and _utils.py from __init__.py (PR-2/8) (#2543)
+- refactor: extract \_assets.py and \_utils.py from **init**.py (PR-2/8) (#2543)
 - fix(opencode): use commands/ directory (plural) to match OpenCode docs (#2453)
-- refactor: extract _console.py from __init__.py (PR-1/8) (#2474)
+- refactor: extract \_console.py from **init**.py (PR-1/8) (#2474)
 - Fix constitution reference in README (#2491)
 - chore: release 0.8.9, begin 0.8.10.dev0 development (#2532)
 
@@ -42,7 +42,7 @@
 - Add install directory to docfx.json file references (#2522)
 - feat(catalog): add BrownKit (brownkit) community extension (#2510) (#2520)
 - fix(kiro-cli): replace literal $ARGUMENTS with prose fallback (#2482)
-- Preset: Add game-narrative-writing  preset to community catalog (#2454)
+- Preset: Add game-narrative-writing preset to community catalog (#2454)
 - docs: clarify CLI upgrade discovery (#2519)
 - fix: make template metadata line breaks markdownlint-safe (#2505)
 - refactor(catalogs): extract integration catalog config loading (#2497)
@@ -230,7 +230,7 @@
 - feat: register Blueprint in community catalog (#2252)
 - preset: Update preset-fiction-book-writing to community catalog -> v1.5.0 (#2256)
 - chore(deps): bump actions/upload-pages-artifact from 3 to 5 (#2251)
-- fix: add reference/*.md to docfx content glob (#2248)
+- fix: add reference/\*.md to docfx content glob (#2248)
 - chore: release 0.7.2, begin 0.7.3.dev0 development (#2247)
 
 ## [0.7.2] - 2026-04-16
@@ -642,7 +642,7 @@
 
 ### Changed
 
-- fix: include 'src/**' path in release workflow triggers (#1646)
+- fix: include 'src/\*\*' path in release workflow triggers (#1646)
 
 ## [0.0.101] - 2026-02-19
 
@@ -812,15 +812,15 @@
 - Update CHANGELOG.md
 - Update agent configuration
 - Update scripts/powershell/create-new-feature.ps1
-- Update src/specify_cli/__init__.py
+- Update src/specify_cli/**init**.py
 - Create create-release-packages.ps1
 - Script changes
 - Update taskstoissues.md
 - Create taskstoissues.md
-- Update src/specify_cli/__init__.py
+- Update src/specify_cli/**init**.py
 - Update CONTRIBUTING.md
 - Potential fix for code scanning alert no. 3: Workflow does not contain permissions
-- Update src/specify_cli/__init__.py
+- Update src/specify_cli/**init**.py
 - Update CHANGELOG.md
 - Fixes #970
 - Fixes #975
@@ -856,7 +856,7 @@
 
 ### Changed
 
-- fix: include the latest changelog in the `GitHub Release`'s  body
+- fix: include the latest changelog in the `GitHub Release`'s body
 
 ## [0.0.76] - 2025-10-21
 
@@ -893,7 +893,7 @@
 - chore: fix path to powershell script in vscode settings
 - fix: correct `run_command` exit behavior and improve installation instructions (for `Amazon Q`) in `post-create.sh` + fix typos in `CONTRIBUTING.md`
 - chore: add `specify`'s github copilot chat settings to `devcontainer`
-- chore: add `devcontainer` support  to ease developer workstation setup
+- chore: add `devcontainer` support to ease developer workstation setup
 
 ## [0.0.72] - 2025-10-18
 
@@ -915,7 +915,7 @@
 - fix: broken media files
 - Update README.md
 - The function parameters lack type hints. Consider adding type annotations for better code clarity and IDE support.
-- - **Smart JSON Merging for VS Code Settings**: `.vscode/settings.json` is now intelligently merged instead of being overwritten during `specify init --here` or `specify init .`   - Existing settings are preserved   - New Spec Kit settings are added   - Nested objects are merged recursively   - Prevents accidental loss of custom VS Code workspace configurations
+- - **Smart JSON Merging for VS Code Settings**: `.vscode/settings.json` is now intelligently merged instead of being overwritten during `specify init --here` or `specify init .` - Existing settings are preserved - New Spec Kit settings are added - Nested objects are merged recursively - Prevents accidental loss of custom VS Code workspace configurations
 - Fix: incorrect command formatting in agent context file, refix #895
 
 ## [0.0.69] - 2025-10-15
@@ -1003,13 +1003,13 @@
 
 ### Changed
 
-- Update __init__.py
+- Update **init**.py
 - Consolidate Cursor naming
 - Update CHANGELOG.md
 - Git errors are now highlighted.
-- Update __init__.py
+- Update **init**.py
 - Refactor agent configuration
-- Update src/specify_cli/__init__.py
+- Update src/specify_cli/**init**.py
 - Update scripts/powershell/update-agent-context.ps1
 - Update AGENTS.md
 - Update templates/commands/implement.md
@@ -1073,10 +1073,10 @@
 
 - Update URLs to Contributing and Support Guides in Docs
 - fix: add UTF-8 encoding to file read/write operations in update-agent-context.ps1
-- Update __init__.py
-- Update src/specify_cli/__init__.py
+- Update **init**.py
+- Update src/specify_cli/**init**.py
 - docs: fix the paths of generated files (moved under a `.specify/` folder)
-- Update src/specify_cli/__init__.py
+- Update src/specify_cli/**init**.py
 - feat: support 'specify init .' for current directory initialization
 - feat: Add emacs-style up/down keys
 
@@ -1086,7 +1086,7 @@
 
 - Update CONTRIBUTING.md
 - Refine `plan-template.md` with improved project type detection, clarified structure decision process, and enhanced research task guidance.
-- Update __init__.py
+- Update **init**.py
 
 ## [0.0.53] - 2025-09-24
 
@@ -1196,23 +1196,23 @@
 - Update update-agent-context.ps1
 - Update package release
 - Update config
-- Update __init__.py
-- Update __init__.py
+- Update **init**.py
+- Update **init**.py
 - Remove Codex-specific logic in the initialization script
 - Update version rev
-- Update __init__.py
+- Update **init**.py
 - Enhance Codex support by auto-syncing prompt files, allowing spec generation without git, and documenting clearer /specify usage.
 - Consistency tweaks
 - Consistent step coloring
-- Update __init__.py
-- Update __init__.py
+- Update **init**.py
+- Update **init**.py
 - Quick UI tweak
 - Update package release
 - Limit workspace command seeding to Codex init and update Codex documentation accordingly.
 - Clarify Codex-specific README note with rationale for its different workflow.
 - Bump to 0.0.7 and document Codex support
 - Normalize Codex command templates to the scripts-based schema and auto-upgrade generated commands.
-- Fix remaining merge conflict markers in __init__.py
+- Fix remaining merge conflict markers in **init**.py
 - Add Codex CLI support with AGENTS.md and commands bootstrap
 
 ## [0.0.45] - 2025-09-19
@@ -1228,7 +1228,7 @@
 ### Changed
 
 - Update specify.md
-- Update __init__.py
+- Update **init**.py
 
 ## [0.0.43] - 2025-09-18
 
@@ -1366,11 +1366,11 @@
 ### Changed
 
 - Update config
-- Update __init__.py
+- Update **init**.py
 - Refactor with platform-specific constraints
 - Update README.md
 - Update CLI reference
-- Update __init__.py
+- Update **init**.py
 - refactor: extract Claude local path to constant for maintainability
 - fix: support Claude CLI installed via migrate-installer
 
@@ -1520,4 +1520,3 @@
 ### Changed
 
 - Update release.yml
-

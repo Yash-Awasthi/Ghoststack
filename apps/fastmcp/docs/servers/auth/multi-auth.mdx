@@ -5,7 +5,7 @@ description: Accept tokens from multiple authentication sources with a single se
 icon: layer-group
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.1.0" />
 
@@ -87,9 +87,9 @@ Without a server, no OAuth routes or metadata are served. This is appropriate fo
 
 ### MultiAuth
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `server` | `AuthProvider \| None` | Optional auth provider that owns routes and OAuth metadata. Also tried first for token verification. |
-| `verifiers` | `list[TokenVerifier] \| TokenVerifier` | One or more token verifiers tried after the server. |
-| `base_url` | `str \| None` | Override the base URL. Defaults to the server's `base_url`. |
-| `required_scopes` | `list[str] \| None` | Override required scopes. Defaults to the server's scopes. |
+| Parameter         | Type                                   | Description                                                                                          |
+| ----------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `server`          | `AuthProvider \| None`                 | Optional auth provider that owns routes and OAuth metadata. Also tried first for token verification. |
+| `verifiers`       | `list[TokenVerifier] \| TokenVerifier` | One or more token verifiers tried after the server.                                                  |
+| `base_url`        | `str \| None`                          | Override the base URL. Defaults to the server's `base_url`.                                          |
+| `required_scopes` | `list[str] \| None`                    | Override required scopes. Defaults to the server's scopes.                                           |

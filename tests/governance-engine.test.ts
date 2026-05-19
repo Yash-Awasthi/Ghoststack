@@ -1,14 +1,14 @@
-import { 
-  GovernanceEngine, 
-  ResourceScopeConstraint, 
-  CostBudgetConstraint, 
-  DangerousOperationPolicy, 
+import {
+  GovernanceEngine,
+  ResourceScopeConstraint,
+  CostBudgetConstraint,
+  DangerousOperationPolicy,
   WildcardPermissionsPolicy,
   LoopDetectionGuardrail,
   RunawayRetriesGuardrail,
   TaskGraphLimitGuardrail
-} from '../orchestration/governance-engine';
-import { ITaskSynthesisResult } from '../orchestration/interfaces/governance.interface';
+} from "../orchestration/governance-engine";
+import { ITaskSynthesisResult } from "../orchestration/interfaces/governance.interface";
 
 describe("Milestone 2: Governance Engine & Execution Policies", () => {
   let engine: GovernanceEngine;
@@ -16,7 +16,7 @@ describe("Milestone 2: Governance Engine & Execution Policies", () => {
   beforeEach(() => {
     engine = new GovernanceEngine();
     engine.registerConstraint(new ResourceScopeConstraint());
-    engine.registerConstraint(new CostBudgetConstraint(0.50));
+    engine.registerConstraint(new CostBudgetConstraint(0.5));
     engine.registerPolicy(new DangerousOperationPolicy());
     engine.registerPolicy(new WildcardPermissionsPolicy());
     engine.registerGuardrail(new LoopDetectionGuardrail(3));
@@ -46,7 +46,7 @@ describe("Milestone 2: Governance Engine & Execution Policies", () => {
       arguments: { scope: "*" },
       dependencies: [],
       priority: "high",
-      governanceMetadata: { dangerous: true, costEstimate: 0.00, resourceScope: "system:root" }
+      governanceMetadata: { dangerous: true, costEstimate: 0.0, resourceScope: "system:root" }
     };
 
     const res = await engine.evaluateTask(task);

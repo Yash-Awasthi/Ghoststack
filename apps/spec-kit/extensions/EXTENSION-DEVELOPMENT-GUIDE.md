@@ -19,43 +19,43 @@ cd my-extension
 schema_version: "1.0"
 
 extension:
-  id: "my-ext"                          # Lowercase, alphanumeric + hyphens only
+  id: "my-ext" # Lowercase, alphanumeric + hyphens only
   name: "My Extension"
-  version: "1.0.0"                      # Semantic versioning
+  version: "1.0.0" # Semantic versioning
   description: "My custom extension"
   author: "Your Name"
   repository: "https://github.com/you/spec-kit-my-ext"
   license: "MIT"
 
 requires:
-  speckit_version: ">=0.1.0"            # Minimum spec-kit version
-  tools:                                # Optional: External tools required
+  speckit_version: ">=0.1.0" # Minimum spec-kit version
+  tools: # Optional: External tools required
     - name: "my-tool"
       required: true
       version: ">=1.0.0"
-  commands:                             # Optional: Core commands needed
+  commands: # Optional: Core commands needed
     - "speckit.tasks"
 
 provides:
   commands:
-    - name: "speckit.my-ext.hello"      # Must follow pattern: speckit.{ext-id}.{cmd}
+    - name: "speckit.my-ext.hello" # Must follow pattern: speckit.{ext-id}.{cmd}
       file: "commands/hello.md"
       description: "Say hello"
-      aliases: ["speckit.my-ext.hi"]    # Optional aliases, same pattern
+      aliases: ["speckit.my-ext.hi"] # Optional aliases, same pattern
 
-  config:                               # Optional: Config files
+  config: # Optional: Config files
     - name: "my-ext-config.yml"
       template: "my-ext-config.template.yml"
       description: "Extension configuration"
       required: false
 
-hooks:                                  # Optional: Integration hooks
+hooks: # Optional: Integration hooks
   after_tasks:
     command: "speckit.my-ext.hello"
     optional: true
     prompt: "Run hello command?"
 
-tags:                                   # Optional: For catalog search
+tags: # Optional: For catalog search
   - "example"
   - "utility"
 ```
@@ -70,12 +70,12 @@ mkdir commands
 
 **File**: `commands/hello.md`
 
-```markdown
+````markdown
 ---
 description: "Say hello command"
-tools:                              # Optional: AI tools this command uses
-  - 'some-tool/function'
-scripts:                            # Optional: Helper scripts
+tools: # Optional: AI tools this command uses
+  - "some-tool/function"
+scripts: # Optional: Helper scripts
   sh: ../../scripts/bash/helper.sh
   ps: ../../scripts/powershell/helper.ps1
 ---
@@ -97,6 +97,7 @@ $ARGUMENTS
 echo "Hello from my extension!"
 echo "Arguments: $ARGUMENTS"
 ```
+````
 
 ## Extension Configuration
 
@@ -234,10 +235,10 @@ JSON Schema for validating extension configuration.
 
 ```yaml
 ---
-description: "Command description"          # Required
-tools:                                      # Optional
-  - 'tool-name/function'
-scripts:                                    # Optional
+description: "Command description" # Required
+tools: # Optional
+  - "tool-name/function"
+scripts: # Optional
   sh: ../../scripts/bash/helper.sh
   ps: ../../scripts/powershell/helper.ps1
 ---
@@ -381,14 +382,14 @@ CONTRIBUTING.md
 
 ### Pattern Matching
 
-| Pattern | Matches | Does NOT match |
-|---------|---------|----------------|
-| `*.pyc` | Any `.pyc` file in any directory | — |
-| `tests/` | The `tests` directory (and all its contents) | A file named `tests` |
-| `docs/*.draft.md` | `docs/api.draft.md` (directly inside `docs/`) | `docs/sub/api.draft.md` (nested) |
-| `.env` | The `.env` file at any level | — |
-| `!README.md` | Re-includes `README.md` even if matched by an earlier pattern | — |
-| `docs/**/*.draft.md` | `docs/api.draft.md`, `docs/sub/api.draft.md` | — |
+| Pattern              | Matches                                                       | Does NOT match                   |
+| -------------------- | ------------------------------------------------------------- | -------------------------------- |
+| `*.pyc`              | Any `.pyc` file in any directory                              | —                                |
+| `tests/`             | The `tests` directory (and all its contents)                  | A file named `tests`             |
+| `docs/*.draft.md`    | `docs/api.draft.md` (directly inside `docs/`)                 | `docs/sub/api.draft.md` (nested) |
+| `.env`               | The `.env` file at any level                                  | —                                |
+| `!README.md`         | Re-includes `README.md` even if matched by an earlier pattern | —                                |
+| `docs/**/*.draft.md` | `docs/api.draft.md`, `docs/sub/api.draft.md`                  | —                                |
 
 ### Unsupported Features
 
@@ -598,10 +599,9 @@ provides:
 ```
 
 ````markdown
-<!-- commands/hello.md -->
----
-description: "Hello command"
----
+## <!-- commands/hello.md -->
+
+## description: "Hello command"
 
 # Hello World
 
@@ -632,9 +632,11 @@ timeout: 30
 
 ````markdown
 <!-- commands/use-config.md -->
+
 # Use Config
 
 Load config:
+
 ```bash
 config_file=".specify/extensions/tool/tool-config.yml"
 endpoint=$(yq eval '.api_endpoint' "$config_file")
@@ -651,7 +653,7 @@ Extension that runs automatically:
 hooks:
   after_tasks:
     command: "speckit.auto.analyze"
-    optional: false  # Always run
+    optional: false # Always run
     description: "Analyze tasks after generation"
 ```
 

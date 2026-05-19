@@ -23,6 +23,7 @@ FastMCP is an extremely highly-trafficked repository maintained by a very small 
 **LLM-generated issues will be closed immediately.** Issues that contain paragraphs of unnecessary explanation, verbose problem descriptions, or obvious LLM authorship patterns obfuscate the actual problem and transfer burden to maintainers.
 
 Write clear, concise issues that:
+
 - State the problem directly
 - Provide a minimal reproducible example
 - Skip unnecessary background or context
@@ -33,7 +34,6 @@ Issues may be labeled "Invalid" simply due to confusion caused by verbosity or n
 ## Pull Requests
 
 PRs that deviate from FastMCP's core principles will be rejected regardless of implementation quality. **PRs are NOT for iterating on ideas** - they should only be opened for ideas that already have a bias toward acceptance based on issue discussion.
-
 
 ### Development Environment
 
@@ -61,11 +61,12 @@ Prek hooks will run automatically on every commit to catch issues before they re
 
 #### Scope
 
-Large pull requests create review bottlenecks and quality risks. Unless you're fixing a discrete bug or making an incredibly well-scoped change, keep PRs small and focused. 
+Large pull requests create review bottlenecks and quality risks. Unless you're fixing a discrete bug or making an incredibly well-scoped change, keep PRs small and focused.
 
 A PR that changes 50 lines across 3 files can be thoroughly reviewed in minutes. A PR that changes 500 lines across 20 files requires hours of careful analysis and often hides subtle issues.
 
 Breaking large features into smaller PRs:
+
 - Creates better review experiences
 - Makes git history clear
 - Simplifies debugging with bisect
@@ -77,6 +78,7 @@ Breaking large features into smaller PRs:
 FastMCP values clarity over cleverness. Every line you write will be maintained by someone else - possibly years from now, possibly without context about your decisions.
 
 **PRs can be rejected for two opposing reasons:**
+
 1. **Insufficient quality** - Code that doesn't meet our standards for clarity, maintainability, or idiomaticity
 2. **Overengineering** - Code that is overbearing, unnecessarily complex, or tries to be too clever
 
@@ -108,6 +110,7 @@ uv run prek run --all-files
 ```
 
 This runs three critical tools:
+
 - **Ruff**: Linting and formatting
 - **Prettier**: Code formatting
 - **ty**: Static type checking
@@ -138,6 +141,7 @@ just docs
 ```
 
 Documentation requirements:
+
 - **Explain concepts in prose first** - Code without context is just syntax
 - **Complete, runnable examples** - Every code block should be copy-pasteable
 - **Register in docs.json** - Makes pages appear in navigation
@@ -145,7 +149,7 @@ Documentation requirements:
 
 #### SDK Documentation
 
-FastMCP's SDK documentation is auto-generated from the source code docstrings and type annotations. It is automatically updated on every merge to main by a GitHub Actions workflow, so users are *not* responsible for keeping the documentation up to date. However, to generate it proactively, you can use the following command:
+FastMCP's SDK documentation is auto-generated from the source code docstrings and type annotations. It is automatically updated on every merge to main by a GitHub Actions workflow, so users are _not_ responsible for keeping the documentation up to date. However, to generate it proactively, you can use the following command:
 
 ```bash
 just api-ref-all
@@ -163,8 +167,9 @@ just api-ref-all
 #### PR Description
 
 Write PR descriptions that explain:
+
 - What problem you're solving
-- Why you chose this approach  
+- Why you chose this approach
 - Any trade-offs or alternatives considered
 - Migration path for breaking changes
 

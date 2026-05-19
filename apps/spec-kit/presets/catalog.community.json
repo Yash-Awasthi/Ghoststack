@@ -21,13 +21,7 @@
         "templates": 9,
         "commands": 3
       },
-      "tags": [
-        "a11y",
-        "accessibility",
-        "bilingual",
-        "wcag",
-        "inclusion"
-      ],
+      "tags": ["a11y", "accessibility", "bilingual", "wcag", "inclusion"],
       "created_at": "2026-04-27T00:00:00Z",
       "updated_at": "2026-04-27T00:00:00Z"
     },
@@ -49,13 +43,7 @@
         "templates": 6,
         "commands": 3
       },
-      "tags": [
-        "agents",
-        "governance",
-        "parity",
-        "agent-guidance",
-        "multi-agent"
-      ],
+      "tags": ["agents", "governance", "parity", "agent-guidance", "multi-agent"],
       "created_at": "2026-04-27T00:00:00Z",
       "updated_at": "2026-04-27T00:00:00Z"
     },
@@ -72,20 +60,13 @@
       "license": "MIT",
       "requires": {
         "speckit_version": ">=0.2.0",
-        "extensions": [
-          "aide"
-        ]
+        "extensions": ["aide"]
       },
       "provides": {
         "templates": 2,
         "commands": 8
       },
-      "tags": [
-        "migration",
-        "in-place",
-        "brownfield",
-        "aide"
-      ]
+      "tags": ["migration", "in-place", "brownfield", "aide"]
     },
     "architecture-governance": {
       "name": "Architecture Governance",
@@ -105,13 +86,7 @@
         "templates": 11,
         "commands": 3
       },
-      "tags": [
-        "architecture",
-        "governance",
-        "threat-modeling",
-        "stride",
-        "zero-trust"
-      ],
+      "tags": ["architecture", "governance", "threat-modeling", "stride", "zero-trust"],
       "created_at": "2026-04-27T00:00:00Z",
       "updated_at": "2026-04-27T00:00:00Z"
     },
@@ -133,11 +108,7 @@
         "templates": 2,
         "commands": 8
       },
-      "tags": [
-        "baseline",
-        "canon",
-        "spec-first"
-      ]
+      "tags": ["baseline", "canon", "spec-first"]
     },
     "claude-ask-questions": {
       "name": "Claude AskUserQuestion",
@@ -157,12 +128,7 @@
         "templates": 0,
         "commands": 2
       },
-      "tags": [
-        "claude",
-        "ask-user-question",
-        "clarify",
-        "checklist"
-      ],
+      "tags": ["claude", "ask-user-question", "clarify", "checklist"],
       "created_at": "2026-04-13T00:00:00Z",
       "updated_at": "2026-04-13T00:00:00Z"
     },
@@ -184,13 +150,7 @@
         "templates": 8,
         "commands": 3
       },
-      "tags": [
-        "cross-platform",
-        "bash",
-        "powershell",
-        "man-page",
-        "cmdlet"
-      ],
+      "tags": ["cross-platform", "bash", "powershell", "man-page", "cmdlet"],
       "created_at": "2026-04-27T00:00:00Z",
       "updated_at": "2026-04-27T00:00:00Z"
     },
@@ -212,12 +172,7 @@
         "templates": 1,
         "commands": 1
       },
-      "tags": [
-        "dependencies",
-        "parallel",
-        "scheduling",
-        "wave-dag"
-      ]
+      "tags": ["dependencies", "parallel", "scheduling", "wave-dag"]
     },
     "fiction-book-writing": {
       "name": "Fiction Book Writing",
@@ -311,13 +266,7 @@
         "templates": 13,
         "commands": 3
       },
-      "tags": [
-        "architecture",
-        "governance",
-        "isaqb",
-        "arc42",
-        "adr"
-      ],
+      "tags": ["architecture", "governance", "isaqb", "arc42", "adr"],
       "created_at": "2026-04-27T00:00:00Z",
       "updated_at": "2026-04-27T00:00:00Z"
     },
@@ -339,12 +288,7 @@
         "templates": 0,
         "commands": 1
       },
-      "tags": [
-        "jira",
-        "atlassian",
-        "issue-tracking",
-        "preset"
-      ],
+      "tags": ["jira", "atlassian", "issue-tracking", "preset"],
       "created_at": "2026-04-15T00:00:00Z",
       "updated_at": "2026-04-15T00:00:00Z"
     },
@@ -361,9 +305,7 @@
       "license": "MIT",
       "requires": {
         "speckit_version": ">=0.1.0",
-        "extensions": [
-          "mde"
-        ]
+        "extensions": ["mde"]
       },
       "provides": {
         "templates": 6,
@@ -397,12 +339,7 @@
         "templates": 0,
         "commands": 2
       },
-      "tags": [
-        "multi-repo-branching",
-        "multi-module",
-        "submodules",
-        "monorepo"
-      ],
+      "tags": ["multi-repo-branching", "multi-module", "submodules", "monorepo"],
       "created_at": "2026-04-09T00:00:00Z",
       "updated_at": "2026-04-09T00:00:00Z"
     },
@@ -424,12 +361,7 @@
         "templates": 6,
         "commands": 9
       },
-      "tags": [
-        "pirate",
-        "theme",
-        "fun",
-        "experimental"
-      ]
+      "tags": ["pirate", "theme", "fun", "experimental"]
     },
     "screenwriting": {
       "name": "Screenwriting",
@@ -487,13 +419,7 @@
         "templates": 12,
         "commands": 3
       },
-      "tags": [
-        "security",
-        "governance",
-        "msl",
-        "asvs",
-        "supply-chain"
-      ],
+      "tags": ["security", "governance", "msl", "asvs", "supply-chain"],
       "created_at": "2026-04-27T00:00:00Z",
       "updated_at": "2026-04-27T00:00:00Z"
     },
@@ -515,15 +441,10 @@
         "templates": 5,
         "commands": 8
       },
-      "tags": [
-        "azure",
-        "spec2cloud",
-        "workflow",
-        "deployment"
-      ],
+      "tags": ["azure", "spec2cloud", "workflow", "deployment"],
       "created_at": "2026-04-30T00:00:00Z",
       "updated_at": "2026-04-30T00:00:00Z"
-    }, 
+    },
     "toc-navigation": {
       "name": "Table of Contents Navigation",
       "id": "toc-navigation",
@@ -542,11 +463,7 @@
         "templates": 3,
         "commands": 3
       },
-      "tags": [
-        "navigation",
-        "toc",
-        "documentation"
-      ]
+      "tags": ["navigation", "toc", "documentation"]
     },
     "vscode-ask-questions": {
       "name": "VS Code Ask Questions",
@@ -566,12 +483,7 @@
         "templates": 0,
         "commands": 1
       },
-      "tags": [
-        "vscode",
-        "askquestions",
-        "clarify",
-        "interactive"
-      ]
+      "tags": ["vscode", "askquestions", "clarify", "interactive"]
     }
   }
 }

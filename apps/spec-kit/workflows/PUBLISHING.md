@@ -48,18 +48,18 @@ Verify your definition is valid:
 schema_version: "1.0"
 
 workflow:
-  id: "your-workflow"              # Unique lowercase-hyphenated ID
-  name: "Your Workflow Name"       # Human-readable name
-  version: "1.0.0"                 # Semantic version
+  id: "your-workflow" # Unique lowercase-hyphenated ID
+  name: "Your Workflow Name" # Human-readable name
+  version: "1.0.0" # Semantic version
   author: "Your Name or Organization"
   description: "Brief description (one sentence)"
-  integration: claude              # Default integration (optional)
-  model: "claude-sonnet-4-20250514"         # Default model (optional)
+  integration: claude # Default integration (optional)
+  model: "claude-sonnet-4-20250514" # Default model (optional)
 
 requires:
   speckit_version: ">=0.6.1"
   integrations:
-    any: ["claude", "gemini"]      # At least one required
+    any: ["claude", "gemini"] # At least one required
 
 inputs:
   spec:
@@ -177,10 +177,7 @@ Edit `workflows/catalog.community.json` and add your workflow.
       "requires": {
         "speckit_version": ">=0.15.0"
       },
-      "tags": [
-        "category",
-        "automation"
-      ],
+      "tags": ["category", "automation"],
       "created_at": "2026-04-10T00:00:00Z",
       "updated_at": "2026-04-10T00:00:00Z"
     }
@@ -214,6 +211,7 @@ git push origin add-your-workflow
 **Repository**: https://github.com/your-org/spec-kit-workflow-your-workflow
 
 ### Checklist
+
 - [ ] Valid workflow.yml (passes `specify workflow info`)
 - [ ] README.md with description, inputs, and step graph
 - [ ] LICENSE file included

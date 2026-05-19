@@ -6,8 +6,8 @@ icon: message-smile
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
-import { LocalFocusTip } from "/snippets/local-focus.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
+import { LocalFocusTip } from "/snippets/local-focus.mdx";
 
 <LocalFocusTip />
 
@@ -39,6 +39,7 @@ if __name__ == "__main__":
 ## Install the Server
 
 ### FastMCP CLI
+
 <VersionBadge version="2.13.0" />
 
 The easiest way to install a FastMCP server in Gemini CLI is using the `fastmcp install gemini-cli` command. This automatically handles the configuration, dependency management, and calls Gemini CLI's built-in MCP management system.
@@ -97,7 +98,6 @@ Alternatively, you can use a `fastmcp.json` configuration file (recommended):
 }
 ```
 
-
 #### Python Version and Project Configuration
 
 Control the Python environment for your server with these options:
@@ -131,7 +131,8 @@ fastmcp install gemini-cli server.py --server-name "Weather Server" --env-file .
 ```
 
 <Warning>
-**Gemini CLI must be installed**. The integration looks for the Gemini CLI and uses the `gemini mcp add` command to register servers.
+  **Gemini CLI must be installed**. The integration looks for the Gemini CLI and uses the `gemini mcp add` command to
+  register servers.
 </Warning>
 
 ### Manual Configuration
@@ -169,6 +170,6 @@ Try asking Gemini something like:
 
 Gemini will automatically detect your `roll_dice` tool and use it to fulfill your request.
 
-Gemini CLI can now access all the tools and prompts you've defined in your FastMCP server. 
+Gemini CLI can now access all the tools and prompts you've defined in your FastMCP server.
 
 If your server provides prompts, you can use them as slash commands with `/prompt_name`.

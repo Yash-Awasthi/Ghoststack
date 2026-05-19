@@ -6,25 +6,25 @@ icon: layer-group
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.9.0" />
 
 MCP middleware is a powerful concept that allows you to add cross-cutting functionality to your FastMCP server. Unlike traditional web middleware, MCP middleware is designed specifically for the Model Context Protocol, providing hooks for different types of MCP operations like tool calls, resource reads, and prompt requests.
 
 <Tip>
-MCP middleware is a FastMCP-specific concept and is not part of the official MCP protocol specification. This middleware system is designed to work with FastMCP servers and may not be compatible with other MCP implementations.
+  MCP middleware is a FastMCP-specific concept and is not part of the official MCP protocol specification. This
+  middleware system is designed to work with FastMCP servers and may not be compatible with other MCP implementations.
 </Tip>
 
-<Warning>
-MCP middleware is a brand new concept and may be subject to breaking changes in future versions.
-</Warning>
+<Warning>MCP middleware is a brand new concept and may be subject to breaking changes in future versions.</Warning>
 
 ## What is MCP Middleware?
 
 MCP middleware lets you intercept and modify MCP requests and responses as they flow through your server. Think of it as a pipeline where each piece of middleware can inspect what's happening, make changes, and then pass control to the next middleware in the chain.
 
 Common use cases for MCP middleware include:
+
 - **Authentication and Authorization**: Verify client permissions before executing operations
 - **Logging and Monitoring**: Track usage patterns and performance metrics
 - **Rate Limiting**: Control request frequency per client or operation type
@@ -79,6 +79,7 @@ When a request comes in, **multiple hooks may be called for the same request**, 
 3. **Operation-specific hooks** - Called for specific MCP operations like `on_call_tool`
 
 For example, when a client calls a tool, your middleware will receive **multiple hook calls**:
+
 1. `on_message` and `on_request` for any initial tool discovery operations (list_tools)
 2. `on_message` (because it's any MCP message) for the tool call itself
 3. `on_request` (because tool calls expect responses) for the tool call itself
@@ -89,6 +90,7 @@ Note that the MCP SDK may perform additional operations like listing tools for c
 This hierarchy allows you to target your middleware logic with the right level of specificity. Use `on_message` for broad concerns like logging, `on_request` for authentication, and `on_call_tool` for tool-specific logic like performance monitoring.
 
 ### Available Hooks
+
 <VersionBadge version="2.9.0" />
 
 - `on_message`: Called for all MCP messages (requests and notifications)
@@ -102,11 +104,14 @@ This hierarchy allows you to target your middleware logic with the right level o
 - `on_list_resources`: Called when listing available resources
 - `on_list_resource_templates`: Called when listing resource templates
 - `on_list_prompts`: Called when listing available prompts
-<VersionBadge version="2.13.0" />
+  <VersionBadge version="2.13.0" />
 - `on_initialize`: Called when a client connects and initializes the session (returns `None`)
-<Note>
-The `on_initialize` hook receives the client's initialization request but **returns `None`** rather than a result. The initialization response is handled internally by the MCP protocol and cannot be modified by middleware. This hook is useful for client detection, logging connections, or initializing session state, but not for modifying the initialization handshake itself.
-</Note>
+  <Note>
+    The `on_initialize` hook receives the client's initialization request but **returns `None`** rather than a result.
+    The initialization response is handled internally by the MCP protocol and cannot be modified by middleware. This
+    hook is useful for client detection, logging connections, or initializing session state, but not for modifying the
+    initialization handshake itself.
+  </Note>
 
 **Example:**
 
@@ -131,7 +136,9 @@ class InitializationMiddleware(Middleware):
 ```
 
 <Warning>
-If you raise `McpError` in `on_initialize` **after** calling `call_next()`, the error will only be logged and will not be sent to the client. The initialization response has already been sent at that point. Always raise `McpError` **before** `call_next()` if you want to reject the initialization.
+  If you raise `McpError` in `on_initialize` **after** calling `call_next()`, the error will only be logged and will not
+  be sent to the client. The initialization response has already been sent at that point. Always raise `McpError`
+  **before** `call_next()` if you want to reject the initialization.
 </Warning>
 
 ### MCP Session Availability in Middleware
@@ -141,6 +148,7 @@ If you raise `McpError` in `on_initialize` **after** calling `call_next()`, the 
 The MCP session and request context are not available during certain phases like initialization. When middleware runs during these phases, `context.fastmcp_context.request_context` returns `None` rather than the full MCP request context.
 
 This typically occurs when:
+
 - The `on_request` hook fires during client initialization
 - The MCP handshake hasn't completed yet
 
@@ -177,12 +185,14 @@ Understanding how to access component information (tools, resources, prompts) in
 FastMCP middleware handles two types of operations differently:
 
 **Listing Operations** (`on_list_tools`, `on_list_resources`, `on_list_prompts`, etc.):
+
 - Middleware receives **FastMCP component objects** with full metadata
 - These objects include FastMCP-specific properties like `tags` that can be accessed directly from the component
-- The result contains complete component information before it's converted to MCP format  
+- The result contains complete component information before it's converted to MCP format
 - Tags are included in the component's `meta` field in the listing response returned to MCP clients
 
 **Execution Operations** (`on_call_tool`, `on_read_resource`, `on_get_prompt`):
+
 - Middleware runs **before** the component is executed
 - The middleware result is either the execution result or an error if the component wasn't found
 - Component metadata isn't directly available in the hook parameters
@@ -201,20 +211,20 @@ class TagBasedMiddleware(Middleware):
         if context.fastmcp_context:
             try:
                 tool = await context.fastmcp_context.fastmcp.get_tool(context.message.name)
-                
+
                 # Check if this tool has a "private" tag
                 if "private" in tool.tags:
                     raise ToolError("Access denied: private tool")
-                    
+
                 # Check if tool is enabled
                 if not tool.enabled:
                     raise ToolError("Tool is currently disabled")
-                    
+
             except Exception:
                 # Tool not found or other error - let execution continue
                 # and handle the error naturally
                 pass
-        
+
         return await call_next(context)
 ```
 
@@ -234,7 +244,7 @@ class ComponentAccessMiddleware(Middleware):
             except Exception:
                 pass
         return await call_next(context)
-    
+
     async def on_get_prompt(self, context: MiddlewareContext, call_next):
         if context.fastmcp_context:
             try:
@@ -256,13 +266,13 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 class ListingFilterMiddleware(Middleware):
     async def on_list_tools(self, context: MiddlewareContext, call_next):
         result = await call_next(context)
-        
+
         # Filter out tools with "private" tag
         filtered_tools = [
-            tool for tool in result 
+            tool for tool in result
             if "private" not in tool.tags
         ]
-        
+
         # Return modified list
         return filtered_tools
 ```
@@ -270,7 +280,8 @@ class ListingFilterMiddleware(Middleware):
 This filtering happens before the components are converted to MCP format and returned to the client. Tags are accessible both during filtering and are included in the component's `meta` field in the final listing response.
 
 <Tip>
-When filtering components in listing operations, ensure you also prevent execution of filtered components in the corresponding execution hooks (`on_call_tool`, `on_read_resource`, `on_get_prompt`) to maintain consistency.
+  When filtering components in listing operations, ensure you also prevent execution of filtered components in the
+  corresponding execution hooks (`on_call_tool`, `on_read_resource`, `on_get_prompt`) to maintain consistency.
 </Tip>
 
 ### Tool Call Denial
@@ -284,17 +295,19 @@ from fastmcp.exceptions import ToolError
 class AuthMiddleware(Middleware):
     async def on_call_tool(self, context: MiddlewareContext, call_next):
         tool_name = context.message.name
-        
+
         # Deny access to restricted tools
         if tool_name.lower() in ["delete", "admin_config"]:
             raise ToolError("Access denied: tool requires admin privileges")
-        
+
         # Allow other tools to proceed
         return await call_next(context)
 ```
 
 <Warning>
-When denying tool calls, always raise `ToolError` rather than returning `ToolResult` objects or other values. `ToolError` ensures proper error propagation through the middleware chain and converts to the correct MCP error response format.
+  When denying tool calls, always raise `ToolError` rather than returning `ToolResult` objects or other values.
+  `ToolError` ensures proper error propagation through the middleware chain and converts to the correct MCP error
+  response format.
 </Warning>
 
 ### Tool Call Modification
@@ -311,20 +324,21 @@ class ToolCallMiddleware(Middleware):
             # Ensure positive inputs
             if context.message.arguments.get("value", 0) < 0:
                 context.message.arguments["value"] = abs(context.message.arguments["value"])
-        
+
         result = await call_next(context)
-        
+
         # Transform result after execution
         if context.message.name == "get_data":
             # Add metadata to result
             if result.structured_content:
                 result.structured_content["processed_at"] = "2024-01-01T00:00:00Z"
-        
+
         return result
 ```
 
 <Tip>
-For more complex tool rewriting scenarios, consider using [Tool Transformation](/v2/patterns/tool-transformation) patterns which provide a more structured approach to creating modified tool variants.
+  For more complex tool rewriting scenarios, consider using [Tool Transformation](/v2/patterns/tool-transformation)
+  patterns which provide a more structured approach to creating modified tool variants.
 </Tip>
 
 ### Anatomy of a Hook
@@ -335,13 +349,13 @@ Every middleware hook follows the same pattern. Let's examine the `on_message` h
 async def on_message(self, context: MiddlewareContext, call_next):
     # 1. Pre-processing: Inspect and optionally modify the request
     print(f"Processing {context.method}")
-    
+
     # 2. Chain continuation: Call the next middleware/handler
     result = await call_next(context)
-    
+
     # 3. Post-processing: Inspect and optionally modify the response
     print(f"Completed {context.method}")
-    
+
     # 4. Return the result (potentially modified)
     return result
 ```
@@ -363,6 +377,7 @@ Every hook receives two parameters:
 ### Control Flow
 
 You have complete control over the request flow:
+
 - **Continue processing**: Call `await call_next(context)` to proceed
 - **Modify the request**: Change the context before calling `call_next`
 - **Modify the response**: Change the result after calling `call_next`
@@ -385,13 +400,13 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 
 class LoggingMiddleware(Middleware):
     """Middleware that logs all MCP operations."""
-    
+
     async def on_message(self, context: MiddlewareContext, call_next):
         """Called for all MCP messages."""
         print(f"Processing {context.method} from {context.source}")
-        
+
         result = await call_next(context)
-        
+
         print(f"Completed {context.method}")
         return result
 
@@ -426,8 +441,9 @@ mcp.add_middleware(LoggingMiddleware())
 ```
 
 This creates the following execution flow:
+
 1. AuthenticationMiddleware (pre-processing)
-2. PerformanceMiddleware (pre-processing)  
+2. PerformanceMiddleware (pre-processing)
 3. LoggingMiddleware (pre-processing)
 4. Actual tool/resource handler
 5. LoggingMiddleware (post-processing)
@@ -449,7 +465,7 @@ This allows you to create layered middleware architectures where parent servers 
 parent = FastMCP("Parent")
 parent.add_middleware(AuthenticationMiddleware("token"))
 
-# Child server with its own middleware  
+# Child server with its own middleware
 child = FastMCP("Child")
 child.add_middleware(LoggingMiddleware())
 
@@ -469,7 +485,7 @@ FastMCP includes several middleware implementations that demonstrate best practi
 
 ### Timing Middleware
 
-Performance monitoring is essential for understanding your server's behavior and identifying bottlenecks. FastMCP includes timing middleware at `fastmcp.server.middleware.timing`. 
+Performance monitoring is essential for understanding your server's behavior and identifying bottlenecks. FastMCP includes timing middleware at `fastmcp.server.middleware.timing`.
 
 Here's an example of how it works:
 
@@ -480,7 +496,7 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 class SimpleTimingMiddleware(Middleware):
     async def on_request(self, context: MiddlewareContext, call_next):
         start_time = time.perf_counter()
-        
+
         try:
             result = await call_next(context)
             duration_ms = (time.perf_counter() - start_time) * 1000
@@ -496,7 +512,7 @@ To use the full version with proper logging and configuration:
 
 ```python
 from fastmcp.server.middleware.timing import (
-    TimingMiddleware, 
+    TimingMiddleware,
     DetailedTimingMiddleware
 )
 
@@ -619,7 +635,7 @@ print(f"Total cache operations: {stats}")
 
 ### Logging Middleware
 
-Request and response logging is crucial for debugging, monitoring, and understanding usage patterns in your MCP server. FastMCP provides comprehensive logging middleware at `fastmcp.server.middleware.logging`. 
+Request and response logging is crucial for debugging, monitoring, and understanding usage patterns in your MCP server. FastMCP provides comprehensive logging middleware at `fastmcp.server.middleware.logging`.
 
 Here's an example of how it works:
 
@@ -629,7 +645,7 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 class SimpleLoggingMiddleware(Middleware):
     async def on_message(self, context: MiddlewareContext, call_next):
         print(f"Processing {context.method} from {context.source}")
-        
+
         try:
             result = await call_next(context)
             print(f"Completed {context.method}")
@@ -643,7 +659,7 @@ To use the full versions with advanced features:
 
 ```python
 from fastmcp.server.middleware.logging import (
-    LoggingMiddleware, 
+    LoggingMiddleware,
     StructuredLoggingMiddleware
 )
 
@@ -661,7 +677,7 @@ The built-in versions include payload logging, structured JSON output, custom lo
 
 ### Rate Limiting Middleware
 
-Rate limiting is essential for protecting your server from abuse, ensuring fair resource usage, and maintaining performance under load. FastMCP includes sophisticated rate limiting middleware at `fastmcp.server.middleware.rate_limiting`. 
+Rate limiting is essential for protecting your server from abuse, ensuring fair resource usage, and maintaining performance under load. FastMCP includes sophisticated rate limiting middleware at `fastmcp.server.middleware.rate_limiting`.
 
 Here's an example of how it works:
 
@@ -676,21 +692,21 @@ class SimpleRateLimitMiddleware(Middleware):
     def __init__(self, requests_per_minute: int = 60):
         self.requests_per_minute = requests_per_minute
         self.client_requests = defaultdict(list)
-    
+
     async def on_request(self, context: MiddlewareContext, call_next):
         current_time = time.time()
         client_id = "default"  # In practice, extract from headers or context
-        
+
         # Clean old requests and check limit
         cutoff_time = current_time - 60
         self.client_requests[client_id] = [
             req_time for req_time in self.client_requests[client_id]
             if req_time > cutoff_time
         ]
-        
+
         if len(self.client_requests[client_id]) >= self.requests_per_minute:
             raise McpError(ErrorData(code=-32000, message="Rate limit exceeded"))
-        
+
         self.client_requests[client_id].append(current_time)
         return await call_next(context)
 ```
@@ -699,7 +715,7 @@ To use the full versions with advanced algorithms:
 
 ```python
 from fastmcp.server.middleware.rate_limiting import (
-    RateLimitingMiddleware, 
+    RateLimitingMiddleware,
     SlidingWindowRateLimitingMiddleware
 )
 
@@ -732,7 +748,7 @@ class SimpleErrorHandlingMiddleware(Middleware):
     def __init__(self):
         self.logger = logging.getLogger("errors")
         self.error_counts = {}
-    
+
     async def on_message(self, context: MiddlewareContext, call_next):
         try:
             return await call_next(context)
@@ -740,7 +756,7 @@ class SimpleErrorHandlingMiddleware(Middleware):
             # Log the error and track statistics
             error_key = f"{type(error).__name__}:{context.method}"
             self.error_counts[error_key] = self.error_counts.get(error_key, 0) + 1
-            
+
             self.logger.error(f"Error in {context.method}: {type(error).__name__}: {error}")
             raise
 ```
@@ -749,7 +765,7 @@ To use the full versions with advanced features:
 
 ```python
 from fastmcp.server.middleware.error_handling import (
-    ErrorHandlingMiddleware, 
+    ErrorHandlingMiddleware,
     RetryMiddleware
 )
 
@@ -806,9 +822,9 @@ class CustomHeaderMiddleware(Middleware):
     async def on_request(self, context: MiddlewareContext, call_next):
         # Add custom logic here
         print(f"Processing {context.method}")
-        
+
         result = await call_next(context)
-        
+
         print(f"Completed {context.method}")
         return result
 

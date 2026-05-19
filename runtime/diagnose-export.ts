@@ -1,26 +1,26 @@
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { MetricsCollector } from '../orchestration/observability-manager';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { ApprovalWorkflow } from '../orchestration/approval-workflow';
-import { LocalEventBus } from '../orchestration/event-bus';
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { MetricsCollector } from "../orchestration/observability-manager";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { ApprovalWorkflow } from "../orchestration/approval-workflow";
+import { LocalEventBus } from "../orchestration/event-bus";
 import {
   WorkflowRegistry,
   WorkflowTelemetry,
   BrowserResearchWorkflowTemplate,
   LocalCloudProvisioningTemplate
-} from '../orchestration/workflow-engine';
-import * as fs from 'fs';
-import * as path from 'path';
+} from "../orchestration/workflow-engine";
+import * as fs from "fs";
+import * as path from "path";
 
 async function exportDiagnostics() {
   console.log("[DIAG] Packaging GhostStack v1.1 Operational Diagnostics Snapshot...");
 
-  const testDir = path.join(__dirname, '../data-runtime');
-  const eventLogPath = path.join(testDir, 'events.jsonl');
-  const cacheDbPath = path.join(testDir, 'cache.json');
+  const testDir = path.join(__dirname, "../data-runtime");
+  const eventLogPath = path.join(testDir, "events.jsonl");
+  const cacheDbPath = path.join(testDir, "cache.json");
 
   const eventStore = new FileEventStore(eventLogPath);
   const queue = new MemoryQueueBackend();
@@ -53,7 +53,7 @@ async function exportDiagnostics() {
     telemetry
   );
 
-  const api = new RuntimeDiagnosticAPI(inspector);
+  new RuntimeDiagnosticAPI(inspector);
 
   const diagnosticsSnapshot = {
     timestamp: new Date().toISOString(),
@@ -67,7 +67,7 @@ async function exportDiagnostics() {
       deadLetterLength: (await queue.getDeadLetterQueue()).length
     },
     workflows: {
-      registeredTemplates: registry.listTemplates().map(t => ({ id: t.templateId, name: t.name })),
+      registeredTemplates: registry.listTemplates().map((t) => ({ id: t.templateId, name: t.name })),
       telemetryHistory: telemetry.getExecutionHistory()
     },
     services: await discovery.listServices(),
@@ -77,13 +77,13 @@ async function exportDiagnostics() {
     }
   };
 
-  const logsDir = path.join(__dirname, '../logs');
+  const logsDir = path.join(__dirname, "../logs");
   if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });
   }
 
-  const exportPath = path.join(logsDir, 'diagnostics-export.json');
-  fs.writeFileSync(exportPath, JSON.stringify(diagnosticsSnapshot, null, 2), 'utf8');
+  const exportPath = path.join(logsDir, "diagnostics-export.json");
+  fs.writeFileSync(exportPath, JSON.stringify(diagnosticsSnapshot, null, 2), "utf8");
 
   console.log(`\x1b[32m[SUCCESS] Operational diagnostics successfully exported to: ${exportPath}\x1b[0m`);
   console.log(`  - Registered templates count: ${diagnosticsSnapshot.workflows.registeredTemplates.length}`);
@@ -91,7 +91,7 @@ async function exportDiagnostics() {
   console.log(`  - Governance approval records: ${diagnosticsSnapshot.systemMetrics.governanceApprovalsCount}`);
 }
 
-exportDiagnostics().catch(err => {
+exportDiagnostics().catch((err) => {
   console.error("[CRITICAL] Diagnostics exporter failed:", err);
   process.exit(1);
 });

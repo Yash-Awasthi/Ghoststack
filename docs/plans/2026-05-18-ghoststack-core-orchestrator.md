@@ -74,13 +74,13 @@ graph TD
 
 The workspace is organized into discrete directories representing the control plane, definitions, and application nodes:
 
-| Path | Primary Engine | Language/Type | Role / Purpose |
-| :--- | :--- | :--- | :--- |
-| `orchestration/` | Core Loop | TypeScript | Handles orchestrator lifecycle, event dispatching, memory routing, and agent registry |
-| `runtime/` | Host Environment | YAML / TS | Defines port assignments, healthy daemon definitions, system healthchecks, and boot configuration |
-| `schemas/` | Validation Plane | JSON Schema | Dictates the API contracts for Agent Messages, Tasks, Memory states, and Runtime status |
-| `specs/` | Feature definitions | Markdown / Specs | Stores spec-kit feature files and implementation plans |
-| `apps/` | Integrations | Git Submodules/Src | Subfolders for each of the 10 components (`floci`, `spec-kit`, `codebuff`, etc.) |
+| Path             | Primary Engine      | Language/Type      | Role / Purpose                                                                                    |
+| :--------------- | :------------------ | :----------------- | :------------------------------------------------------------------------------------------------ |
+| `orchestration/` | Core Loop           | TypeScript         | Handles orchestrator lifecycle, event dispatching, memory routing, and agent registry             |
+| `runtime/`       | Host Environment    | YAML / TS          | Defines port assignments, healthy daemon definitions, system healthchecks, and boot configuration |
+| `schemas/`       | Validation Plane    | JSON Schema        | Dictates the API contracts for Agent Messages, Tasks, Memory states, and Runtime status           |
+| `specs/`         | Feature definitions | Markdown / Specs   | Stores spec-kit feature files and implementation plans                                            |
+| `apps/`          | Integrations        | Git Submodules/Src | Subfolders for each of the 10 components (`floci`, `spec-kit`, `codebuff`, etc.)                  |
 
 ---
 
@@ -124,6 +124,7 @@ Contracts are verified utilizing JSON schema validation. Three primary contracts
 ## 4. Architectural Synthesis
 
 The Orchestrator combines all 10 systems:
+
 - **Floci** handles the emulation of the AWS stack.
 - **Spec-Kit** dictates requirements.
 - **Codebuff** executes refactoring.
@@ -141,7 +142,9 @@ The Orchestrator combines all 10 systems:
 We follow TDD with strict validation.
 
 ### Task 1: Initialize System Configurations
+
 **Files:**
+
 - Create: `runtime/ports.yaml`
 - Create: `runtime/services.yaml`
 - Create: `runtime/healthchecks.yaml`
@@ -150,14 +153,15 @@ We follow TDD with strict validation.
 
 **Step 1: Write the config tests**
 Create `tests/runtime_config.test.ts` to ensure configurations load correctly:
+
 ```typescript
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "js-yaml";
 
 describe("Runtime Configurations", () => {
   it("should contain standard YAML profiles", () => {
-    const ports = yaml.load(fs.readFileSync(path.join(__dirname, '../runtime/ports.yaml'), 'utf8')) as any;
+    const ports = yaml.load(fs.readFileSync(path.join(__dirname, "../runtime/ports.yaml"), "utf8")) as any;
     expect(ports.floci).toBe(4566);
     expect(ports.fcc).toBe(8082);
     expect(ports.mcp).toBe(8000);
@@ -173,7 +177,8 @@ Expected: FAIL (missing files or dependencies)
 **Step 3: Write minimal implementation**
 Create the config files:
 
-*`runtime/ports.yaml`:*
+_`runtime/ports.yaml`:_
+
 ```yaml
 floci: 4566
 fcc: 8082
@@ -182,7 +187,8 @@ ollama: 11434
 claude-mem: 8088
 ```
 
-*`runtime/services.yaml`:*
+_`runtime/services.yaml`:_
+
 ```yaml
 services:
   floci:
@@ -202,7 +208,8 @@ services:
     port: 11434
 ```
 
-*`runtime/healthchecks.yaml`:*
+_`runtime/healthchecks.yaml`:_
+
 ```yaml
 healthchecks:
   floci:
@@ -216,7 +223,8 @@ healthchecks:
     interval: 2000
 ```
 
-*`runtime/ghoststack.runtime.yaml`:*
+_`runtime/ghoststack.runtime.yaml`:_
+
 ```yaml
 version: "1.0.0"
 environment: development
@@ -232,6 +240,7 @@ Run: `npm test tests/runtime_config.test.ts`
 Expected: PASS
 
 **Step 5: Commit**
+
 ```bash
 git add runtime/
 git commit -m "feat: implement baseline configuration architecture"
@@ -240,22 +249,25 @@ git commit -m "feat: implement baseline configuration architecture"
 ---
 
 ### Task 2: Build the Event Bus & Task Router
+
 **Files:**
+
 - Modify: `orchestration/event-bus.ts`
 - Modify: `orchestration/task-router.ts`
 - Test: `tests/orchestration.test.ts`
 
 **Step 1: Write the failing orchestration test**
 Create `tests/orchestration.test.ts`:
+
 ```typescript
-import { EventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
+import { EventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
 
 describe("Event Bus & Task Routing", () => {
   it("should process and route agent tasks with dependency resolution", async () => {
     const bus = new EventBus();
     const router = new TaskRouter(bus);
-    
+
     const task = {
       id: "task-01",
       title: "Scrape Data",
@@ -264,7 +276,7 @@ describe("Event Bus & Task Routing", () => {
       status: "pending",
       dependencies: []
     };
-    
+
     const resolved = await router.route(task);
     expect(resolved.status).toBe("routed");
   });
@@ -278,9 +290,10 @@ Expected: FAIL (types not resolved, or file empty)
 **Step 3: Write minimal implementation**
 Create/Modify files:
 
-*`orchestration/event-bus.ts`:*
+_`orchestration/event-bus.ts`:_
+
 ```typescript
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export class EventBus extends EventEmitter {
   publish(event: string, data: any) {
@@ -293,9 +306,10 @@ export class EventBus extends EventEmitter {
 }
 ```
 
-*`orchestration/task-router.ts`:*
+_`orchestration/task-router.ts`:_
+
 ```typescript
-import { EventBus } from './event-bus';
+import { EventBus } from "./event-bus";
 
 export interface Task {
   id: string;
@@ -317,7 +331,7 @@ export class TaskRouter {
   async route(task: Task): Promise<Task> {
     task.status = "routed";
     this.queue.push(task);
-    this.bus.publish('task_routed', task);
+    this.bus.publish("task_routed", task);
     return task;
   }
 }
@@ -328,6 +342,7 @@ Run: `npm test tests/orchestration.test.ts`
 Expected: PASS
 
 **Step 5: Commit**
+
 ```bash
 git add orchestration/
 git commit -m "feat: implement event-bus and task routing pipeline"
@@ -336,15 +351,18 @@ git commit -m "feat: implement event-bus and task routing pipeline"
 ---
 
 ### Task 3: Setup Runtime Manager & Orchestrator Shell
+
 **Files:**
+
 - Modify: `orchestration/runtime-manager.ts`
 - Modify: `runtime/orchestrator.ts`
 - Test: `tests/runtime_manager.test.ts`
 
 **Step 1: Write the failing runtime manager test**
 Create `tests/runtime_manager.test.ts`:
+
 ```typescript
-import { RuntimeManager } from '../orchestration/runtime-manager';
+import { RuntimeManager } from "../orchestration/runtime-manager";
 
 describe("Runtime Manager", () => {
   it("should detect active services and parse service health status", async () => {
@@ -362,18 +380,19 @@ Expected: FAIL
 **Step 3: Write minimal implementation**
 Create/Modify files:
 
-*`orchestration/runtime-manager.ts`:*
+_`orchestration/runtime-manager.ts`:_
+
 ```typescript
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "js-yaml";
 
 export class RuntimeManager {
-  private configPath = path.join(__dirname, '../runtime/services.yaml');
+  private configPath = path.join(__dirname, "../runtime/services.yaml");
 
   async getActiveServices(): Promise<string[]> {
     try {
-      const content = fs.readFileSync(this.configPath, 'utf8');
+      const content = fs.readFileSync(this.configPath, "utf8");
       const data = yaml.load(content) as any;
       return Object.keys(data?.services || {});
     } catch {
@@ -383,11 +402,12 @@ export class RuntimeManager {
 }
 ```
 
-*`runtime/orchestrator.ts`:*
+_`runtime/orchestrator.ts`:_
+
 ```typescript
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { EventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { EventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
 
 export class GhostStackOrchestrator {
   private runtimeManager: RuntimeManager;
@@ -403,7 +423,7 @@ export class GhostStackOrchestrator {
   async start() {
     console.log("Starting GhostStack Unified Orchestrator...");
     const services = await this.runtimeManager.getActiveServices();
-    console.log(`Active services: ${services.join(', ')}`);
+    console.log(`Active services: ${services.join(", ")}`);
   }
 }
 ```
@@ -413,6 +433,7 @@ Run: `npm test tests/runtime_manager.test.ts`
 Expected: PASS
 
 **Step 5: Commit**
+
 ```bash
 git add orchestration/ runtime/
 git commit -m "feat: complete unified runtime manager and orchestrator start routine"

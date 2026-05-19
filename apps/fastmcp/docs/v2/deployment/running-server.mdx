@@ -12,7 +12,8 @@ FastMCP servers can be run in different ways depending on your needs. This guide
 Every FastMCP server needs to be started to accept connections. The simplest way to run a server is by calling the `run()` method on your FastMCP instance. This method starts the server and blocks until it's stopped, handling all the connection management for you.
 
 <Tip>
-For maximum compatibility, it's best practice to place the `run()` call within an `if __name__ == "__main__":` block. This ensures the server starts only when the script is executed directly, not when imported as a module.
+  For maximum compatibility, it's best practice to place the `run()` call within an `if __name__ == "__main__":` block.
+  This ensures the server starts only when the script is executed directly, not when imported as a module.
 </Tip>
 
 ```python {9-10} my_server.py
@@ -56,6 +57,7 @@ if __name__ == "__main__":
 ```
 
 STDIO is ideal for:
+
 - Local development and testing
 - Claude Desktop integration
 - Command-line tools
@@ -84,6 +86,7 @@ if __name__ == "__main__":
 ```
 
 Your server is now accessible at `http://localhost:8000/mcp`. This URL is the MCP endpoint that clients will connect to. HTTP transport enables:
+
 - Network accessibility
 - Multiple concurrent clients
 - Integration with web infrastructure
@@ -141,7 +144,8 @@ fastmcp run server.py --project /path/to/project
 ```
 
 <Note>
-When using `--python`, `--with`, `--project`, or `--with-requirements`, the server runs via `uv run` subprocess instead of using your local environment.
+  When using `--python`, `--with`, `--project`, or `--with-requirements`, the server runs via `uv run` subprocess
+  instead of using your local environment.
 </Note>
 
 ### Passing Arguments to Servers
@@ -185,6 +189,7 @@ if __name__ == "__main__":
 The `run()` method cannot be called from inside an async function because it creates its own async event loop internally. If you attempt to call `run()` from inside an async function, you'll get an error about the event loop already running.
 
 Always use `run_async()` inside async functions and `run()` in synchronous contexts.
+
 </Warning>
 
 Both `run()` and `run_async()` accept the same transport arguments, so all the examples above apply to both methods.
@@ -245,11 +250,11 @@ from fastmcp import FastMCP
 
 def create_app():
     mcp = FastMCP("MyServer")
-    
+
     @mcp.tool
     def process(data: str) -> str:
         return f"Processed: {data}"
-    
+
     return mcp.http_app()
 
 app = create_app()  # Uvicorn will use this

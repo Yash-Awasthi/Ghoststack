@@ -1,5 +1,1 @@
-[
-  {"Value": "Shared"},
-  {"Value": "Dedicated"},
-  {"Value": "Host"}
-]
+[{ "Value": "Shared" }, { "Value": "Dedicated" }, { "Value": "Host" }]

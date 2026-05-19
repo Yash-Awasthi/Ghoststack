@@ -124,6 +124,7 @@ def test_schema_generation():
 ```
 
 Commands:
+
 - `pytest --inline-snapshot=create` - populate empty snapshots
 - `pytest --inline-snapshot=fix` - update after intentional changes
 
@@ -211,6 +212,7 @@ uv run pytest -m "not integration" # Exclude integration tests
 ## Checklist
 
 Before submitting tests:
+
 - [ ] Each test tests one thing
 - [ ] No `@pytest.mark.asyncio` decorators
 - [ ] Imports at module level

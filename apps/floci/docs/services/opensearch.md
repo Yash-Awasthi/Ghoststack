@@ -17,7 +17,7 @@ Domain metadata is stored in-process. No Docker containers are started. Domains 
 Floci starts an **OpenSearch** (`opensearchproject/opensearch:2`) Docker container per domain. The container is exposed on a host port from the configured range (`9400–9499`). Once `/_cluster/health` returns `green` or `yellow`, the domain transitions to `Created: true` and the `Endpoint` field is populated with the container's address.
 
 !!! note "Docker socket required"
-    Real mode starts Docker containers. Mount the Docker socket and set the Docker network so containers can reach each other. For private registry authentication and other Docker settings see [Docker Configuration](../configuration/docker.md).
+Real mode starts Docker containers. Mount the Docker socket and set the Docker network so containers can reach each other. For private registry authentication and other Docker settings see [Docker Configuration](../configuration/docker.md).
 
 ```yaml
 services:
@@ -35,60 +35,60 @@ services:
 
 ### Domain Lifecycle
 
-| Operation | Method + Path | Description |
-|---|---|---|
-| `CreateDomain` | `POST /2021-01-01/opensearch/domain` | Create a new domain |
-| `DescribeDomain` | `GET /2021-01-01/opensearch/domain/{name}` | Get domain details |
-| `DescribeDomains` | `POST /2021-01-01/opensearch/domain-info` | Batch describe domains |
-| `DescribeDomainConfig` | `GET /2021-01-01/opensearch/domain/{name}/config` | Get domain configuration |
-| `UpdateDomainConfig` | `POST /2021-01-01/opensearch/domain/{name}/config` | Update cluster config, EBS options, engine version |
-| `DeleteDomain` | `DELETE /2021-01-01/opensearch/domain/{name}` | Delete a domain |
-| `ListDomainNames` | `GET /2021-01-01/domain` | List all domains (supports `?engineType=` filter) |
+| Operation              | Method + Path                                      | Description                                        |
+| ---------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| `CreateDomain`         | `POST /2021-01-01/opensearch/domain`               | Create a new domain                                |
+| `DescribeDomain`       | `GET /2021-01-01/opensearch/domain/{name}`         | Get domain details                                 |
+| `DescribeDomains`      | `POST /2021-01-01/opensearch/domain-info`          | Batch describe domains                             |
+| `DescribeDomainConfig` | `GET /2021-01-01/opensearch/domain/{name}/config`  | Get domain configuration                           |
+| `UpdateDomainConfig`   | `POST /2021-01-01/opensearch/domain/{name}/config` | Update cluster config, EBS options, engine version |
+| `DeleteDomain`         | `DELETE /2021-01-01/opensearch/domain/{name}`      | Delete a domain                                    |
+| `ListDomainNames`      | `GET /2021-01-01/domain`                           | List all domains (supports `?engineType=` filter)  |
 
 ### Tags
 
-| Operation | Method + Path | Description |
-|---|---|---|
-| `AddTags` | `POST /2021-01-01/tags` | Add tags to a domain by ARN |
-| `ListTags` | `GET /2021-01-01/tags/?arn=` | List tags for a domain |
+| Operation    | Method + Path                   | Description                   |
+| ------------ | ------------------------------- | ----------------------------- |
+| `AddTags`    | `POST /2021-01-01/tags`         | Add tags to a domain by ARN   |
+| `ListTags`   | `GET /2021-01-01/tags/?arn=`    | List tags for a domain        |
 | `RemoveTags` | `POST /2021-01-01/tags-removal` | Remove tag keys from a domain |
 
 ### Versions & Instance Types
 
-| Operation | Method + Path | Description |
-|---|---|---|
-| `ListVersions` | `GET /2021-01-01/opensearch/versions` | List supported engine versions |
-| `GetCompatibleVersions` | `GET /2021-01-01/opensearch/compatibleVersions` | List valid upgrade paths |
-| `ListInstanceTypeDetails` | `GET /2021-01-01/opensearch/instanceTypeDetails/{version}` | List available instance types |
+| Operation                    | Method + Path                                                    | Description                     |
+| ---------------------------- | ---------------------------------------------------------------- | ------------------------------- |
+| `ListVersions`               | `GET /2021-01-01/opensearch/versions`                            | List supported engine versions  |
+| `GetCompatibleVersions`      | `GET /2021-01-01/opensearch/compatibleVersions`                  | List valid upgrade paths        |
+| `ListInstanceTypeDetails`    | `GET /2021-01-01/opensearch/instanceTypeDetails/{version}`       | List available instance types   |
 | `DescribeInstanceTypeLimits` | `GET /2021-01-01/opensearch/instanceTypeLimits/{version}/{type}` | Get limits for an instance type |
 
 ### Stubs (SDK-compatible, no-op responses)
 
-| Operation | Notes |
-|---|---|
-| `DescribeDomainChangeProgress` | Returns empty `ChangeProgressStatus` |
-| `DescribeDomainAutoTunes` | Returns empty `AutoTunes` list |
-| `DescribeDryRunProgress` | Returns empty `DryRunProgressStatus` |
-| `DescribeDomainHealth` | Returns `ClusterHealth: Green` |
-| `GetUpgradeHistory` | Returns empty list |
-| `GetUpgradeStatus` | Returns `StepStatus: SUCCEEDED` |
-| `UpgradeDomain` | Stores new engine version, returns immediately with a generated `UpgradeId` |
-| `CancelDomainConfigChange` | Returns empty `CancelledChangeIds` |
-| `StartServiceSoftwareUpdate` | Returns no-op `ServiceSoftwareOptions` |
-| `CancelServiceSoftwareUpdate` | Returns no-op `ServiceSoftwareOptions` |
+| Operation                      | Notes                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `DescribeDomainChangeProgress` | Returns empty `ChangeProgressStatus`                                        |
+| `DescribeDomainAutoTunes`      | Returns empty `AutoTunes` list                                              |
+| `DescribeDryRunProgress`       | Returns empty `DryRunProgressStatus`                                        |
+| `DescribeDomainHealth`         | Returns `ClusterHealth: Green`                                              |
+| `GetUpgradeHistory`            | Returns empty list                                                          |
+| `GetUpgradeStatus`             | Returns `StepStatus: SUCCEEDED`                                             |
+| `UpgradeDomain`                | Stores new engine version, returns immediately with a generated `UpgradeId` |
+| `CancelDomainConfigChange`     | Returns empty `CancelledChangeIds`                                          |
+| `StartServiceSoftwareUpdate`   | Returns no-op `ServiceSoftwareOptions`                                      |
+| `CancelServiceSoftwareUpdate`  | Returns no-op `ServiceSoftwareOptions`                                      |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_OPENSEARCH_ENABLED` | `true` | Enable/disable the service |
-| `FLOCI_SERVICES_OPENSEARCH_MOCK` | `false` | `true` = metadata only (no Docker) |
-| `FLOCI_SERVICES_OPENSEARCH_DEFAULT_IMAGE` | `opensearchproject/opensearch:2` | Docker image for real mode |
-| `FLOCI_SERVICES_OPENSEARCH_PROXY_BASE_PORT` | `9400` | Port range start for real mode |
-| `FLOCI_SERVICES_OPENSEARCH_PROXY_MAX_PORT` | `9499` | Port range end for real mode |
-| `FLOCI_SERVICES_OPENSEARCH_KEEP_RUNNING_ON_SHUTDOWN` | `false` | Leave containers running after Floci stops |
-| `FLOCI_SERVICES_DOCKER_NETWORK` | *(unset)* | Shared Docker network for all container-based services including OpenSearch |
-| `FLOCI_STORAGE_SERVICES_OPENSEARCH_FLUSH_INTERVAL_MS` | `5000` | Flush interval (ms) |
+| Variable                                              | Default                          | Description                                                                 |
+| ----------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------- |
+| `FLOCI_SERVICES_OPENSEARCH_ENABLED`                   | `true`                           | Enable/disable the service                                                  |
+| `FLOCI_SERVICES_OPENSEARCH_MOCK`                      | `false`                          | `true` = metadata only (no Docker)                                          |
+| `FLOCI_SERVICES_OPENSEARCH_DEFAULT_IMAGE`             | `opensearchproject/opensearch:2` | Docker image for real mode                                                  |
+| `FLOCI_SERVICES_OPENSEARCH_PROXY_BASE_PORT`           | `9400`                           | Port range start for real mode                                              |
+| `FLOCI_SERVICES_OPENSEARCH_PROXY_MAX_PORT`            | `9499`                           | Port range end for real mode                                                |
+| `FLOCI_SERVICES_OPENSEARCH_KEEP_RUNNING_ON_SHUTDOWN`  | `false`                          | Leave containers running after Floci stops                                  |
+| `FLOCI_SERVICES_DOCKER_NETWORK`                       | _(unset)_                        | Shared Docker network for all container-based services including OpenSearch |
+| `FLOCI_STORAGE_SERVICES_OPENSEARCH_FLUSH_INTERVAL_MS` | `5000`                           | Flush interval (ms)                                                         |
 
 ### Mock mode (CI / tests)
 

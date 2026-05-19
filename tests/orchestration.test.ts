@@ -1,19 +1,19 @@
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter, Task } from '../orchestration/task-router';
-import { LocalAgentRegistry, Agent } from '../orchestration/agent-registry';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { FileEventStore } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import * as path from 'path';
-import * as fs from 'fs';
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter, Task } from "../orchestration/task-router";
+import { LocalAgentRegistry, Agent } from "../orchestration/agent-registry";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { FileEventStore } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Event Bus & Task Routing Pipeline", () => {
   it("should process and route agent tasks with dependency resolution", async () => {
     const bus = new LocalEventBus();
     const router = new TaskRouter(bus);
-    
+
     const task: Task = {
       id: "task-01",
       title: "Scrape Data",
@@ -22,12 +22,12 @@ describe("Event Bus & Task Routing Pipeline", () => {
       status: "pending",
       dependencies: []
     };
-    
+
     let emittedEvent: Task | null = null;
-    bus.subscribe('task_routed', (data) => {
+    bus.subscribe("task_routed", (data) => {
       emittedEvent = data as Task;
     });
-    
+
     const resolved = await router.route(task);
     expect(resolved.status).toBe("routed");
     expect(emittedEvent).not.toBeNull();
@@ -38,7 +38,7 @@ describe("Event Bus & Task Routing Pipeline", () => {
 describe("Agent Registry Operations", () => {
   it("should register, retrieve, and filter active agents dynamically", async () => {
     const registry = new LocalAgentRegistry();
-    
+
     const agent: Agent = {
       id: "agent-01",
       name: "codebuff",
@@ -46,16 +46,16 @@ describe("Agent Registry Operations", () => {
       capabilities: ["ts-edit", "lint"],
       status: "idle"
     };
-    
+
     await registry.register(agent);
-    
+
     const retrieved = await registry.getAgent("agent-01");
     expect(retrieved).toEqual(agent);
-    
+
     const listers = await registry.findAgentsByCapability("ts-edit");
     expect(listers.length).toBe(1);
     expect(listers[0].name).toBe("codebuff");
-    
+
     await registry.deregister("agent-01");
     const gone = await registry.getAgent("agent-01");
     expect(gone).toBeUndefined();
@@ -63,8 +63,8 @@ describe("Agent Registry Operations", () => {
 });
 
 describe("GhostStack Orchestrator Crash Recovery & Core Integration", () => {
-  const testDir = path.join(__dirname, '../temp-integration-db');
-  const eventLogPath = path.join(testDir, 'integration_events.jsonl');
+  const testDir = path.join(__dirname, "../temp-integration-db");
+  const eventLogPath = path.join(testDir, "integration_events.jsonl");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -80,10 +80,10 @@ describe("GhostStack Orchestrator Crash Recovery & Core Integration", () => {
 
   it("should boot, record task routes persistently, and reconstruct queue after cold restart", async () => {
     const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+      portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+      servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+      healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+      runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
     });
 
     const rm = new RuntimeManager(loader);
@@ -117,13 +117,13 @@ describe("GhostStack Orchestrator Crash Recovery & Core Integration", () => {
     const freshRegistry = new LocalAgentRegistry();
 
     const orchestrator2 = new GhostStackOrchestrator(rm, freshBus, freshRouter, freshRegistry, sameEventStore, logger);
-    
+
     // Assert queue is empty before boot recovery
     expect(freshRouter.getQueue().length).toBe(0);
 
     // 3. Boot new orchestrator and verify recovery
     await orchestrator2.start();
-    
+
     // Queue should be restored from historical log!
     const restoredQueue = freshRouter.getQueue();
     expect(restoredQueue.length).toBe(1);

@@ -12,13 +12,13 @@ snapshot with `FLOCI_SERVICES_PRICING_SNAPSHOT_PATH`.
 
 ## Supported Operations
 
-| Operation | Notes |
-|-----------|-------|
-| `DescribeServices` | Lists bundled services and their queryable attribute names |
-| `GetAttributeValues` | Returns the set of values a given attribute can take |
-| `GetProducts` | Returns `PriceList` as an array of JSON-encoded product-offer strings (matches AWS format) |
-| `ListPriceLists` | Lists available price-list ARNs filtered by service, currency, and optional region |
-| `GetPriceListFileUrl` | Returns a stub HTTPS URL; useful for code paths that validate URL presence |
+| Operation             | Notes                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `DescribeServices`    | Lists bundled services and their queryable attribute names                                 |
+| `GetAttributeValues`  | Returns the set of values a given attribute can take                                       |
+| `GetProducts`         | Returns `PriceList` as an array of JSON-encoded product-offer strings (matches AWS format) |
+| `ListPriceLists`      | Lists available price-list ARNs filtered by service, currency, and optional region         |
+| `GetPriceListFileUrl` | Returns a stub HTTPS URL; useful for code paths that validate URL presence                 |
 
 Pagination is supported on all list operations via `NextToken` + `MaxResults`.
 
@@ -26,21 +26,21 @@ Pagination is supported on all list operations via `NextToken` + `MaxResults`.
 
 The default snapshot on the classpath covers:
 
-| ServiceCode | Regions | Notes |
-|-------------|---------|-------|
+| ServiceCode | Regions                                              | Notes                              |
+| ----------- | ---------------------------------------------------- | ---------------------------------- |
 | `AmazonEC2` | `us-east-1` (Linux/Shared tenancy, 3 instance types) | `t3.micro`, `m5.large`, `c5.large` |
-| `AmazonS3` | `us-east-1` (Standard storage) | |
-| `AWSLambda` | `us-east-1` (Requests) | |
+| `AmazonS3`  | `us-east-1` (Standard storage)                       |                                    |
+| `AWSLambda` | `us-east-1` (Requests)                               |                                    |
 
 The snapshot is intentionally minimal — enough to exercise SDK parsing and
 filter logic — not a comprehensive price database.
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_PRICING_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_PRICING_SNAPSHOT_PATH` | *(unset)* | Filesystem directory overriding the bundled snapshot |
+| Variable                               | Default   | Description                                          |
+| -------------------------------------- | --------- | ---------------------------------------------------- |
+| `FLOCI_SERVICES_PRICING_ENABLED`       | `true`    | Enable or disable the service                        |
+| `FLOCI_SERVICES_PRICING_SNAPSHOT_PATH` | _(unset)_ | Filesystem directory overriding the bundled snapshot |
 
 ### Snapshot directory layout
 

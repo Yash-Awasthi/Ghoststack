@@ -5,55 +5,55 @@
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateTable` | Create a table with indexes |
-| `DeleteTable` | Delete a table |
-| `DescribeTable` | Get table metadata |
-| `ListTables` | List all tables |
-| `UpdateTable` | Update throughput, indexes, streams |
-| `PutItem` | Write an item |
-| `GetItem` | Read an item by primary key |
-| `DeleteItem` | Delete an item |
-| `UpdateItem` | Partially update an item |
-| `Query` | Query by partition key with optional filter |
-| `Scan` | Full table scan with optional filter |
-| `BatchWriteItem` | Write/delete up to 25 items across tables |
-| `BatchGetItem` | Read up to 100 items across tables |
-| `TransactWriteItems` | ACID write transaction |
-| `TransactGetItems` | ACID read transaction |
-| `DescribeTimeToLive` | Get TTL configuration |
-| `UpdateTimeToLive` | Enable/disable TTL on a table |
-| `TagResource` | Tag a table |
-| `UntagResource` | Remove tags |
-| `ListTagsOfResource` | List tags |
-| `DescribeContinuousBackups` | Get PITR backup configuration |
-| `UpdateContinuousBackups` | Enable/disable PITR |
-| `DescribeKinesisStreamingDestination` | List Kinesis streaming destinations |
-| `EnableKinesisStreamingDestination` | Enable Kinesis streaming for a table |
-| `DisableKinesisStreamingDestination` | Disable Kinesis streaming for a table |
-| `ExportTableToPointInTime` | Export table data to S3 as gzip NDJSON |
-| `DescribeExport` | Get export status and metadata |
-| `ListExports` | List exports, optionally filtered by table ARN |
+| Action                                | Description                                    |
+| ------------------------------------- | ---------------------------------------------- |
+| `CreateTable`                         | Create a table with indexes                    |
+| `DeleteTable`                         | Delete a table                                 |
+| `DescribeTable`                       | Get table metadata                             |
+| `ListTables`                          | List all tables                                |
+| `UpdateTable`                         | Update throughput, indexes, streams            |
+| `PutItem`                             | Write an item                                  |
+| `GetItem`                             | Read an item by primary key                    |
+| `DeleteItem`                          | Delete an item                                 |
+| `UpdateItem`                          | Partially update an item                       |
+| `Query`                               | Query by partition key with optional filter    |
+| `Scan`                                | Full table scan with optional filter           |
+| `BatchWriteItem`                      | Write/delete up to 25 items across tables      |
+| `BatchGetItem`                        | Read up to 100 items across tables             |
+| `TransactWriteItems`                  | ACID write transaction                         |
+| `TransactGetItems`                    | ACID read transaction                          |
+| `DescribeTimeToLive`                  | Get TTL configuration                          |
+| `UpdateTimeToLive`                    | Enable/disable TTL on a table                  |
+| `TagResource`                         | Tag a table                                    |
+| `UntagResource`                       | Remove tags                                    |
+| `ListTagsOfResource`                  | List tags                                      |
+| `DescribeContinuousBackups`           | Get PITR backup configuration                  |
+| `UpdateContinuousBackups`             | Enable/disable PITR                            |
+| `DescribeKinesisStreamingDestination` | List Kinesis streaming destinations            |
+| `EnableKinesisStreamingDestination`   | Enable Kinesis streaming for a table           |
+| `DisableKinesisStreamingDestination`  | Disable Kinesis streaming for a table          |
+| `ExportTableToPointInTime`            | Export table data to S3 as gzip NDJSON         |
+| `DescribeExport`                      | Get export status and metadata                 |
+| `ListExports`                         | List exports, optionally filtered by table ARN |
 
 ## Streams {#streams}
 
 DynamoDB Streams are supported via a separate target (`DynamoDBStreams_20120810`):
 
-| Action | Description |
-|---|---|
-| `ListStreams` | List all streams |
-| `DescribeStream` | Get stream and shard info |
-| `GetShardIterator` | Get a shard iterator |
-| `GetRecords` | Read stream records from a shard |
+| Action             | Description                      |
+| ------------------ | -------------------------------- |
+| `ListStreams`      | List all streams                 |
+| `DescribeStream`   | Get stream and shard info        |
+| `GetShardIterator` | Get a shard iterator             |
+| `GetRecords`       | Read stream records from a shard |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_DYNAMODB_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_STORAGE_SERVICES_DYNAMODB_MODE` | *(global default)* | Storage mode override for DynamoDB (`memory`, `persistent`, `hybrid`, `wal`) |
-| `FLOCI_STORAGE_SERVICES_DYNAMODB_FLUSH_INTERVAL_MS` | `5000` | Flush interval for `hybrid`/`wal` storage modes (milliseconds) |
+| Variable                                            | Default            | Description                                                                  |
+| --------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------- |
+| `FLOCI_SERVICES_DYNAMODB_ENABLED`                   | `true`             | Enable or disable the service                                                |
+| `FLOCI_STORAGE_SERVICES_DYNAMODB_MODE`              | _(global default)_ | Storage mode override for DynamoDB (`memory`, `persistent`, `hybrid`, `wal`) |
+| `FLOCI_STORAGE_SERVICES_DYNAMODB_FLUSH_INTERVAL_MS` | `5000`             | Flush interval for `hybrid`/`wal` storage modes (milliseconds)               |
 
 ## Examples
 
@@ -157,4 +157,7 @@ aws dynamodb list-exports \
 ```
 
 The export writes to `s3://<bucket>/<prefix>/AWSDynamoDB/<exportId>/data/` as one or more `.json.gz` files, along with `manifest-summary.json` and `manifest-files.json` — the same layout as real AWS DynamoDB exports.
+
+```
+
 ```

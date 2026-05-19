@@ -6,7 +6,7 @@ icon: camera-cctv
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.11.0" />
 
@@ -18,19 +18,20 @@ Remote OAuth integration allows your FastMCP server to leverage external identit
 - **OAuth Proxy**: For providers WITHOUT Dynamic Client Registration (GitHub, Google, Azure, AWS, Discord, etc.)
 
 RemoteAuthProvider requires DCR support for fully automated client registration and authentication.
+
 </Tip>
 
 ## DCR-Enabled Providers
 
 RemoteAuthProvider works with identity providers that support **Dynamic Client Registration (DCR)** - a critical capability that enables automated authentication flows:
 
-| Feature | DCR Providers (RemoteAuth) | Non-DCR Providers (OAuth Proxy) |
-|---------|---------------------------|--------------------------------|
-| **Client Registration** | Automatic via API | Manual in provider console |
-| **Credentials** | Dynamic per client | Fixed app credentials |
-| **Configuration** | Zero client config | Pre-shared credentials |
-| **Examples** | Descope, WorkOS AuthKit, modern OIDC | GitHub, Google, Azure |
-| **FastMCP Class** | `RemoteAuthProvider` | [`OAuthProxy`](/v2/servers/auth/oauth-proxy) |
+| Feature                 | DCR Providers (RemoteAuth)           | Non-DCR Providers (OAuth Proxy)              |
+| ----------------------- | ------------------------------------ | -------------------------------------------- |
+| **Client Registration** | Automatic via API                    | Manual in provider console                   |
+| **Credentials**         | Dynamic per client                   | Fixed app credentials                        |
+| **Configuration**       | Zero client config                   | Pre-shared credentials                       |
+| **Examples**            | Descope, WorkOS AuthKit, modern OIDC | GitHub, Google, Azure                        |
+| **FastMCP Class**       | `RemoteAuthProvider`                 | [`OAuthProxy`](/v2/servers/auth/oauth-proxy) |
 
 If your provider doesn't support DCR (most traditional OAuth providers), you'll need to use [`OAuth Proxy`](/v2/servers/auth/oauth-proxy) instead, which bridges the gap between MCP's DCR expectations and fixed OAuth credentials.
 
@@ -64,11 +65,11 @@ sequenceDiagram
 
     Client->>FastMCPServer: 1. GET /.well-known/oauth-protected-resource
     FastMCPServer-->>Client: 2. "Use https://my-idp.com for auth"
-    
+
     note over Client, ExternalIdP: Client goes directly to the IdP
     Client->>ExternalIdP: 3. Authenticate & get token via DCR
     ExternalIdP-->>Client: 4. Access token
-    
+
     Client->>FastMCPServer: 5. MCP request with Bearer token
     FastMCPServer->>FastMCPServer: 6. Verify token signature
     FastMCPServer-->>Client: 7. MCP response
@@ -87,6 +88,7 @@ FastMCP provides `RemoteAuthProvider` to handle the complexities of remote OAuth
 `RemoteAuthProvider` works by composing a [`TokenVerifier`](/v2/servers/auth/token-verification) with authorization server information. A `TokenVerifier` is another FastMCP authentication class that focuses solely on token validation - signature verification, expiration checking, and claim extraction. The `RemoteAuthProvider` takes that token validation capability and adds the OAuth discovery endpoints that enable MCP clients to automatically find and authenticate with your identity provider.
 
 This composition pattern means you can use any token validation strategy while maintaining consistent OAuth discovery behavior:
+
 - **JWT tokens**: Use `JWTVerifier` for self-contained tokens
 - **Opaque tokens**: Use `IntrospectionTokenVerifier` for RFC 7662 introspection
 - **Custom validation**: Implement your own `TokenVerifier` subclass
@@ -144,19 +146,19 @@ class CompanyAuthProvider(RemoteAuthProvider):
             issuer="https://auth.yourcompany.com",
             audience="mcp-production-api"
         )
-        
+
         super().__init__(
             token_verifier=token_verifier,
             authorization_servers=[AnyHttpUrl("https://auth.yourcompany.com")],
             base_url="https://api.yourcompany.com"  # Your server base URL
         )
-    
+
     def get_routes(self) -> list[Route]:
         """Add custom endpoints to the standard protected resource routes."""
-        
+
         # Get the standard OAuth protected resource routes
         routes = super().get_routes()
-        
+
         # Add authorization server metadata forwarding for client convenience
         async def authorization_server_metadata(request):
             async with httpx.AsyncClient() as client:
@@ -165,11 +167,11 @@ class CompanyAuthProvider(RemoteAuthProvider):
                 )
                 response.raise_for_status()
                 return JSONResponse(response.json())
-        
+
         routes.append(
             Route("/.well-known/oauth-authorization-server", authorization_server_metadata)
         )
-        
+
         return routes
 
 mcp = FastMCP(name="Company API", auth=CompanyAuthProvider())
@@ -209,6 +211,7 @@ WorkOS's support for Dynamic Client Registration makes it particularly well-suit
 - Empty list `[]`: Allow all (not recommended)
 
 This provides defense-in-depth even though DCR providers typically validate redirect URIs themselves.
+
 </Note>
 
 ## Implementation Considerations

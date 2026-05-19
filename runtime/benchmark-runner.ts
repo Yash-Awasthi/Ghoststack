@@ -1,25 +1,25 @@
-import { LocalEventBus } from '../orchestration/event-bus';
-import { FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { StructuredLogger } from '../orchestration/logger';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { BrowserExecutionAdapter } from '../orchestration/browser-adapter';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
-import { QueueJob } from '../orchestration/interfaces/queue.interface';
-import * as path from 'path';
-import * as fs from 'fs';
+import { LocalEventBus } from "../orchestration/event-bus";
+import { FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { StructuredLogger } from "../orchestration/logger";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
+import { QueueJob } from "../orchestration/interfaces/queue.interface";
+import * as path from "path";
+import * as fs from "fs";
 
 async function runBenchmarks() {
   console.log("\x1b[35m=========================================================================");
   console.log("             GHOSTSTACK V1.1 PLATFORM MICRO-BENCHMARK SUITE             ");
   console.log("=========================================================================\x1b[0m\n");
 
-  const testDir = path.join(__dirname, '../data-runtime');
+  const testDir = path.join(__dirname, "../data-runtime");
   if (!fs.existsSync(testDir)) {
     fs.mkdirSync(testDir, { recursive: true });
   }
-  const dbPath = path.join(testDir, 'benchmark_cache.json');
+  const dbPath = path.join(testDir, "benchmark_cache.json");
   if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 
   const persistence = new FileRuntimePersistence(dbPath);
@@ -30,15 +30,7 @@ async function runBenchmarks() {
   const tracer = new TraceRecorder();
 
   const adapter = new BrowserExecutionAdapter(new EnvironmentTelemetry(), true);
-  const executor = new TaskExecutor(
-    queue,
-    eventBus,
-    persistence,
-    logger,
-    [adapter],
-    metrics,
-    tracer
-  );
+  const executor = new TaskExecutor(queue, eventBus, persistence, logger, [adapter], metrics, tracer);
 
   // 1. Warm-up Pass
   console.log("[BENCH] Running warm-up pass (10 sequential tasks)...");
@@ -109,7 +101,7 @@ async function runBenchmarks() {
   console.log(`| System Dispatch Throughput           | ${(1000 / avgTaskMs).toFixed(0)} tasks/sec    |`);
   console.log("\x1b[32m==================================================================\x1b[0m\n");
 
-  const docsDir = path.join(__dirname, '../docs');
+  const docsDir = path.join(__dirname, "../docs");
   if (!fs.existsSync(docsDir)) {
     fs.mkdirSync(docsDir, { recursive: true });
   }
@@ -134,13 +126,13 @@ Automated hardware profiling snapshot generated on ${new Date().toISOString()}.
 - Low overhead telemetry profiling is guaranteed under dynamic telemetry amplification loops.
 `;
 
-  fs.writeFileSync(path.join(docsDir, 'BENCHMARKS.md'), benchmarkMd, 'utf8');
+  fs.writeFileSync(path.join(docsDir, "BENCHMARKS.md"), benchmarkMd, "utf8");
   console.log("[BENCH] Benchmark markdown output exported successfully to docs/BENCHMARKS.md.");
 
   if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 }
 
-runBenchmarks().catch(err => {
+runBenchmarks().catch((err) => {
   console.error("[CRITICAL] Benchmarking harness crashed:", err);
   process.exit(1);
 });

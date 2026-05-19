@@ -9,7 +9,7 @@ export interface IExecutionContext {
 export interface IRuntimeEvent {
   eventId: string;
   taskId: string;
-  type: 'execution_started' | 'execution_succeeded' | 'execution_failed';
+  type: "execution_started" | "execution_succeeded" | "execution_failed";
   timestamp: Date;
   payload: any;
 }

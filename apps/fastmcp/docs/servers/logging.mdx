@@ -5,10 +5,12 @@ description: Send log messages back to MCP clients through the context.
 icon: receipt
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <Tip>
-This documentation covers **MCP client logging**—sending messages from your server to MCP clients. For standard server-side logging (e.g., writing to files, console), use `fastmcp.utilities.logging.get_logger()` or Python's built-in `logging` module.
+  This documentation covers **MCP client logging**—sending messages from your server to MCP clients. For standard
+  server-side logging (e.g., writing to files, console), use `fastmcp.utilities.logging.get_logger()` or Python's
+  built-in `logging` module.
 </Tip>
 
 Server logging allows MCP tools to send debug, info, warning, and error messages back to the client. Unlike standard Python logging, MCP server logging sends messages directly to the client, making them visible in the client's interface or logs.
@@ -44,12 +46,12 @@ async def analyze_data(data: list[float], ctx: Context) -> dict:
 
 ## Log Levels
 
-| Level | Use Case |
-|-------|----------|
-| `ctx.debug()` | Detailed execution information for diagnosing problems |
-| `ctx.info()` | General information about normal program execution |
-| `ctx.warning()` | Potentially harmful situations that don't prevent execution |
-| `ctx.error()` | Error events that might still allow the application to continue |
+| Level           | Use Case                                                        |
+| --------------- | --------------------------------------------------------------- |
+| `ctx.debug()`   | Detailed execution information for diagnosing problems          |
+| `ctx.info()`    | General information about normal program execution              |
+| `ctx.warning()` | Potentially harmful situations that don't prevent execution     |
+| `ctx.error()`   | Error events that might still allow the application to continue |
 
 ## Structured Logging
 

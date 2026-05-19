@@ -79,15 +79,15 @@ provides:
 
 ### Descriptor Validation Rules
 
-| Field | Rule |
-|-------|------|
-| `schema_version` | Must be `"1.0"` |
-| `integration.id` | Lowercase alphanumeric + hyphens (`^[a-z0-9-]+$`) |
-| `integration.version` | Valid PEP 440 version (parsed with `packaging.version.Version()`) |
+| Field                      | Rule                                                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `schema_version`           | Must be `"1.0"`                                                                                          |
+| `integration.id`           | Lowercase alphanumeric + hyphens (`^[a-z0-9-]+$`)                                                        |
+| `integration.version`      | Valid PEP 440 version (parsed with `packaging.version.Version()`)                                        |
 | `requires.speckit_version` | Required field; specify a version constraint such as `>=0.6.0` (current validation checks presence only) |
-| `provides` | Must include at least one command or script |
-| `provides.commands[].name` | String identifier |
-| `provides.commands[].file` | Relative path to template file |
+| `provides`                 | Must include at least one command or script                                                              |
+| `provides.commands[].name` | String identifier                                                                                        |
+| `provides.commands[].file` | Relative path to template file                                                                           |
 
 ### Submitting to the Community Catalog
 

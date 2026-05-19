@@ -5,7 +5,6 @@ sidebarTitle: pagination
 
 # `fastmcp.utilities.pagination`
 
-
 Pagination utilities for MCP list operations.
 
 ## Functions
@@ -16,31 +15,30 @@ Pagination utilities for MCP list operations.
 paginate_sequence(items: Sequence[T], cursor: str | None, page_size: int) -> tuple[list[T], str | None]
 ```
 
-
 Paginate a sequence of items.
 
 **Args:**
+
 - `items`: The full sequence to paginate.
 - `cursor`: Optional cursor from a previous request. None for first page.
 - `page_size`: Maximum number of items per page.
 
 **Returns:**
+
 - Tuple of (page_items, next_cursor). next_cursor is None if no more pages.
 
 **Raises:**
-- `ValueError`: If the cursor is invalid.
 
+- `ValueError`: If the cursor is invalid.
 
 ## Classes
 
 ### `CursorState` <sup><a href="https://github.com/PrefectHQ/fastmcp/blob/main/fastmcp_slim/fastmcp/utilities/pagination.py#L16" target="_blank"><Icon icon="github" style="width: 14px; height: 14px;" /></a></sup>
 
-
 Internal representation of pagination cursor state.
 
 The cursor encodes the offset into the result set. This is opaque to clients
 per the MCP spec - they should not parse or modify cursors.
-
 
 **Methods:**
 
@@ -52,7 +50,6 @@ encode(self) -> str
 
 Encode cursor state to an opaque string.
 
-
 #### `decode` <sup><a href="https://github.com/PrefectHQ/fastmcp/blob/main/fastmcp_slim/fastmcp/utilities/pagination.py#L31" target="_blank"><Icon icon="github" style="width: 14px; height: 14px;" /></a></sup>
 
 ```python
@@ -62,5 +59,5 @@ decode(cls, cursor: str) -> CursorState
 Decode cursor from an opaque string.
 
 **Raises:**
-- `ValueError`: If the cursor is invalid or malformed.
 
+- `ValueError`: If the cursor is invalid or malformed.

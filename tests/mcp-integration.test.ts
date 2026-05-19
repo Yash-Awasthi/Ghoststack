@@ -1,35 +1,25 @@
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { MCPServerRegistry } from '../orchestration/mcp-registry';
-import { MCPRuntime } from '../orchestration/mcp-adapter';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { IMCPTransport, IMCPTask } from '../orchestration/interfaces/mcp.interface';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import * as path from 'path';
-import * as fs from 'fs';
+import { FileEventStore } from "../orchestration/persistence-manager";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { MCPServerRegistry } from "../orchestration/mcp-registry";
+import { MCPRuntime } from "../orchestration/mcp-adapter";
+import { IMCPTransport, IMCPTask } from "../orchestration/interfaces/mcp.interface";
+import * as path from "path";
+import * as fs from "fs";
 
 class MockMCPTransport implements IMCPTransport {
   async connect(): Promise<void> {}
   async disconnect(): Promise<void> {}
-  async send(message: any): Promise<any> {
+  async send(_message: any): Promise<any> {
     return { content: [{ type: "text", text: `provisions resolved` }] };
   }
 }
 
 describe("Milestone 3: MCP End-to-End Orchestrator Integration & Observability", () => {
-  const testDir = path.join(__dirname, '../temp-mcp-integration-db');
-  const eventLogPath = path.join(testDir, 'mcp_events.jsonl');
-  const cacheDbPath = path.join(testDir, 'mcp_cache.json');
+  const testDir = path.join(__dirname, "../temp-mcp-integration-db");
+  const eventLogPath = path.join(testDir, "mcp_events.jsonl");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -44,40 +34,32 @@ describe("Milestone 3: MCP End-to-End Orchestrator Integration & Observability",
   });
 
   it("should integrate MCP tasks into the pipeline, expose servers/tools/executions logs, and support diagnostics", async () => {
-    const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
-    });
-
-    const logger = new StructuredLogger();
-    const eventBus = new LocalEventBus();
     const eventStore = new FileEventStore(eventLogPath);
-    const persistence = new FileRuntimePersistence(cacheDbPath);
-    const runtimeManager = new RuntimeManager(loader);
-    const agentRegistry = new LocalAgentRegistry();
-    const taskRouter = new TaskRouter(eventBus, eventStore);
 
     // Initialize telemetry
     const metrics = new MetricsCollector();
     const tracer = new TraceRecorder();
     const queue = new MemoryQueueBackend();
-    const discovery = new LocalServiceDiscovery();
-    
+    const discovery = {
+      listServices: async () => []
+    } as any;
+
     // Initialize MCP Registry and Runtime
     const mcpRegistry = new MCPServerRegistry();
     const mcpRuntime = new MCPRuntime(mcpRegistry, metrics, tracer);
 
     // Register a mock MCP server
     const mockTransport = new MockMCPTransport();
-    await mcpRegistry.registerServer({
-      name: "financial-news-mcp",
-      transportType: "stdio",
-      endpoint: "node bin.js",
-      status: "active",
-      tools: ["scrape_cnbc", "summarize_headlines"]
-    }, mockTransport);
+    await mcpRegistry.registerServer(
+      {
+        name: "financial-news-mcp",
+        transportType: "stdio",
+        endpoint: "node bin.js",
+        status: "active",
+        tools: ["scrape_cnbc", "summarize_headlines"]
+      },
+      mockTransport
+    );
 
     const inspector = new RuntimeInspector(metrics, queue, discovery, eventStore, mcpRuntime, mcpRegistry);
     const api = new RuntimeDiagnosticAPI(inspector);

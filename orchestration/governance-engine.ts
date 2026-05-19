@@ -1,23 +1,23 @@
-import { 
-  IGovernanceEngine, 
-  IExecutionConstraint, 
-  IExecutionPolicy, 
-  IRuntimeGuardrail, 
-  ITaskSynthesisResult, 
-  ICognitiveTrace 
-} from './interfaces/governance.interface';
+import {
+  IGovernanceEngine,
+  IExecutionConstraint,
+  IExecutionPolicy,
+  IRuntimeGuardrail,
+  ITaskSynthesisResult,
+  ICognitiveTrace
+} from "./interfaces/governance.interface";
 
 // 1. Core Constraints implementations
 export class ResourceScopeConstraint implements IExecutionConstraint {
-  name = 'ResourceScopeConstraint';
+  name = "ResourceScopeConstraint";
   private blockedScopes: string[];
 
-  constructor(blockedScopes = ['system:root', 'admin:direct']) {
+  constructor(blockedScopes = ["system:root", "admin:direct"]) {
     this.blockedScopes = blockedScopes;
   }
 
   validate(task: ITaskSynthesisResult): { success: boolean; reason?: string } {
-    const scope = task.governanceMetadata?.resourceScope || '';
+    const scope = task.governanceMetadata?.resourceScope || "";
     if (this.blockedScopes.includes(scope)) {
       return { success: false, reason: `Unauthorized resource scope block: ${scope}` };
     }
@@ -26,17 +26,20 @@ export class ResourceScopeConstraint implements IExecutionConstraint {
 }
 
 export class CostBudgetConstraint implements IExecutionConstraint {
-  name = 'CostBudgetConstraint';
+  name = "CostBudgetConstraint";
   private maxTaskCost: number;
 
-  constructor(maxTaskCost = 0.50) {
+  constructor(maxTaskCost = 0.5) {
     this.maxTaskCost = maxTaskCost;
   }
 
   validate(task: ITaskSynthesisResult): { success: boolean; reason?: string } {
     const cost = task.governanceMetadata?.costEstimate || 0;
     if (cost > this.maxTaskCost) {
-      return { success: false, reason: `Execution cost estimate $${cost} exceeds task budget limit of $${this.maxTaskCost}` };
+      return {
+        success: false,
+        reason: `Execution cost estimate $${cost} exceeds task budget limit of $${this.maxTaskCost}`
+      };
     }
     return { success: true };
   }
@@ -44,37 +47,37 @@ export class CostBudgetConstraint implements IExecutionConstraint {
 
 // 2. Core Policies implementations
 export class DangerousOperationPolicy implements IExecutionPolicy {
-  name = 'DangerousOperationPolicy';
+  name = "DangerousOperationPolicy";
 
   requiresApproval(task: ITaskSynthesisResult): boolean {
     return task.governanceMetadata?.dangerous === true;
   }
 
-  validate(task: ITaskSynthesisResult): { success: boolean; reason?: string } {
+  validate(_task: ITaskSynthesisResult): { success: boolean; reason?: string } {
     // Allows dangerous tasks ONLY if they are routed through approval workflows
     return { success: true };
   }
 }
 
 export class WildcardPermissionsPolicy implements IExecutionPolicy {
-  name = 'WildcardPermissionsPolicy';
+  name = "WildcardPermissionsPolicy";
 
   requiresApproval(task: ITaskSynthesisResult): boolean {
     const args = task.arguments || {};
-    if (Array.isArray(args.permissions) && args.permissions.includes('*')) {
+    if (Array.isArray(args.permissions) && args.permissions.includes("*")) {
       return true;
     }
     return false;
   }
 
-  validate(task: ITaskSynthesisResult): { success: boolean; reason?: string } {
+  validate(_task: ITaskSynthesisResult): { success: boolean; reason?: string } {
     return { success: true };
   }
 }
 
 // 3. Core Guardrails implementations
 export class LoopDetectionGuardrail implements IRuntimeGuardrail {
-  name = 'LoopDetectionGuardrail';
+  name = "LoopDetectionGuardrail";
   private actionMaxCount: number;
 
   constructor(actionMaxCount = 5) {
@@ -84,10 +87,13 @@ export class LoopDetectionGuardrail implements IRuntimeGuardrail {
   check(tasks: ITaskSynthesisResult[], executionLogs: any[]): { success: boolean; reason?: string } {
     const actionCounts = new Map<string, number>();
     for (const log of executionLogs) {
-      const action = log.action || log.event || '';
+      const action = log.action || log.event || "";
       actionCounts.set(action, (actionCounts.get(action) || 0) + 1);
       if ((actionCounts.get(action) || 0) > this.actionMaxCount) {
-        return { success: false, reason: `Orchestration loop protection triggered: action '${action}' invoked ${actionCounts.get(action)} times` };
+        return {
+          success: false,
+          reason: `Orchestration loop protection triggered: action '${action}' invoked ${actionCounts.get(action)} times`
+        };
       }
     }
     return { success: true };
@@ -95,7 +101,7 @@ export class LoopDetectionGuardrail implements IRuntimeGuardrail {
 }
 
 export class RunawayRetriesGuardrail implements IRuntimeGuardrail {
-  name = 'RunawayRetriesGuardrail';
+  name = "RunawayRetriesGuardrail";
   private maxRetries: number;
 
   constructor(maxRetries = 5) {
@@ -105,7 +111,10 @@ export class RunawayRetriesGuardrail implements IRuntimeGuardrail {
   check(tasks: ITaskSynthesisResult[], executionLogs: any[]): { success: boolean; reason?: string } {
     for (const log of executionLogs) {
       if (log.retries && log.retries > this.maxRetries) {
-        return { success: false, reason: `Runaway retry guardrail triggered: retries count ${log.retries} exceeds limit ${this.maxRetries}` };
+        return {
+          success: false,
+          reason: `Runaway retry guardrail triggered: retries count ${log.retries} exceeds limit ${this.maxRetries}`
+        };
       }
     }
     return { success: true };
@@ -113,16 +122,19 @@ export class RunawayRetriesGuardrail implements IRuntimeGuardrail {
 }
 
 export class TaskGraphLimitGuardrail implements IRuntimeGuardrail {
-  name = 'TaskGraphLimitGuardrail';
+  name = "TaskGraphLimitGuardrail";
   private maxTasksCount: number;
 
   constructor(maxTasksCount = 10) {
     this.maxTasksCount = maxTasksCount;
   }
 
-  check(tasks: ITaskSynthesisResult[], executionLogs: any[]): { success: boolean; reason?: string } {
+  check(tasks: ITaskSynthesisResult[], _executionLogs: any[]): { success: boolean; reason?: string } {
     if (tasks.length > this.maxTasksCount) {
-      return { success: false, reason: `Task graph complexity ceiling exceeded: synthesized ${tasks.length} tasks (max ${this.maxTasksCount})` };
+      return {
+        success: false,
+        reason: `Task graph complexity ceiling exceeded: synthesized ${tasks.length} tasks (max ${this.maxTasksCount})`
+      };
     }
     return { success: true };
   }
@@ -158,7 +170,9 @@ export class GovernanceEngine implements IGovernanceEngine {
     return [...this.guardrails];
   }
 
-  async evaluateTask(task: ITaskSynthesisResult): Promise<{ allowed: boolean; requiresApproval: boolean; reason?: string }> {
+  async evaluateTask(
+    task: ITaskSynthesisResult
+  ): Promise<{ allowed: boolean; requiresApproval: boolean; reason?: string }> {
     // 1. Evaluate hard constraints
     for (const constraint of this.constraints) {
       const res = constraint.validate(task);
@@ -193,7 +207,10 @@ export class GovernanceEngine implements IGovernanceEngine {
     return { allowed: true };
   }
 
-  async evaluateRuntimeLogs(tasks: ITaskSynthesisResult[], executionLogs: any[]): Promise<{ allowed: boolean; reason?: string }> {
+  async evaluateRuntimeLogs(
+    tasks: ITaskSynthesisResult[],
+    executionLogs: any[]
+  ): Promise<{ allowed: boolean; reason?: string }> {
     for (const guardrail of this.guardrails) {
       const res = guardrail.check(tasks, executionLogs);
       if (!res.success) {

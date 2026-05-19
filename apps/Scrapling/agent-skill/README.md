@@ -9,7 +9,9 @@ It can be used to answer almost 90% of any questions you would have about scrapl
 You can use this [direct URL](https://github.com/D4Vinci/Scrapling/raw/refs/heads/main/agent-skill/Scrapling-Skill.zip) to download the ZIP file of the skill directly. We will try to update this page with all available methods.
 
 ### Clawhub
+
 If you are an [OpenClaw](https://github.com/openclaw/openclaw) and [Claude Code](https://claude.com/product/claude-code), you can install the skill using [Clawhub](https://docs.openclaw.ai/tools/clawhub) directly:
+
 ```bash
 clawhub install scrapling-official
 ```

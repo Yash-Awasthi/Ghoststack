@@ -9,7 +9,7 @@ order: 1
 
 Codebuff is an open-source AI coding agent that coordinates specialized sub-agents instead of using one model for everything.
 
- The result: better code quality and up to 3x faster performance than Claude Code, built on a deep agent framework continuously refined by our in-house evals
+The result: better code quality and up to 3x faster performance than Claude Code, built on a deep agent framework continuously refined by our in-house evals
 
 ## 100+ Seconds Faster Than Claude Code
 
@@ -18,6 +18,7 @@ Codebuff is dramatically faster—often completing features in 1/3 the time.
 {/* TODO: Add speed comparison image/video */}
 
 In real-world tests:
+
 - **Claude Code**: 19m 37s for a feature
 - **Codebuff**: 6m 45s for the same feature
 
@@ -34,6 +35,7 @@ Claude Code can spend 5+ minutes grep-ing and reading file excerpts one at a tim
 {/* TODO: Add file picker screenshot */}
 
 Codebuff's approach:
+
 1. **Parse your entire codebase**: We analyze all source files and extract function names, class names, and type names
 2. **Build a code tree**: This creates a compact tree of all directories, files, and symbols in your project
 3. **Grok 4.1 Fast scans the tree**: We feed this code tree to Grok 4.1 Fast, which identifies up to 12 relevant files in seconds
@@ -49,6 +51,7 @@ In MAX mode, Codebuff doesn't just try once—it tries three times in parallel w
 {/* TODO: Add multi-prompt editing diagram */}
 
 How it works:
+
 1. The orchestrator spawns multiple editor agents, each with a different strategy
 2. All implementations run in parallel, reusing the prompt cache
 3. A selector agent chooses the best implementation
@@ -76,6 +79,7 @@ Other tools show you "% context used" and make you worry about it.
 {/* TODO: Add context management diagram */}
 
 Codebuff handles context automatically:
+
 - **Smart compaction**: After the prompt cache expires (5 min idle), we automatically summarize the conversation—much more efficient for long sessions
 - **Non-lossy summaries**: 10-20 roundtrips preserved with full details
 - **Deterministic strategy**: User messages, assistant messages, tool calls—all kept
@@ -90,6 +94,7 @@ Our entire agent framework is [open source](/docs/advanced/sdk). The same code t
 {/* TODO: Add agent framework diagram */}
 
 Key innovations:
+
 - **Agents as the composable unit**: Not individual LLM calls, but complete agents with tools and prompts
 - **Optional inherited context**: Subagents can optionally inherit conversation history (Claude Code's subagents always start with blank context)
 - **Arbitrary nesting**: Agents can spawn agents that spawn agents—unlimited depth (Claude Code only supports 1 level of subagents)
@@ -100,7 +105,7 @@ Key innovations:
 // Simplified example of the orchestrator pattern
 const orchestrator = {
   tools: [spawnAgent],
-  spawnableAgents: [filePicker, editor, reviewer, thinker, researcher]
+  spawnableAgents: [filePicker, editor, reviewer, thinker, researcher],
 }
 ```
 

@@ -376,7 +376,7 @@ defaults:
 
 ```yaml
 project:
-  key: "MYTEST"  # Override for local development
+  key: "MYTEST" # Override for local development
 ```
 
 **Environment variable**:
@@ -420,10 +420,10 @@ hooks:
 
 In addition to extension-specific environment variables (`SPECKIT_{EXT_ID}_*`), spec-kit supports core environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPECKIT_CATALOG_URL`       | Override the full catalog stack with a single URL (backward compat) | Built-in default stack |
-| `GH_TOKEN` / `GITHUB_TOKEN` | GitHub token for authenticated requests to GitHub-hosted URLs (`raw.githubusercontent.com`, `github.com`, `api.github.com`, `codeload.github.com`). Required when your catalog JSON or extension ZIPs are hosted in a private GitHub repository. | None |
+| Variable                    | Description                                                                                                                                                                                                                                      | Default                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| `SPECKIT_CATALOG_URL`       | Override the full catalog stack with a single URL (backward compat)                                                                                                                                                                              | Built-in default stack |
+| `GH_TOKEN` / `GITHUB_TOKEN` | GitHub token for authenticated requests to GitHub-hosted URLs (`raw.githubusercontent.com`, `github.com`, `api.github.com`, `codeload.github.com`). Required when your catalog JSON or extension ZIPs are hosted in a private GitHub repository. | None                   |
 
 #### Example: Using a custom catalog for testing
 
@@ -456,10 +456,10 @@ The token is attached automatically to requests targeting GitHub domains. Non-Gi
 
 Spec Kit uses a **catalog stack** — an ordered list of catalogs searched simultaneously. By default, two catalogs are active:
 
-| Priority | Catalog | Install Allowed | Purpose |
-|----------|---------|-----------------|---------|
-| 1 | `catalog.json` (default) | ✅ Yes | Curated extensions available for installation |
-| 2 | `catalog.community.json` (community) | ❌ No (discovery only) | Browse community extensions |
+| Priority | Catalog                              | Install Allowed        | Purpose                                       |
+| -------- | ------------------------------------ | ---------------------- | --------------------------------------------- |
+| 1        | `catalog.json` (default)             | ✅ Yes                 | Curated extensions available for installation |
+| 2        | `catalog.community.json` (community) | ❌ No (discovery only) | Browse community extensions                   |
 
 ### Listing Active Catalogs
 
@@ -573,9 +573,7 @@ Create a `catalog.json` file with your extensions:
       "license": "MIT",
       "requires": {
         "speckit_version": ">=0.1.0",
-        "tools": [
-          {"name": "atlassian-mcp-server", "required": true}
-        ]
+        "tools": [{ "name": "atlassian-mcp-server", "required": true }]
       },
       "provides": {
         "commands": 3,
@@ -610,12 +608,12 @@ Create a `catalog.json` file with your extensions:
 
 Options for hosting your catalog:
 
-| Method | URL Example | Use Case |
-| ------ | ----------- | -------- |
-| GitHub Pages | `https://your-org.github.io/spec-kit-catalog/catalog.json` | Public or org-visible |
-| Internal web server | `https://internal.company.com/spec-kit/catalog.json` | Corporate network |
-| S3/Cloud storage | `https://s3.amazonaws.com/your-bucket/catalog.json` | Cloud-hosted teams |
-| Local file server | `http://localhost:8000/catalog.json` | Development/testing |
+| Method              | URL Example                                                | Use Case              |
+| ------------------- | ---------------------------------------------------------- | --------------------- |
+| GitHub Pages        | `https://your-org.github.io/spec-kit-catalog/catalog.json` | Public or org-visible |
+| Internal web server | `https://internal.company.com/spec-kit/catalog.json`       | Corporate network     |
+| S3/Cloud storage    | `https://s3.amazonaws.com/your-bucket/catalog.json`        | Cloud-hosted teams    |
+| Local file server   | `http://localhost:8000/catalog.json`                       | Development/testing   |
 
 **Security requirement**: URLs must use HTTPS (except `localhost` for testing).
 
@@ -666,22 +664,22 @@ specify extension add jira
 
 Required fields for each extension entry:
 
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-| `name` | string | Yes | Human-readable name |
-| `id` | string | Yes | Unique identifier (lowercase, hyphens) |
-| `version` | string | Yes | Semantic version (X.Y.Z) |
-| `download_url` | string | Yes | URL to ZIP archive |
-| `repository` | string | Yes | Source code URL |
-| `description` | string | No | Brief description |
-| `author` | string | No | Author/organization |
-| `license` | string | No | SPDX license identifier |
-| `requires.speckit_version` | string | No | Version constraint |
-| `requires.tools` | array | No | Required external tools |
-| `provides.commands` | number | No | Number of commands |
-| `provides.hooks` | number | No | Number of hooks |
-| `tags` | array | No | Search tags |
-| `verified` | boolean | No | Verification status |
+| Field                      | Type    | Required | Description                            |
+| -------------------------- | ------- | -------- | -------------------------------------- |
+| `name`                     | string  | Yes      | Human-readable name                    |
+| `id`                       | string  | Yes      | Unique identifier (lowercase, hyphens) |
+| `version`                  | string  | Yes      | Semantic version (X.Y.Z)               |
+| `download_url`             | string  | Yes      | URL to ZIP archive                     |
+| `repository`               | string  | Yes      | Source code URL                        |
+| `description`              | string  | No       | Brief description                      |
+| `author`                   | string  | No       | Author/organization                    |
+| `license`                  | string  | No       | SPDX license identifier                |
+| `requires.speckit_version` | string  | No       | Version constraint                     |
+| `requires.tools`           | array   | No       | Required external tools                |
+| `provides.commands`        | number  | No       | Number of commands                     |
+| `provides.hooks`           | number  | No       | Number of hooks                        |
+| `tags`                     | array   | No       | Search tags                            |
+| `verified`                 | boolean | No       | Verification status                    |
 
 ### Use Cases
 
@@ -890,6 +888,7 @@ Add to `.gitignore`:
 ## Extensions
 
 This project uses:
+
 - **jira** (v1.0.0) - Jira integration
   - Config: `.specify/extensions/jira/jira-config.yml`
   - Requires: jira-mcp-server
@@ -904,12 +903,12 @@ Use local config for development:
 ```yaml
 # .specify/extensions/jira/jira-config.local.yml
 project:
-  key: "DEVTEST"  # Your test project
+  key: "DEVTEST" # Your test project
 
 defaults:
   task:
     custom_fields:
-      customfield_10002: 1  # Lower story points for testing
+      customfield_10002: 1 # Lower story points for testing
 ```
 
 ### 4. Environment-Specific Config
@@ -940,7 +939,7 @@ specify extension update
 # .specify/extensions.yml
 installed:
   - id: jira
-    version: "1.0.0"  # Pin to specific version
+    version: "1.0.0" # Pin to specific version
 ```
 
 ### 6. Minimal Extensions
@@ -961,6 +960,7 @@ Document extension usage in your project:
 ## Working with Jira
 
 After creating tasks, sync to Jira:
+
 1. Run `/speckit.tasks` to generate tasks
 2. Run `/speckit.jira.specstoissues` to create Jira issues
 3. Run `/speckit.jira.sync-status` to update status
@@ -1021,5 +1021,5 @@ After creating tasks, sync to Jira:
 
 ---
 
-*Last Updated: 2026-01-28*
-*Spec Kit Version: 0.1.0*
+_Last Updated: 2026-01-28_
+_Spec Kit Version: 0.1.0_

@@ -5,7 +5,7 @@ description: Request LLM text generation from the client or a configured provide
 icon: robot
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.0.0" />
 
@@ -118,9 +118,7 @@ Client support for sampling is optional—some clients may not implement it. To 
 
 FastMCP provides built-in handlers for [OpenAI and Anthropic APIs](/clients/sampling#built-in-handlers). These handlers support the full sampling API including tools, automatically converting your Python functions to each provider's format.
 
-<Note>
-Install handlers with `pip install fastmcp[openai]` or `pip install fastmcp[anthropic]`.
-</Note>
+<Note>Install handlers with `pip install fastmcp[openai]` or `pip install fastmcp[anthropic]`.</Note>
 
 ```python
 from fastmcp import FastMCP
@@ -204,7 +202,8 @@ async def research(topic: str, ctx: Context) -> ResearchResult:
 ```
 
 <Note>
-Structured output with automatic validation only applies to `sample()`. With `sample_step()`, you must manage structured output yourself.
+  Structured output with automatic validation only applies to `sample()`. With `sample_step()`, you must manage
+  structured output yourself.
 </Note>
 
 ## Tool Use
@@ -325,13 +324,16 @@ result = await ctx.sample(
 ```
 
 <Note>
-When any tool in a batch has `sequential=True`, the entire batch executes sequentially regardless of `tool_concurrency`. This is a conservative guarantee — if one tool needs ordering, all tools in that batch respect it.
+  When any tool in a batch has `sequential=True`, the entire batch executes sequentially regardless of
+  `tool_concurrency`. This is a conservative guarantee — if one tool needs ordering, all tools in that batch respect it.
 </Note>
 
 ### Client Requirements
 
 <Note>
-Sampling with tools requires the client to advertise the `sampling.tools` capability. FastMCP clients do this automatically. For external clients that don't support tool-enabled sampling, configure a fallback handler with `sampling_handler_behavior="always"`.
+  Sampling with tools requires the client to advertise the `sampling.tools` capability. FastMCP clients do this
+  automatically. For external clients that don't support tool-enabled sampling, configure a fallback handler with
+  `sampling_handler_behavior="always"`.
 </Note>
 
 ## Advanced Control
@@ -391,14 +393,15 @@ async def controlled_agent(question: str, ctx: Context) -> str:
 
 Each `SampleStep` provides information about what the LLM returned:
 
-| Property | Description |
-|----------|-------------|
-| `step.is_tool_use` | True if the LLM requested tool calls |
-| `step.tool_calls` | List of tool calls requested (if any) |
-| `step.text` | The text content (if any) |
-| `step.history` | All messages exchanged so far |
+| Property           | Description                           |
+| ------------------ | ------------------------------------- |
+| `step.is_tool_use` | True if the LLM requested tool calls  |
+| `step.tool_calls`  | List of tool calls requested (if any) |
+| `step.text`        | The text content (if any)             |
+| `step.history`     | All messages exchanged so far         |
 
 The contents of `step.history` depend on `execute_tools`:
+
 - **`execute_tools=True`** (default): Includes tool results, ready for the next iteration
 - **`execute_tools=False`**: Includes the assistant's tool request, but you add results yourself
 
@@ -558,6 +561,7 @@ tool_result = ToolResultContent(
     <ResponseField name="tool_concurrency" type="int | None" default="None">
       Controls parallel execution of tools. `None` (default) for sequential, `0` for unlimited parallel, or a positive integer for bounded concurrency.
     </ResponseField>
+
   </Expandable>
 
   <Expandable title="Response">

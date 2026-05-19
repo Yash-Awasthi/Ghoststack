@@ -11,28 +11,28 @@ Floci supports both CloudWatch Logs and CloudWatch Metrics.
 
 ### Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateLogGroup` | Create a log group |
-| `DeleteLogGroup` | Delete a log group |
-| `DescribeLogGroups` | List log groups |
-| `CreateLogStream` | Create a log stream inside a log group |
-| `DeleteLogStream` | Delete a log stream |
-| `DescribeLogStreams` | List log streams in a group |
-| `PutLogEvents` | Write log events to a stream |
-| `GetLogEvents` | Read log events from a stream |
-| `FilterLogEvents` | Search log events with a filter pattern |
-| `PutRetentionPolicy` | Set log retention (days) |
-| `DeleteRetentionPolicy` | Remove log retention policy |
-| `TagLogGroup` | Tag a log group |
-| `UntagLogGroup` | Remove tags |
-| `ListTagsLogGroup` | List tags |
+| Action                  | Description                             |
+| ----------------------- | --------------------------------------- |
+| `CreateLogGroup`        | Create a log group                      |
+| `DeleteLogGroup`        | Delete a log group                      |
+| `DescribeLogGroups`     | List log groups                         |
+| `CreateLogStream`       | Create a log stream inside a log group  |
+| `DeleteLogStream`       | Delete a log stream                     |
+| `DescribeLogStreams`    | List log streams in a group             |
+| `PutLogEvents`          | Write log events to a stream            |
+| `GetLogEvents`          | Read log events from a stream           |
+| `FilterLogEvents`       | Search log events with a filter pattern |
+| `PutRetentionPolicy`    | Set log retention (days)                |
+| `DeleteRetentionPolicy` | Remove log retention policy             |
+| `TagLogGroup`           | Tag a log group                         |
+| `UntagLogGroup`         | Remove tags                             |
+| `ListTagsLogGroup`      | List tags                               |
 
 ### Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_CLOUDWATCHLOGS_ENABLED` | `true` | Enable or disable the CloudWatch Logs service |
+| Variable                                             | Default | Description                                                         |
+| ---------------------------------------------------- | ------- | ------------------------------------------------------------------- |
+| `FLOCI_SERVICES_CLOUDWATCHLOGS_ENABLED`              | `true`  | Enable or disable the CloudWatch Logs service                       |
 | `FLOCI_SERVICES_CLOUDWATCHLOGS_MAX_EVENTS_PER_QUERY` | `10000` | Maximum events returned per `FilterLogEvents` / `GetLogEvents` call |
 
 ### Examples
@@ -83,16 +83,16 @@ aws logs put-retention-policy \
 
 ### Supported Actions
 
-| Action | Description |
-|---|---|
-| `PutMetricData` | Publish custom metrics |
-| `ListMetrics` | List available metrics |
+| Action                | Description                                |
+| --------------------- | ------------------------------------------ |
+| `PutMetricData`       | Publish custom metrics                     |
+| `ListMetrics`         | List available metrics                     |
 | `GetMetricStatistics` | Get metric statistics (Average, Sum, etc.) |
-| `GetMetricData` | Query metrics with math expressions |
-| `PutMetricAlarm` | Create a metric alarm |
-| `DescribeAlarms` | List alarms |
-| `DeleteAlarms` | Delete alarms |
-| `SetAlarmState` | Manually set alarm state |
+| `GetMetricData`       | Query metrics with math expressions        |
+| `PutMetricAlarm`      | Create a metric alarm                      |
+| `DescribeAlarms`      | List alarms                                |
+| `DeleteAlarms`        | Delete alarms                              |
+| `SetAlarmState`       | Manually set alarm state                   |
 
 ### Examples
 

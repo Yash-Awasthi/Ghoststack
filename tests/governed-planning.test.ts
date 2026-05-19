@@ -1,4 +1,4 @@
-import { PlanningEngine } from '../orchestration/planning-engine';
+import { PlanningEngine } from "../orchestration/planning-engine";
 
 describe("Milestone 1: Planning Engine & Bounded Synthesis", () => {
   it("should decompose complex news ingestion objectives into high-fidelity typed dependency graphs", async () => {
@@ -9,9 +9,9 @@ describe("Milestone 1: Planning Engine & Bounded Synthesis", () => {
     expect(plan.planId).toContain("plan-");
     expect(plan.synthesisResults.length).toBe(3);
 
-    const s3 = plan.synthesisResults.find(x => x.action === 'create_s3_bucket');
-    const sqs = plan.synthesisResults.find(x => x.action === 'create_sqs_queue');
-    const ddb = plan.synthesisResults.find(x => x.action === 'create_dynamodb_table');
+    const s3 = plan.synthesisResults.find((x) => x.action === "create_s3_bucket");
+    const sqs = plan.synthesisResults.find((x) => x.action === "create_sqs_queue");
+    const ddb = plan.synthesisResults.find((x) => x.action === "create_dynamodb_table");
 
     expect(s3).toBeDefined();
     expect(sqs).toBeDefined();
@@ -22,7 +22,7 @@ describe("Milestone 1: Planning Engine & Bounded Synthesis", () => {
     expect(ddb?.dependencies).toContain(sqs?.taskId);
 
     // Verify priorities and cost allocations
-    expect(s3?.priority).toBe('high');
+    expect(s3?.priority).toBe("high");
     expect(s3?.governanceMetadata?.costEstimate).toBe(0.02);
   });
 
@@ -30,8 +30,8 @@ describe("Milestone 1: Planning Engine & Bounded Synthesis", () => {
     const engine = new PlanningEngine();
     const plan = await engine.generatePlan("Provision secure database backup");
 
-    const iam = plan.synthesisResults.find(x => x.action === 'create_iam_role');
+    const iam = plan.synthesisResults.find((x) => x.action === "create_iam_role");
     expect(iam?.governanceMetadata?.dangerous).toBe(true);
-    expect(iam?.governanceMetadata?.resourceScope).toBe('aws:iam');
+    expect(iam?.governanceMetadata?.resourceScope).toBe("aws:iam");
   });
 });

@@ -2,7 +2,7 @@
  * Kinesis integration tests.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   KinesisClient,
   CreateStreamCommand,
@@ -11,11 +11,11 @@ import {
   GetShardIteratorCommand,
   GetRecordsCommand,
   DeleteStreamCommand,
-  ListStreamsCommand,
-} from '@aws-sdk/client-kinesis';
-import { makeClient, uniqueName } from './setup';
+  ListStreamsCommand
+} from "@aws-sdk/client-kinesis";
+import { makeClient, uniqueName } from "./setup";
 
-describe('Kinesis', () => {
+describe("Kinesis", () => {
   let kinesis: KinesisClient;
   let streamName: string;
 
@@ -32,32 +32,32 @@ describe('Kinesis', () => {
     }
   });
 
-  it('should create stream', async () => {
+  it("should create stream", async () => {
     await kinesis.send(new CreateStreamCommand({ StreamName: streamName, ShardCount: 1 }));
   });
 
-  it('should describe stream', async () => {
+  it("should describe stream", async () => {
     const response = await kinesis.send(new DescribeStreamCommand({ StreamName: streamName }));
-    expect(['ACTIVE', 'CREATING']).toContain(response.StreamDescription?.StreamStatus);
+    expect(["ACTIVE", "CREATING"]).toContain(response.StreamDescription?.StreamStatus);
   });
 
-  it('should list streams', async () => {
+  it("should list streams", async () => {
     const response = await kinesis.send(new ListStreamsCommand({}));
     expect(response.StreamNames?.includes(streamName)).toBe(true);
   });
 
-  it('should put record', async () => {
+  it("should put record", async () => {
     const response = await kinesis.send(
       new PutRecordCommand({
         StreamName: streamName,
-        Data: Buffer.from('kinesis-test-record'),
-        PartitionKey: 'pk1',
+        Data: Buffer.from("kinesis-test-record"),
+        PartitionKey: "pk1"
       })
     );
     expect(response.SequenceNumber).toBeTruthy();
   });
 
-  it('should get records', async () => {
+  it("should get records", async () => {
     const descr = await kinesis.send(new DescribeStreamCommand({ StreamName: streamName }));
     const shardId = descr.StreamDescription!.Shards![0].ShardId!;
 
@@ -65,23 +65,23 @@ describe('Kinesis', () => {
       new GetShardIteratorCommand({
         StreamName: streamName,
         ShardId: shardId,
-        ShardIteratorType: 'TRIM_HORIZON',
+        ShardIteratorType: "TRIM_HORIZON"
       })
     );
 
     const recordsResult = await kinesis.send(
       new GetRecordsCommand({
         ShardIterator: iterResult.ShardIterator!,
-        Limit: 10,
+        Limit: 10
       })
     );
     expect(recordsResult.Records?.length).toBeGreaterThan(0);
     const data = Buffer.from(recordsResult.Records![0].Data!).toString();
-    expect(data).toBe('kinesis-test-record');
+    expect(data).toBe("kinesis-test-record");
   });
 
-  it('should delete stream', async () => {
+  it("should delete stream", async () => {
     await kinesis.send(new DeleteStreamCommand({ StreamName: streamName }));
-    streamName = '';
+    streamName = "";
   });
 });

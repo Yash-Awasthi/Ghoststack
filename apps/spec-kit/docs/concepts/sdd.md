@@ -6,18 +6,18 @@ Spec-Driven Development **flips the script** on traditional software development
 
 Spec-Driven Development is a structured process that emphasizes:
 
-- **Intent-driven development** where specifications define the "*what*" before the "*how*"
+- **Intent-driven development** where specifications define the "_what_" before the "_how_"
 - **Rich specification creation** using guardrails and organizational principles
 - **Multi-step refinement** rather than one-shot code generation from prompts
 - **Heavy reliance** on advanced AI model capabilities for specification interpretation
 
 ## Development Phases
 
-| Phase | Focus | Key Activities |
-|-------|-------|----------------|
-| **0-to-1 Development** ("Greenfield") | Generate from scratch | <ul><li>Start with high-level requirements</li><li>Generate specifications</li><li>Plan implementation steps</li><li>Build production-ready applications</li></ul> |
-| **Creative Exploration** | Parallel implementations | <ul><li>Explore diverse solutions</li><li>Support multiple technology stacks & architectures</li><li>Experiment with UX patterns</li></ul> |
-| **Iterative Enhancement** ("Brownfield") | Brownfield modernization | <ul><li>Add features iteratively</li><li>Modernize legacy systems</li><li>Adapt processes</li></ul> |
+| Phase                                    | Focus                    | Key Activities                                                                                                                                                     |
+| ---------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **0-to-1 Development** ("Greenfield")    | Generate from scratch    | <ul><li>Start with high-level requirements</li><li>Generate specifications</li><li>Plan implementation steps</li><li>Build production-ready applications</li></ul> |
+| **Creative Exploration**                 | Parallel implementations | <ul><li>Explore diverse solutions</li><li>Support multiple technology stacks & architectures</li><li>Experiment with UX patterns</li></ul>                         |
+| **Iterative Enhancement** ("Brownfield") | Brownfield modernization | <ul><li>Add features iteratively</li><li>Modernize legacy systems</li><li>Adapt processes</li></ul>                                                                |
 
 ## Experimental Goals
 

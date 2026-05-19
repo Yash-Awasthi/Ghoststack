@@ -6,7 +6,7 @@ icon: wand-magic-sparkles
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -110,10 +110,10 @@ Get the weather forecast for a city.
 uv run --with fastmcp python cli.py call-tool get_forecast --city <value> --days <value>
 ```
 
-| Flag | Type | Required | Description |
-|------|------|----------|-------------|
-| `--city` | string | yes | City name |
-| `--days` | integer | no | Number of forecast days |
+| Flag     | Type    | Required | Description             |
+| -------- | ------- | -------- | ----------------------- |
+| `--city` | string  | yes      | City name               |
+| `--days` | integer | no       | Number of forecast days |
 ````
 
 To skip skill generation, pass `--no-skill`:
@@ -133,16 +133,19 @@ At the top of the generated file, a `CLIENT_SPEC` variable holds the resolved tr
 Parameters are mapped intelligently based on their complexity:
 
 **Simple types** (`string`, `integer`, `number`, `boolean`) become typed Python parameters with clean flags:
+
 ```bash
 python cli.py call-tool get_forecast --city London --days 3
 ```
 
 **Arrays of simple types** (`array` with `string`/`integer`/`number`/`boolean` items) become `list[T]` parameters that accept multiple flags:
+
 ```bash
 python cli.py call-tool tag_items --tags python --tags fastapi --tags mcp
 ```
 
 **Complex types** (objects, nested arrays, or unions) accept JSON strings. The tool's `--help` displays the full JSON schema so you know exactly what structure to pass:
+
 ```bash
 python cli.py call-tool create_user \
   --name John \

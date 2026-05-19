@@ -1,7 +1,7 @@
-import { MCPRuntime } from '../orchestration/mcp-adapter';
-import { MCPServerRegistry } from '../orchestration/mcp-registry';
-import { IMCPTransport, IMCPTask } from '../orchestration/interfaces/mcp.interface';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
+import { MCPRuntime } from "../orchestration/mcp-adapter";
+import { MCPServerRegistry } from "../orchestration/mcp-registry";
+import { IMCPTransport, IMCPTask } from "../orchestration/interfaces/mcp.interface";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
 
 class MockMCPTransport implements IMCPTransport {
   private simulateDelayMs = 0;
@@ -11,18 +11,22 @@ class MockMCPTransport implements IMCPTransport {
     this.simulateDelayMs = simulateDelayMs;
   }
 
-  async connect(): Promise<void> { this.connected = true; }
-  async disconnect(): Promise<void> { this.connected = false; }
+  async connect(): Promise<void> {
+    this.connected = true;
+  }
+  async disconnect(): Promise<void> {
+    this.connected = false;
+  }
 
   async send(message: any): Promise<any> {
     if (this.simulateDelayMs > 0) {
-      await new Promise(resolve => setTimeout(resolve, this.simulateDelayMs));
+      await new Promise((resolve) => setTimeout(resolve, this.simulateDelayMs));
     }
 
     if (message.method === "tools/call") {
       const name = message.params?.name;
       const args = message.params?.arguments || {};
-      
+
       if (name === "echo") {
         return { content: [{ type: "text", text: args.input || "hello" }] };
       }
@@ -42,13 +46,16 @@ describe("Milestone 2: MCP Tool Execution Fabric & Timeout Limits", () => {
     const tracer = new TraceRecorder();
 
     const transport = new MockMCPTransport();
-    await registry.registerServer({
-      name: "echo-server",
-      transportType: "stdio",
-      endpoint: "node bin.js",
-      status: "active",
-      tools: ["echo"]
-    }, transport);
+    await registry.registerServer(
+      {
+        name: "echo-server",
+        transportType: "stdio",
+        endpoint: "node bin.js",
+        status: "active",
+        tools: ["echo"]
+      },
+      transport
+    );
 
     const runtime = new MCPRuntime(registry, metrics, tracer);
 
@@ -82,13 +89,16 @@ describe("Milestone 2: MCP Tool Execution Fabric & Timeout Limits", () => {
 
     // 50ms delay for simulation
     const transport = new MockMCPTransport(50);
-    await registry.registerServer({
-      name: "slow-server",
-      transportType: "http",
-      endpoint: "http://localhost/slow",
-      status: "active",
-      tools: ["echo"]
-    }, transport);
+    await registry.registerServer(
+      {
+        name: "slow-server",
+        transportType: "http",
+        endpoint: "http://localhost/slow",
+        status: "active",
+        tools: ["echo"]
+      },
+      transport
+    );
 
     const runtime = new MCPRuntime(registry, metrics, tracer);
 

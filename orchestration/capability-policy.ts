@@ -1,4 +1,4 @@
-import { ICapabilityPolicy, IExecutionEnvironment, IEnvironmentTelemetry } from './interfaces/environment.interface';
+import { ICapabilityPolicy, IExecutionEnvironment, IEnvironmentTelemetry } from "./interfaces/environment.interface";
 
 export class ExecutionEnvironment implements IExecutionEnvironment {
   constructor(
@@ -9,9 +9,12 @@ export class ExecutionEnvironment implements IExecutionEnvironment {
 }
 
 export class CapabilityPolicy implements ICapabilityPolicy {
-  async evaluateCapability(taskType: string, environment: IExecutionEnvironment): Promise<{ 
-    allowed: boolean; 
-    reason?: string; 
+  async evaluateCapability(
+    taskType: string,
+    environment: IExecutionEnvironment
+  ): Promise<{
+    allowed: boolean;
+    reason?: string;
   }> {
     if (taskType === "browser" && !environment.capabilities.includes("BROWSER_INTERACT")) {
       return {

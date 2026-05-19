@@ -5,9 +5,9 @@ The `testcontainers-floci` library integrates Floci with [Testcontainers for Jav
 Two artifact lines are published to keep in sync with the Testcontainers major version:
 
 | Testcontainers version | Spring Boot | Artifact version |
-|---|---|---|
-| 1.x | 3.x | `1.4.0` |
-| 2.x | 4.x | `2.5.0` |
+| ---------------------- | ----------- | ---------------- |
+| 1.x                    | 3.x         | `1.4.0`          |
+| 2.x                    | 4.x         | `2.5.0`          |
 
 ## Installation
 

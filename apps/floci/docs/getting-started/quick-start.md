@@ -17,10 +17,10 @@ This guide gets Floci running and verifies that AWS CLI commands work against it
         volumes:
           # Local directory bind mount (default)
           - ./data:/app/data
-    
+
           # OR named volume (optional):
           # - floci-data:/app/data
-    
+
     # volumes:
     #   floci-data:
     ```
@@ -42,10 +42,10 @@ This guide gets Floci running and verifies that AWS CLI commands work against it
         volumes:
           # Local directory bind mount (default)
           - ./data:/app/data
-    
+
           # OR named volume (optional):
           # - floci-data:/app/data
-    
+
     # volumes:
     #   floci-data:
     ```
@@ -186,7 +186,7 @@ See the [ECR service docs](../services/ecr.md) for the full action surface, imag
 
 ## Lambda on native Linux Docker (UFW)
 
-When Floci runs **natively on a Linux host** (not Docker Desktop), Lambda function containers reach Floci's Runtime API server via the docker bridge gateway. On Ubuntu / Pop!_OS / Debian boxes with **UFW enabled**, the default `INPUT DROP` policy silently drops these packets and Lambda invocations time out with `Function.TimedOut`. This affects every Lambda packaging type — Zip *and* image-backed functions deployed via emulated ECR.
+When Floci runs **natively on a Linux host** (not Docker Desktop), Lambda function containers reach Floci's Runtime API server via the docker bridge gateway. On Ubuntu / Pop!\_OS / Debian boxes with **UFW enabled**, the default `INPUT DROP` policy silently drops these packets and Lambda invocations time out with `Function.TimedOut`. This affects every Lambda packaging type — Zip _and_ image-backed functions deployed via emulated ECR.
 
 **One-time fix**, scoped to the docker bridge only (does not expose anything to the network — `docker0` is internal):
 

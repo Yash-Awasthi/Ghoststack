@@ -13,6 +13,7 @@ npm run bootstrap
 ```
 
 ### Expected Startup Log Sequence
+
 1. **Logo Banner**: Displays the GhostStack v1.1 ASCII title.
 2. **Directory Init**: Sets up runtime folders (`data-runtime/` and `logs/`).
 3. **Template Registrations**: Registers `browser-research-template`, `local-provisioning-template`, etc.
@@ -30,6 +31,7 @@ npm run healthcheck
 ```
 
 The script audits:
+
 - **Folders Integrity**: Verifies core directories are healthy.
 - **Config Verifications**: Parses YAML config files to ensure syntactical validity.
 - **Source Compilation**: Ensures necessary orchestrator TypeScript classes compile cleanly.
@@ -42,11 +44,13 @@ If any check fails, the process exits with code `1`, halting deployments.
 ## 3. Real-Time Introspection & Metrics Logging
 
 GhostStack records system activity through a structured file logging substrate:
+
 - **Event Log**: `data-runtime/events.jsonl` preserves high-fidelity event lines.
 - **State Store**: `data-runtime/cache.json` tracks active key-value persistence records.
 - **Performance Traces**: Tracing metrics are routed to the observability registry.
 
 ### Exporting Diagnostics snapshots
+
 To extract a complete diagnostics payload for troubleshooting, run:
 
 ```bash
@@ -54,6 +58,7 @@ npm run diagnose
 ```
 
 This generates `logs/diagnostics-export.json` which packages:
+
 - Current active queue length and dead-letter statistics.
 - History of executed workflow templates and status logs.
 - Registered templates and service discovery nodes.
@@ -78,6 +83,7 @@ If a host process kills the orchestrator abruptly:
 ```
 
 To clean trace cache states during maintenance, delete the runtime databases manually:
+
 - `Remove-Item data-runtime/*.json`
 - `Remove-Item data-runtime/*.jsonl`
 
@@ -92,5 +98,6 @@ npm run benchmark
 ```
 
 Results are stored dynamically in `docs/BENCHMARKS.md`.
+
 - **Target Sequential Latency**: < 5ms.
 - **Target Concurrency Throughput**: > 50 tasks/sec.

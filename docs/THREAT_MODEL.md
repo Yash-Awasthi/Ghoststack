@@ -7,6 +7,7 @@ This document details identified security vectors, systemic threats, validation 
 ## 1. Core Threat Surface Analysis
 
 ### 1.1 Sandbox Escape & File Path Traversal
+
 - **Threat Vector**: A governed workflow task injects malicious filesystem queries (e.g., `file:///etc/passwd`, `..\..\..\private.key`) through template parameters or dynamic execution code blocks.
 - **System Impact**: Potential unauthorized host file leakage or deletion.
 - **Mitigation**:
@@ -14,6 +15,7 @@ This document details identified security vectors, systemic threats, validation 
   - Blocks all path traversals containing directory dots `..`, root prefixes `/etc/`, or absolute root paths on Windows `C:\` that are outside of the local data sandbox directory (`data-runtime/`).
 
 ### 1.2 Event Replay Poisoning
+
 - **Threat Vector**: An attacker manipulates `events.jsonl` on disk, inserting synthetic events to trick the event stream loader during orchestrator startup.
 - **System Impact**: Submitting arbitrary fake execution outcomes, bypassing active worker loops, or injecting corrupted states.
 - **Mitigation**:
@@ -21,6 +23,7 @@ This document details identified security vectors, systemic threats, validation 
   - Any malformed or logically disjointed trace timeline event (e.g., success outcome for a non-existent task ID) is logged as critical, halts bootstrap, and pushes the event data to an isolated quarantine snapshot.
 
 ### 1.3 Queue Abuse & Starvation (Denial of Service)
+
 - **Threat Vector**: An agent or workflow template enters an infinite loop, flooding the priority queue with thousands of low-priority or failing tasks.
 - **System Impact**: Memory exhaustion and worker starvation.
 - **Mitigation**:
@@ -28,6 +31,7 @@ This document details identified security vectors, systemic threats, validation 
   - Tasks violating retries are moved instantly to the `deadLetterQueue`, allowing the worker threads to process healthy queued tasks.
 
 ### 1.4 Approval Bypass & State Tampering
+
 - **Threat Vector**: Directly calling the execution engine, bypassing the governance decider to run high-quota or system tasks without approvals.
 - **System Impact**: Bypassing manual gates to execute system commands.
 - **Mitigation**:

@@ -152,24 +152,24 @@ After running `specify init`, your AI coding agent will have access to these sla
 
 Essential commands for the Spec-Driven Development workflow:
 
-| Command                  | Agent Skill            | Description                                                                |
-| ------------------------ | ---------------------- | -------------------------------------------------------------------------- |
-| `/speckit.constitution`  | `speckit-constitution` | Create or update project governing principles and development guidelines   |
-| `/speckit.specify`       | `speckit-specify`      | Define what you want to build (requirements and user stories)              |
-| `/speckit.plan`          | `speckit-plan`         | Create technical implementation plans with your chosen tech stack          |
-| `/speckit.tasks`         | `speckit-tasks`        | Generate actionable task lists for implementation                          |
-| `/speckit.taskstoissues` | `speckit-taskstoissues`| Convert generated task lists into GitHub issues for tracking and execution |
-| `/speckit.implement`     | `speckit-implement`    | Execute all tasks to build the feature according to the plan               |
+| Command                  | Agent Skill             | Description                                                                |
+| ------------------------ | ----------------------- | -------------------------------------------------------------------------- |
+| `/speckit.constitution`  | `speckit-constitution`  | Create or update project governing principles and development guidelines   |
+| `/speckit.specify`       | `speckit-specify`       | Define what you want to build (requirements and user stories)              |
+| `/speckit.plan`          | `speckit-plan`          | Create technical implementation plans with your chosen tech stack          |
+| `/speckit.tasks`         | `speckit-tasks`         | Generate actionable task lists for implementation                          |
+| `/speckit.taskstoissues` | `speckit-taskstoissues` | Convert generated task lists into GitHub issues for tracking and execution |
+| `/speckit.implement`     | `speckit-implement`     | Execute all tasks to build the feature according to the plan               |
 
 #### Optional Commands
 
 Additional commands for enhanced quality and validation:
 
-| Command              | Agent Skill            | Description                                                                                                                          |
-| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `/speckit.clarify`   | `speckit-clarify`      | Clarify underspecified areas (recommended before `/speckit.plan`; formerly `/quizme`)                                                |
-| `/speckit.analyze`   | `speckit-analyze`      | Cross-artifact consistency & coverage analysis (run after `/speckit.tasks`, before `/speckit.implement`)                             |
-| `/speckit.checklist` | `speckit-checklist`    | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
+| Command              | Agent Skill         | Description                                                                                                                          |
+| -------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `/speckit.clarify`   | `speckit-clarify`   | Clarify underspecified areas (recommended before `/speckit.plan`; formerly `/quizme`)                                                |
+| `/speckit.analyze`   | `speckit-analyze`   | Cross-artifact consistency & coverage analysis (run after `/speckit.tasks`, before `/speckit.implement`)                             |
+| `/speckit.checklist` | `speckit-checklist` | Generate custom quality checklists that validate requirements completeness, clarity, and consistency (like "unit tests for English") |
 
 ## 🔧 Specify CLI Reference
 
@@ -194,7 +194,7 @@ Spec Kit can be tailored to your needs through two complementary systems — **e
 
 ### Extensions — Add New Capabilities
 
-Use **extensions** when you need functionality that goes beyond Spec Kit's core. Extensions introduce new commands and templates — for example, adding domain-specific workflows that are not covered by the built-in SDD commands, integrating with external tools, or adding entirely new development phases. They expand *what Spec Kit can do*.
+Use **extensions** when you need functionality that goes beyond Spec Kit's core. Extensions introduce new commands and templates — for example, adding domain-specific workflows that are not covered by the built-in SDD commands, integrating with external tools, or adding entirely new development phases. They expand _what Spec Kit can do_.
 
 ```bash
 # Search available extensions
@@ -210,7 +210,7 @@ See the [Extensions reference](https://github.github.io/spec-kit/reference/exten
 
 ### Presets — Customize Existing Workflows
 
-Use **presets** when you want to change *how* Spec Kit works without adding new capabilities. Presets override the templates and commands that ship with the core *and* with installed extensions — for example, enforcing a compliance-oriented spec format, using domain-specific terminology, or applying organizational standards to plans and tasks. They customize the artifacts and instructions that Spec Kit and its extensions produce.
+Use **presets** when you want to change _how_ Spec Kit works without adding new capabilities. Presets override the templates and commands that ship with the core _and_ with installed extensions — for example, enforcing a compliance-oriented spec format, using domain-specific terminology, or applying organizational standards to plans and tasks. They customize the artifacts and instructions that Spec Kit and its extensions produce.
 
 ```bash
 # Search available presets
@@ -226,19 +226,19 @@ See the [Presets reference](https://github.github.io/spec-kit/reference/presets.
 
 ### When to Use Which
 
-| Goal | Use |
-| --- | --- |
-| Add a brand-new command or workflow | Extension |
-| Customize the format of specs, plans, or tasks | Preset |
-| Integrate an external tool or service | Extension |
-| Enforce organizational or regulatory standards | Preset |
-| Ship reusable domain-specific templates | Either — presets for template overrides, extensions for templates bundled with new commands |
+| Goal                                           | Use                                                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Add a brand-new command or workflow            | Extension                                                                                   |
+| Customize the format of specs, plans, or tasks | Preset                                                                                      |
+| Integrate an external tool or service          | Extension                                                                                   |
+| Enforce organizational or regulatory standards | Preset                                                                                      |
+| Ship reusable domain-specific templates        | Either — presets for template overrides, extensions for templates bundled with new commands |
 
 ## 📚 Core Philosophy
 
 Spec-Driven Development is a structured process that emphasizes:
 
-- **Intent-driven development** where specifications define the "*what*" before the "*how*"
+- **Intent-driven development** where specifications define the "_what_" before the "_how_"
 - **Rich specification creation** using guardrails and organizational principles
 - **Multi-step refinement** rather than one-shot code generation from prompts
 - **Heavy reliance** on advanced AI model capabilities for specification interpretation
@@ -368,7 +368,7 @@ This step creates or updates the `.specify/memory/constitution.md` file with you
 With your project principles established, you can now create the functional specifications. Use the `/speckit.specify` command and then provide the concrete requirements for the project you want to develop.
 
 > [!IMPORTANT]
-> Be as explicit as possible about *what* you are trying to build and *why*. **Do not focus on the tech stack at this point**.
+> Be as explicit as possible about _what_ you are trying to build and _why_. **Do not focus on the tech stack at this point**.
 
 An example prompt:
 
@@ -579,7 +579,7 @@ Once the implementation is complete, test the application and resolve any runtim
 
 ---
 
-##  Support
+## Support
 
 For support, please open a [GitHub issue](https://github.com/github/spec-kit/issues/new). We welcome bug reports, feature requests, and questions about using Spec-Driven Development.
 

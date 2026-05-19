@@ -6,14 +6,15 @@ icon: shield-check
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.2.4" />
 
 This guide shows you how to secure your FastMCP server using **Keycloak OAuth**. This integration uses the [**Remote OAuth**](/servers/auth/remote-oauth) pattern with Dynamic Client Registration (DCR), where Keycloak handles user login and your FastMCP server validates the tokens.
 
 <Note>
-**Keycloak 26.6.0 or later is required.** Earlier versions had a DCR incompatibility with MCP clients ([PR #45309](https://github.com/keycloak/keycloak/pull/45309)) that is fixed in 26.6.0.
+  **Keycloak 26.6.0 or later is required.** Earlier versions had a DCR incompatibility with MCP clients ([PR
+  #45309](https://github.com/keycloak/keycloak/pull/45309)) that is fixed in 26.6.0.
 </Note>
 
 ## Configuration
@@ -21,6 +22,7 @@ This guide shows you how to secure your FastMCP server using **Keycloak OAuth**.
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. A running **[Keycloak](https://keycloak.org/)** instance (e.g., `http://localhost:8080`)
 2. A Keycloak realm with **Dynamic Client Registration** enabled and a trusted host policy that allows your server URL (e.g., `http://localhost:8000/*`)
 3. Your FastMCP server's public URL (e.g., `http://localhost:8000`)
@@ -57,7 +59,9 @@ async def get_access_token_claims() -> dict:
 ```
 
 <Warning>
-**Production security**: Always configure the `audience` parameter in production. Without it, your server accepts tokens issued for any audience. Configure Keycloak audience mappers and set `audience` to your server's base URL to ensure tokens are specifically intended for your server.
+  **Production security**: Always configure the `audience` parameter in production. Without it, your server accepts
+  tokens issued for any audience. Configure Keycloak audience mappers and set `audience` to your server's base URL to
+  ensure tokens are specifically intended for your server.
 </Warning>
 
 ## Local Development

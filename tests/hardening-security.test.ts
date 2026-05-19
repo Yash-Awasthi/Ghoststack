@@ -1,19 +1,19 @@
-import { FilesystemSandbox, SandboxConstraint } from '../orchestration/filesystem-sandbox';
-import { BrowserExecutionAdapter } from '../orchestration/browser-adapter';
-import { ScrapingExecutionAdapter } from '../orchestration/scraping-adapter';
-import { MCPRuntime } from '../orchestration/mcp-adapter';
-import { MCPServerRegistry } from '../orchestration/mcp-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { ApprovalWorkflow } from '../orchestration/approval-workflow';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
-import { isSafeUrl, isSafeSandboxPath } from '../orchestration/security-utils';
-import * as fs from 'fs';
-import * as path from 'path';
+import { FilesystemSandbox, SandboxConstraint } from "../orchestration/filesystem-sandbox";
+import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
+import { ScrapingExecutionAdapter } from "../orchestration/scraping-adapter";
+import { MCPRuntime } from "../orchestration/mcp-adapter";
+import { MCPServerRegistry } from "../orchestration/mcp-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { ApprovalWorkflow } from "../orchestration/approval-workflow";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
+import { isSafeUrl, isSafeSandboxPath } from "../orchestration/security-utils";
+import * as fs from "fs";
+import * as path from "path";
 
 describe("GhostStack v1.1 Hardening & Security Verification", () => {
-  const testDir = path.join(__dirname, '../temp-hardening-db');
-  
+  const testDir = path.join(__dirname, "../temp-hardening-db");
+
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, { recursive: true });
@@ -28,18 +28,18 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
 
   describe("1. Filesystem Sandbox Traversal & Boundary Safety", () => {
     it("should prevent sibling folder traversal bypass (e.g. sandbox-sibling vs sandbox)", () => {
-      const sandboxRoot = path.join(testDir, 'sandbox');
-      const siblingRoot = path.join(testDir, 'sandbox-sibling');
-      
+      const sandboxRoot = path.join(testDir, "sandbox");
+      const siblingRoot = path.join(testDir, "sandbox-sibling");
+
       const constraint = new SandboxConstraint(1024 * 1024, sandboxRoot);
       const sandbox = new FilesystemSandbox(sandboxRoot, constraint);
 
       // Verify basic prefix matching checks that would allow path-traversal without deep matching
       const traversalPath = path.resolve(siblingRoot);
-      
+
       // Target sibling must fail
       expect(isSafeSandboxPath(sandboxRoot, traversalPath)).toBe(false);
-      expect(isSafeSandboxPath(sandboxRoot, path.join(sandboxRoot, 'nested-file.txt'))).toBe(true);
+      expect(isSafeSandboxPath(sandboxRoot, path.join(sandboxRoot, "nested-file.txt"))).toBe(true);
 
       // Attempting to write to sibling path should throw error
       expect(async () => {
@@ -48,11 +48,11 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
     });
 
     it("should prevent relative path escapes (e.g. nested/../../file.txt)", () => {
-      const sandboxRoot = path.join(testDir, 'sandbox');
+      const sandboxRoot = path.join(testDir, "sandbox");
       const constraint = new SandboxConstraint(1024 * 1024, sandboxRoot);
       const sandbox = new FilesystemSandbox(sandboxRoot, constraint);
 
-      const escapePath = path.join(sandboxRoot, 'nested/../../escaped-file.txt');
+      const escapePath = path.join(sandboxRoot, "nested/../../escaped-file.txt");
       expect(isSafeSandboxPath(sandboxRoot, escapePath)).toBe(false);
 
       expect(async () => {
@@ -65,7 +65,7 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
     it("should validate allowed protocols and reject non-http schemes", () => {
       expect(isSafeUrl("http://example.com")).toBe(true);
       expect(isSafeUrl("https://secure.site.org")).toBe(true);
-      
+
       expect(isSafeUrl("file:///etc/passwd")).toBe(false);
       expect(isSafeUrl("ftp://files.host")).toBe(false);
       expect(isSafeUrl("gopher://server.net")).toBe(false);
@@ -138,11 +138,11 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
 
   describe("4. Atomic Persistence & Write Verification", () => {
     it("should save state atomically to prevent JSON write corruption", async () => {
-      const stateFilePath = path.join(testDir, 'persistent_state.json');
+      const stateFilePath = path.join(testDir, "persistent_state.json");
       const persistence = new FileRuntimePersistence(stateFilePath);
 
       await persistence.saveState("config", { cluster: "primary", node: 12 });
-      
+
       // Verify correct write state
       const value = await persistence.getState<{ cluster: string }>("config");
       expect(value?.cluster).toBe("primary");
@@ -156,7 +156,7 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
 
   describe("5. Approval Cache Integrity & Replay Performance", () => {
     it("should read event logs only once and preserve consistent cache state", async () => {
-      const eventLogPath = path.join(testDir, 'cached_events.jsonl');
+      const eventLogPath = path.join(testDir, "cached_events.jsonl");
       const eventStore = new FileEventStore(eventLogPath);
       const eventBus = new LocalEventBus();
 
@@ -171,15 +171,15 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
       expect(list.length).toBe(2);
 
       // Spies or assertion checks: eventStore replayEvents count should match 1 on first list query
-      const replaySpy = jest.spyOn(eventStore, 'replayEvents');
-      
+      const replaySpy = jest.spyOn(eventStore, "replayEvents");
+
       const record = await approvalWorkflow.getRecord(req1.approvalId);
       expect(record?.status).toBe("pending");
 
       // Multiple list and retrieve calls should NOT call eventStore.replayEvents again
       await approvalWorkflow.listRecords();
       await approvalWorkflow.getRecord(req2.approvalId);
-      
+
       // Since it is cached, replayEvents was not triggered again
       expect(replaySpy).not.toHaveBeenCalled();
 

@@ -1,22 +1,22 @@
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { FlociExecutionAdapter } from '../orchestration/floci-adapter';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import * as path from 'path';
-import * as fs from 'fs';
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
+import { LocalAgentRegistry } from "../orchestration/agent-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
-  const testDir = path.join(__dirname, '../temp-telemetry-db');
-  const eventLogPath = path.join(testDir, 'telemetry_events.jsonl');
-  const cacheDbPath = path.join(testDir, 'telemetry_cache.json');
+  const testDir = path.join(__dirname, "../temp-telemetry-db");
+  const eventLogPath = path.join(testDir, "telemetry_events.jsonl");
+  const cacheDbPath = path.join(testDir, "telemetry_cache.json");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -32,10 +32,10 @@ describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
 
   it("should track latency timings, queue depths, replayed logs, and parent traces automatically", async () => {
     const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+      portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+      servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+      healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+      runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
     });
 
     const logger = new StructuredLogger();
@@ -50,10 +50,10 @@ describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
     const metrics = new MetricsCollector();
     const tracer = new TraceRecorder();
     const queue = new MemoryQueueBackend();
-    
+
     const adapter = new FlociExecutionAdapter();
     const executor = new TaskExecutor(queue, eventBus, persistence, logger, [adapter], metrics, tracer);
-    
+
     const orchestrator = new GhostStackOrchestrator(
       runtimeManager,
       eventBus,
@@ -71,9 +71,7 @@ describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
     await orchestrator.start();
 
     // Submit tasks
-    const testTasks = [
-      { id: "task-telemetry-s3", description: "setup s3 bucket", priority: "high", dependencies: [] }
-    ];
+    const testTasks = [{ id: "task-telemetry-s3", description: "setup s3 bucket", priority: "high", dependencies: [] }];
 
     await orchestrator.submitAndExecuteTasks(testTasks as any);
 
@@ -87,7 +85,7 @@ describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
 
     // 2. Assert traces capture execution spans
     const spans = tracer.getSpans();
-    const executionSpan = spans.find(s => s.name === "task.execute");
+    const executionSpan = spans.find((s) => s.name === "task.execute");
     expect(executionSpan).toBeDefined();
     expect(executionSpan?.metadata?.taskId).toBe("task-telemetry-s3");
   });

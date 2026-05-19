@@ -24,12 +24,12 @@ client = boto3.client('sts', endpoint_url='https://localhost:4566', verify=False
 
 ## Configuration
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `FLOCI_TLS_ENABLED` | `false` | Enable TLS/HTTPS on the server |
-| `FLOCI_TLS_CERT_PATH` | *(unset)* | Path to PEM certificate file |
-| `FLOCI_TLS_KEY_PATH` | *(unset)* | Path to PEM private key file |
-| `FLOCI_TLS_SELF_SIGNED` | `true` | Auto-generate a self-signed certificate when no cert/key paths provided |
+| Environment Variable    | Default   | Description                                                             |
+| ----------------------- | --------- | ----------------------------------------------------------------------- |
+| `FLOCI_TLS_ENABLED`     | `false`   | Enable TLS/HTTPS on the server                                          |
+| `FLOCI_TLS_CERT_PATH`   | _(unset)_ | Path to PEM certificate file                                            |
+| `FLOCI_TLS_KEY_PATH`    | _(unset)_ | Path to PEM private key file                                            |
+| `FLOCI_TLS_SELF_SIGNED` | `true`    | Auto-generate a self-signed certificate when no cert/key paths provided |
 
 ## Self-Signed Certificate
 
@@ -93,17 +93,17 @@ No additional configuration is needed — Vert.x handles TLS at the transport la
 ### AWS SDK for JavaScript v3
 
 ```typescript
-import { STSClient } from '@aws-sdk/client-sts';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
-import https from 'node:https';
+import { STSClient } from "@aws-sdk/client-sts";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
+import https from "node:https";
 
 const client = new STSClient({
-  endpoint: 'https://localhost:4566',
-  region: 'us-east-1',
-  credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
+  endpoint: "https://localhost:4566",
+  region: "us-east-1",
+  credentials: { accessKeyId: "test", secretAccessKey: "test" },
   requestHandler: new NodeHttpHandler({
-    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-  }),
+    httpsAgent: new https.Agent({ rejectUnauthorized: false })
+  })
 });
 ```
 
@@ -152,12 +152,12 @@ client = boto3.client(
 
 ## When Do I Need to Disable TLS Verification?
 
-| Certificate type | Verification disabled? | Why |
-|-----------------|----------------------|-----|
-| Floci self-signed (default) | **Yes** — `NODE_TLS_REJECT_UNAUTHORIZED=0`, `verify=False`, etc. | The self-signed CA is not in your system's trust store |
-| `mkcert` with local CA installed | **No** | `mkcert -install` adds its root CA to the OS trust store |
-| Corporate/internal CA already trusted | **No** | Your OS or JVM already trusts the issuing CA |
-| Public CA (Let's Encrypt, etc.) | **No** | Trusted by default in all runtimes |
+| Certificate type                      | Verification disabled?                                           | Why                                                      |
+| ------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------- |
+| Floci self-signed (default)           | **Yes** — `NODE_TLS_REJECT_UNAUTHORIZED=0`, `verify=False`, etc. | The self-signed CA is not in your system's trust store   |
+| `mkcert` with local CA installed      | **No**                                                           | `mkcert -install` adds its root CA to the OS trust store |
+| Corporate/internal CA already trusted | **No**                                                           | Your OS or JVM already trusts the issuing CA             |
+| Public CA (Let's Encrypt, etc.)       | **No**                                                           | Trusted by default in all runtimes                       |
 
 In short: you only need to disable verification when the certificate's issuer is **not** in the client's trust chain. If you provide your own certificate via `FLOCI_TLS_CERT_PATH` and its CA is already trusted by your system, no extra client configuration is needed.
 
@@ -173,4 +173,4 @@ This only happens with self-signed certificates. Set `NODE_TLS_REJECT_UNAUTHORIZ
 For self-signed certificates: configure a trust-all TrustManager as shown above, or import the certificate into your JVM's truststore with `keytool -importcert`. For user-provided certificates from a trusted CA, this should not occur.
 
 **Certificate doesn't include my custom hostname.**
-Ensure `FLOCI_HOSTNAME` or `FLOCI_BASE_URL` is set *before* Floci starts. The certificate is generated during startup. Check the logs for `TLS: detected custom hostnames: [...]`.
+Ensure `FLOCI_HOSTNAME` or `FLOCI_BASE_URL` is set _before_ Floci starts. The certificate is generated during startup. Check the logs for `TLS: detected custom hostnames: [...]`.

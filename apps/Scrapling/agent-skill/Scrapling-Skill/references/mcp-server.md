@@ -13,7 +13,7 @@ Fast HTTP GET with browser fingerprint impersonation (TLS, headers). Suitable fo
 **Key parameters:**
 
 | Parameter           | Type                               | Default      | Description                                                        |
-|---------------------|------------------------------------|--------------|--------------------------------------------------------------------|
+| ------------------- | ---------------------------------- | ------------ | ------------------------------------------------------------------ |
 | `url`               | str                                | required     | URL to fetch                                                       |
 | `extraction_type`   | `"markdown"` / `"html"` / `"text"` | `"markdown"` | Output format                                                      |
 | `css_selector`      | str or null                        | null         | CSS selector to narrow content (applied after `main_content_only`) |
@@ -25,7 +25,7 @@ Fast HTTP GET with browser fingerprint impersonation (TLS, headers). Suitable fo
 | `timeout`           | number                             | 30           | Seconds before timeout                                             |
 | `retries`           | int                                | 3            | Retry attempts on failure                                          |
 | `retry_delay`       | int                                | 1            | Seconds between retries                                            |
-| `stealthy_headers`  | bool                               | true         | Generate realistic browser headers and Google referer       |
+| `stealthy_headers`  | bool                               | true         | Generate realistic browser headers and Google referer              |
 | `http3`             | bool                               | false        | Use HTTP/3 (may conflict with `impersonate`)                       |
 | `follow_redirects`  | bool or "safe"                     | "safe"       | Follow redirects. "safe" rejects redirects to internal/private IPs |
 | `max_redirects`     | int                                | 30           | Max redirects (-1 for unlimited)                                   |
@@ -44,28 +44,28 @@ Opens a Chromium browser via Playwright to render JavaScript. Suitable for dynam
 
 **Key parameters (beyond shared ones):**
 
-| Parameter             | Type                | Default      | Description                                                                     |
-|-----------------------|---------------------|--------------|---------------------------------------------------------------------------------|
-| `url`                 | str                 | required     | URL to fetch                                                                    |
-| `extraction_type`     | str                 | `"markdown"` | `"markdown"` / `"html"` / `"text"`                                              |
-| `css_selector`        | str or null         | null         | Narrow content before extraction                                                |
-| `main_content_only`   | bool                | true         | Restrict to `<body>`                                                            |
-| `headless`            | bool                | true         | Run browser hidden (true) or visible (false)                                    |
-| `proxy`               | str or dict or null | null         | String URL or `{"server": "...", "username": "...", "password": "..."}`         |
-| `timeout`             | number              | 30000        | Timeout in **milliseconds**                                                     |
-| `wait`                | number              | 0            | Extra wait (ms) after page load before extraction                               |
-| `wait_selector`       | str or null         | null         | CSS selector to wait for before extraction                                      |
-| `wait_selector_state` | str                 | `"attached"` | State for wait_selector: `"attached"` / `"visible"` / `"hidden"` / `"detached"` |
-| `network_idle`        | bool                | false        | Wait until no network activity for 500ms                                        |
-| `disable_resources`   | bool                | false        | Block fonts, images, media, stylesheets, etc. for speed                         |
-| `google_search`       | bool                | true         | Set a Google referer header                                            |
-| `real_chrome`         | bool                | false        | Use locally installed Chrome instead of bundled Chromium                        |
-| `cdp_url`             | str or null         | null         | Connect to existing browser via CDP URL                                         |
-| `extra_headers`       | dict or null        | null         | Additional request headers                                                      |
-| `useragent`           | str or null         | null         | Custom user-agent (auto-generated if null)                                      |
-| `cookies`             | list or null        | null         | Playwright-format cookies                                                       |
-| `timezone_id`         | str or null         | null         | Browser timezone, e.g. `"America/New_York"`                                     |
-| `locale`              | str or null         | null         | Browser locale, e.g. `"en-GB"`                                                  |
+| Parameter             | Type                | Default      | Description                                                                      |
+| --------------------- | ------------------- | ------------ | -------------------------------------------------------------------------------- |
+| `url`                 | str                 | required     | URL to fetch                                                                     |
+| `extraction_type`     | str                 | `"markdown"` | `"markdown"` / `"html"` / `"text"`                                               |
+| `css_selector`        | str or null         | null         | Narrow content before extraction                                                 |
+| `main_content_only`   | bool                | true         | Restrict to `<body>`                                                             |
+| `headless`            | bool                | true         | Run browser hidden (true) or visible (false)                                     |
+| `proxy`               | str or dict or null | null         | String URL or `{"server": "...", "username": "...", "password": "..."}`          |
+| `timeout`             | number              | 30000        | Timeout in **milliseconds**                                                      |
+| `wait`                | number              | 0            | Extra wait (ms) after page load before extraction                                |
+| `wait_selector`       | str or null         | null         | CSS selector to wait for before extraction                                       |
+| `wait_selector_state` | str                 | `"attached"` | State for wait_selector: `"attached"` / `"visible"` / `"hidden"` / `"detached"`  |
+| `network_idle`        | bool                | false        | Wait until no network activity for 500ms                                         |
+| `disable_resources`   | bool                | false        | Block fonts, images, media, stylesheets, etc. for speed                          |
+| `google_search`       | bool                | true         | Set a Google referer header                                                      |
+| `real_chrome`         | bool                | false        | Use locally installed Chrome instead of bundled Chromium                         |
+| `cdp_url`             | str or null         | null         | Connect to existing browser via CDP URL                                          |
+| `extra_headers`       | dict or null        | null         | Additional request headers                                                       |
+| `useragent`           | str or null         | null         | Custom user-agent (auto-generated if null)                                       |
+| `cookies`             | list or null        | null         | Playwright-format cookies                                                        |
+| `timezone_id`         | str or null         | null         | Browser timezone, e.g. `"America/New_York"`                                      |
+| `locale`              | str or null         | null         | Browser locale, e.g. `"en-GB"`                                                   |
 | `session_id`          | str or null         | null         | Reuse a persistent session from `open_session` instead of creating a new browser |
 
 ### `bulk_fetch` -- Browser fetch (multiple URLs)
@@ -79,7 +79,7 @@ Anti-bot bypass fetcher with fingerprint spoofing. Use this for sites with Cloud
 **Additional parameters (beyond those in `fetch`):**
 
 | Parameter          | Type         | Default | Description                                                      |
-|--------------------|--------------|---------|------------------------------------------------------------------|
+| ------------------ | ------------ | ------- | ---------------------------------------------------------------- |
 | `solve_cloudflare` | bool         | false   | Automatically solve Cloudflare Turnstile/Interstitial challenges |
 | `hide_canvas`      | bool         | false   | Add noise to canvas operations to prevent fingerprinting         |
 | `block_webrtc`     | bool         | false   | Force WebRTC to respect proxy settings (prevents IP leak)        |
@@ -99,18 +99,18 @@ Opens a browser session that stays alive across multiple fetch calls, avoiding t
 
 **Key parameters:**
 
-| Parameter          | Type                        | Default      | Description                                                                                           |
-|--------------------|-----------------------------|--------------|-------------------------------------------------------------------------------------------------------|
-| `session_type`     | `"dynamic"` / `"stealthy"`  | required     | Type of browser session to create                                                                     |
-| `session_id`       | str or null                 | null         | Custom ID for the session. If omitted, a random 12-char hex ID is generated. Raises if already in use |
-| `headless`         | bool                        | true         | Run browser hidden or visible                                                                         |
-| `max_pages`        | int                         | 5            | Max concurrent browser tabs (1-50)                                                                    |
-| `proxy`            | str or dict or null         | null         | Proxy for all requests in this session                                                                |
-| `timeout`          | number                      | 30000        | Default timeout in ms                                                                                 |
-| `solve_cloudflare` | bool                        | false        | (Stealthy only) Auto-solve Cloudflare challenges                                                      |
-| `hide_canvas`      | bool                        | false        | (Stealthy only) Canvas fingerprint noise                                                              |
-| `block_webrtc`     | bool                        | false        | (Stealthy only) Block WebRTC IP leak                                                                  |
-| `allow_webgl`      | bool                        | true         | (Stealthy only) Keep WebGL enabled                                                                    |
+| Parameter          | Type                       | Default  | Description                                                                                           |
+| ------------------ | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `session_type`     | `"dynamic"` / `"stealthy"` | required | Type of browser session to create                                                                     |
+| `session_id`       | str or null                | null     | Custom ID for the session. If omitted, a random 12-char hex ID is generated. Raises if already in use |
+| `headless`         | bool                       | true     | Run browser hidden or visible                                                                         |
+| `max_pages`        | int                        | 5        | Max concurrent browser tabs (1-50)                                                                    |
+| `proxy`            | str or dict or null        | null     | Proxy for all requests in this session                                                                |
+| `timeout`          | number                     | 30000    | Default timeout in ms                                                                                 |
+| `solve_cloudflare` | bool                       | false    | (Stealthy only) Auto-solve Cloudflare challenges                                                      |
+| `hide_canvas`      | bool                       | false    | (Stealthy only) Canvas fingerprint noise                                                              |
+| `block_webrtc`     | bool                       | false    | (Stealthy only) Block WebRTC IP leak                                                                  |
+| `allow_webgl`      | bool                       | true     | (Stealthy only) Keep WebGL enabled                                                                    |
 
 Plus all other browser session parameters (`google_search`, `real_chrome`, `cdp_url`, `locale`, `timezone_id`, `useragent`, `extra_headers`, `cookies`, `disable_resources`, `network_idle`, `wait_selector`, `wait_selector_state`).
 
@@ -120,9 +120,9 @@ A dynamic session can only be used with `fetch`/`bulk_fetch`. A stealthy session
 
 Closes a session and frees its browser resources. Always close sessions when done.
 
-| Parameter    | Type | Default  | Description                      |
-|--------------|------|----------|----------------------------------|
-| `session_id` | str  | required | Session ID from `open_session`   |
+| Parameter    | Type | Default  | Description                    |
+| ------------ | ---- | -------- | ------------------------------ |
+| `session_id` | str  | required | Session ID from `open_session` |
 
 Returns a `SessionClosedModel` with `session_id` and `message`.
 
@@ -138,31 +138,31 @@ Navigates to a URL inside an existing browser session and returns the screenshot
 
 Requires an open browser session. Call `open_session` first, then pass the `session_id` here. Both `dynamic` and `stealthy` sessions are accepted.
 
-| Parameter             | Type                  | Default      | Description                                                                          |
-|-----------------------|-----------------------|--------------|--------------------------------------------------------------------------------------|
-| `url`                 | str                   | required     | URL to navigate to and capture                                                       |
-| `session_id`          | str                   | required     | ID of an open browser session created with `open_session`                            |
-| `image_type`          | `"png"` / `"jpeg"`    | `"png"`      | Image format. Use `"jpeg"` for smaller payloads                                      |
-| `full_page`           | bool                  | false        | Capture the full scrollable page instead of just the viewport                        |
-| `quality`             | int or null           | null         | JPEG quality 0-100. Raises if passed with `image_type="png"`                         |
-| `wait`                | number                | 0            | Extra wait (ms) after page load before capture                                       |
-| `wait_selector`       | str or null           | null         | CSS selector to wait for before capture                                              |
-| `wait_selector_state` | str                   | `"attached"` | State for `wait_selector`: `"attached"` / `"visible"` / `"hidden"` / `"detached"`    |
-| `network_idle`        | bool                  | false        | Wait until no network activity for 500ms                                             |
-| `timeout`             | number                | 30000        | Timeout in milliseconds                                                              |
+| Parameter             | Type               | Default      | Description                                                                       |
+| --------------------- | ------------------ | ------------ | --------------------------------------------------------------------------------- |
+| `url`                 | str                | required     | URL to navigate to and capture                                                    |
+| `session_id`          | str                | required     | ID of an open browser session created with `open_session`                         |
+| `image_type`          | `"png"` / `"jpeg"` | `"png"`      | Image format. Use `"jpeg"` for smaller payloads                                   |
+| `full_page`           | bool               | false        | Capture the full scrollable page instead of just the viewport                     |
+| `quality`             | int or null        | null         | JPEG quality 0-100. Raises if passed with `image_type="png"`                      |
+| `wait`                | number             | 0            | Extra wait (ms) after page load before capture                                    |
+| `wait_selector`       | str or null        | null         | CSS selector to wait for before capture                                           |
+| `wait_selector_state` | str                | `"attached"` | State for `wait_selector`: `"attached"` / `"visible"` / `"hidden"` / `"detached"` |
+| `network_idle`        | bool               | false        | Wait until no network activity for 500ms                                          |
+| `timeout`             | number             | 30000        | Timeout in milliseconds                                                           |
 
 ## Tool selection guide
 
 | Scenario                                 | Tool                                                          |
-|------------------------------------------|---------------------------------------------------------------|
+| ---------------------------------------- | ------------------------------------------------------------- |
 | Static page, no bot protection           | `get`                                                         |
 | Multiple static pages                    | `bulk_get`                                                    |
 | JavaScript-rendered / SPA page           | `fetch`                                                       |
 | Multiple JS-rendered pages               | `bulk_fetch`                                                  |
 | Cloudflare or strong anti-bot protection | `stealthy_fetch` (with `solve_cloudflare=true` for Turnstile) |
 | Multiple protected pages                 | `bulk_stealthy_fetch`                                         |
-| Multiple pages from the same site        | `open_session` + `fetch`/`stealthy_fetch` with `session_id`  |
-| Need a screenshot of a page              | `open_session` + `screenshot` with `session_id`              |
+| Multiple pages from the same site        | `open_session` + `fetch`/`stealthy_fetch` with `session_id`   |
+| Need a screenshot of a page              | `open_session` + `screenshot` with `session_id`               |
 
 Start with `get` (fastest, lowest resource cost). Escalate to `fetch` if content requires JS rendering. Escalate to `stealthy_fetch` only if blocked. For multiple pages from the same site, use a persistent session to avoid browser launch overhead.
 

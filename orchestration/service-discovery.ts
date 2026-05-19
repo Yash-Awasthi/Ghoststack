@@ -1,11 +1,11 @@
-import { IServiceDiscovery, ServiceHeartbeat, IHealthMonitor } from './interfaces/discovery.interface';
-import { IConfigLoader } from '../runtime/config-loader';
+import { IServiceDiscovery, ServiceHeartbeat, IHealthMonitor } from "./interfaces/discovery.interface";
+import { IConfigLoader } from "../runtime/config-loader";
 
 export class LocalServiceDiscovery implements IServiceDiscovery {
   private services = new Map<string, ServiceHeartbeat>();
 
   async registerService(name: string, port: number, details?: any): Promise<void> {
-    const status = details?.status || 'healthy';
+    const status = details?.status || "healthy";
     this.services.set(name, {
       name,
       status,
@@ -55,7 +55,7 @@ export class HealthMonitor implements IHealthMonitor {
 
   async checkService(name: string): Promise<boolean> {
     const service = await this.discovery.getService(name);
-    return service?.status === 'healthy';
+    return service?.status === "healthy";
   }
 
   private async pollChecks(): Promise<void> {

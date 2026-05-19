@@ -9,28 +9,28 @@ Floci emulates the AWS Glue Data Catalog and Glue Schema Registry, allowing you 
 
 ### Data Catalog
 
-| Area | Actions |
-|---|---|
-| Databases | `CreateDatabase` · `GetDatabase` · `GetDatabases` |
-| Tables | `CreateTable` · `GetTable` · `GetTables` · `DeleteTable` |
-| Partitions | `CreatePartition` · `GetPartitions` |
+| Area       | Actions                                                  |
+| ---------- | -------------------------------------------------------- |
+| Databases  | `CreateDatabase` · `GetDatabase` · `GetDatabases`        |
+| Tables     | `CreateTable` · `GetTable` · `GetTables` · `DeleteTable` |
+| Partitions | `CreatePartition` · `GetPartitions`                      |
 
 ### Schema Registry
 
-| Area | Actions |
-|---|---|
-| Registries | `CreateRegistry` · `GetRegistry` · `ListRegistries` · `UpdateRegistry` · `DeleteRegistry` |
-| Schemas | `CreateSchema` · `GetSchema` · `ListSchemas` · `UpdateSchema` · `DeleteSchema` |
-| Versions | `RegisterSchemaVersion` · `GetSchemaByDefinition` · `GetSchemaVersion` · `ListSchemaVersions` · `DeleteSchemaVersions` · `GetSchemaVersionsDiff` · `CheckSchemaVersionValidity` |
-| Metadata and tags | `PutSchemaVersionMetadata` · `RemoveSchemaVersionMetadata` · `QuerySchemaVersionMetadata` · `TagResource` · `UntagResource` · `GetTags` |
+| Area              | Actions                                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Registries        | `CreateRegistry` · `GetRegistry` · `ListRegistries` · `UpdateRegistry` · `DeleteRegistry`                                                                                       |
+| Schemas           | `CreateSchema` · `GetSchema` · `ListSchemas` · `UpdateSchema` · `DeleteSchema`                                                                                                  |
+| Versions          | `RegisterSchemaVersion` · `GetSchemaByDefinition` · `GetSchemaVersion` · `ListSchemaVersions` · `DeleteSchemaVersions` · `GetSchemaVersionsDiff` · `CheckSchemaVersionValidity` |
+| Metadata and tags | `PutSchemaVersionMetadata` · `RemoveSchemaVersionMetadata` · `QuerySchemaVersionMetadata` · `TagResource` · `UntagResource` · `GetTags`                                         |
 
 Supported schema formats are `AVRO`, `JSON`, and `PROTOBUF`. Compatibility modes are `NONE`, `DISABLED`, `BACKWARD`, `BACKWARD_ALL`, `FORWARD`, `FORWARD_ALL`, `FULL`, and `FULL_ALL`.
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_GLUE_ENABLED` | `true` | Enable or disable the service |
+| Variable                      | Default | Description                   |
+| ----------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_GLUE_ENABLED` | `true`  | Enable or disable the service |
 
 ## Integration with Athena
 
@@ -40,12 +40,12 @@ Tables can reference a Schema Registry schema version through `StorageDescriptor
 
 The DuckDB read function is selected based on the table's `StorageDescriptor.InputFormat` and `StorageDescriptor.SerdeInfo.SerializationLibrary`:
 
-| Condition | DuckDB function |
-|---|---|
-| `InputFormat` or `SerializationLibrary` contains `parquet` | `read_parquet` |
-| `InputFormat` or `SerializationLibrary` contains `json` | `read_json_auto` |
-| `InputFormat` contains `hive` | `read_json_auto` |
-| Anything else | `read_csv_auto` |
+| Condition                                                  | DuckDB function  |
+| ---------------------------------------------------------- | ---------------- |
+| `InputFormat` or `SerializationLibrary` contains `parquet` | `read_parquet`   |
+| `InputFormat` or `SerializationLibrary` contains `json`    | `read_json_auto` |
+| `InputFormat` contains `hive`                              | `read_json_auto` |
+| Anything else                                              | `read_csv_auto`  |
 
 ## Data Catalog Example
 

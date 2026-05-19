@@ -58,9 +58,9 @@ Verify your manifest is valid:
 schema_version: "1.0"
 
 extension:
-  id: "your-extension"           # Unique lowercase-hyphenated ID
-  name: "Your Extension Name"     # Human-readable name
-  version: "1.0.0"                # Semantic version
+  id: "your-extension" # Unique lowercase-hyphenated ID
+  name: "Your Extension Name" # Human-readable name
+  version: "1.0.0" # Semantic version
   description: "Brief description (one sentence)"
   author: "Your Name or Organization"
   repository: "https://github.com/your-org/spec-kit-your-extension"
@@ -68,15 +68,15 @@ extension:
   homepage: "https://github.com/your-org/spec-kit-your-extension"
 
 requires:
-  speckit_version: ">=0.1.0"    # Required spec-kit version
+  speckit_version: ">=0.1.0" # Required spec-kit version
 
 provides:
-  commands:                       # List all commands
+  commands: # List all commands
     - name: "speckit.your-extension.command"
       file: "commands/command.md"
       description: "Command description"
 
-tags:                             # 2-5 relevant tags
+tags: # 2-5 relevant tags
   - "category"
   - "tool-name"
 ```
@@ -185,7 +185,7 @@ When releasing a new version:
 
    ```yaml
    extension:
-     version: "1.1.0"  # Updated version
+     version: "1.1.0" # Updated version
    ```
 
 2. **Update CHANGELOG.md**:
@@ -194,9 +194,11 @@ When releasing a new version:
    ## [1.1.0] - 2026-02-15
 
    ### Added
+
    - New feature X
 
    ### Fixed
+
    - Bug fix Y
    ```
 
@@ -361,5 +363,5 @@ Use 2-5 tags that best describe your extension.
 
 ---
 
-*Last Updated: 2026-01-28*
-*Catalog Format Version: 1.0*
+_Last Updated: 2026-01-28_
+_Catalog Format Version: 1.0_

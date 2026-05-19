@@ -30,8 +30,10 @@ module.exports = {
     'no-restricted-syntax': [
       'error',
       {
-        selector: "MemberExpression[object.object.name='process'][object.property.name='env'][property.name='CODEBUFF_API_KEY']",
-        message: 'process.env.CODEBUFF_API_KEY is not allowed in web package. Users must provide their own API key via Authorization header.',
+        selector:
+          "MemberExpression[object.object.name='process'][object.property.name='env'][property.name='CODEBUFF_API_KEY']",
+        message:
+          'process.env.CODEBUFF_API_KEY is not allowed in web package. Users must provide their own API key via Authorization header.',
       },
     ],
   },

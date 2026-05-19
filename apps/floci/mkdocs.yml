@@ -56,67 +56,67 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started:
-    - Quick Start: getting-started/quick-start.md
-    - Installation: getting-started/installation.md
-    - AWS CLI & SDK Setup: getting-started/aws-setup.md
-    - Migrate from LocalStack: getting-started/migrate-from-localstack.md
+      - Quick Start: getting-started/quick-start.md
+      - Installation: getting-started/installation.md
+      - AWS CLI & SDK Setup: getting-started/aws-setup.md
+      - Migrate from LocalStack: getting-started/migrate-from-localstack.md
   - Configuration:
-    - Environment Variables: configuration/environment-variables.md
-    - Docker Images: configuration/docker-images.md
-    - Docker Compose: configuration/docker-compose.md
-    - Ports Reference: configuration/ports.md
-    - Multi-Account Isolation: configuration/multi-account.md
-    - Storage Modes: configuration/storage.md
-    - TLS / HTTPS: configuration/tls.md
-    - Initialization Hooks: configuration/initialization-hooks.md
-    - Advanced:
-      - application.yml Reference: configuration/advanced/application-yml.md
+      - Environment Variables: configuration/environment-variables.md
+      - Docker Images: configuration/docker-images.md
+      - Docker Compose: configuration/docker-compose.md
+      - Ports Reference: configuration/ports.md
+      - Multi-Account Isolation: configuration/multi-account.md
+      - Storage Modes: configuration/storage.md
+      - TLS / HTTPS: configuration/tls.md
+      - Initialization Hooks: configuration/initialization-hooks.md
+      - Advanced:
+          - application.yml Reference: configuration/advanced/application-yml.md
   - Services:
-    - Overview: services/index.md
-    - SSM Parameter Store: services/ssm.md
-    - SQS: services/sqs.md
-    - SNS: services/sns.md
-    - SES: services/ses.md
-    - S3: services/s3.md
-    - DynamoDB: services/dynamodb.md
-    - Lambda: services/lambda.md
-    - API Gateway: services/api-gateway.md
-    - Cognito: services/cognito.md
-    - KMS: services/kms.md
-    - Kinesis: services/kinesis.md
-    - Secrets Manager: services/secrets-manager.md
-    - CloudFormation: services/cloudformation.md
-    - Step Functions: services/step-functions.md
-    - IAM: services/iam.md
-    - STS: services/sts.md
-    - ElastiCache: services/elasticache.md
-    - RDS: services/rds.md
-    - MSK (Kafka): services/msk.md
-    - Glue: services/glue.md
-    - Athena: services/athena.md
-    - Data Firehose: services/firehose.md
-    - EventBridge: services/eventbridge.md
-    - EventBridge Scheduler: services/scheduler.md
-    - CloudWatch: services/cloudwatch.md
-    - ACM: services/acm.md
-    - ECS: services/ecs.md
-    - ECR: services/ecr.md
-    - EKS: services/eks.md
-    - OpenSearch: services/opensearch.md
-    - EC2: services/ec2.md
-    - AppConfig: services/appconfig.md
-    - Bedrock Runtime: services/bedrock-runtime.md
-    - ELB v2: services/elb.md
-    - Auto Scaling: services/autoscaling.md
-    - CodeBuild: services/codebuild.md
-    - CodeDeploy: services/codedeploy.md
-    - AWS Backup: services/backup.md
-    - Route53: services/route53.md
-    - Transfer Family: services/transfer.md
+      - Overview: services/index.md
+      - SSM Parameter Store: services/ssm.md
+      - SQS: services/sqs.md
+      - SNS: services/sns.md
+      - SES: services/ses.md
+      - S3: services/s3.md
+      - DynamoDB: services/dynamodb.md
+      - Lambda: services/lambda.md
+      - API Gateway: services/api-gateway.md
+      - Cognito: services/cognito.md
+      - KMS: services/kms.md
+      - Kinesis: services/kinesis.md
+      - Secrets Manager: services/secrets-manager.md
+      - CloudFormation: services/cloudformation.md
+      - Step Functions: services/step-functions.md
+      - IAM: services/iam.md
+      - STS: services/sts.md
+      - ElastiCache: services/elasticache.md
+      - RDS: services/rds.md
+      - MSK (Kafka): services/msk.md
+      - Glue: services/glue.md
+      - Athena: services/athena.md
+      - Data Firehose: services/firehose.md
+      - EventBridge: services/eventbridge.md
+      - EventBridge Scheduler: services/scheduler.md
+      - CloudWatch: services/cloudwatch.md
+      - ACM: services/acm.md
+      - ECS: services/ecs.md
+      - ECR: services/ecr.md
+      - EKS: services/eks.md
+      - OpenSearch: services/opensearch.md
+      - EC2: services/ec2.md
+      - AppConfig: services/appconfig.md
+      - Bedrock Runtime: services/bedrock-runtime.md
+      - ELB v2: services/elb.md
+      - Auto Scaling: services/autoscaling.md
+      - CodeBuild: services/codebuild.md
+      - CodeDeploy: services/codedeploy.md
+      - AWS Backup: services/backup.md
+      - Route53: services/route53.md
+      - Transfer Family: services/transfer.md
   - Testcontainers:
-    - Overview: testcontainers/index.md
-    - Java: testcontainers/java.md
-    - Node.js / TypeScript: testcontainers/nodejs.md
-    - Python: testcontainers/python.md
-    - Go: testcontainers/go.md
+      - Overview: testcontainers/index.md
+      - Java: testcontainers/java.md
+      - Node.js / TypeScript: testcontainers/nodejs.md
+      - Python: testcontainers/python.md
+      - Go: testcontainers/go.md
   - Contributing: contributing.md

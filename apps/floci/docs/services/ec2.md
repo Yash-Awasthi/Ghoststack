@@ -6,13 +6,13 @@
 
 `RunInstances` launches a **real Docker container** for each instance. The container is kept alive with `tail -f /dev/null` so any base image works regardless of its default CMD. The lifecycle maps directly to Docker:
 
-| EC2 state | Docker operation |
-|---|---|
-| `pending → running` | Container created and started |
-| `running → stopping → stopped` | `docker stop` (30 s timeout, then SIGKILL) |
-| `stopped → pending → running` | `docker start` |
-| `running → shutting-down → terminated` | `docker rm -f` |
-| Reboot | `docker restart` |
+| EC2 state                              | Docker operation                           |
+| -------------------------------------- | ------------------------------------------ |
+| `pending → running`                    | Container created and started              |
+| `running → stopping → stopped`         | `docker stop` (30 s timeout, then SIGKILL) |
+| `stopped → pending → running`          | `docker start`                             |
+| `running → shutting-down → terminated` | `docker rm -f`                             |
+| Reboot                                 | `docker restart`                           |
 
 Terminated instances remain queryable for 1 hour (matching real EC2 tombstone behavior) before being pruned.
 
@@ -20,14 +20,14 @@ Terminated instances remain queryable for 1 hour (matching real EC2 tombstone be
 
 Floci resolves AMI IDs to Docker images. Built-in mappings:
 
-| AMI ID | Docker image |
-|---|---|
+| AMI ID                | Docker image                                  |
+| --------------------- | --------------------------------------------- |
 | `ami-amazonlinux2023` | `public.ecr.aws/amazonlinux/amazonlinux:2023` |
-| `ami-amazonlinux2` | `public.ecr.aws/amazonlinux/amazonlinux:2` |
-| `ami-ubuntu2204` | `public.ecr.aws/docker/library/ubuntu:22.04` |
-| `ami-ubuntu2004` | `public.ecr.aws/docker/library/ubuntu:20.04` |
-| `ami-debian12` | `public.ecr.aws/docker/library/debian:12` |
-| `ami-alpine` | `public.ecr.aws/docker/library/alpine:latest` |
+| `ami-amazonlinux2`    | `public.ecr.aws/amazonlinux/amazonlinux:2`    |
+| `ami-ubuntu2204`      | `public.ecr.aws/docker/library/ubuntu:22.04`  |
+| `ami-ubuntu2004`      | `public.ecr.aws/docker/library/ubuntu:20.04`  |
+| `ami-debian12`        | `public.ecr.aws/docker/library/debian:12`     |
+| `ami-alpine`          | `public.ecr.aws/docker/library/alpine:latest` |
 
 Any unrecognized AMI ID (including real AWS AMI IDs like `ami-0abc12345678`) falls back to `public.ecr.aws/amazonlinux/amazonlinux:2023`.
 
@@ -59,25 +59,25 @@ curl -s -H "x-aws-ec2-metadata-token: $TOKEN" \
 
 ### Supported IMDS endpoints
 
-| Endpoint | Returns |
-|---|---|
-| `GET /latest/meta-data/instance-id` | Instance ID |
-| `GET /latest/meta-data/ami-id` | Image ID |
-| `GET /latest/meta-data/instance-type` | Instance type |
-| `GET /latest/meta-data/local-ipv4` | Private IP |
-| `GET /latest/meta-data/public-ipv4` | Public IP (`127.0.0.1`) |
-| `GET /latest/meta-data/public-hostname` | Public hostname |
-| `GET /latest/meta-data/local-hostname` | Private DNS name |
-| `GET /latest/meta-data/hostname` | Private DNS name |
-| `GET /latest/meta-data/mac` | MAC address of first ENI |
-| `GET /latest/meta-data/security-groups` | Security group names |
-| `GET /latest/meta-data/placement/availability-zone` | AZ |
-| `GET /latest/meta-data/placement/region` | Region |
-| `GET /latest/meta-data/iam/info` | IAM instance profile info |
-| `GET /latest/meta-data/iam/security-credentials/` | Role name list |
-| `GET /latest/meta-data/iam/security-credentials/{role}` | Temporary credentials |
-| `GET /latest/user-data` | UserData script |
-| `GET /latest/dynamic/instance-identity/document` | Identity document JSON |
+| Endpoint                                                | Returns                   |
+| ------------------------------------------------------- | ------------------------- |
+| `GET /latest/meta-data/instance-id`                     | Instance ID               |
+| `GET /latest/meta-data/ami-id`                          | Image ID                  |
+| `GET /latest/meta-data/instance-type`                   | Instance type             |
+| `GET /latest/meta-data/local-ipv4`                      | Private IP                |
+| `GET /latest/meta-data/public-ipv4`                     | Public IP (`127.0.0.1`)   |
+| `GET /latest/meta-data/public-hostname`                 | Public hostname           |
+| `GET /latest/meta-data/local-hostname`                  | Private DNS name          |
+| `GET /latest/meta-data/hostname`                        | Private DNS name          |
+| `GET /latest/meta-data/mac`                             | MAC address of first ENI  |
+| `GET /latest/meta-data/security-groups`                 | Security group names      |
+| `GET /latest/meta-data/placement/availability-zone`     | AZ                        |
+| `GET /latest/meta-data/placement/region`                | Region                    |
+| `GET /latest/meta-data/iam/info`                        | IAM instance profile info |
+| `GET /latest/meta-data/iam/security-credentials/`       | Role name list            |
+| `GET /latest/meta-data/iam/security-credentials/{role}` | Temporary credentials     |
+| `GET /latest/user-data`                                 | UserData script           |
+| `GET /latest/dynamic/instance-identity/document`        | Identity document JSON    |
 
 IAM credentials are served when the instance has an `IamInstanceProfile.Arn` set at launch. The container can then call other Floci services with full SigV4 validation using the standard AWS SDK credential chain.
 
@@ -85,65 +85,78 @@ IAM credentials are served when the instance has an `IamInstanceProfile.Arn` set
 
 Floci seeds the following resources on first use in each region so Terraform, the AWS CLI, and SDK clients work out of the box without any setup:
 
-| Resource | ID | Details |
-|---|---|---|
-| Default VPC | `vpc-default` | CIDR `172.31.0.0/16` |
-| Default Subnet (AZ a) | `subnet-default-a` | CIDR `172.31.0.0/20` |
-| Default Subnet (AZ b) | `subnet-default-b` | CIDR `172.31.16.0/20` |
-| Default Subnet (AZ c) | `subnet-default-c` | CIDR `172.31.32.0/20` |
-| Default Security Group | `sg-default` | `groupName=default`, all-traffic egress |
-| Default Internet Gateway | `igw-default` | Attached to default VPC |
-| Main Route Table | `rtb-default` | Associated with default VPC |
+| Resource                 | ID                 | Details                                 |
+| ------------------------ | ------------------ | --------------------------------------- |
+| Default VPC              | `vpc-default`      | CIDR `172.31.0.0/16`                    |
+| Default Subnet (AZ a)    | `subnet-default-a` | CIDR `172.31.0.0/20`                    |
+| Default Subnet (AZ b)    | `subnet-default-b` | CIDR `172.31.16.0/20`                   |
+| Default Subnet (AZ c)    | `subnet-default-c` | CIDR `172.31.32.0/20`                   |
+| Default Security Group   | `sg-default`       | `groupName=default`, all-traffic egress |
+| Default Internet Gateway | `igw-default`      | Attached to default VPC                 |
+| Main Route Table         | `rtb-default`      | Associated with default VPC             |
 
 ## Supported Actions
 
 ### Instances
+
 `RunInstances` · `DescribeInstances` · `TerminateInstances` · `StartInstances` · `StopInstances` · `RebootInstances` · `DescribeInstanceStatus` · `DescribeInstanceAttribute` · `ModifyInstanceAttribute`
 
 ### VPCs
+
 `CreateVpc` · `DescribeVpcs` · `DeleteVpc` · `ModifyVpcAttribute` · `DescribeVpcAttribute` · `CreateDefaultVpc` · `AssociateVpcCidrBlock` · `DisassociateVpcCidrBlock`
 
 ### Subnets
+
 `CreateSubnet` · `DescribeSubnets` · `DeleteSubnet` · `ModifySubnetAttribute`
 
 ### Security Groups
+
 `CreateSecurityGroup` · `DescribeSecurityGroups` · `DeleteSecurityGroup` · `AuthorizeSecurityGroupIngress` · `AuthorizeSecurityGroupEgress` · `RevokeSecurityGroupIngress` · `RevokeSecurityGroupEgress` · `DescribeSecurityGroupRules` · `ModifySecurityGroupRules` · `UpdateSecurityGroupRuleDescriptionsIngress` · `UpdateSecurityGroupRuleDescriptionsEgress`
 
 ### Key Pairs
+
 `CreateKeyPair` · `DescribeKeyPairs` · `DeleteKeyPair` · `ImportKeyPair`
 
 ### AMIs
+
 `DescribeImages`
 
 ### Tags
+
 `CreateTags` · `DeleteTags` · `DescribeTags`
 
 ### Internet Gateways
+
 `CreateInternetGateway` · `DescribeInternetGateways` · `DeleteInternetGateway` · `AttachInternetGateway` · `DetachInternetGateway`
 
 ### Route Tables
+
 `CreateRouteTable` · `DescribeRouteTables` · `DeleteRouteTable` · `AssociateRouteTable` · `DisassociateRouteTable` · `CreateRoute` · `DeleteRoute`
 
 ### Elastic IPs
+
 `AllocateAddress` · `DescribeAddresses` · `AssociateAddress` · `DisassociateAddress` · `ReleaseAddress`
 
 ### Availability Zones & Regions
+
 `DescribeAvailabilityZones` · `DescribeRegions` · `DescribeAccountAttributes`
 
 ### Instance Types
+
 `DescribeInstanceTypes`
 
 ### Volumes
+
 `CreateVolume` · `DescribeVolumes` · `DeleteVolume`
 
 ## Configuration
 
-| Environment variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_EC2_IMDS_PORT` | `9169` | Host port for the IMDS server |
-| `FLOCI_SERVICES_EC2_SSH_PORT_RANGE_START` | `2200` | Start of SSH host port range |
-| `FLOCI_SERVICES_EC2_SSH_PORT_RANGE_END` | `2299` | End of SSH host port range |
-| `FLOCI_SERVICES_EC2_MOCK` | `false` | Skip Docker; instances jump directly to final state (useful for tests) |
+| Environment variable                      | Default | Description                                                            |
+| ----------------------------------------- | ------- | ---------------------------------------------------------------------- |
+| `FLOCI_SERVICES_EC2_IMDS_PORT`            | `9169`  | Host port for the IMDS server                                          |
+| `FLOCI_SERVICES_EC2_SSH_PORT_RANGE_START` | `2200`  | Start of SSH host port range                                           |
+| `FLOCI_SERVICES_EC2_SSH_PORT_RANGE_END`   | `2299`  | End of SSH host port range                                             |
+| `FLOCI_SERVICES_EC2_MOCK`                 | `false` | Skip Docker; instances jump directly to final state (useful for tests) |
 
 ## Requirements
 
@@ -155,7 +168,7 @@ services:
     image: floci/floci:latest
     ports:
       - "4566:4566"
-      - "9169:9169"   # IMDS — expose if containers need to reach it externally
+      - "9169:9169" # IMDS — expose if containers need to reach it externally
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 ```

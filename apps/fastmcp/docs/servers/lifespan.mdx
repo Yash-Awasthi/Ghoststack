@@ -6,7 +6,7 @@ icon: heart-pulse
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -35,9 +35,7 @@ mcp = FastMCP("MyServer", lifespan=app_lifespan)
 
 The dict you yield becomes the **lifespan context**, accessible from tools.
 
-<Note>
-Always use `try/finally` for cleanup code to ensure it runs even if the server is cancelled.
-</Note>
+<Note>Always use `try/finally` for cleanup code to ensure it runs even if the server is cancelled.</Note>
 
 ## Accessing Lifespan Context
 
@@ -84,6 +82,7 @@ mcp = FastMCP("MyServer", lifespan=config_lifespan | data_lifespan)
 ```
 
 Composed lifespans:
+
 - Enter in order (left to right)
 - Exit in reverse order (right to left)
 - Merge their context dicts (later values overwrite earlier on conflict)

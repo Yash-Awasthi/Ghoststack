@@ -5,7 +5,7 @@ description: Update clients on the progress of long-running operations through t
 icon: chart-line
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 Progress reporting allows MCP tools to notify clients about the progress of long-running operations. Clients can display progress indicators and provide better user experience during time-consuming tasks.
 
@@ -36,11 +36,11 @@ async def process_items(items: list[str], ctx: Context) -> dict:
 
 ## Progress Patterns
 
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| Percentage | Progress as 0-100 percentage | `progress=75, total=100` |
-| Absolute | Completed items of a known count | `progress=3, total=10` |
-| Indeterminate | Progress without known endpoint | `progress=files_found` (no total) |
+| Pattern       | Description                      | Example                           |
+| ------------- | -------------------------------- | --------------------------------- |
+| Percentage    | Progress as 0-100 percentage     | `progress=75, total=100`          |
+| Absolute      | Completed items of a known count | `progress=3, total=10`            |
+| Indeterminate | Progress without known endpoint  | `progress=files_found` (no total) |
 
 For multi-stage operations, map each stage to a portion of the total progress range. A four-stage operation might allocate 0-25% to validation, 25-60% to export, 60-80% to transform, and 80-100% to import.
 

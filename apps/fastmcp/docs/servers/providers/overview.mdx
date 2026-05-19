@@ -6,7 +6,7 @@ icon: layer-group
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -34,11 +34,11 @@ The provider abstraction solves a common problem: as servers grow, you need to o
 
 FastMCP includes providers for common patterns:
 
-| Provider | What it does | How you use it |
-|----------|--------------|----------------|
-| `LocalProvider` | Stores components you define in code | `@mcp.tool`, `mcp.add_tool()` |
-| `FastMCPProvider` | Wraps another FastMCP server | `mcp.mount(server)` |
-| `ProxyProvider` | Connects to remote MCP servers | `create_proxy(client)` |
+| Provider          | What it does                         | How you use it                |
+| ----------------- | ------------------------------------ | ----------------------------- |
+| `LocalProvider`   | Stores components you define in code | `@mcp.tool`, `mcp.add_tool()` |
+| `FastMCPProvider` | Wraps another FastMCP server         | `mcp.mount(server)`           |
+| `ProxyProvider`   | Connects to remote MCP servers       | `create_proxy(client)`        |
 
 Most users only interact with `LocalProvider` (through decorators) and occasionally mount or proxy other servers. The provider abstraction stays invisible until you need it.
 
@@ -46,9 +46,9 @@ Most users only interact with `LocalProvider` (through decorators) and occasiona
 
 [Transforms](/servers/transforms/transforms) modify components as they flow from providers to clients. Each transform sits in a chain, intercepting queries and modifying results before passing them along.
 
-| Transform | Purpose |
-|-----------|---------|
-| `Namespace` | Prefixes names to avoid conflicts |
+| Transform       | Purpose                                                |
+| --------------- | ------------------------------------------------------ |
+| `Namespace`     | Prefixes names to avoid conflicts                      |
 | `ToolTransform` | Modifies tool schemas (rename, description, arguments) |
 
 The most common use is namespacing mounted servers to prevent name collisions. When you call `mount(server, namespace="api")`, FastMCP creates a `Namespace` transform automatically.
@@ -66,6 +66,7 @@ When a client requests a tool, FastMCP queries providers in registration order. 
 **You can ignore providers entirely** if you're building a simple server with decorators. Just use `@mcp.tool`, `@mcp.resource`, and `@mcp.prompt` - FastMCP handles the rest.
 
 **Learn about providers when** you want to:
+
 - [Mount another server](/servers/composition) into yours
 - [Proxy a remote server](/servers/providers/proxy) through yours
 - [Control visibility state](/servers/visibility) of components

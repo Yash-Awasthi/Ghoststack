@@ -46,7 +46,7 @@ async def test_list_tools(main_mcp_client: Client[FastMCPTransport]):
     assert len(list_tools) == 5
 ```
 
-We recommend the [inline-snapshot library](https://github.com/15r10nk/inline-snapshot) for asserting complex data structures coming from your MCP Server. This library allows you to write tests that are easy to read and understand, and are also easy to update when the data structure changes. 
+We recommend the [inline-snapshot library](https://github.com/15r10nk/inline-snapshot) for asserting complex data structures coming from your MCP Server. This library allows you to write tests that are easy to read and understand, and are also easy to update when the data structure changes.
 
 ```python
 from inline_snapshot import snapshot
@@ -60,7 +60,8 @@ async def test_list_tools(main_mcp_client: Client[FastMCPTransport]):
 Simply run `pytest --inline-snapshot=fix,create` to fill in the `snapshot()` with actual data.
 
 <Tip>
-For values that change you can leverage the [dirty-equals](https://github.com/samuelcolvin/dirty-equals) library to perform flexible equality assertions on dynamic or non-deterministic values.
+  For values that change you can leverage the [dirty-equals](https://github.com/samuelcolvin/dirty-equals) library to
+  perform flexible equality assertions on dynamic or non-deterministic values.
 </Tip>
 
 Using the pytest `parametrize` decorator, you can easily test your tools with a wide variety of inputs.
@@ -100,5 +101,7 @@ async def test_add(
 ```
 
 <Tip>
-The [FastMCP Repository contains thousands of tests](https://github.com/PrefectHQ/fastmcp/tree/main/tests) for the FastMCP Client and Server. Everything from connecting to remote MCP servers, to testing tools, resources, and prompts is covered, take a look for inspiration!
+  The [FastMCP Repository contains thousands of tests](https://github.com/PrefectHQ/fastmcp/tree/main/tests) for the
+  FastMCP Client and Server. Everything from connecting to remote MCP servers, to testing tools, resources, and prompts
+  is covered, take a look for inspiration!
 </Tip>

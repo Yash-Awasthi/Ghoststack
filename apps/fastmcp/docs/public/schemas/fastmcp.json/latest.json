@@ -6,12 +6,7 @@
         "transport": {
           "anyOf": [
             {
-              "enum": [
-                "stdio",
-                "http",
-                "sse",
-                "streamable-http"
-              ],
+              "enum": ["stdio", "http", "sse", "streamable-http"],
               "type": "string"
             },
             {
@@ -33,11 +28,7 @@
           ],
           "default": null,
           "description": "Host to bind to when using HTTP transport",
-          "examples": [
-            "127.0.0.1",
-            "0.0.0.0",
-            "localhost"
-          ],
+          "examples": ["127.0.0.1", "0.0.0.0", "localhost"],
           "title": "Host"
         },
         "port": {
@@ -51,11 +42,7 @@
           ],
           "default": null,
           "description": "Port to bind to when using HTTP transport",
-          "examples": [
-            8000,
-            3000,
-            5000
-          ],
+          "examples": [8000, 3000, 5000],
           "title": "Port"
         },
         "path": {
@@ -69,23 +56,13 @@
           ],
           "default": null,
           "description": "URL path for the server endpoint",
-          "examples": [
-            "/mcp/",
-            "/api/mcp/",
-            "/sse/"
-          ],
+          "examples": ["/mcp/", "/api/mcp/", "/sse/"],
           "title": "Path"
         },
         "log_level": {
           "anyOf": [
             {
-              "enum": [
-                "DEBUG",
-                "INFO",
-                "WARNING",
-                "ERROR",
-                "CRITICAL"
-              ],
+              "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
               "type": "string"
             },
             {
@@ -107,11 +84,7 @@
           ],
           "default": null,
           "description": "Working directory for the server process",
-          "examples": [
-            ".",
-            "./src",
-            "/app"
-          ],
+          "examples": [".", "./src", "/app"],
           "title": "Cwd"
         },
         "env": {
@@ -150,13 +123,7 @@
           ],
           "default": null,
           "description": "Arguments to pass to the server (after --)",
-          "examples": [
-            [
-              "--config",
-              "config.json",
-              "--debug"
-            ]
-          ],
+          "examples": [["--config", "config.json", "--debug"]],
           "title": "Args"
         }
       },
@@ -191,9 +158,7 @@
           "title": "Entrypoint"
         }
       },
-      "required": [
-        "path"
-      ],
+      "required": ["path"],
       "title": "FileSystemSource",
       "type": "object"
     },
@@ -217,11 +182,7 @@
           ],
           "default": null,
           "description": "Python version constraint",
-          "examples": [
-            "3.10",
-            "3.11",
-            "3.12"
-          ],
+          "examples": ["3.10", "3.11", "3.12"],
           "title": "Python"
         },
         "dependencies": {
@@ -238,13 +199,7 @@
           ],
           "default": null,
           "description": "Python packages to install with PEP 508 specifiers",
-          "examples": [
-            [
-              "fastmcp>=2.0,<3",
-              "httpx",
-              "pandas>=2.0"
-            ]
-          ],
+          "examples": [["fastmcp>=2.0,<3", "httpx", "pandas>=2.0"]],
           "title": "Dependencies"
         },
         "requirements": {
@@ -259,10 +214,7 @@
           ],
           "default": null,
           "description": "Path to requirements.txt file",
-          "examples": [
-            "requirements.txt",
-            "../requirements/prod.txt"
-          ],
+          "examples": ["requirements.txt", "../requirements/prod.txt"],
           "title": "Requirements"
         },
         "project": {
@@ -277,10 +229,7 @@
           ],
           "default": null,
           "description": "Path to project directory containing pyproject.toml",
-          "examples": [
-            ".",
-            "../my-project"
-          ],
+          "examples": [".", "../my-project"],
           "title": "Project"
         },
         "editable": {
@@ -298,15 +247,7 @@
           ],
           "default": null,
           "description": "Directories to install in editable mode",
-          "examples": [
-            [
-              ".",
-              "../my-package"
-            ],
-            [
-              "/path/to/package"
-            ]
-          ],
+          "examples": [[".", "../my-package"], ["/path/to/package"]],
           "title": "Editable"
         }
       },
@@ -356,9 +297,7 @@
       "description": "Server deployment and runtime settings"
     }
   },
-  "required": [
-    "source"
-  ],
+  "required": ["source"],
   "title": "FastMCP Configuration",
   "type": "object",
   "$id": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json"

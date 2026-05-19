@@ -151,16 +151,19 @@ describe('extractUsageAndCost', () => {
       { cost: 0.0534, expected: 0.0534 },
       { cost: 0.0584, expected: 0.0584 },
       { cost: 0.1171, expected: 0.1171 },
-    ])('bills $expected (not 2x) when cost === upstream === $cost', ({ cost, expected }) => {
-      const usage = {
-        prompt_tokens: 100000,
-        completion_tokens: 500,
-        prompt_tokens_details: { cached_tokens: 95000 },
-        cost,
-        cost_details: { upstream_inference_cost: cost },
-      }
-      const result = extractUsageAndCost(usage)
-      expect(result.cost).toBeCloseTo(expected, 6)
-    })
+    ])(
+      'bills $expected (not 2x) when cost === upstream === $cost',
+      ({ cost, expected }) => {
+        const usage = {
+          prompt_tokens: 100000,
+          completion_tokens: 500,
+          prompt_tokens_details: { cached_tokens: 95000 },
+          cost,
+          cost_details: { upstream_inference_cost: cost },
+        }
+        const result = extractUsageAndCost(usage)
+        expect(result.cost).toBeCloseTo(expected, 6)
+      },
+    )
   })
 })

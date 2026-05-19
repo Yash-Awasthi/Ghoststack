@@ -6,7 +6,7 @@ icon: discord
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.13.2" />
 
@@ -17,6 +17,7 @@ This guide shows you how to secure your FastMCP server using **Discord OAuth**. 
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. A **[Discord Account](https://discord.com/)** with access to create applications
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 
@@ -29,6 +30,7 @@ Create an application in the Discord Developer Portal to get the credentials nee
     Go to the [Discord Developer Portal](https://discord.com/developers/applications).
 
     Click **"New Application"** and give it a name users will recognize (e.g., "My FastMCP Server").
+
 </Step>
 
 <Step title="Configure OAuth2 Settings">
@@ -41,6 +43,7 @@ Create an application in the Discord Developer Portal to get the credentials nee
     <Warning>
     The redirect URL must match exactly. The default path is `/auth/callback`, but you can customize it using the `redirect_path` parameter. Discord allows `http://localhost` URLs for development. For production, use HTTPS.
     </Warning>
+
 </Step>
 
 <Step title="Save Your Credentials">
@@ -52,6 +55,7 @@ Create an application in the Discord Developer Portal to get the credentials nee
     <Tip>
     Store these credentials securely. Never commit them to version control. Use environment variables or a secrets manager in production.
     </Tip>
+
 </Step>
 </Steps>
 
@@ -116,25 +120,27 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to Discord's authorization page
 2. Sign in with your Discord account and authorize the app
 3. After authorization, you'll be redirected back
 4. The client receives the token and can make authenticated requests
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>
 
 ## Discord Scopes
 
 Discord OAuth supports several scopes for accessing different types of user data:
 
-| Scope | Description |
-|-------|-------------|
-| `identify` | Access username, avatar, and discriminator (default) |
-| `email` | Access the user's email address |
-| `guilds` | Access the user's list of servers |
-| `guilds.join` | Ability to add the user to a server |
+| Scope         | Description                                          |
+| ------------- | ---------------------------------------------------- |
+| `identify`    | Access username, avatar, and discriminator (default) |
+| `email`       | Access the user's email address                      |
+| `guilds`      | Access the user's list of servers                    |
+| `guilds.join` | Ability to add the user to a server                  |
 
 To request additional scopes:
 
@@ -181,6 +187,7 @@ mcp = FastMCP(name="Production Discord App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/v2/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 ## Environment Variables
@@ -192,9 +199,9 @@ For production deployments, use environment variables instead of hardcoding cred
 Setting this environment variable allows the Discord provider to be used automatically without explicitly instantiating it in code.
 
 <Card>
-<ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
-Set to `fastmcp.server.auth.providers.discord.DiscordProvider` to use Discord authentication.
-</ParamField>
+  <ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
+    Set to `fastmcp.server.auth.providers.discord.DiscordProvider` to use Discord authentication.
+  </ParamField>
 </Card>
 
 ### Discord-Specific Configuration
@@ -207,23 +214,24 @@ Your Discord Application Client ID (e.g., `12345`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_DISCORD_CLIENT_SECRET" required>
-Your Discord OAuth Client Secret
+  Your Discord OAuth Client Secret
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_DISCORD_BASE_URL" default="http://localhost:8000">
-Public URL where OAuth endpoints will be accessible (includes any mount path)
+  Public URL where OAuth endpoints will be accessible (includes any mount path)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_DISCORD_ISSUER_URL" default="Uses BASE_URL">
-Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
+  Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to
+  avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_DISCORD_REDIRECT_PATH" default="/auth/callback">
-Redirect path configured in your Discord OAuth settings
+  Redirect path configured in your Discord OAuth settings
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_DISCORD_REQUIRED_SCOPES" default='["identify"]'>
-Comma-, space-, or JSON-separated list of required Discord scopes (e.g., `identify,email` or `["identify","email"]`)
+  Comma-, space-, or JSON-separated list of required Discord scopes (e.g., `identify,email` or `["identify","email"]`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_DISCORD_TIMEOUT_SECONDS" default="10">
@@ -232,6 +240,7 @@ HTTP request timeout for Discord API calls
 </Card>
 
 Example `.env` file:
+
 ```bash
 FASTMCP_SERVER_AUTH=fastmcp.server.auth.providers.discord.DiscordProvider
 

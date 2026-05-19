@@ -6,6 +6,7 @@ description: Monitor and respond to automated PR reviews (Codex bot). Use when p
 # PR Review Workflow
 
 This repo has `chatgpt-codex-connector[bot]` configured as an automated reviewer. After every push to a PR branch, Codex reviews the diff and either:
+
 - Reacts with a thumbs-up on its review body (no suggestions — PR is clean)
 - Posts inline comments with suggestions (each tagged with a priority badge)
 
@@ -44,6 +45,7 @@ gh api repos/PrefectHQ/fastmcp/pulls/{PR_NUMBER}/comments \
 ```
 
 Codex comments include priority badges:
+
 - `P0` (red) — Critical issue, likely a real bug
 - `P1` (orange) — Important, worth fixing
 - `P2` (yellow) — Moderate, evaluate on merit
@@ -97,6 +99,7 @@ Codex sometimes re-posts old comments that reference code you've already fixed (
 ## When a PR is ready
 
 A PR is ready for human review when:
+
 - All Codex comments are either fixed or replied to with dismissal reasoning
 - CI checks pass
 - The diff is clean and focused on the stated purpose

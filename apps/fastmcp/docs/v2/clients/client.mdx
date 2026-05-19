@@ -5,7 +5,7 @@ description: Programmatic client for interacting with MCP servers through a well
 icon: user-robot
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.0.0" />
 
@@ -14,14 +14,14 @@ The central piece of MCP client applications is the `fastmcp.Client` class. This
 The FastMCP Client is designed for deterministic, controlled interactions rather than autonomous behavior, making it ideal for:
 
 - **Testing MCP servers** during development
-- **Building deterministic applications** that need reliable MCP interactions  
+- **Building deterministic applications** that need reliable MCP interactions
 - **Creating the foundation for agentic or LLM-based clients** with structured, type-safe operations
 
 All client operations require using the `async with` context manager for proper connection lifecycle management.
 
-
 <Note>
-This is not an agentic client - it requires explicit function calls and provides direct control over all MCP operations. Use it as a building block for higher-level systems.
+  This is not an agentic client - it requires explicit function calls and provides direct control over all MCP
+  operations. Use it as a building block for higher-level systems.
 </Note>
 
 ## Creating a Client
@@ -46,12 +46,12 @@ async def main():
     async with client:
         # Basic server interaction
         await client.ping()
-        
+
         # List available operations
         tools = await client.list_tools()
         resources = await client.list_resources()
         prompts = await client.list_prompts()
-        
+
         # Execute operations
         result = await client.call_tool("example_tool", {"param": "value"})
         print(result)
@@ -72,7 +72,7 @@ The client automatically infers the appropriate transport based on the input:
 
 1. **`FastMCP` instance** → In-memory transport (perfect for testing)
 2. **File path ending in `.py`** → Python Stdio transport
-3. **File path ending in `.js`** → Node.js Stdio transport  
+3. **File path ending in `.js`** → Node.js Stdio transport
 4. **URL starting with `http://` or `https://`** → HTTP transport
 5. **`MCPConfig` dictionary** → Multi-server client
 
@@ -81,12 +81,13 @@ from fastmcp import Client, FastMCP
 
 # Examples of transport inference
 client_memory = Client(FastMCP("TestServer"))
-client_script = Client("./server.py") 
+client_script = Client("./server.py")
 client_http = Client("https://api.example.com/mcp")
 ```
 
 <Tip>
-For testing and development, always prefer the in-memory transport by passing a `FastMCP` server directly to the client. This eliminates network complexity and separate processes.
+  For testing and development, always prefer the in-memory transport by passing a `FastMCP` server directly to the
+  client. This eliminates network complexity and separate processes.
 </Tip>
 
 ## Configuration-Based Clients
@@ -102,7 +103,7 @@ config = {
     "mcpServers": {
         "server_name": {
             # Remote HTTP/SSE server
-            "transport": "http",  # or "sse" 
+            "transport": "http",  # or "sse"
             "url": "https://api.example.com/mcp",
             "headers": {"Authorization": "Bearer token"},
             "auth": "oauth"  # or bearer token string
@@ -135,7 +136,7 @@ async with client:
     # Tools are prefixed with server names
     weather_data = await client.call_tool("weather_get_forecast", {"city": "London"})
     response = await client.call_tool("assistant_answer_question", {"question": "What's the capital of France?"})
-    
+
     # Resources use prefixed URIs
     icons = await client.read_resource("weather://weather/icons/sunny")
     templates = await client.read_resource("resource://assistant/templates/list")
@@ -148,15 +149,15 @@ The client operates asynchronously and uses context managers for connection mana
 ```python
 async def example():
     client = Client("my_mcp_server.py")
-    
+
     # Connection established here
     async with client:
         print(f"Connected: {client.is_connected()}")
-        
+
         # Make multiple calls within the same session
         tools = await client.list_tools()
         result = await client.call_tool("greet", {"name": "World"})
-        
+
     # Connection closed automatically here
     print(f"Connected: {client.is_connected()}")
 ```
@@ -173,7 +174,7 @@ Tools are server-side functions that the client can execute with arguments.
 async with client:
     # List available tools
     tools = await client.list_tools()
-    
+
     # Execute a tool
     result = await client.call_tool("multiply", {"a": 5, "b": 3})
     print(result.data)  # 15
@@ -189,7 +190,7 @@ Resources are data sources that the client can read, either static or templated.
 async with client:
     # List available resources
     resources = await client.list_resources()
-    
+
     # Read a resource
     content = await client.read_resource("file:///config/settings.json")
     print(content[0].text)
@@ -205,7 +206,7 @@ Prompts are reusable message templates that can accept arguments.
 async with client:
     # List available prompts
     prompts = await client.list_prompts()
-    
+
     # Get a rendered prompt
     messages = await client.get_prompt("analyze_data", {"data": [1, 2, 3]})
     print(messages.messages)
@@ -305,7 +306,7 @@ client = Client(
 
 The `Client` constructor accepts several configuration options:
 
-- `transport`: Transport instance or source for automatic inference  
+- `transport`: Transport instance or source for automatic inference
 - `log_handler`: Handle server log messages
 - `progress_handler`: Monitor long-running operations
 - `sampling_handler`: Respond to server LLM requests
@@ -321,20 +322,24 @@ For detailed transport configuration (headers, authentication, environment varia
 Explore the detailed documentation for each operation type:
 
 ### Core Operations
+
 - **[Tools](/v2/clients/tools)** - Execute server-side functions and handle results
-- **[Resources](/v2/clients/resources)** - Access static and templated resources  
+- **[Resources](/v2/clients/resources)** - Access static and templated resources
 - **[Prompts](/v2/clients/prompts)** - Work with message templates and argument serialization
 
 ### Advanced Features
+
 - **[Logging](/v2/clients/logging)** - Handle server log messages
 - **[Progress](/v2/clients/progress)** - Monitor long-running operations
 - **[Sampling](/v2/clients/sampling)** - Respond to server LLM requests
 - **[Roots](/v2/clients/roots)** - Provide local context to servers
 
 ### Connection Details
+
 - **[Transports](/v2/clients/transports)** - Configure connection methods and parameters
 - **[Authentication](/v2/clients/auth/oauth)** - Set up OAuth and bearer token authentication
 
 <Tip>
-The FastMCP Client is designed as a foundational tool. Use it directly for deterministic operations, or build higher-level agentic systems on top of its reliable, type-safe interface.
+  The FastMCP Client is designed as a foundational tool. Use it directly for deterministic operations, or build
+  higher-level agentic systems on top of its reliable, type-safe interface.
 </Tip>

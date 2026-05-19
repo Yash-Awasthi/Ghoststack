@@ -7,7 +7,11 @@ import {
   classifyOne,
 } from '../fireworks-health'
 
-type PromSample = { name: string; labels: Record<string, string>; value: number }
+type PromSample = {
+  name: string
+  labels: Record<string, string>
+  value: number
+}
 
 const DEPLOY = 'mjb4i7ea'
 
@@ -27,15 +31,17 @@ function prefillQueueBuckets(p90Ms: number): PromSample[] {
   const les = [50, 150, 300, 500, 750, 1000, 1500, 3000, 5000, 7500, 10000]
   const name = 'latency_prefill_queue_ms_bucket:sum_by_deployment'
   const total = 10
-  return les.map((le) => ({
-    name,
-    labels: { deployment_id: DEPLOY, le: String(le) },
-    value: le >= p90Ms ? total : 0,
-  })).concat({
-    name,
-    labels: { deployment_id: DEPLOY, le: '+Inf' },
-    value: total,
-  })
+  return les
+    .map((le) => ({
+      name,
+      labels: { deployment_id: DEPLOY, le: String(le) },
+      value: le >= p90Ms ? total : 0,
+    }))
+    .concat({
+      name,
+      labels: { deployment_id: DEPLOY, le: '+Inf' },
+      value: total,
+    })
 }
 
 function requests(rate: number): PromSample {

@@ -185,13 +185,13 @@ schema_version: "1.0"
 
 # Extension metadata (REQUIRED)
 extension:
-  id: "jira"                    # Unique identifier (lowercase, alphanumeric, hyphens)
-  name: "Jira Integration"      # Human-readable name
-  version: "1.0.0"              # Semantic version
+  id: "jira" # Unique identifier (lowercase, alphanumeric, hyphens)
+  name: "Jira Integration" # Human-readable name
+  version: "1.0.0" # Semantic version
   description: "Create Jira Epics, Stories, and Issues from spec-kit artifacts"
-  author: "Stats Perform"       # Author/organization
+  author: "Stats Perform" # Author/organization
   repository: "https://github.com/statsperform/spec-kit-jira"
-  license: "MIT"                # SPDX license identifier
+  license: "MIT" # SPDX license identifier
   homepage: "https://github.com/statsperform/spec-kit-jira/blob/main/README.md"
 
 # Compatibility requirements (REQUIRED)
@@ -203,14 +203,14 @@ requires:
   tools:
     - name: "jira-mcp-server"
       required: true
-      version: ">=1.0.0"          # Optional: version constraint
+      version: ">=1.0.0" # Optional: version constraint
       description: "Jira MCP server for API access"
       install_url: "https://github.com/your-org/jira-mcp-server"
-      check_command: "jira --version"  # Optional: CLI command to verify
+      check_command: "jira --version" # Optional: CLI command to verify
 
   # Core spec-kit commands this extension depends on
   commands:
-    - "speckit.tasks"             # Extension needs tasks command
+    - "speckit.tasks" # Extension needs tasks command
 
   # Core scripts required
   scripts:
@@ -223,7 +223,7 @@ provides:
     - name: "speckit.jira.specstoissues"
       file: "commands/specstoissues.md"
       description: "Create Jira hierarchy from spec and tasks"
-      aliases: ["speckit.jira.sync"]  # Alternate names
+      aliases: ["speckit.jira.sync"] # Alternate names
 
     - name: "speckit.jira.discover-fields"
       file: "commands/discover-fields.md"
@@ -238,19 +238,19 @@ provides:
     - name: "jira-config.yml"
       template: "jira-config.template.yml"
       description: "Jira integration configuration"
-      required: true              # User must configure before use
+      required: true # User must configure before use
 
   # Helper scripts
   scripts:
     - name: "parse-jira-config.sh"
       file: "scripts/parse-jira-config.sh"
       description: "Parse jira-config.yml to JSON"
-      executable: true            # Make executable on install
+      executable: true # Make executable on install
 
 # Extension configuration defaults (OPTIONAL)
 defaults:
   project:
-    key: null                     # No default, user must configure
+    key: null # No default, user must configure
   hierarchy:
     issue_type: "subtask"
   update_behavior:
@@ -442,18 +442,21 @@ Extensions provide **universal command format** (Markdown-based), and CLI conver
 # Universal metadata (parsed by all agents)
 description: "Create Jira hierarchy from spec and tasks"
 tools:
-  - 'jira-mcp-server/epic_create'
-  - 'jira-mcp-server/story_create'
+  - "jira-mcp-server/epic_create"
+  - "jira-mcp-server/story_create"
 scripts:
   sh: ../../scripts/bash/check-prerequisites.sh --json
   ps: ../../scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
 # Command implementation
+
 ## User Input
+
 $ARGUMENTS
 
 ## Steps
+
 1. Load jira-config.yml
 2. Parse spec.md and tasks.md
 3. Create Jira items
@@ -467,18 +470,21 @@ $ARGUMENTS
 ---
 description: "Create Jira hierarchy from spec and tasks"
 tools:
-  - 'jira-mcp-server/epic_create'
-  - 'jira-mcp-server/story_create'
+  - "jira-mcp-server/epic_create"
+  - "jira-mcp-server/story_create"
 scripts:
   sh: .specify/scripts/bash/check-prerequisites.sh --json
   ps: .specify/scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
 # Command implementation (copied from extension)
+
 ## User Input
+
 $ARGUMENTS
 
 ## Steps
+
 1. Load jira-config.yml from .specify/extensions/jira/
 2. Parse spec.md and tasks.md
 3. Create Jira items
@@ -619,7 +625,7 @@ defaults:
 ```yaml
 # .specify/extensions/jira/jira-config.local.yml (Local overrides - gitignored)
 project:
-  key: "MYTEST"  # Override for local testing
+  key: "MYTEST" # Override for local testing
 ```
 
 ```bash
@@ -737,7 +743,7 @@ installed:
 
 # Global extension settings
 settings:
-  auto_execute_hooks: true  # Prompt for optional hooks after commands
+  auto_execute_hooks: true # Prompt for optional hooks after commands
 
 # Hook configuration
 hooks:
@@ -980,10 +986,10 @@ The active catalog stack is resolved in this order (first match wins):
 
 When no config file exists, the CLI uses:
 
-| Priority | Catalog | install_allowed | Purpose |
-|----------|---------|-----------------|---------|
-| 1 | `catalog.json` (default) | `true` | Curated extensions available for installation |
-| 2 | `catalog.community.json` (community) | `false` | Discovery only — browse but not install |
+| Priority | Catalog                              | install_allowed | Purpose                                       |
+| -------- | ------------------------------------ | --------------- | --------------------------------------------- |
+| 1        | `catalog.json` (default)             | `true`          | Curated extensions available for installation |
+| 2        | `catalog.community.json` (community) | `false`         | Discovery only — browse but not install       |
 
 This means `specify extension search` surfaces community extensions out of the box, while `specify extension add` is still restricted to entries from catalogs with `install_allowed: true`.
 
@@ -993,7 +999,7 @@ This means `specify extension search` surfaces community extensions out of the b
 catalogs:
   - name: "default"
     url: "https://raw.githubusercontent.com/github/spec-kit/main/extensions/catalog.json"
-    priority: 1          # Highest — only approved entries can be installed
+    priority: 1 # Highest — only approved entries can be installed
     install_allowed: true
     description: "Built-in catalog of installable extensions"
 
@@ -1005,7 +1011,7 @@ catalogs:
 
   - name: "community"
     url: "https://raw.githubusercontent.com/github/spec-kit/main/extensions/catalog.community.json"
-    priority: 3          # Lowest — discovery only, not installable
+    priority: 3 # Lowest — discovery only, not installable
     install_allowed: false
     description: "Community-contributed extensions (discovery only)"
 ```
@@ -1062,11 +1068,13 @@ specify extension add jira     # Installs from custom catalog
 ```
 
 **Requirements:**
+
 - URL must use HTTPS (HTTP only allowed for localhost testing)
 - Catalog must follow the standard catalog.json schema
 - Must be publicly accessible or accessible within your network
 
 **Example for testing:**
+
 ```bash
 # Test with localhost during development
 export SPECKIT_CATALOG_URL="http://localhost:8000/catalog.json"
@@ -1440,10 +1448,10 @@ Extensions run with **same privileges as AI agent**:
 ```yaml
 # Future extension.yml
 permissions:
-  - "filesystem:read:.specify/extensions/jira/"  # Can only read own config
-  - "filesystem:write:.specify/memory/"          # Can write to memory
-  - "network:external:*.atlassian.net"           # Can call Jira API
-  - "env:read:SPECKIT_JIRA_*"                    # Can read own env vars
+  - "filesystem:read:.specify/extensions/jira/" # Can only read own config
+  - "filesystem:write:.specify/memory/" # Can write to memory
+  - "network:external:*.atlassian.net" # Can call Jira API
+  - "env:read:SPECKIT_JIRA_*" # Can read own env vars
 ```
 
 ### Package Integrity
@@ -1452,12 +1460,13 @@ permissions:
 
 ```yaml
 # catalog.json
-"jira": {
-  "download_url": "...",
-  "checksum": "sha256:abc123...",
-  "signature": "https://github.com/.../spec-kit-jira-1.0.0.sig",
-  "signing_key": "https://github.com/statsperform.gpg"
-}
+"jira":
+  {
+    "download_url": "...",
+    "checksum": "sha256:abc123...",
+    "signature": "https://github.com/.../spec-kit-jira-1.0.0.sig",
+    "signing_key": "https://github.com/statsperform.gpg"
+  }
 ```
 
 CLI verifies signature before extraction.
@@ -1525,7 +1534,7 @@ provides:
   commands:
     - name: "speckit.github.taskstoissues"
       file: "commands/taskstoissues.md"
-      aliases: ["speckit.github.sync-taskstoissues"]  # Alternate namespaced entry point
+      aliases: ["speckit.github.sync-taskstoissues"] # Alternate namespaced entry point
 ```
 
 AI agents register both names, so callers can migrate to the alternate alias without relying on deprecated global shortcuts like `/speckit.taskstoissues`.
@@ -1854,13 +1863,13 @@ spec-kit-jira/
 
 **Planned support matrix:**
 
-| Extension Feature | Spec Kit Version | AI Agent Support |
-|-------------------|------------------|------------------|
-| Basic commands | 0.2.0+ | Claude, Gemini, Copilot |
-| Hooks (after_tasks) | 0.3.0+ | Claude, Gemini |
-| Config validation | 0.2.0+ | All |
-| Multiple catalogs | 0.4.0+ | All |
-| Permissions (sandboxing) | 1.0.0+ | TBD |
+| Extension Feature        | Spec Kit Version | AI Agent Support        |
+| ------------------------ | ---------------- | ----------------------- |
+| Basic commands           | 0.2.0+           | Claude, Gemini, Copilot |
+| Hooks (after_tasks)      | 0.3.0+           | Claude, Gemini          |
+| Config validation        | 0.2.0+           | All                     |
+| Multiple catalogs        | 0.4.0+           | All                     |
+| Permissions (sandboxing) | 1.0.0+           | TBD                     |
 
 ### Appendix D: Extension Catalog Schema
 

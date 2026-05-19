@@ -5,21 +5,21 @@ description: Connect FastMCP servers to the OpenAI API
 icon: message-code
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
-
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 ## Responses API
 
 OpenAI's [Responses API](https://platform.openai.com/docs/api-reference/responses) supports [MCP servers](https://platform.openai.com/docs/guides/tools-remote-mcp) as remote tool sources, allowing you to extend AI capabilities with custom functions.
 
 <Note>
-The Responses API is a distinct API from OpenAI's Completions API or Assistants API. At this time, only the Responses API supports MCP.
+  The Responses API is a distinct API from OpenAI's Completions API or Assistants API. At this time, only the Responses
+  API supports MCP.
 </Note>
 
 <Tip>
-Currently, the Responses API only accesses **tools** from MCP servers—it queries the `list_tools` endpoint and exposes those functions to the AI agent. Other MCP features like resources and prompts are not currently supported.
+  Currently, the Responses API only accesses **tools** from MCP servers—it queries the `list_tools` endpoint and exposes
+  those functions to the AI agent. Other MCP features like resources and prompts are not currently supported.
 </Tip>
-
 
 ### Create a Server
 
@@ -56,10 +56,12 @@ python server.py
 ```bash ngrok
 ngrok http 8000
 ```
+
 </CodeGroup>
 
 <Warning>
-This exposes your unauthenticated server to the internet. Only run this command in a safe environment if you understand the risks.
+  This exposes your unauthenticated server to the internet. Only run this command in a safe environment if you
+  understand the risks.
 </Warning>
 
 ### Call the Server
@@ -101,6 +103,7 @@ resp = client.responses.create(
 
 print(resp.output_text)
 ```
+
 If you run this code, you'll see something like the following output:
 
 ```text
@@ -115,9 +118,9 @@ The Responses API can include headers to authenticate the request, which means y
 
 #### Server Authentication
 
-The simplest way to add authentication to the server is to use a bearer token scheme. 
+The simplest way to add authentication to the server is to use a bearer token scheme.
 
-For this example, we'll quickly generate our own tokens with FastMCP's `RSAKeyPair` utility, but this may not be appropriate for production use. For more details, see the complete server-side [Token Verification](/servers/auth/token-verification) documentation. 
+For this example, we'll quickly generate our own tokens with FastMCP's `RSAKeyPair` utility, but this may not be appropriate for production use. For more details, see the complete server-side [Token Verification](/servers/auth/token-verification) documentation.
 
 We'll start by creating an RSA key pair to sign and verify tokens.
 
@@ -128,11 +131,9 @@ key_pair = RSAKeyPair.generate()
 access_token = key_pair.create_token(audience="dice-server")
 ```
 
-<Warning>
-FastMCP's `RSAKeyPair` utility is for development and testing only.
-</Warning> 
+<Warning>FastMCP's `RSAKeyPair` utility is for development and testing only.</Warning>
 
-Next, we'll create a `JWTVerifier` to authenticate the server. 
+Next, we'll create a `JWTVerifier` to authenticate the server.
 
 ```python
 from fastmcp import FastMCP
@@ -192,7 +193,6 @@ APIStatusError: Error code: 424 - {
 As expected, the server is rejecting the request because it's not authenticated.
 
 To authenticate the client, you can pass the token in the `Authorization` header with the `Bearer` scheme:
-
 
 ```python {4, 7, 19-21} [expandable]
 from openai import OpenAI

@@ -12,7 +12,6 @@
 
 在我们的[评测](evals/README.md)中，Codebuff 在 175+ 个真实开源仓库的编码任务上以 61% 对 53% 的成绩领先 Claude Code。
 
-
 ## 工作原理
 
 当你让 Codebuff "给我的 API 加上身份验证"时，它可能会调用：
@@ -66,6 +65,7 @@ codebuff
 ```
 
 这会生成：
+
 ```
 knowledge.md               # Codebuff 用的项目上下文
 .agents/
@@ -215,7 +215,7 @@ wsl --install
 sudo apt-get install tmux
 ```
 
-更完整的测试文档见 [cli/src/__tests__/README.md](cli/src/__tests__/README.md)。
+更完整的测试文档见 [cli/src/**tests**/README.md](cli/src/__tests__/README.md)。
 
 可以帮忙的方向：
 

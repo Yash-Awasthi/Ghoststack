@@ -237,13 +237,13 @@ container, err := floci.NewFlociContainer().
     Start(ctx)
 ```
 
-| Method | Default | Description |
-|---|---|---|
-| `WithImage(image string)` | `floci/floci:latest` | Docker image to use |
-| `WithRegion(region string)` | `us-east-1` | AWS region set in Floci and returned by `GetRegion()` |
-| `WithAccountID(id string)` | `000000000000` | Default AWS account ID used in ARNs |
-| `WithAvailabilityZone(az string)` | `us-east-1a` | Availability zone reported by Floci |
-| `WithDedicatedNetwork()` | _(none)_ | Create a dedicated Docker network for container-backed services (ElastiCache, RDS, OpenSearch, MSK) |
+| Method                            | Default              | Description                                                                                         |
+| --------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| `WithImage(image string)`         | `floci/floci:latest` | Docker image to use                                                                                 |
+| `WithRegion(region string)`       | `us-east-1`          | AWS region set in Floci and returned by `GetRegion()`                                               |
+| `WithAccountID(id string)`        | `000000000000`       | Default AWS account ID used in ARNs                                                                 |
+| `WithAvailabilityZone(az string)` | `us-east-1a`         | Availability zone reported by Floci                                                                 |
+| `WithDedicatedNetwork()`          | _(none)_             | Create a dedicated Docker network for container-backed services (ElastiCache, RDS, OpenSearch, MSK) |
 
 ## Service configuration
 
@@ -270,17 +270,17 @@ Available config methods: `WithAcmConfig`, `WithApiGatewayConfig`, `WithAppConfi
 
 ## `StartedFlociContainer` API
 
-| Method | Returns | Description |
-|---|---|---|
-| `GetEndpoint()` | `string` | Full HTTP endpoint, e.g. `http://localhost:32768` |
-| `GetRegion()` | `string` | AWS region configured at start |
-| `GetAccountID()` | `string` | AWS account ID configured at start |
-| `GetAccessKey()` | `string` | Always `"test"` |
-| `GetSecretKey()` | `string` | Always `"test"` |
-| `GetAvailabilityZone()` | `string` | Availability zone configured at start |
-| `GetDedicatedNetworkName()` | `string` | Docker network name, or empty string if not using a dedicated network |
-| `GetMappedPort(ctx, port int)` | `(int, error)` | Host port mapped to the given container port |
-| `Stop(ctx)` | `error` | Terminate the container and clean up |
+| Method                         | Returns        | Description                                                           |
+| ------------------------------ | -------------- | --------------------------------------------------------------------- |
+| `GetEndpoint()`                | `string`       | Full HTTP endpoint, e.g. `http://localhost:32768`                     |
+| `GetRegion()`                  | `string`       | AWS region configured at start                                        |
+| `GetAccountID()`               | `string`       | AWS account ID configured at start                                    |
+| `GetAccessKey()`               | `string`       | Always `"test"`                                                       |
+| `GetSecretKey()`               | `string`       | Always `"test"`                                                       |
+| `GetAvailabilityZone()`        | `string`       | Availability zone configured at start                                 |
+| `GetDedicatedNetworkName()`    | `string`       | Docker network name, or empty string if not using a dedicated network |
+| `GetMappedPort(ctx, port int)` | `(int, error)` | Host port mapped to the given container port                          |
+| `Stop(ctx)`                    | `error`        | Terminate the container and clean up                                  |
 
 ## Source
 

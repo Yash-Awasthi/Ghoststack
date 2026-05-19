@@ -8,13 +8,11 @@ A session is a pre-configured fetcher instance that stays alive for the duration
 
 By default, every spider creates a single [FetcherSession](../fetching/static.md). You can add more sessions or swap the default by overriding the `configure_sessions()` method, but you have to use the async version of each session only, as the table shows below:
 
-
 | Session Type                                    | Use Case                                 |
-|-------------------------------------------------|------------------------------------------|
+| ----------------------------------------------- | ---------------------------------------- |
 | [FetcherSession](../fetching/static.md)         | Fast HTTP requests, no JavaScript        |
 | [AsyncDynamicSession](../fetching/dynamic.md)   | Browser automation, JavaScript rendering |
 | [AsyncStealthySession](../fetching/stealthy.md) | Anti-bot bypass, Cloudflare, etc.        |
-
 
 ## Configuring Sessions
 
@@ -38,17 +36,17 @@ class MySpider(Spider):
 The `manager.add()` method takes:
 
 | Argument     | Type      | Default    | Description                                  |
-|--------------|-----------|------------|----------------------------------------------|
-| `session_id` | `str`     | *required* | A name to reference this session in requests |
-| `session`    | `Session` | *required* | The session instance                         |
+| ------------ | --------- | ---------- | -------------------------------------------- |
+| `session_id` | `str`     | _required_ | A name to reference this session in requests |
+| `session`    | `Session` | _required_ | The session instance                         |
 | `default`    | `bool`    | `False`    | Make this the default session                |
 | `lazy`       | `bool`    | `False`    | Start the session only when first used       |
 
 **Notes:**
 
 1. In all requests, if you don't specify which session to use, the default session is used. The default session is determined in one of two ways:
-    1. The first session you add to the manager becomes the default automatically.
-    2. The session that gets `default=True` while added to the manager.
+   1. The first session you add to the manager becomes the default automatically.
+   2. The session that gets `default=True` while added to the manager.
 2. The instances you pass of each session don't have to be already started by you; the spider checks on all sessions if they are not already started and starts them.
 3. If you want a specific session to start when used only, then use the `lazy` argument while adding that session to the manager. Example: start the browser only when you need it, not with the spider start.
 
@@ -173,7 +171,7 @@ async def parse(self, response: Response):
     )
 ```
 
-**Warning:** Session arguments (**kwargs) passed from the original request are inherited by `response.follow()`. New kwargs take precedence over inherited ones.
+**Warning:** Session arguments (\*\*kwargs) passed from the original request are inherited by `response.follow()`. New kwargs take precedence over inherited ones.
 
 ```python
 from scrapling.spiders import Spider, Response
@@ -202,4 +200,5 @@ class ProductSpider(Spider):
             "price": response.css(".price::text").get(""),
         }
 ```
+
 **Note:** Upon spider closure, the manager automatically checks whether any sessions are still running and closes them before closing the spider.

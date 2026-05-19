@@ -1,5 +1,5 @@
-import { LocalServiceDiscovery, HealthMonitor } from '../orchestration/service-discovery';
-import { IConfigLoader } from '../runtime/config-loader';
+import { LocalServiceDiscovery, HealthMonitor } from "../orchestration/service-discovery";
+import { IConfigLoader } from "../runtime/config-loader";
 
 describe("Milestone 3: Service Discovery & Health Monitoring", () => {
   it("should register dynamic services and update statuses dynamically", async () => {
@@ -7,7 +7,7 @@ describe("Milestone 3: Service Discovery & Health Monitoring", () => {
 
     await discovery.registerService("floci", 4566, { type: "docker" });
     const list = await discovery.listServices();
-    
+
     expect(list.length).toBe(1);
     expect(list[0].name).toBe("floci");
     expect(list[0].status).toBe("healthy");
@@ -19,7 +19,7 @@ describe("Milestone 3: Service Discovery & Health Monitoring", () => {
 
   it("should monitor config services and evaluate dynamic checks", async () => {
     const discovery = new LocalServiceDiscovery();
-    
+
     // Mock Config Loader
     const mockLoader: IConfigLoader = {
       loadPorts: jest.fn(),
@@ -42,8 +42,8 @@ describe("Milestone 3: Service Discovery & Health Monitoring", () => {
 
     const services = await discovery.listServices();
     expect(services.length).toBe(2);
-    expect(services.map(s => s.name)).toContain("floci");
-    expect(services.map(s => s.name)).toContain("fcc");
+    expect(services.map((s) => s.name)).toContain("floci");
+    expect(services.map((s) => s.name)).toContain("fcc");
 
     await monitor.stopMonitoring();
   });

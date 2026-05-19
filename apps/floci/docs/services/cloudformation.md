@@ -5,72 +5,72 @@
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateStack` | Deploy a CloudFormation template |
-| `UpdateStack` | Update an existing stack |
-| `DeleteStack` | Delete a stack and its resources |
-| `DescribeStacks` | Get stack status and outputs |
-| `ListStacks` | List stacks by status |
-| `DescribeStackEvents` | Get stack creation/update event history |
-| `DescribeStackResources` | Get all resources in a stack |
-| `DescribeStackResource` | Get a specific stack resource |
-| `ListStackResources` | List resource summaries |
-| `GetTemplate` | Retrieve the template body |
-| `ValidateTemplate` | Validate a template without deploying |
-| `CreateChangeSet` | Create a change set |
-| `DescribeChangeSet` | Get change set details |
-| `ExecuteChangeSet` | Apply a change set |
-| `ListChangeSets` | List change sets for a stack |
-| `DeleteChangeSet` | Delete a change set |
-| `SetStackPolicy` | Set a stack policy |
-| `GetStackPolicy` | Retrieve the current stack policy |
-| `ListStackSets` | List StackSets |
-| `DescribeStackSet` | Get StackSet details |
-| `CreateStackSet` | Create a new StackSet |
+| Action                   | Description                             |
+| ------------------------ | --------------------------------------- |
+| `CreateStack`            | Deploy a CloudFormation template        |
+| `UpdateStack`            | Update an existing stack                |
+| `DeleteStack`            | Delete a stack and its resources        |
+| `DescribeStacks`         | Get stack status and outputs            |
+| `ListStacks`             | List stacks by status                   |
+| `DescribeStackEvents`    | Get stack creation/update event history |
+| `DescribeStackResources` | Get all resources in a stack            |
+| `DescribeStackResource`  | Get a specific stack resource           |
+| `ListStackResources`     | List resource summaries                 |
+| `GetTemplate`            | Retrieve the template body              |
+| `ValidateTemplate`       | Validate a template without deploying   |
+| `CreateChangeSet`        | Create a change set                     |
+| `DescribeChangeSet`      | Get change set details                  |
+| `ExecuteChangeSet`       | Apply a change set                      |
+| `ListChangeSets`         | List change sets for a stack            |
+| `DeleteChangeSet`        | Delete a change set                     |
+| `SetStackPolicy`         | Set a stack policy                      |
+| `GetStackPolicy`         | Retrieve the current stack policy       |
+| `ListStackSets`          | List StackSets                          |
+| `DescribeStackSet`       | Get StackSet details                    |
+| `CreateStackSet`         | Create a new StackSet                   |
 
 ## Supported Resource Types
 
 Resource types provisioned during `CreateStack` / `UpdateStack` / `DeleteStack`:
 
-| Resource Type | Notes |
-|---|---|
-| `AWS::S3::Bucket` | |
-| `AWS::S3::BucketPolicy` | Accepted; policy not enforced |
-| `AWS::SQS::Queue` | |
-| `AWS::SQS::QueuePolicy` | Accepted; policy not enforced |
-| `AWS::SNS::Topic` | |
-| `AWS::DynamoDB::Table` | |
-| `AWS::DynamoDB::GlobalTable` | |
-| `AWS::Lambda::Function` | Zip (S3 or inline `ZipFile`) and Image package types |
-| `AWS::Lambda::EventSourceMapping` | SQS, Kinesis, and DynamoDB Streams sources |
-| `AWS::IAM::Role` | |
-| `AWS::IAM::User` | |
-| `AWS::IAM::AccessKey` | |
-| `AWS::IAM::Policy` | |
-| `AWS::IAM::ManagedPolicy` | |
-| `AWS::IAM::InstanceProfile` | |
-| `AWS::SSM::Parameter` | |
-| `AWS::KMS::Key` | |
-| `AWS::KMS::Alias` | |
-| `AWS::SecretsManager::Secret` | |
-| `AWS::ECR::Repository` | |
-| `AWS::Events::Rule` | |
-| `AWS::ApiGateway::RestApi` | |
-| `AWS::ApiGateway::Resource` | |
-| `AWS::ApiGateway::Method` | |
-| `AWS::ApiGateway::Deployment` | |
-| `AWS::ApiGateway::Stage` | |
-| `AWS::ApiGatewayV2::Api` | |
-| `AWS::ApiGatewayV2::Route` | |
-| `AWS::ApiGatewayV2::Integration` | |
-| `AWS::ApiGatewayV2::Stage` | |
-| `AWS::ApiGatewayV2::Deployment` | |
-| `AWS::Pipes::Pipe` | |
-| `AWS::CloudFormation::Stack` | Nested stacks (stubbed — returns synthetic stack ID) |
-| `AWS::CDK::Metadata` | Accepted; no-op |
-| `AWS::Route53::HostedZone` | Stubbed |
-| `AWS::Route53::RecordSet` | Stubbed |
+| Resource Type                     | Notes                                                |
+| --------------------------------- | ---------------------------------------------------- |
+| `AWS::S3::Bucket`                 |                                                      |
+| `AWS::S3::BucketPolicy`           | Accepted; policy not enforced                        |
+| `AWS::SQS::Queue`                 |                                                      |
+| `AWS::SQS::QueuePolicy`           | Accepted; policy not enforced                        |
+| `AWS::SNS::Topic`                 |                                                      |
+| `AWS::DynamoDB::Table`            |                                                      |
+| `AWS::DynamoDB::GlobalTable`      |                                                      |
+| `AWS::Lambda::Function`           | Zip (S3 or inline `ZipFile`) and Image package types |
+| `AWS::Lambda::EventSourceMapping` | SQS, Kinesis, and DynamoDB Streams sources           |
+| `AWS::IAM::Role`                  |                                                      |
+| `AWS::IAM::User`                  |                                                      |
+| `AWS::IAM::AccessKey`             |                                                      |
+| `AWS::IAM::Policy`                |                                                      |
+| `AWS::IAM::ManagedPolicy`         |                                                      |
+| `AWS::IAM::InstanceProfile`       |                                                      |
+| `AWS::SSM::Parameter`             |                                                      |
+| `AWS::KMS::Key`                   |                                                      |
+| `AWS::KMS::Alias`                 |                                                      |
+| `AWS::SecretsManager::Secret`     |                                                      |
+| `AWS::ECR::Repository`            |                                                      |
+| `AWS::Events::Rule`               |                                                      |
+| `AWS::ApiGateway::RestApi`        |                                                      |
+| `AWS::ApiGateway::Resource`       |                                                      |
+| `AWS::ApiGateway::Method`         |                                                      |
+| `AWS::ApiGateway::Deployment`     |                                                      |
+| `AWS::ApiGateway::Stage`          |                                                      |
+| `AWS::ApiGatewayV2::Api`          |                                                      |
+| `AWS::ApiGatewayV2::Route`        |                                                      |
+| `AWS::ApiGatewayV2::Integration`  |                                                      |
+| `AWS::ApiGatewayV2::Stage`        |                                                      |
+| `AWS::ApiGatewayV2::Deployment`   |                                                      |
+| `AWS::Pipes::Pipe`                |                                                      |
+| `AWS::CloudFormation::Stack`      | Nested stacks (stubbed — returns synthetic stack ID) |
+| `AWS::CDK::Metadata`              | Accepted; no-op                                      |
+| `AWS::Route53::HostedZone`        | Stubbed                                              |
+| `AWS::Route53::RecordSet`         | Stubbed                                              |
 
 All other resource types are accepted without error and assigned a synthetic physical ID, so templates with unsupported types still deploy rather than fail.
 
@@ -85,9 +85,9 @@ All other resource types are accepted without error and assigned a synthetic phy
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_CLOUDFORMATION_ENABLED` | `true` | Enable or disable the service |
+| Variable                                | Default | Description                   |
+| --------------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_CLOUDFORMATION_ENABLED` | `true`  | Enable or disable the service |
 
 ## Examples
 
@@ -194,5 +194,5 @@ aws cloudformation create-stack \
 ```
 
 !!! note "Dependency ordering"
-    Use `!Ref MyFunction` (not a plain string) for `FunctionName` so CloudFormation
-    provisions the function before the event source mapping.
+Use `!Ref MyFunction` (not a plain string) for `FunctionName` so CloudFormation
+provisions the function before the event source mapping.

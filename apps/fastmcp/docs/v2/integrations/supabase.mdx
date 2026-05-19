@@ -6,7 +6,7 @@ icon: shield-check
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.13.0" />
 
@@ -17,12 +17,14 @@ This guide shows you how to secure your FastMCP server using **Supabase Auth**. 
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. A **[Supabase Account](https://supabase.com/)** with a project or a self-hosted **Supabase Auth** instance
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 
 ### Step 1: Get Supabase Project URL
 
 In your Supabase Dashboard:
+
 1. Go to **Project Settings**
 2. Copy your **Project URL** (e.g., `https://abc123.supabase.co`)
 
@@ -87,6 +89,7 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to Supabase's authorization page
 2. After you authorize, you'll be redirected back
 3. The client receives the token and can make authenticated requests
@@ -100,9 +103,9 @@ For production deployments, use environment variables instead of hardcoding cred
 Setting this environment variable allows the Supabase provider to be used automatically without explicitly instantiating it in code.
 
 <Card>
-<ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
-Set to `fastmcp.server.auth.providers.supabase.SupabaseProvider` to use Supabase authentication.
-</ParamField>
+  <ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
+    Set to `fastmcp.server.auth.providers.supabase.SupabaseProvider` to use Supabase authentication.
+  </ParamField>
 </Card>
 
 ### Supabase-Specific Configuration
@@ -115,11 +118,11 @@ Your Supabase project URL (e.g., `https://abc123.supabase.co`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_SUPABASE_BASE_URL" required>
-Public URL of your FastMCP server (e.g., `https://your-server.com` or `http://localhost:8000` for development)
+  Public URL of your FastMCP server (e.g., `https://your-server.com` or `http://localhost:8000` for development)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_SUPABASE_AUTH_ROUTE" default="/auth/v1">
-Your Supabase auth route (e.g., `/auth/v1`)
+  Your Supabase auth route (e.g., `/auth/v1`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_SUPABASE_REQUIRED_SCOPES" default="[]">
@@ -128,6 +131,7 @@ Comma-, space-, or JSON-separated list of required OAuth scopes (e.g., `openid e
 </Card>
 
 Example `.env` file:
+
 ```bash
 # Use the Supabase provider
 FASTMCP_SERVER_AUTH=fastmcp.server.auth.providers.supabase.SupabaseProvider

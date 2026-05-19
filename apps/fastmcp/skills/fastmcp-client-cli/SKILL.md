@@ -57,13 +57,13 @@ Type coercion is automatic: `limit=5` becomes an integer, `verbose=true` becomes
 
 All commands accept the same server targets:
 
-| Target | Example |
-|--------|---------|
-| HTTP/HTTPS URL | `http://localhost:8000/mcp` |
-| Python file | `server.py` |
-| MCPConfig JSON | `mcp.json` (must have `mcpServers` key) |
-| Stdio command | `--command 'npx -y @mcp/server'` |
-| Discovered name | `weather` or `source:name` |
+| Target          | Example                                 |
+| --------------- | --------------------------------------- |
+| HTTP/HTTPS URL  | `http://localhost:8000/mcp`             |
+| Python file     | `server.py`                             |
+| MCPConfig JSON  | `mcp.json` (must have `mcpServers` key) |
+| Stdio command   | `--command 'npx -y @mcp/server'`        |
+| Discovered name | `weather` or `source:name`              |
 
 Servers configured in editor configs (Claude Desktop, Claude Code, Cursor, Gemini CLI, Goose) or project-level `mcp.json` can be referenced by name. Use `source:name` (e.g. `claude-code:my-server`, `cursor:weather`) to target a specific source. Run `fastmcp discover` to see available names.
 

@@ -11,15 +11,15 @@ management surfaces over one underlying export pipeline.
 
 ## Supported Operations
 
-| Operation | Notes |
-|-----------|-------|
-| `CreateExport` | Creates an export; rejects duplicate `Name` with `ValidationException` |
-| `GetExport` | Returns one export by ARN; missing ARN returns `ResourceNotFoundException` |
-| `ListExports` | Returns every export owned by the calling account |
-| `UpdateExport` | Replaces mutable fields on an existing export |
-| `DeleteExport` | Idempotent; deletes orphan executions too |
-| `ListExecutions` | Returns all execution records for an export |
-| `GetExecution` | Returns one execution record |
+| Operation        | Notes                                                                      |
+| ---------------- | -------------------------------------------------------------------------- |
+| `CreateExport`   | Creates an export; rejects duplicate `Name` with `ValidationException`     |
+| `GetExport`      | Returns one export by ARN; missing ARN returns `ResourceNotFoundException` |
+| `ListExports`    | Returns every export owned by the calling account                          |
+| `UpdateExport`   | Replaces mutable fields on an existing export                              |
+| `DeleteExport`   | Idempotent; deletes orphan executions too                                  |
+| `ListExecutions` | Returns all execution records for an export                                |
+| `GetExecution`   | Returns one execution record                                               |
 
 ## Validation rules
 
@@ -72,18 +72,18 @@ execution produces an artifact at
 
 ### `FLOCI_SERVICES_BCM_DATA_EXPORTS_EMIT_MODE`
 
-| Value | Behavior |
-|-------|----------|
-| `synchronous` (default) | Emit on every `CreateExport` / `UpdateExport` |
-| `daily` | Emit every 24h via the shared CUR scheduled executor |
-| `off` | Management plane only — no emission |
+| Value                   | Behavior                                             |
+| ----------------------- | ---------------------------------------------------- |
+| `synchronous` (default) | Emit on every `CreateExport` / `UpdateExport`        |
+| `daily`                 | Emit every 24h via the shared CUR scheduled executor |
+| `off`                   | Management plane only — no emission                  |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_BCM_DATA_EXPORTS_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_BCM_DATA_EXPORTS_EMIT_MODE` | `synchronous` | Run mode (see above) |
+| Variable                                    | Default       | Description                   |
+| ------------------------------------------- | ------------- | ----------------------------- |
+| `FLOCI_SERVICES_BCM_DATA_EXPORTS_ENABLED`   | `true`        | Enable or disable the service |
+| `FLOCI_SERVICES_BCM_DATA_EXPORTS_EMIT_MODE` | `synchronous` | Run mode (see above)          |
 
 ## Examples
 

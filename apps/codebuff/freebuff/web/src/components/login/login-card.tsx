@@ -60,7 +60,8 @@ export function LoginCard({ authCode }: { authCode?: string | null }) {
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
-                  boxShadow: '0 0 40px 10px rgba(124, 255, 63, 0.15), 0 0 80px 20px rgba(124, 255, 63, 0.08)',
+                  boxShadow:
+                    '0 0 40px 10px rgba(124, 255, 63, 0.15), 0 0 80px 20px rgba(124, 255, 63, 0.08)',
                 }}
               />
               <Image
@@ -105,7 +106,9 @@ export function LoginCard({ authCode }: { authCode?: string | null }) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-white truncate">{session.user.name}</p>
+                      <p className="font-medium text-white truncate">
+                        {session.user.name}
+                      </p>
                       <p className="text-sm text-muted-foreground truncate">
                         {session.user.email}
                       </p>

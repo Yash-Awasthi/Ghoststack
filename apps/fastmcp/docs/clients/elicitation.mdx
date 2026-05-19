@@ -65,7 +65,8 @@ The handler receives four parameters:
 </ResponseField>
 
 <ResponseField name="response_type" type="type | None">
-  A Python dataclass type that FastMCP created from the server's JSON schema. Use this to construct your response with proper typing. If the server requests an empty object, this will be `None`.
+  A Python dataclass type that FastMCP created from the server's JSON schema. Use this to construct your response with
+  proper typing. If the server requests an empty object, this will be `None`.
 </ResponseField>
 
 <ResponseField name="params" type="ElicitRequestParams">
@@ -108,6 +109,7 @@ async def elicitation_handler(message, response_type, params, context):
 ```
 
 **Action types:**
+
 - **`accept`**: User provided valid input. Include the data in the `content` field.
 - **`decline`**: User chose not to provide the requested information. Omit `content`.
 - **`cancel`**: User cancelled the entire operation. Omit `content`.

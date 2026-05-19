@@ -5,20 +5,20 @@
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `RequestCertificate` | Request a new certificate (auto-issued for emulation) |
-| `DescribeCertificate` | Get certificate details and validation status |
-| `GetCertificate` | Retrieve the certificate and chain in PEM format |
-| `ListCertificates` | List all certificates with optional status filtering |
-| `DeleteCertificate` | Delete a certificate |
-| `AddTagsToCertificate` | Add tags to a certificate |
-| `RemoveTagsFromCertificate` | Remove tags from a certificate |
-| `ListTagsForCertificate` | List tags for a certificate |
-| `ExportCertificate` | Export certificate with encrypted private key (PRIVATE type only) |
-| `GetAccountConfiguration` | Get account-level ACM settings |
-| `PutAccountConfiguration` | Update account-level ACM settings |
-| `RenewCertificate` | Trigger certificate renewal |
+| Action                      | Description                                                       |
+| --------------------------- | ----------------------------------------------------------------- |
+| `RequestCertificate`        | Request a new certificate (auto-issued for emulation)             |
+| `DescribeCertificate`       | Get certificate details and validation status                     |
+| `GetCertificate`            | Retrieve the certificate and chain in PEM format                  |
+| `ListCertificates`          | List all certificates with optional status filtering              |
+| `DeleteCertificate`         | Delete a certificate                                              |
+| `AddTagsToCertificate`      | Add tags to a certificate                                         |
+| `RemoveTagsFromCertificate` | Remove tags from a certificate                                    |
+| `ListTagsForCertificate`    | List tags for a certificate                                       |
+| `ExportCertificate`         | Export certificate with encrypted private key (PRIVATE type only) |
+| `GetAccountConfiguration`   | Get account-level ACM settings                                    |
+| `PutAccountConfiguration`   | Update account-level ACM settings                                 |
+| `RenewCertificate`          | Trigger certificate renewal                                       |
 
 ## Emulation Behavior
 
@@ -30,10 +30,10 @@
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_ACM_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_ACM_VALIDATION_WAIT_SECONDS` | `0` | Seconds to wait before transitioning a certificate from `PENDING_VALIDATION` to `ISSUED` (0 = immediate) |
+| Variable                                     | Default | Description                                                                                              |
+| -------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `FLOCI_SERVICES_ACM_ENABLED`                 | `true`  | Enable or disable the service                                                                            |
+| `FLOCI_SERVICES_ACM_VALIDATION_WAIT_SECONDS` | `0`     | Seconds to wait before transitioning a certificate from `PENDING_VALIDATION` to `ISSUED` (0 = immediate) |
 
 ## Examples
 

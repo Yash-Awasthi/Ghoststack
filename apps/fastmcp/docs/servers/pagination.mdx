@@ -6,7 +6,7 @@ icon: page
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -75,12 +75,12 @@ The `_mcp` methods return the raw MCP protocol objects, which include both the i
 
 All four list operations support manual pagination:
 
-| Operation | Convenience Method | Manual Method |
-|-----------|-------------------|---------------|
-| Tools | `list_tools()` | `list_tools_mcp(cursor=...)` |
-| Resources | `list_resources()` | `list_resources_mcp(cursor=...)` |
+| Operation          | Convenience Method          | Manual Method                             |
+| ------------------ | --------------------------- | ----------------------------------------- |
+| Tools              | `list_tools()`              | `list_tools_mcp(cursor=...)`              |
+| Resources          | `list_resources()`          | `list_resources_mcp(cursor=...)`          |
 | Resource Templates | `list_resource_templates()` | `list_resource_templates_mcp(cursor=...)` |
-| Prompts | `list_prompts()` | `list_prompts_mcp(cursor=...)` |
+| Prompts            | `list_prompts()`            | `list_prompts_mcp(cursor=...)`            |
 
 ## When to Use Pagination
 

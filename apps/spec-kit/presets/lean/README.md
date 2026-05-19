@@ -8,13 +8,13 @@ Use Lean when you want the structured specify → plan → tasks → implement p
 
 ## Commands Included
 
-| Command | Output | Description |
-|---------|--------|-------------|
-| `speckit.specify` | `spec.md` | Create a specification from a feature description |
-| `speckit.plan` | `plan.md` | Create an implementation plan from the spec |
-| `speckit.tasks` | `tasks.md` | Create dependency-ordered tasks from spec and plan |
-| `speckit.implement` | *(code)* | Execute all tasks in order, marking progress |
-| `speckit.constitution` | `constitution.md` | Create or update the project constitution |
+| Command                | Output            | Description                                        |
+| ---------------------- | ----------------- | -------------------------------------------------- |
+| `speckit.specify`      | `spec.md`         | Create a specification from a feature description  |
+| `speckit.plan`         | `plan.md`         | Create an implementation plan from the spec        |
+| `speckit.tasks`        | `tasks.md`        | Create dependency-ordered tasks from spec and plan |
+| `speckit.implement`    | _(code)_          | Execute all tasks in order, marking progress       |
+| `speckit.constitution` | `constitution.md` | Create or update the project constitution          |
 
 ## What It Replaces
 

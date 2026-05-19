@@ -5,7 +5,7 @@ export interface IMCPTask {
   arguments: Record<string, any>;
   correlationId: string;
   timeoutMs?: number;
-  priority?: 'low' | 'medium' | 'high';
+  priority?: "low" | "medium" | "high";
   dependencies?: string[];
 }
 
@@ -32,9 +32,9 @@ export interface IMCPTransport {
 
 export interface IMCPServerInfo {
   name: string;
-  transportType: 'stdio' | 'http' | 'websocket';
+  transportType: "stdio" | "http" | "websocket";
   endpoint: string;
-  status: 'active' | 'inactive' | 'failed';
+  status: "active" | "inactive" | "failed";
   tools: string[];
 }
 

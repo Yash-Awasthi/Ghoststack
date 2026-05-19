@@ -5,8 +5,8 @@ description: Install and use FastMCP servers in Cursor
 icon: message-smile
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
-import { LocalFocusTip } from "/snippets/local-focus.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
+import { LocalFocusTip } from "/snippets/local-focus.mdx";
 
 <LocalFocusTip />
 
@@ -38,6 +38,7 @@ if __name__ == "__main__":
 ## Install the Server
 
 ### FastMCP CLI
+
 <VersionBadge version="2.10.3" />
 
 The easiest way to install a FastMCP server in Cursor is using the `fastmcp install cursor` command. This automatically handles the configuration, dependency management, and opens Cursor with a deeplink to install the server.
@@ -47,6 +48,7 @@ fastmcp install cursor server.py
 ```
 
 #### Workspace Installation
+
 <VersionBadge version="2.12.0" />
 
 By default, FastMCP installs servers globally for Cursor. You can also install servers to project-specific workspaces using the `--workspace` flag:
@@ -113,7 +115,6 @@ Alternatively, you can use a `fastmcp.json` configuration file (recommended):
 }
 ```
 
-
 #### Python Version and Project Configuration
 
 Control your server's Python environment with these options:
@@ -133,7 +134,8 @@ fastmcp install cursor server.py --project /path/to/my-project
 #### Environment Variables
 
 <Warning>
-Cursor runs servers in a completely isolated environment with no access to your shell environment or locally installed applications. You must explicitly pass any environment variables your server needs.
+  Cursor runs servers in a completely isolated environment with no access to your shell environment or locally installed
+  applications. You must explicitly pass any environment variables your server needs.
 </Warning>
 
 If your server needs environment variables (like API keys), you must include them:
@@ -151,13 +153,15 @@ fastmcp install cursor server.py --server-name "Weather Server" --env-file .env
 ```
 
 <Warning>
-**`uv` must be installed and available in your system PATH**. Cursor runs in its own isolated environment and needs `uv` to manage dependencies.
+  **`uv` must be installed and available in your system PATH**. Cursor runs in its own isolated environment and needs
+  `uv` to manage dependencies.
 </Warning>
 
 ### Generate MCP JSON
 
 <Note>
-**Use the first-class integration above for the best experience.** The MCP JSON generation is useful for advanced use cases, manual configuration, or integration with other tools.
+  **Use the first-class integration above for the best experience.** The MCP JSON generation is useful for advanced use
+  cases, manual configuration, or integration with other tools.
 </Note>
 
 You can generate MCP JSON configuration for manual use:
@@ -175,6 +179,7 @@ This generates the standard `mcpServers` configuration format that can be used w
 ### Manual Configuration
 
 For more control over the configuration, you can manually edit Cursor's configuration file. The configuration file is located at:
+
 - **All platforms**: `~/.cursor/mcp.json`
 
 The configuration file is a JSON object with a `mcpServers` key, which contains the configuration for each MCP server.
@@ -205,9 +210,12 @@ When manually configuring dependencies, the recommended approach is to use `uv` 
       "command": "uv",
       "args": [
         "run",
-        "--with", "fastmcp",
-        "--with", "pandas",
-        "--with", "requests", 
+        "--with",
+        "fastmcp",
+        "--with",
+        "pandas",
+        "--with",
+        "requests",
         "fastmcp",
         "run",
         "path/to/your/server.py"
@@ -226,9 +234,12 @@ You can also manually specify Python versions and project directories in your co
       "command": "uv",
       "args": [
         "run",
-        "--python", "3.11",
-        "--project", "/path/to/project",
-        "--with", "fastmcp",
+        "--python",
+        "3.11",
+        "--project",
+        "/path/to/project",
+        "--with",
+        "fastmcp",
         "fastmcp",
         "run",
         "path/to/your/server.py"
@@ -241,7 +252,8 @@ You can also manually specify Python versions and project directories in your co
 Note that the order of arguments is important: Python version and project settings should come before package specifications.
 
 <Warning>
-**`uv` must be installed and available in your system PATH**. Cursor runs in its own isolated environment and needs `uv` to manage dependencies.
+  **`uv` must be installed and available in your system PATH**. Cursor runs in its own isolated environment and needs
+  `uv` to manage dependencies.
 </Warning>
 
 #### Environment Variables
@@ -264,7 +276,8 @@ You can also specify environment variables in the configuration:
 ```
 
 <Warning>
-Cursor runs servers in a completely isolated environment with no access to your shell environment or locally installed applications. You must explicitly pass any environment variables your server needs.
+  Cursor runs servers in a completely isolated environment with no access to your shell environment or locally installed
+  applications. You must explicitly pass any environment variables your server needs.
 </Warning>
 
 ## Using the Server
@@ -278,7 +291,7 @@ Try asking Cursor something like:
 Cursor will automatically detect your `roll_dice` tool and use it to fulfill your request, returning something like:
 
 > 🎲 Here are your dice rolls: 4, 6, 4
-> 
+>
 > You rolled 3 dice with a total of 14! The 6 was a nice high roll there!
 
 The AI assistant can now access all the tools, resources, and prompts you've defined in your FastMCP server.

@@ -5,7 +5,6 @@ sidebarTitle: json_schema_type
 
 # `fastmcp.utilities.json_schema_type`
 
-
 Convert JSON Schema to Python types with validation.
 
 The json_schema_to_type function converts a JSON Schema into a Python type that can be used
@@ -41,22 +40,21 @@ degrades gracefully:
 4. Other constraints (`minLength`, `maxLength`) are still enforced.
 
 Example:
-    ```python
-    schema = {
-        "type": "object",
-        "properties": {
-            "name": {"type": "string", "minLength": 1},
-            "age": {"type": "integer", "minimum": 0},
-            "email": {"type": "string", "format": "email"}
-        },
-        "required": ["name", "age"]
-    }
+```python
+schema = {
+"type": "object",
+"properties": {
+"name": {"type": "string", "minLength": 1},
+"age": {"type": "integer", "minimum": 0},
+"email": {"type": "string", "format": "email"}
+},
+"required": ["name", "age"]
+}
 
     # Name is optional and will be inferred from schema's "title" property if not provided
     Person = json_schema_to_type(schema)
     # Creates a validated dataclass with name, age, and optional email fields
     ```
-
 
 ## Functions
 
@@ -66,25 +64,28 @@ Example:
 json_schema_to_type(schema: Mapping[str, Any] | bool, name: str | None = None) -> type
 ```
 
-
 Convert JSON schema to appropriate Python type with validation.
 
 **Args:**
+
 - `schema`: A JSON Schema dictionary defining the type structure and validation rules.
-Boolean schemas are also accepted (``True`` = any type, ``False`` = unsatisfiable).
+  Boolean schemas are also accepted (`True` = any type, `False` = unsatisfiable).
 - `name`: Optional name for object schemas. Only allowed when schema type is "object".
-If not provided for objects, name will be inferred from schema's "title"
-property or default to "Root".
+  If not provided for objects, name will be inferred from schema's "title"
+  property or default to "Root".
 
 **Returns:**
+
 - A Python type (typically a dataclass for objects) with Pydantic validation
 
 **Raises:**
+
 - `ValueError`: If a name is provided for a non-object schema
 
 **Examples:**
 
 Create a dataclass from an object schema:
+
 ```python
 schema = {
     "type": "object",
@@ -105,9 +106,11 @@ Person = json_schema_to_type(schema)
 #     age: int
 #     email: str | None = None
 ```
+
 Person(name="John", age=30)
 
 Create a scalar type with constraints:
+
 ```python
 schema = {
     "type": "string",
@@ -122,7 +125,6 @@ NameType = json_schema_to_type(schema)
 class Name:
     name: NameType
 ```
-
 
 ## Classes
 

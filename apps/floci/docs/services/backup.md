@@ -8,62 +8,62 @@
 
 ### Backup Vaults
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `CreateBackupVault` | `PUT` | `/backup-vaults/{backupVaultName}` | Create a backup vault |
-| `DescribeBackupVault` | `GET` | `/backup-vaults/{backupVaultName}` | Describe a backup vault |
-| `DeleteBackupVault` | `DELETE` | `/backup-vaults/{backupVaultName}` | Delete an empty backup vault |
-| `ListBackupVaults` | `GET` | `/backup-vaults/` | List all backup vaults |
+| Action                | Method   | Path                               | Description                  |
+| --------------------- | -------- | ---------------------------------- | ---------------------------- |
+| `CreateBackupVault`   | `PUT`    | `/backup-vaults/{backupVaultName}` | Create a backup vault        |
+| `DescribeBackupVault` | `GET`    | `/backup-vaults/{backupVaultName}` | Describe a backup vault      |
+| `DeleteBackupVault`   | `DELETE` | `/backup-vaults/{backupVaultName}` | Delete an empty backup vault |
+| `ListBackupVaults`    | `GET`    | `/backup-vaults/`                  | List all backup vaults       |
 
 ### Backup Plans
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `CreateBackupPlan` | `PUT` | `/backup/plans/` | Create a backup plan with rules |
-| `GetBackupPlan` | `GET` | `/backup/plans/{backupPlanId}/` | Get backup plan details |
-| `UpdateBackupPlan` | `POST` | `/backup/plans/{backupPlanId}` | Update a backup plan |
-| `DeleteBackupPlan` | `DELETE` | `/backup/plans/{backupPlanId}` | Delete a backup plan (fails if selections exist) |
-| `ListBackupPlans` | `GET` | `/backup/plans/` | List all backup plans |
+| Action             | Method   | Path                            | Description                                      |
+| ------------------ | -------- | ------------------------------- | ------------------------------------------------ |
+| `CreateBackupPlan` | `PUT`    | `/backup/plans/`                | Create a backup plan with rules                  |
+| `GetBackupPlan`    | `GET`    | `/backup/plans/{backupPlanId}/` | Get backup plan details                          |
+| `UpdateBackupPlan` | `POST`   | `/backup/plans/{backupPlanId}`  | Update a backup plan                             |
+| `DeleteBackupPlan` | `DELETE` | `/backup/plans/{backupPlanId}`  | Delete a backup plan (fails if selections exist) |
+| `ListBackupPlans`  | `GET`    | `/backup/plans/`                | List all backup plans                            |
 
 ### Backup Selections
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `CreateBackupSelection` | `PUT` | `/backup/plans/{backupPlanId}/selections/` | Assign resources to a backup plan |
-| `GetBackupSelection` | `GET` | `/backup/plans/{backupPlanId}/selections/{selectionId}` | Get selection details |
-| `DeleteBackupSelection` | `DELETE` | `/backup/plans/{backupPlanId}/selections/{selectionId}` | Remove a resource selection |
-| `ListBackupSelections` | `GET` | `/backup/plans/{backupPlanId}/selections/` | List selections for a plan |
+| Action                  | Method   | Path                                                    | Description                       |
+| ----------------------- | -------- | ------------------------------------------------------- | --------------------------------- |
+| `CreateBackupSelection` | `PUT`    | `/backup/plans/{backupPlanId}/selections/`              | Assign resources to a backup plan |
+| `GetBackupSelection`    | `GET`    | `/backup/plans/{backupPlanId}/selections/{selectionId}` | Get selection details             |
+| `DeleteBackupSelection` | `DELETE` | `/backup/plans/{backupPlanId}/selections/{selectionId}` | Remove a resource selection       |
+| `ListBackupSelections`  | `GET`    | `/backup/plans/{backupPlanId}/selections/`              | List selections for a plan        |
 
 ### Backup Jobs
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `StartBackupJob` | `PUT` | `/backup-jobs` | Start an on-demand backup job |
-| `DescribeBackupJob` | `GET` | `/backup-jobs/{backupJobId}` | Get backup job status |
-| `StopBackupJob` | `POST` | `/backup-jobs/{backupJobId}` | Stop a running backup job |
-| `ListBackupJobs` | `GET` | `/backup-jobs/` | List backup jobs with optional filters |
+| Action              | Method | Path                         | Description                            |
+| ------------------- | ------ | ---------------------------- | -------------------------------------- |
+| `StartBackupJob`    | `PUT`  | `/backup-jobs`               | Start an on-demand backup job          |
+| `DescribeBackupJob` | `GET`  | `/backup-jobs/{backupJobId}` | Get backup job status                  |
+| `StopBackupJob`     | `POST` | `/backup-jobs/{backupJobId}` | Stop a running backup job              |
+| `ListBackupJobs`    | `GET`  | `/backup-jobs/`              | List backup jobs with optional filters |
 
 ### Recovery Points
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `DescribeRecoveryPoint` | `GET` | `/backup-vaults/{backupVaultName}/recovery-points/{recoveryPointArn}` | Describe a recovery point |
-| `ListRecoveryPointsByBackupVault` | `GET` | `/backup-vaults/{backupVaultName}/recovery-points/` | List recovery points in a vault |
-| `DeleteRecoveryPoint` | `DELETE` | `/backup-vaults/{backupVaultName}/recovery-points/{recoveryPointArn}` | Delete a recovery point |
+| Action                            | Method   | Path                                                                  | Description                     |
+| --------------------------------- | -------- | --------------------------------------------------------------------- | ------------------------------- |
+| `DescribeRecoveryPoint`           | `GET`    | `/backup-vaults/{backupVaultName}/recovery-points/{recoveryPointArn}` | Describe a recovery point       |
+| `ListRecoveryPointsByBackupVault` | `GET`    | `/backup-vaults/{backupVaultName}/recovery-points/`                   | List recovery points in a vault |
+| `DeleteRecoveryPoint`             | `DELETE` | `/backup-vaults/{backupVaultName}/recovery-points/{recoveryPointArn}` | Delete a recovery point         |
 
 ### Tagging
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `ListTags` | `GET` | `/tags/{resourceArn}` | List tags on a backup resource |
-| `TagResource` | `POST` | `/tags/{resourceArn}` | Add tags to a backup resource |
+| Action          | Method | Path                   | Description                        |
+| --------------- | ------ | ---------------------- | ---------------------------------- |
+| `ListTags`      | `GET`  | `/tags/{resourceArn}`  | List tags on a backup resource     |
+| `TagResource`   | `POST` | `/tags/{resourceArn}`  | Add tags to a backup resource      |
 | `UntagResource` | `POST` | `/untag/{resourceArn}` | Remove tags from a backup resource |
 
 ### Other
 
-| Action | Method | Path | Description |
-|---|---|---|---|
-| `GetSupportedResourceTypes` | `GET` | `/supported-resource-types` | List resource types supported for backup |
+| Action                      | Method | Path                        | Description                              |
+| --------------------------- | ------ | --------------------------- | ---------------------------------------- |
+| `GetSupportedResourceTypes` | `GET`  | `/supported-resource-types` | List resource types supported for backup |
 
 ## Job Lifecycle
 
@@ -74,6 +74,7 @@ CREATED → RUNNING (after ~1 s) → COMPLETED (after job-completion-delay-secon
 ```
 
 When a job reaches `COMPLETED`:
+
 - A recovery point is created in the target vault
 - The vault's `NumberOfRecoveryPoints` counter is incremented
 - `StopBackupJob` on a `CREATED` or `RUNNING` job transitions it to `ABORTING → ABORTED`
@@ -102,10 +103,10 @@ Actual backup is simulated — no data is read from or written to the referenced
 
 ## Configuration
 
-| Property | Env var | Default | Description |
-|---|---|---|---|
-| `floci.services.backup.enabled` | `FLOCI_SERVICES_BACKUP_ENABLED` | `true` | Enable / disable the service |
-| `floci.services.backup.job-completion-delay-seconds` | `FLOCI_SERVICES_BACKUP_JOB_COMPLETION_DELAY_SECONDS` | `3` | Seconds from job start until `COMPLETED` |
+| Property                                             | Env var                                              | Default | Description                              |
+| ---------------------------------------------------- | ---------------------------------------------------- | ------- | ---------------------------------------- |
+| `floci.services.backup.enabled`                      | `FLOCI_SERVICES_BACKUP_ENABLED`                      | `true`  | Enable / disable the service             |
+| `floci.services.backup.job-completion-delay-seconds` | `FLOCI_SERVICES_BACKUP_JOB_COMPLETION_DELAY_SECONDS` | `3`     | Seconds from job start until `COMPLETED` |
 
 ## Not Yet Supported
 

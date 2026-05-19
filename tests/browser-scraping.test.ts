@@ -1,6 +1,6 @@
-import { BrowserExecutionAdapter } from '../orchestration/browser-adapter';
-import { ScrapingExecutionAdapter } from '../orchestration/scraping-adapter';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
+import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
+import { ScrapingExecutionAdapter } from "../orchestration/scraping-adapter";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
 
 describe("Milestone 2 & 3: Bounded Browser & Bounded Scraping Quotas", () => {
   let telemetry: EnvironmentTelemetry;
@@ -15,10 +15,7 @@ describe("Milestone 2 & 3: Bounded Browser & Bounded Scraping Quotas", () => {
       const result = await adapter.executeBrowserTask({
         id: "task-b1",
         url: "https://github.com",
-        actions: [
-          { type: "navigate", value: "https://news.ycombinator.com" },
-          { type: "screenshot" }
-        ],
+        actions: [{ type: "navigate", value: "https://news.ycombinator.com" }, { type: "screenshot" }],
         timeoutMs: 5000
       });
 
@@ -57,9 +54,7 @@ describe("Milestone 2 & 3: Bounded Browser & Bounded Scraping Quotas", () => {
       const res = await adapter.executeBrowserTask({
         id: "task-b4",
         url: "https://github.com",
-        actions: [
-          { type: "navigate", value: "file:///C:/Users/yasha/Desktop/secrets.json" }
-        ],
+        actions: [{ type: "navigate", value: "file:///C:/Users/yasha/Desktop/secrets.json" }],
         timeoutMs: 5000
       });
       expect(res.success).toBe(false);

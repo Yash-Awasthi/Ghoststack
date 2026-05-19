@@ -2,25 +2,25 @@
  * Common test setup and utilities for floci SDK tests.
  */
 
-import { randomUUID } from 'node:crypto';
-import { writeFileSync, readFileSync, mkdtempSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { buildSync } from 'esbuild';
+import { randomUUID } from "node:crypto";
+import { writeFileSync, readFileSync, mkdtempSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { buildSync } from "esbuild";
 
-export const ENDPOINT = process.env.FLOCI_ENDPOINT || 'http://localhost:4566';
-export const REGION = process.env.AWS_DEFAULT_REGION || 'us-east-1';
-export const ACCOUNT = '000000000000';
+export const ENDPOINT = process.env.FLOCI_ENDPOINT || "http://localhost:4566";
+export const REGION = process.env.AWS_DEFAULT_REGION || "us-east-1";
+export const ACCOUNT = "000000000000";
 export const CREDS = {
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'test',
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'test',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID || "test",
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "test"
 };
 
 export const CLIENT_CONFIG = {
   endpoint: ENDPOINT,
   region: REGION,
   credentials: CREDS,
-  forcePathStyle: true,
+  forcePathStyle: true
 };
 
 export function makeClient<T>(
@@ -30,7 +30,7 @@ export function makeClient<T>(
   return new ClientClass({ ...CLIENT_CONFIG, ...extra });
 }
 
-export function uniqueName(prefix = 'test'): string {
+export function uniqueName(prefix = "test"): string {
   return `${prefix}-${randomUUID().slice(0, 8)}`;
 }
 
@@ -124,13 +124,13 @@ function crc32(buf: Buffer): number {
  * This avoids maintaining a separate folder with its own package.json/node_modules.
  */
 export function buildBundledZip(handlerCode: string): Buffer {
-  const tmpDir = mkdtempSync(join(tmpdir(), 'lambda-bundle-'));
-  const entryFile = join(tmpDir, 'index.js');
-  const outFile = join(tmpDir, 'bundle.js');
+  const tmpDir = mkdtempSync(join(tmpdir(), "lambda-bundle-"));
+  const entryFile = join(tmpDir, "index.js");
+  const outFile = join(tmpDir, "bundle.js");
 
   // Resolve node_modules from the test project root (where this file lives)
-  const projectRoot = join(import.meta.dirname, '..');
-  const nodeModulesPath = join(projectRoot, 'node_modules');
+  const projectRoot = join(import.meta.dirname, "..");
+  const nodeModulesPath = join(projectRoot, "node_modules");
 
   try {
     writeFileSync(entryFile, handlerCode);
@@ -138,16 +138,16 @@ export function buildBundledZip(handlerCode: string): Buffer {
     buildSync({
       entryPoints: [entryFile],
       bundle: true,
-      platform: 'node',
-      target: 'node22',
+      platform: "node",
+      target: "node22",
       outfile: outFile,
-      format: 'cjs',
+      format: "cjs",
       minify: false,
-      nodePaths: [nodeModulesPath],
+      nodePaths: [nodeModulesPath]
     });
 
     const bundled = readFileSync(outFile);
-    return buildMinimalZip('index.js', bundled);
+    return buildMinimalZip("index.js", bundled);
   } finally {
     rmSync(tmpDir, { recursive: true, force: true });
   }

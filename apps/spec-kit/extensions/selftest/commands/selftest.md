@@ -24,7 +24,7 @@ specify extension info "$ARGUMENTS"
 
 ### Step 2: Simulate Installation
 
-First, try to add the extension to the current workspace configuration directly. If the catalog provides the extension as `install_allowed: false` (discovery-only), this step is *expected* to fail.
+First, try to add the extension to the current workspace configuration directly. If the catalog provides the extension as `install_allowed: false` (discovery-only), this step is _expected_ to fail.
 
 ```bash
 specify extension add "$ARGUMENTS"
@@ -48,10 +48,11 @@ cat .specify/extensions/.registry/$ARGUMENTS.json
 
 ### Step 4: Verification Report
 
-Analyze the standard output of the three steps. 
+Analyze the standard output of the three steps.
 Generate a terminal-style test output format detailing the results of discovery, installation, and registration. Return this directly to the user.
 
 Example output format:
+
 ```text
 ============================= test session starts ==============================
 collected 3 items

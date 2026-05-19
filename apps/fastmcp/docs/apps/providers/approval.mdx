@@ -6,14 +6,17 @@ icon: shield-check
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.2.0" />
 
 `Approval` adds a human-in-the-loop confirmation step to any server. The LLM presents what it's about to do, the user approves or rejects via buttons, and the decision flows back into the conversation as a message.
 
 <Frame>
-  <img src="/apps/images/app-approval.png" alt="The Approval provider shown in Goose, with a payment confirmation card and Approve/Cancel buttons" />
+  <img
+    src="/apps/images/app-approval.png"
+    alt="The Approval provider shown in Goose, with a payment confirmation card and Approve/Cancel buttons"
+  />
 </Frame>
 
 ```python
@@ -26,9 +29,9 @@ mcp.add_provider(Approval())
 
 This registers a single tool:
 
-| Tool | Visibility | Purpose |
-|------|-----------|---------|
-| `request_approval` | Model | Shows an approval card, sends the user's decision back as a message |
+| Tool               | Visibility | Purpose                                                             |
+| ------------------ | ---------- | ------------------------------------------------------------------- |
+| `request_approval` | Model      | Shows an approval card, sends the user's decision back as a message |
 
 The LLM calls `request_approval` with a summary (and optional details) whenever it's about to take a significant action. The user sees a card with Approve and Reject buttons. Clicking either sends a message back into the conversation via `SendMessage`, which triggers the LLM's next turn.
 
@@ -39,7 +42,10 @@ The message looks like it came from the user:
 ```
 
 <Note>
-Approval is an advisory gate, not an enforcement mechanism. The conversation isn't blocked while the card is open — the user can keep typing, and a determined LLM could proceed without waiting. Think of it as a strong UX signal that encourages confirmation, not a security boundary. For hard enforcement, implement approval logic server-side in your tool implementations.
+  Approval is an advisory gate, not an enforcement mechanism. The conversation isn't blocked while the card is open —
+  the user can keep typing, and a determined LLM could proceed without waiting. Think of it as a strong UX signal that
+  encourages confirmation, not a security boundary. For hard enforcement, implement approval logic server-side in your
+  tool implementations.
 </Note>
 
 ## Configuration

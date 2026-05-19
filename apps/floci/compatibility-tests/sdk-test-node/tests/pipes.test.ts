@@ -2,7 +2,7 @@
  * EventBridge Pipes integration tests.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   PipesClient,
   CreatePipeCommand,
@@ -12,8 +12,8 @@ import {
   DeletePipeCommand,
   StartPipeCommand,
   StopPipeCommand,
-  RequestedPipeState,
-} from '@aws-sdk/client-pipes';
+  RequestedPipeState
+} from "@aws-sdk/client-pipes";
 import {
   SQSClient,
   CreateQueueCommand,
@@ -21,25 +21,24 @@ import {
   SendMessageCommand,
   ReceiveMessageCommand,
   GetQueueUrlCommand,
-  GetQueueAttributesCommand,
-} from '@aws-sdk/client-sqs';
-import { makeClient, uniqueName, ACCOUNT, REGION, sleep } from './setup';
+  GetQueueAttributesCommand
+} from "@aws-sdk/client-sqs";
+import { makeClient, uniqueName, ACCOUNT, REGION, sleep } from "./setup";
 
 const ROLE_ARN = `arn:aws:iam::${ACCOUNT}:role/pipe-role`;
 
-const sqsArn = (queueName: string) =>
-  `arn:aws:sqs:${REGION}:${ACCOUNT}:${queueName}`;
+const sqsArn = (queueName: string) => `arn:aws:sqs:${REGION}:${ACCOUNT}:${queueName}`;
 
 const getQueueUrl = async (sqs: SQSClient, name: string): Promise<string> => {
   try {
     const r = await sqs.send(new GetQueueUrlCommand({ QueueName: name }));
-    return r.QueueUrl ?? '';
+    return r.QueueUrl ?? "";
   } catch {
-    return '';
+    return "";
   }
 };
 
-describe('Pipes CRUD', () => {
+describe("Pipes CRUD", () => {
   let pipes: PipesClient;
   let sqs: SQSClient;
   let pipeName: string;
@@ -55,7 +54,7 @@ describe('Pipes CRUD', () => {
     // Cleanup is handled per-test
   });
 
-  it('should create a pipe in STOPPED state', async () => {
+  it("should create a pipe in STOPPED state", async () => {
     pipeName = `node-pipe-create-${uniqueName()}`;
     srcQueue = `node-pipe-src-create-${uniqueName()}`;
     tgtQueue = `node-pipe-tgt-create-${uniqueName()}`;
@@ -70,10 +69,10 @@ describe('Pipes CRUD', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
-      expect(response.CurrentState).toBe('STOPPED');
+      expect(response.CurrentState).toBe("STOPPED");
       expect(response.Arn).toContain(pipeName);
     } finally {
       await pipes.send(new DeletePipeCommand({ Name: pipeName })).catch(() => {});
@@ -82,7 +81,7 @@ describe('Pipes CRUD', () => {
     }
   });
 
-  it('should describe a pipe', async () => {
+  it("should describe a pipe", async () => {
     pipeName = `node-pipe-describe-${uniqueName()}`;
     srcQueue = `node-pipe-src-describe-${uniqueName()}`;
     tgtQueue = `node-pipe-tgt-describe-${uniqueName()}`;
@@ -97,7 +96,7 @@ describe('Pipes CRUD', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
@@ -105,7 +104,7 @@ describe('Pipes CRUD', () => {
       expect(response.Name).toBe(pipeName);
       expect(response.Source).toBe(sqsArn(srcQueue));
       expect(response.Target).toBe(sqsArn(tgtQueue));
-      expect(response.CurrentState).toBe('STOPPED');
+      expect(response.CurrentState).toBe("STOPPED");
     } finally {
       await pipes.send(new DeletePipeCommand({ Name: pipeName })).catch(() => {});
       await sqs.send(new DeleteQueueCommand({ QueueUrl: await getQueueUrl(sqs, srcQueue) })).catch(() => {});
@@ -113,7 +112,7 @@ describe('Pipes CRUD', () => {
     }
   });
 
-  it('should list pipes', async () => {
+  it("should list pipes", async () => {
     pipeName = `node-pipe-list-${uniqueName()}`;
     srcQueue = `node-pipe-src-list-${uniqueName()}`;
     tgtQueue = `node-pipe-tgt-list-${uniqueName()}`;
@@ -128,7 +127,7 @@ describe('Pipes CRUD', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
@@ -142,7 +141,7 @@ describe('Pipes CRUD', () => {
     }
   });
 
-  it('should update a pipe', async () => {
+  it("should update a pipe", async () => {
     pipeName = `node-pipe-update-${uniqueName()}`;
     srcQueue = `node-pipe-src-update-${uniqueName()}`;
     tgtQueue = `node-pipe-tgt-update-${uniqueName()}`;
@@ -157,7 +156,7 @@ describe('Pipes CRUD', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
@@ -165,13 +164,13 @@ describe('Pipes CRUD', () => {
         new UpdatePipeCommand({
           Name: pipeName,
           RoleArn: ROLE_ARN,
-          Description: 'updated via SDK',
-          DesiredState: RequestedPipeState.STOPPED,
+          Description: "updated via SDK",
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
       const response = await pipes.send(new DescribePipeCommand({ Name: pipeName }));
-      expect(response.Description).toBe('updated via SDK');
+      expect(response.Description).toBe("updated via SDK");
     } finally {
       await pipes.send(new DeletePipeCommand({ Name: pipeName })).catch(() => {});
       await sqs.send(new DeleteQueueCommand({ QueueUrl: await getQueueUrl(sqs, srcQueue) })).catch(() => {});
@@ -179,7 +178,7 @@ describe('Pipes CRUD', () => {
     }
   });
 
-  it('should delete a pipe', async () => {
+  it("should delete a pipe", async () => {
     pipeName = `node-pipe-delete-${uniqueName()}`;
     srcQueue = `node-pipe-src-delete-${uniqueName()}`;
     tgtQueue = `node-pipe-tgt-delete-${uniqueName()}`;
@@ -194,29 +193,25 @@ describe('Pipes CRUD', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
       await pipes.send(new DeletePipeCommand({ Name: pipeName }));
 
-      await expect(
-        pipes.send(new DescribePipeCommand({ Name: pipeName }))
-      ).rejects.toThrow();
+      await expect(pipes.send(new DescribePipeCommand({ Name: pipeName }))).rejects.toThrow();
     } finally {
       await sqs.send(new DeleteQueueCommand({ QueueUrl: await getQueueUrl(sqs, srcQueue) })).catch(() => {});
       await sqs.send(new DeleteQueueCommand({ QueueUrl: await getQueueUrl(sqs, tgtQueue) })).catch(() => {});
     }
   });
 
-  it('should return error for non-existent pipe', async () => {
-    await expect(
-      pipes.send(new DescribePipeCommand({ Name: 'nonexistent-pipe' }))
-    ).rejects.toThrow();
+  it("should return error for non-existent pipe", async () => {
+    await expect(pipes.send(new DescribePipeCommand({ Name: "nonexistent-pipe" }))).rejects.toThrow();
   });
 });
 
-describe('Pipes Lifecycle', () => {
+describe("Pipes Lifecycle", () => {
   let pipes: PipesClient;
   let sqs: SQSClient;
 
@@ -225,7 +220,7 @@ describe('Pipes Lifecycle', () => {
     sqs = makeClient(SQSClient);
   });
 
-  it('should start and stop a pipe', async () => {
+  it("should start and stop a pipe", async () => {
     const pipeName = `node-pipe-lifecycle-${uniqueName()}`;
     const srcQueue = `node-pipe-src-lifecycle-${uniqueName()}`;
     const tgtQueue = `node-pipe-tgt-lifecycle-${uniqueName()}`;
@@ -240,15 +235,15 @@ describe('Pipes Lifecycle', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
       const startResponse = await pipes.send(new StartPipeCommand({ Name: pipeName }));
-      expect(startResponse.CurrentState).toBe('RUNNING');
+      expect(startResponse.CurrentState).toBe("RUNNING");
 
       const stopResponse = await pipes.send(new StopPipeCommand({ Name: pipeName }));
-      expect(stopResponse.CurrentState).toBe('STOPPED');
+      expect(stopResponse.CurrentState).toBe("STOPPED");
     } finally {
       await pipes.send(new DeletePipeCommand({ Name: pipeName })).catch(() => {});
       await sqs.send(new DeleteQueueCommand({ QueueUrl: await getQueueUrl(sqs, srcQueue) })).catch(() => {});
@@ -257,7 +252,7 @@ describe('Pipes Lifecycle', () => {
   });
 });
 
-describe('Pipes Polling', () => {
+describe("Pipes Polling", () => {
   let pipes: PipesClient;
   let sqs: SQSClient;
 
@@ -266,7 +261,7 @@ describe('Pipes Polling', () => {
     sqs = makeClient(SQSClient);
   });
 
-  it('should forward SQS messages to SQS target', async () => {
+  it("should forward SQS messages to SQS target", async () => {
     const pipeName = `node-pipe-fwd-${uniqueName()}`;
     const srcQueue = `node-pipe-src-fwd-${uniqueName()}`;
     const tgtQueue = `node-pipe-tgt-fwd-${uniqueName()}`;
@@ -283,13 +278,11 @@ describe('Pipes Polling', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.RUNNING,
+          DesiredState: RequestedPipeState.RUNNING
         })
       );
 
-      await sqs.send(
-        new SendMessageCommand({ QueueUrl: srcUrl, MessageBody: 'hello from pipes' })
-      );
+      await sqs.send(new SendMessageCommand({ QueueUrl: srcUrl, MessageBody: "hello from pipes" }));
 
       let found = false;
       for (let i = 0; i < 15; i++) {
@@ -298,10 +291,10 @@ describe('Pipes Polling', () => {
           new ReceiveMessageCommand({
             QueueUrl: tgtUrl,
             MaxNumberOfMessages: 1,
-            WaitTimeSeconds: 1,
+            WaitTimeSeconds: 1
           })
         );
-        if (r.Messages?.length && r.Messages[0].Body?.includes('hello from pipes')) {
+        if (r.Messages?.length && r.Messages[0].Body?.includes("hello from pipes")) {
           found = true;
           break;
         }
@@ -315,7 +308,7 @@ describe('Pipes Polling', () => {
     }
   });
 
-  it('should filter messages with FilterCriteria', async () => {
+  it("should filter messages with FilterCriteria", async () => {
     const pipeName = `node-pipe-filter-${uniqueName()}`;
     const srcQueue = `node-pipe-src-filter-${uniqueName()}`;
     const tgtQueue = `node-pipe-tgt-filter-${uniqueName()}`;
@@ -335,24 +328,22 @@ describe('Pipes Polling', () => {
           DesiredState: RequestedPipeState.RUNNING,
           SourceParameters: {
             FilterCriteria: {
-              Filters: [
-                { Pattern: '{"body": {"status": ["active"]}}' },
-              ],
-            },
-          },
+              Filters: [{ Pattern: '{"body": {"status": ["active"]}}' }]
+            }
+          }
         })
       );
 
       await sqs.send(
         new SendMessageCommand({
           QueueUrl: srcUrl,
-          MessageBody: JSON.stringify({ status: 'active', id: 'match-1' }),
+          MessageBody: JSON.stringify({ status: "active", id: "match-1" })
         })
       );
       await sqs.send(
         new SendMessageCommand({
           QueueUrl: srcUrl,
-          MessageBody: JSON.stringify({ status: 'inactive', id: 'no-match' }),
+          MessageBody: JSON.stringify({ status: "inactive", id: "no-match" })
         })
       );
 
@@ -363,11 +354,11 @@ describe('Pipes Polling', () => {
           new ReceiveMessageCommand({
             QueueUrl: tgtUrl,
             MaxNumberOfMessages: 10,
-            WaitTimeSeconds: 1,
+            WaitTimeSeconds: 1
           })
         );
-        if (r.Messages?.some((m) => m.Body?.includes('match-1'))) {
-          const hasNonMatch = r.Messages.some((m) => m.Body?.includes('no-match'));
+        if (r.Messages?.some((m) => m.Body?.includes("match-1"))) {
+          const hasNonMatch = r.Messages.some((m) => m.Body?.includes("no-match"));
           expect(hasNonMatch).toBe(false);
           found = true;
           break;
@@ -379,10 +370,10 @@ describe('Pipes Polling', () => {
       const attrs = await sqs.send(
         new GetQueueAttributesCommand({
           QueueUrl: srcUrl,
-          AttributeNames: ['ApproximateNumberOfMessages'],
+          AttributeNames: ["ApproximateNumberOfMessages"]
         })
       );
-      expect(attrs.Attributes?.ApproximateNumberOfMessages).toBe('0');
+      expect(attrs.Attributes?.ApproximateNumberOfMessages).toBe("0");
     } finally {
       await pipes.send(new DeletePipeCommand({ Name: pipeName })).catch(() => {});
       await sqs.send(new DeleteQueueCommand({ QueueUrl: srcUrl })).catch(() => {});
@@ -390,7 +381,7 @@ describe('Pipes Polling', () => {
     }
   });
 
-  it('should respect BatchSize in SourceParameters', async () => {
+  it("should respect BatchSize in SourceParameters", async () => {
     const pipeName = `node-pipe-batch-${uniqueName()}`;
     const srcQueue = `node-pipe-src-batch-${uniqueName()}`;
     const tgtQueue = `node-pipe-tgt-batch-${uniqueName()}`;
@@ -410,16 +401,14 @@ describe('Pipes Polling', () => {
           DesiredState: RequestedPipeState.RUNNING,
           SourceParameters: {
             SqsQueueParameters: {
-              BatchSize: 1,
-            },
-          },
+              BatchSize: 1
+            }
+          }
         })
       );
 
       for (let i = 1; i <= 3; i++) {
-        await sqs.send(
-          new SendMessageCommand({ QueueUrl: srcUrl, MessageBody: `batch-msg-${i}` })
-        );
+        await sqs.send(new SendMessageCommand({ QueueUrl: srcUrl, MessageBody: `batch-msg-${i}` }));
       }
 
       const foundMessages = new Set<string>();
@@ -429,7 +418,7 @@ describe('Pipes Polling', () => {
           new ReceiveMessageCommand({
             QueueUrl: tgtUrl,
             MaxNumberOfMessages: 10,
-            WaitTimeSeconds: 1,
+            WaitTimeSeconds: 1
           })
         );
         for (const msg of r.Messages ?? []) {
@@ -448,7 +437,7 @@ describe('Pipes Polling', () => {
     }
   });
 
-  it('should not forward messages when pipe is stopped', async () => {
+  it("should not forward messages when pipe is stopped", async () => {
     const pipeName = `node-pipe-nofwd-${uniqueName()}`;
     const srcQueue = `node-pipe-src-nofwd-${uniqueName()}`;
     const tgtQueue = `node-pipe-tgt-nofwd-${uniqueName()}`;
@@ -465,29 +454,27 @@ describe('Pipes Polling', () => {
           Source: sqsArn(srcQueue),
           Target: sqsArn(tgtQueue),
           RoleArn: ROLE_ARN,
-          DesiredState: RequestedPipeState.STOPPED,
+          DesiredState: RequestedPipeState.STOPPED
         })
       );
 
-      await sqs.send(
-        new SendMessageCommand({ QueueUrl: srcUrl, MessageBody: 'should not forward' })
-      );
+      await sqs.send(new SendMessageCommand({ QueueUrl: srcUrl, MessageBody: "should not forward" }));
 
       await sleep(3000);
 
       const attrs = await sqs.send(
         new GetQueueAttributesCommand({
           QueueUrl: srcUrl,
-          AttributeNames: ['ApproximateNumberOfMessages'],
+          AttributeNames: ["ApproximateNumberOfMessages"]
         })
       );
-      expect(attrs.Attributes?.ApproximateNumberOfMessages).toBe('1');
+      expect(attrs.Attributes?.ApproximateNumberOfMessages).toBe("1");
 
       const r = await sqs.send(
         new ReceiveMessageCommand({
           QueueUrl: tgtUrl,
           MaxNumberOfMessages: 1,
-          WaitTimeSeconds: 1,
+          WaitTimeSeconds: 1
         })
       );
       expect(r.Messages ?? []).toHaveLength(0);

@@ -6,14 +6,16 @@ icon: database
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.13.0" />
 
 FastMCP uses pluggable storage backends for caching responses and managing OAuth state. By default, all storage is in-memory, which is perfect for development but doesn't persist across restarts. FastMCP includes support for multiple storage backends, and you can easily extend it with custom implementations.
 
 <Tip>
-The storage layer is powered by **[py-key-value-aio](https://github.com/strawgate/py-key-value)**, an async key-value library maintained by a core FastMCP maintainer. This library provides a unified interface for multiple backends, making it easy to swap implementations based on your deployment needs.
+  The storage layer is powered by **[py-key-value-aio](https://github.com/strawgate/py-key-value)**, an async key-value
+  library maintained by a core FastMCP maintainer. This library provides a unified interface for multiple backends,
+  making it easy to swap implementations based on your deployment needs.
 </Tip>
 
 ## Available Backends
@@ -33,6 +35,7 @@ cache_store = MemoryStore()
 ```
 
 **Characteristics:**
+
 - ✅ No setup required
 - ✅ Very fast
 - ❌ Data lost on restart
@@ -65,10 +68,16 @@ middleware = ResponseCachingMiddleware(cache_storage=store)
 ```
 
 <Warning>
-**Sanitization strategies are required** when using `FileTreeStore`. Without them, keys containing special characters (such as URL-based OAuth client IDs like `https://claude.ai/oauth/claude-code-client-metadata`) will be used as-is in filesystem paths, causing `FileNotFoundError` crashes. The V1 strategies shown above are safe defaults — alphanumeric names pass through as-is for readability, while special characters are hashed to prevent path errors and traversal attacks. Changing sanitization strategies after data has been written is a breaking change, so choose your strategy upfront.
+  **Sanitization strategies are required** when using `FileTreeStore`. Without them, keys containing special characters
+  (such as URL-based OAuth client IDs like `https://claude.ai/oauth/claude-code-client-metadata`) will be used as-is in
+  filesystem paths, causing `FileNotFoundError` crashes. The V1 strategies shown above are safe defaults — alphanumeric
+  names pass through as-is for readability, while special characters are hashed to prevent path errors and traversal
+  attacks. Changing sanitization strategies after data has been written is a breaking change, so choose your strategy
+  upfront.
 </Warning>
 
 **Characteristics:**
+
 - ✅ Data persists across restarts
 - ✅ No external dependencies
 - ✅ Human-readable files on disk
@@ -79,9 +88,7 @@ middleware = ResponseCachingMiddleware(cache_storage=store)
 
 **Best for:** Distributed production deployments, shared caching across multiple servers
 
-<Note>
-Redis support requires an optional dependency: `pip install 'py-key-value-aio[redis]'`
-</Note>
+<Note>Redis support requires an optional dependency: `pip install 'py-key-value-aio[redis]'`</Note>
 
 Redis provides distributed caching and state management, ideal for production deployments with multiple server instances.
 
@@ -124,6 +131,7 @@ auth = GitHubProvider(
 ```
 
 **Characteristics:**
+
 - ✅ Distributed and highly available
 - ✅ Fast in-memory performance
 - ✅ Works across multiple server instances
@@ -145,7 +153,10 @@ The py-key-value-aio library includes additional implementations for various sto
 For configuration details on these backends, consult the [py-key-value-aio documentation](https://github.com/strawgate/py-key-value).
 
 <Warning>
-Before using these backends in production, review the [py-key-value documentation](https://github.com/strawgate/py-key-value) to understand the maturity level and limitations of your chosen backend. Some backends may be in preview or have specific constraints that make them unsuitable for production use.
+  Before using these backends in production, review the [py-key-value
+  documentation](https://github.com/strawgate/py-key-value) to understand the maturity level and limitations of your
+  chosen backend. Some backends may be in preview or have specific constraints that make them unsuitable for production
+  use.
 </Warning>
 
 ## Use Cases in FastMCP
@@ -157,6 +168,7 @@ The [OAuth Proxy](/servers/auth/oauth-proxy) and OAuth auth providers use storag
 **Development (default behavior):**
 
 By default, FastMCP automatically manages keys and storage based on your platform:
+
 - **Mac/Windows**: Keys are auto-managed via system keyring, storage defaults to disk. Suitable **only** for development and local testing.
 - **Linux**: Keys are ephemeral, storage defaults to memory.
 
@@ -273,13 +285,13 @@ This allows clients to reconnect without re-authenticating after restarts.
 
 ## Choosing a Backend
 
-| Backend | Development | Single Server | Multi-Server | Cloud Native |
-|---------|-------------|---------------|--------------|--------------|
-| Memory | ✅ Best | ⚠️ Limited | ❌ | ❌ |
-| File | ✅ Good | ✅ Recommended | ❌ | ⚠️ |
-| Redis | ⚠️ Overkill | ✅ Good | ✅ Best | ✅ Best |
-| DynamoDB | ❌ | ⚠️ | ✅ | ✅ Best (AWS) |
-| MongoDB | ❌ | ⚠️ | ✅ | ✅ Good |
+| Backend  | Development | Single Server  | Multi-Server | Cloud Native  |
+| -------- | ----------- | -------------- | ------------ | ------------- |
+| Memory   | ✅ Best     | ⚠️ Limited     | ❌           | ❌            |
+| File     | ✅ Good     | ✅ Recommended | ❌           | ⚠️            |
+| Redis    | ⚠️ Overkill | ✅ Good        | ✅ Best      | ✅ Best       |
+| DynamoDB | ❌          | ⚠️             | ✅           | ✅ Best (AWS) |
+| MongoDB  | ❌          | ⚠️             | ✅           | ✅ Good       |
 
 **Decision tree:**
 

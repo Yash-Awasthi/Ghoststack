@@ -6,12 +6,13 @@ icon: flask
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.1.0" />
 
 <Warning>
-CodeMode is experimental. The core interface is stable, but the specific discovery tools and their parameters may evolve as we learn more about what works best in practice.
+  CodeMode is experimental. The core interface is stable, but the specific discovery tools and their parameters may
+  evolve as we learn more about what works best in practice.
 </Warning>
 
 Standard MCP tool usage has two scaling problems. First, every tool in the catalog is loaded into the LLM's context upfront — with hundreds of tools, that's tens of thousands of tokens spent before the LLM even reads the user's request. Second, every tool call is a round-trip: the LLM calls a tool, the result passes back through the context window, the LLM reasons about it, calls another tool, and so on. Intermediate results that only exist to feed the next step still burn tokens flowing through the model.
@@ -23,7 +24,7 @@ The approach was introduced by Cloudflare in [Code Mode](https://blog.cloudflare
 ## Getting Started
 
 <Tip>
-CodeMode requires the `code-mode` extra for sandbox support. Install it with `pip install "fastmcp[code-mode]"`.
+  CodeMode requires the `code-mode` extra for sandbox support. Install it with `pip install "fastmcp[code-mode]"`.
 </Tip>
 
 You take a normal server with normally registered tools and add a `CodeMode` transform. The transform wraps your existing tools in the code mode machinery — your tool functions don't change at all:
@@ -107,6 +108,7 @@ return b
 ```
 
 The result is returned to the LLM.
+
 </Step>
 </Steps>
 
@@ -120,11 +122,11 @@ CodeMode ships with four built-in discovery tools: `Search`, `GetSchemas`, `GetT
 
 `Search` and `GetSchemas` share the same three detail levels, so the same `detail` value produces the same output format regardless of which tool the LLM calls:
 
-| Level | Output | Token cost |
-|---|---|---|
-| `"brief"` | Tool names and one-line descriptions | Cheapest — good for scanning |
+| Level        | Output                                                             | Token cost                          |
+| ------------ | ------------------------------------------------------------------ | ----------------------------------- |
+| `"brief"`    | Tool names and one-line descriptions                               | Cheapest — good for scanning        |
 | `"detailed"` | Compact markdown with parameter names, types, and required markers | Medium — often enough to write code |
-| `"full"` | Complete JSON schema | Most expensive — everything |
+| `"full"`     | Complete JSON schema                                               | Most expensive — everything         |
 
 `Search` defaults to `"brief"` and `GetSchemas` defaults to `"detailed"`.
 
@@ -300,13 +302,13 @@ mcp = FastMCP("Server", transforms=[CodeMode(sandbox_provider=sandbox)])
 
 All keys are optional — omit any to leave that dimension uncapped:
 
-| Key | Type | Description |
-|---|---|---|
-| `max_duration_secs` | `float` | Maximum wall-clock execution time |
-| `max_memory` | `int` | Memory ceiling in bytes |
-| `max_allocations` | `int` | Cap on total object allocations |
-| `max_recursion_depth` | `int` | Maximum recursion depth |
-| `gc_interval` | `int` | Garbage collection frequency |
+| Key                   | Type    | Description                       |
+| --------------------- | ------- | --------------------------------- |
+| `max_duration_secs`   | `float` | Maximum wall-clock execution time |
+| `max_memory`          | `int`   | Memory ceiling in bytes           |
+| `max_allocations`     | `int`   | Cap on total object allocations   |
+| `max_recursion_depth` | `int`   | Maximum recursion depth           |
+| `gc_interval`         | `int`   | Garbage collection frequency      |
 
 ### Custom Sandbox Providers
 

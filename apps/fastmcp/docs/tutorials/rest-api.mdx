@@ -12,7 +12,8 @@ This is where **FastMCP** shines. If your API has an OpenAPI (or Swagger) specif
 This guide will walk you through converting a public REST API into an MCP server in just a few lines of code.
 
 <Tip>
-Every code block in this tutorial is a complete, runnable example. You can copy and paste it into a file and run it, or paste it directly into a Python REPL like IPython to try it out.
+  Every code block in this tutorial is a complete, runnable example. You can copy and paste it into a file and run it,
+  or paste it directly into a Python REPL like IPython to try it out.
 </Tip>
 
 ### Prerequisites
@@ -27,19 +28,18 @@ pip install fastmcp
 
 For this tutorial, we'll use the [JSONPlaceholder API](https://jsonplaceholder.typicode.com/), a free, fake online REST API for testing and prototyping. It's perfect because it's simple and has a public OpenAPI specification.
 
--   **API Base URL:** `https://jsonplaceholder.typicode.com`
--   **OpenAPI Spec URL:** We'll use a community-provided spec for it.
+- **API Base URL:** `https://jsonplaceholder.typicode.com`
+- **OpenAPI Spec URL:** We'll use a community-provided spec for it.
 
 ## Step 2: Create the MCP Server
 
 Now for the magic. We'll use `FastMCP.from_openapi`. This method takes an `httpx.AsyncClient` configured for your API and its OpenAPI specification, and automatically converts **every endpoint** into a callable MCP `Tool`.
 
-<Tip>
-Learn more about working with OpenAPI specs in the [OpenAPI integration docs](/integrations/openapi).
-</Tip>
+<Tip>Learn more about working with OpenAPI specs in the [OpenAPI integration docs](/integrations/openapi).</Tip>
 
 <Note>
-For this tutorial, we'll use a simplified OpenAPI spec directly in the code. In a real project, you would typically load the spec from a URL or local file.
+  For this tutorial, we'll use a simplified OpenAPI spec directly in the code. In a real project, you would typically
+  load the spec from a URL or local file.
 </Note>
 
 Create a file named `api_server.py`:
@@ -91,9 +91,7 @@ And that's it! With just a few lines of code, you've created an MCP server that 
 
 Let's verify that our new MCP server works. We can use the `fastmcp.Client` to connect to it and inspect its tools.
 
-<Tip>
-Learn more about the FastMCP client in the [client docs](/clients/client).
-</Tip>
+<Tip>Learn more about the FastMCP client in the [client docs](/clients/client).</Tip>
 
 Create a separate file, `api_client.py`:
 
@@ -104,13 +102,13 @@ from fastmcp import Client
 async def main():
     # Connect to the MCP server we just created
     async with Client("http://127.0.0.1:8000/mcp") as client:
-        
+
         # List the tools that were automatically generated
         tools = await client.list_tools()
         print("Generated Tools:")
         for tool in tools:
             print(f"- {tool.name}")
-            
+
         # Call one of the generated tools
         print("\n\nCalling tool 'get_user_by_id'...")
         user = await client.call_tool("get_user_by_id", {"id": 1})
@@ -121,11 +119,13 @@ if __name__ == "__main__":
 ```
 
 First, run your server:
+
 ```bash
 python api_server.py
 ```
 
 Then, in another terminal, run the client:
+
 ```bash
 python api_client.py
 ```
@@ -133,7 +133,6 @@ python api_client.py
 You should see a list of generated tools (`get_users`, `get_user_by_id`) and the result of calling the `get_user_by_id` tool, which fetches data from the live JSONPlaceholder API.
 
 ![](/assets/images/tutorial-rest-api-result.png)
-
 
 ## Step 4: Customizing Route Maps
 
@@ -143,9 +142,7 @@ However, for clients that support the full MCP spec, representing `GET` requests
 
 FastMCP allows users to customize this behavior using the concept of "route maps". A `RouteMap` is a mapping of an API route to an MCP type. FastMCP checks each API route against your custom maps in order. If a route matches a map, it's converted to the specified `mcp_type`. Any route that doesn't match your custom maps will fall back to the default behavior (becoming a `Tool`).
 
-<Tip>
-Learn more about route maps in the [OpenAPI integration docs](/integrations/openapi#route-mapping).
-</Tip>
+<Tip>Learn more about route maps in the [OpenAPI integration docs](/integrations/openapi#route-mapping).</Tip>
 
 Here’s how you can add custom route maps to turn `GET` requests into `Resources` and `ResourceTemplates` (if they have path parameters):
 
@@ -197,7 +194,9 @@ mcp = FastMCP.from_openapi(
 if __name__ == "__main__":
     mcp.run(transport="http", port=8000)
 ```
+
 With this configuration:
+
 - `GET /users/{id}` becomes a `ResourceTemplate`.
 - `GET /users` becomes a `Resource`.
 - Any `POST`, `PUT`, etc. endpoints would still become `Tools` by default.

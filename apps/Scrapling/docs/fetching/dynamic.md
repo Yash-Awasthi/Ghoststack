@@ -11,11 +11,13 @@ As we will explain later, to automate the page, you need some knowledge of [Play
     3. You've completed or read the [Main classes](../parsing/main_classes.md) page to know what properties/methods the [Response](../fetching/choosing.md#response-object) class is inheriting from the [Selector](../parsing/main_classes.md#selector) class.
 
 ## Basic Usage
+
 You have one primary way to import this Fetcher, which is the same for all fetchers.
 
 ```python
 from scrapling.fetchers import DynamicFetcher
 ```
+
 Check out how to configure the parsing options [here](choosing.md#parser-configuration-in-all-fetchers)
 
 Now, we will review most of the arguments one by one, using examples. If you want to jump to a table of all arguments for quick reference, [click here](#full-list-of-arguments)
@@ -24,34 +26,39 @@ Now, we will review most of the arguments one by one, using examples. If you wan
 
     The async version of the `fetch` method is `async_fetch`, of course.
 
-
 This fetcher currently provides three main run options that can be combined as desired.
 
 Which are:
 
 ### 1. Vanilla Playwright
+
 ```python
 DynamicFetcher.fetch('https://example.com')
 ```
+
 Using it in that manner will open a Chromium browser and load the page. There are optimizations for speed, and some stealth goes automatically under the hood, but other than that, there are no tricks or extra features unless you enable some; it's just a plain PlayWright API.
 
 ### 2. Real Chrome
+
 ```python
 DynamicFetcher.fetch('https://example.com', real_chrome=True)
 ```
+
 If you have a Google Chrome browser installed, use this option. It's the same as the first option, but it will use the Google Chrome browser you installed on your device instead of Chromium. This will make your requests look more authentic, so they're less detectable for better results.
 
 If you don't have Google Chrome installed and want to use this option, you can use the command below in the terminal to install it for the library instead of installing it manually:
+
 ```commandline
 playwright install chrome
 ```
 
 ### 3. CDP Connection
+
 ```python
 DynamicFetcher.fetch('https://example.com', cdp_url='ws://localhost:9222')
 ```
-Instead of launching a browser locally (Chromium/Google Chrome), you can connect to a remote browser through the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/).
 
+Instead of launching a browser locally (Chromium/Google Chrome), you can connect to a remote browser through the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/).
 
 !!! note "Notes:"
 
@@ -59,11 +66,12 @@ Instead of launching a browser locally (Chromium/Google Chrome), you can connect
     * This makes it less confusing for new users, easier to maintain, and provides other benefits, as explained on the [StealthyFetcher page](../fetching/stealthy.md).
 
 ## Full list of arguments
+
 Scrapling provides many options with this fetcher and its session classes. To make it as simple as possible, we will list the options here and give examples of how to use most of them.
 
 |      Argument       | Description                                                                                                                                                                                                                         | Optional |
-|:-------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------:|
-|         url         | Target url                                                                                                                                                                                                                          |    ❌     |
+| :-----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+|         url         | Target url                                                                                                                                                                                                                          |    ❌    |
 |      headless       | Pass `True` to run the browser in headless/hidden (**default**) or `False` for headful/visible mode.                                                                                                                                |    ✔️    |
 |  disable_resources  | Drop requests for unnecessary resources for a speed boost. Requests dropped are of type `font`, `image`, `media`, `beacon`, `object`, `imageset`, `texttrack`, `websocket`, `csp_report`, and `stylesheet`.                         |    ✔️    |
 |       cookies       | Set cookies for the next request.                                                                                                                                                                                                   |    ✔️    |
@@ -106,7 +114,6 @@ In session classes, all these arguments can be set globally for the session. Sti
     3. Since version 0.3.13, the `stealth` option has been removed here in favor of the `StealthyFetcher` class, and the `hide_canvas` option has been moved to it. The `disable_webgl` argument has been moved to the `StealthyFetcher` class and renamed as `allow_webgl`.
     4. If you didn't set a user agent and enabled headless mode, the fetcher will generate a real user agent for the same browser version and use it. If you didn't set a user agent and didn't enable headless mode, the fetcher will use the browser's default user agent, which is the same as in standard browsers in the latest versions.
 
-
 ## Session Management
 
 To keep the browser open until you make multiple requests with the same configuration, use `DynamicSession`/`AsyncDynamicSession` classes. Those classes can accept all the arguments that the `fetch` function can take, which enables you to specify a config for the entire session.
@@ -124,7 +131,7 @@ with DynamicSession(
     page1 = session.fetch('https://example1.com')
     page2 = session.fetch('https://example2.com')
     page3 = session.fetch('https://dynamic-site.com')
-    
+
     # All requests reuse the same tab on the same browser instance
 ```
 
@@ -165,8 +172,8 @@ In versions 0.3 and 0.3.1, the pool was reusing finished tabs to save more resou
 - **Consistent fingerprint**: Same browser fingerprint across all requests.
 - **Memory efficiency**: Better resource usage compared to launching new browsers with each fetch.
 
-
 ## Examples
+
 It's easier to understand with examples, so let's take a look.
 
 ### Resource Control
@@ -208,6 +215,7 @@ with open(file='main_cover.png', mode='wb') as f:
 The `body` attribute of the `Response` object always returns `bytes`.
 
 ### Pre-Navigation Setup
+
 If you need to set up event listeners, routes, or scripts that must be registered before the page navigates, use `page_setup`. This function receives the `page` object and runs before `page.goto()` is called.
 
 ```python
@@ -218,7 +226,9 @@ def capture_websockets(page: Page):
 
 page = DynamicFetcher.fetch('https://example.com', page_setup=capture_websockets)
 ```
+
 Async version:
+
 ```python
 from playwright.async_api import Page
 
@@ -231,11 +241,13 @@ page = await DynamicFetcher.async_fetch('https://example.com', page_setup=captur
 You can combine it with `page_action` -- `page_setup` runs before navigation, `page_action` runs after.
 
 ### Browser Automation
+
 This is where your knowledge about [Playwright's Page API](https://playwright.dev/python/docs/api/class-page) comes into play. The function you pass here takes the page object from Playwright's API, performs the desired action, and then the fetcher continues.
 
 This function is executed immediately after waiting for `network_idle` (if enabled) and before waiting for the `wait_selector` argument, allowing it to be used for purposes beyond automation. You can alter the page as you want.
 
 In the example below, I used the pages' [mouse events](https://playwright.dev/python/docs/api/class-mouse) to scroll the page with the mouse wheel, then move the mouse.
+
 ```python
 from playwright.sync_api import Page
 
@@ -246,7 +258,9 @@ def scroll_page(page: Page):
 
 page = DynamicFetcher.fetch('https://example.com', page_action=scroll_page)
 ```
+
 Of course, if you use the async fetch version, the function must also be async.
+
 ```python
 from playwright.async_api import Page
 
@@ -268,6 +282,7 @@ page = DynamicFetcher.fetch(
     wait_selector_state='visible'
 )
 ```
+
 This is the last wait the fetcher will do before returning the response (if enabled). You pass a CSS selector to the `wait_selector` argument, and the fetcher will wait for the state you passed in the `wait_selector_state` argument to be fulfilled. If you didn't pass a state, the default would be `attached`, which means it will wait for the element to be present in the DOM.
 
 After that, if `load_dom` is enabled (the default), the fetcher will check again to see if all JavaScript files are loaded and executed (in the `domcontentloaded` state) or continue waiting. If you have enabled `network_idle`, the fetcher will wait for `network_idle` to be fulfilled again, as explained above.
@@ -309,6 +324,7 @@ page = DynamicFetcher.fetch(
 ```
 
 ### General example
+
 ```python
 from scrapling.fetchers import DynamicFetcher
 
@@ -319,10 +335,10 @@ def scrape_dynamic_content():
         network_idle=True,
         wait_selector='.content'
     )
-    
+
     # Extract dynamic content
     content = page.css('.content')
-    
+
     return {
         'title': content.css('h1::text').get(),
         'items': [
@@ -364,6 +380,6 @@ Use DynamicFetcher when:
 - Want multiple browser options
 - Using a real Chrome browser
 - Need custom browser config
-- Want a few stealth options 
+- Want a few stealth options
 
 If you want more stealth and control without much config, check out the [StealthyFetcher](stealthy.md).

@@ -102,25 +102,51 @@ body[data-layout="landing"][data-bs-theme="dark"] {
   border-radius: 0.5rem;
   padding: 1.5rem;
   background: var(--bs-body-bg);
-  transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition:
+    box-shadow 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
   border-top: 3px solid transparent;
 }
 
 /* Each pillar gets a distinct GitHub color accent */
-.pillar-card:nth-child(1) { border-top-color: var(--gh-green); }
-.pillar-card:nth-child(2) { border-top-color: var(--gh-blue); }
-.pillar-card:nth-child(3) { border-top-color: var(--gh-purple); }
-.pillar-card:nth-child(4) { border-top-color: var(--gh-coral); }
+.pillar-card:nth-child(1) {
+  border-top-color: var(--gh-green);
+}
+.pillar-card:nth-child(2) {
+  border-top-color: var(--gh-blue);
+}
+.pillar-card:nth-child(3) {
+  border-top-color: var(--gh-purple);
+}
+.pillar-card:nth-child(4) {
+  border-top-color: var(--gh-coral);
+}
 
-.pillar-card:nth-child(1):hover { box-shadow: 0 4px 16px rgba(26, 127, 55, 0.12); }
-.pillar-card:nth-child(2):hover { box-shadow: 0 4px 16px rgba(9, 105, 218, 0.12); }
-.pillar-card:nth-child(3):hover { box-shadow: 0 4px 16px rgba(130, 80, 223, 0.12); }
-.pillar-card:nth-child(4):hover { box-shadow: 0 4px 16px rgba(207, 34, 46, 0.12); }
+.pillar-card:nth-child(1):hover {
+  box-shadow: 0 4px 16px rgba(26, 127, 55, 0.12);
+}
+.pillar-card:nth-child(2):hover {
+  box-shadow: 0 4px 16px rgba(9, 105, 218, 0.12);
+}
+.pillar-card:nth-child(3):hover {
+  box-shadow: 0 4px 16px rgba(130, 80, 223, 0.12);
+}
+.pillar-card:nth-child(4):hover {
+  box-shadow: 0 4px 16px rgba(207, 34, 46, 0.12);
+}
 
-[data-bs-theme="dark"] .pillar-card:nth-child(1):hover { box-shadow: 0 4px 16px rgba(63, 185, 80, 0.15); }
-[data-bs-theme="dark"] .pillar-card:nth-child(2):hover { box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15); }
-[data-bs-theme="dark"] .pillar-card:nth-child(3):hover { box-shadow: 0 4px 16px rgba(188, 140, 255, 0.15); }
-[data-bs-theme="dark"] .pillar-card:nth-child(4):hover { box-shadow: 0 4px 16px rgba(248, 81, 73, 0.15); }
+[data-bs-theme="dark"] .pillar-card:nth-child(1):hover {
+  box-shadow: 0 4px 16px rgba(63, 185, 80, 0.15);
+}
+[data-bs-theme="dark"] .pillar-card:nth-child(2):hover {
+  box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15);
+}
+[data-bs-theme="dark"] .pillar-card:nth-child(3):hover {
+  box-shadow: 0 4px 16px rgba(188, 140, 255, 0.15);
+}
+[data-bs-theme="dark"] .pillar-card:nth-child(4):hover {
+  box-shadow: 0 4px 16px rgba(248, 81, 73, 0.15);
+}
 
 .pillar-card h3 {
   font-size: 1.2rem;
@@ -129,10 +155,18 @@ body[data-layout="landing"][data-bs-theme="dark"] {
 }
 
 /* Pillar headings pick up their card's accent color */
-.pillar-card:nth-child(1) h3 { color: var(--gh-green); }
-.pillar-card:nth-child(2) h3 { color: var(--gh-blue); }
-.pillar-card:nth-child(3) h3 { color: var(--gh-purple); }
-.pillar-card:nth-child(4) h3 { color: var(--gh-coral); }
+.pillar-card:nth-child(1) h3 {
+  color: var(--gh-green);
+}
+.pillar-card:nth-child(2) h3 {
+  color: var(--gh-blue);
+}
+.pillar-card:nth-child(3) h3 {
+  color: var(--gh-purple);
+}
+.pillar-card:nth-child(4) h3 {
+  color: var(--gh-coral);
+}
 
 .pillar-card .pillar-stat {
   font-weight: 600;
@@ -159,10 +193,18 @@ body[data-layout="landing"][data-bs-theme="dark"] {
   font-weight: 500;
 }
 
-.pillar-card:nth-child(1) .pillar-link { color: var(--gh-blue); }
-.pillar-card:nth-child(2) .pillar-link { color: var(--gh-green); }
-.pillar-card:nth-child(3) .pillar-link { color: var(--gh-purple); }
-.pillar-card:nth-child(4) .pillar-link { color: var(--gh-coral); }
+.pillar-card:nth-child(1) .pillar-link {
+  color: var(--gh-blue);
+}
+.pillar-card:nth-child(2) .pillar-link {
+  color: var(--gh-green);
+}
+.pillar-card:nth-child(3) .pillar-link {
+  color: var(--gh-purple);
+}
+.pillar-card:nth-child(4) .pillar-link {
+  color: var(--gh-coral);
+}
 
 /* Community stats section */
 .community-section {
@@ -223,7 +265,9 @@ body[data-layout="landing"][data-bs-theme="dark"] {
   padding: 1rem 1.25rem;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition:
+    box-shadow 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
   display: block;
   border-left: 3px solid var(--gh-blue);
 }

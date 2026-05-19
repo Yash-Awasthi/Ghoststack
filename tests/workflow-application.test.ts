@@ -6,33 +6,33 @@ import {
   LocalCloudProvisioningTemplate,
   DocumentProcessingTemplate,
   SpecToExecutionTemplate
-} from '../orchestration/workflow-engine';
-import { RuntimeDiagnosticAPI } from '../orchestration/diagnostic-api';
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { RuntimeManager } from '../orchestration/runtime-manager';
-import { LocalEventBus } from '../orchestration/event-bus';
-import { TaskRouter } from '../orchestration/task-router';
-import { LocalAgentRegistry } from '../orchestration/agent-registry';
-import { FileEventStore, FileRuntimePersistence } from '../orchestration/persistence-manager';
-import { StructuredLogger } from '../orchestration/logger';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { TaskExecutor } from '../orchestration/task-executor';
-import { MetricsCollector, TraceRecorder } from '../orchestration/observability-manager';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import { ApprovalWorkflow } from '../orchestration/approval-workflow';
-import { BrowserExecutionAdapter } from '../orchestration/browser-adapter';
-import { ScrapingExecutionAdapter } from '../orchestration/scraping-adapter';
-import { FlociExecutionAdapter } from '../orchestration/floci-adapter';
-import { EnvironmentTelemetry } from '../orchestration/environment-telemetry';
-import * as path from 'path';
-import * as fs from 'fs';
+} from "../orchestration/workflow-engine";
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { RuntimeManager } from "../orchestration/runtime-manager";
+import { LocalEventBus } from "../orchestration/event-bus";
+import { TaskRouter } from "../orchestration/task-router";
+import { LocalAgentRegistry } from "../orchestration/agent-registry";
+import { FileEventStore, FileRuntimePersistence } from "../orchestration/persistence-manager";
+import { StructuredLogger } from "../orchestration/logger";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { TaskExecutor } from "../orchestration/task-executor";
+import { MetricsCollector, TraceRecorder } from "../orchestration/observability-manager";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import { ApprovalWorkflow } from "../orchestration/approval-workflow";
+import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
+import { ScrapingExecutionAdapter } from "../orchestration/scraping-adapter";
+import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
-  const testDir = path.join(__dirname, '../temp-workflow-db');
-  const eventLogPath = path.join(testDir, 'workflow_events.jsonl');
-  const cacheDbPath = path.join(testDir, 'workflow_cache.json');
+  const testDir = path.join(__dirname, "../temp-workflow-db");
+  const eventLogPath = path.join(testDir, "workflow_events.jsonl");
+  const cacheDbPath = path.join(testDir, "workflow_cache.json");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {
@@ -48,10 +48,10 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
 
   function setupOrchestrator(telemetry: WorkflowTelemetry, registry: WorkflowRegistry) {
     const loader = new YAMLConfigLoader({
-      portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-      servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-      healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-      runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+      portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+      servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+      healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+      runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
     });
 
     const logger = new StructuredLogger();
@@ -129,7 +129,7 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
 
     const templates = registry.listTemplates();
     expect(templates.length).toBe(2);
-    expect(templates.map(t => t.templateId)).toContain("browser-research-template");
+    expect(templates.map((t) => t.templateId)).toContain("browser-research-template");
 
     const browserWf = registry.getTemplate("browser-research-template")!.createWorkflow({ id: "custom-research" });
     expect(browserWf.id).toBe("custom-research");
@@ -140,7 +140,7 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
     const registry = new WorkflowRegistry();
     const persistence = new FileRuntimePersistence(cacheDbPath);
     const telemetry = new WorkflowTelemetry(persistence);
-    
+
     const { engine } = setupOrchestrator(telemetry, registry);
 
     const browserTemplate = new BrowserResearchWorkflowTemplate();
@@ -160,7 +160,7 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
     const registry = new WorkflowRegistry();
     const persistence = new FileRuntimePersistence(cacheDbPath);
     const telemetry = new WorkflowTelemetry(persistence);
-    
+
     const { engine, approval } = setupOrchestrator(telemetry, registry);
 
     const specTemplate = new SpecToExecutionTemplate();
@@ -175,9 +175,9 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
     // Query active approvals request logs
     const pendingReqs = await approval.listRecords();
     // The taskId mapped in createRequest matches the executionId under the approval policy
-    expect(pendingReqs.some(r => r.taskId === "exec-approval-01")).toBe(true);
+    expect(pendingReqs.some((r) => r.taskId === "exec-approval-01")).toBe(true);
 
-    const matchingReq = pendingReqs.find(r => r.taskId === "exec-approval-01")!;
+    const matchingReq = pendingReqs.find((r) => r.taskId === "exec-approval-01")!;
 
     // Approve the pending execution gate using matchingReq.approvalId
     const finalizedExec = await engine.approveAndTriggerWorkflow(matchingReq.approvalId);
@@ -189,7 +189,7 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
     const registry = new WorkflowRegistry();
     const persistence = new FileRuntimePersistence(cacheDbPath);
     const telemetry = new WorkflowTelemetry(persistence);
-    
+
     const { engine, inspector } = setupOrchestrator(telemetry, registry);
 
     const cloudTemplate = new LocalCloudProvisioningTemplate();
@@ -223,7 +223,7 @@ describe("Phase 8: Workflow Application Layer E2E & Unit Tests", () => {
     const registry = new WorkflowRegistry();
     const persistence = new FileRuntimePersistence(cacheDbPath);
     const telemetry = new WorkflowTelemetry(persistence);
-    
+
     const { orchestrator, engine } = setupOrchestrator(telemetry, registry);
     await orchestrator.start();
 

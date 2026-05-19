@@ -44,13 +44,14 @@ fastmcp tasks worker server.py
 ```
 
 **Backend options:**
+
 - `memory://` - Single-process only (default)
 - `redis://` - Distributed, multi-process (Redis or Valkey)
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable             | Default     | Description        |
+| -------------------- | ----------- | ------------------ |
 | `FASTMCP_DOCKET_URL` | `memory://` | Docket backend URL |
 
 ## Learn More

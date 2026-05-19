@@ -1,6 +1,6 @@
-import { IBrowserExecutionAdapter, IBrowserTask, IEnvironmentTelemetry } from './interfaces/environment.interface';
-import { IExecutionContext } from './interfaces/execution.interface';
-import { isSafeUrl } from './security-utils';
+import { IBrowserExecutionAdapter, IBrowserTask, IEnvironmentTelemetry } from "./interfaces/environment.interface";
+import { IExecutionContext } from "./interfaces/execution.interface";
+import { isSafeUrl } from "./security-utils";
 
 export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
   constructor(
@@ -23,10 +23,12 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
     return this.executeBrowserTask(browserTask);
   }
 
-  async executeBrowserTask(task: IBrowserTask): Promise<{ success: boolean; screenshotUrl?: string; content?: string; logs: string[] }> {
+  async executeBrowserTask(
+    task: IBrowserTask
+  ): Promise<{ success: boolean; screenshotUrl?: string; content?: string; logs: string[] }> {
     const logs: string[] = [];
     logs.push(`Initiating browser task execution for: ${task.url}`);
-    
+
     // Safety Policy verification
     if (!isSafeUrl(task.url)) {
       logs.push(`Safety Policy Block: Forbidden URL protocol/host: ${task.url}`);
@@ -42,7 +44,7 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
 
     if (this.isOfflineMode) {
       logs.push(`Simulating offline execution context for browser task...`);
-      
+
       // Simulate timeout bounds
       if (task.timeoutMs <= 50) {
         this.telemetry.browserSessionsActive -= 1;
@@ -55,8 +57,8 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
       }
 
       for (const action of task.actions) {
-        logs.push(`Executing interactive event: ${action.type} (Selector: ${action.selector || 'none'})`);
-        if (action.type === 'navigate' && action.value) {
+        logs.push(`Executing interactive event: ${action.type} (Selector: ${action.selector || "none"})`);
+        if (action.type === "navigate" && action.value) {
           if (!isSafeUrl(action.value)) {
             this.telemetry.browserSessionsActive -= 1;
             logs.push(`Safety Policy Block: Forbidden redirect URL: ${action.value}`);
@@ -81,19 +83,20 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
 
     // High fidelity production Playwright integration with active request filtering
     try {
-      const { chromium } = require('playwright');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { chromium } = require("playwright");
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
 
       logs.push("Real chromium browser context initiated.");
-      
+
       // Route intercepting to prevent DNS rebinding or in-page malicious redirects
-      await page.route('**/*', (route: any) => {
+      await page.route("**/*", (route: any) => {
         const reqUrl = route.request().url();
         if (!isSafeUrl(reqUrl)) {
           logs.push(`In-page redirect / asset load blocked by safety policy: ${reqUrl}`);
-          route.abort('blockedbyclient');
+          route.abort("blockedbyclient");
         } else {
           route.continue();
         }
@@ -107,9 +110,9 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
       await Promise.race([loadPromise, timeoutPromise]);
 
       for (const action of task.actions) {
-        if (action.type === 'click' && action.selector) {
+        if (action.type === "click" && action.selector) {
           await page.click(action.selector);
-        } else if (action.type === 'type' && action.selector && action.value) {
+        } else if (action.type === "type" && action.selector && action.value) {
           await page.type(action.selector, action.value);
         }
       }

@@ -28,9 +28,8 @@ Before using the OIDC proxy, you need to register your application with your OAu
 3. **Obtain your credentials**: Client ID and Client Secret
 
 <Warning>
-  The redirect URI you configure with your provider must exactly match your
-  FastMCP server's URL plus the callback path. If you customize `redirect_path`
-  in the OIDC proxy, update your provider's redirect URI accordingly.
+  The redirect URI you configure with your provider must exactly match your FastMCP server's URL plus the callback path.
+  If you customize `redirect_path` in the OIDC proxy, update your provider's redirect URI accordingly.
 </Warning>
 
 ### Basic Setup
@@ -82,17 +81,16 @@ mcp = FastMCP(name="My Server", auth=auth)
 <ParamField body="resource_base_url" type="AnyHttpUrl | str | None">
   Optional public base URL for the protected resource metadata and token audience.
 
-  Use this when your OAuth callbacks and operational endpoints need to live under one public URL, but the protected MCP resource should be advertised under another. FastMCP will still append the MCP mount path (for example, `/mcp`) to this base URL.
+Use this when your OAuth callbacks and operational endpoints need to live under one public URL, but the protected MCP resource should be advertised under another. FastMCP will still append the MCP mount path (for example, `/mcp`) to this base URL.
+
 </ParamField>
 
 <ParamField body="strict" type="bool | None">
-  Strict flag for configuration validation. When True, requires all OIDC
-  mandatory fields.
+  Strict flag for configuration validation. When True, requires all OIDC mandatory fields.
 </ParamField>
 
 <ParamField body="audience" type="str | None">
-  Audience parameter for OIDC providers that require it (e.g., Auth0). This is
-  typically your API identifier.
+  Audience parameter for OIDC providers that require it (e.g., Auth0). This is typically your API identifier.
 </ParamField>
 
 <ParamField body="timeout_seconds" type="int | None" default="10">
@@ -102,24 +100,25 @@ mcp = FastMCP(name="My Server", auth=auth)
 <ParamField body="token_verifier" type="TokenVerifier | None">
 
 <VersionBadge version="2.13.1" />
-  Custom token verifier for validating tokens. When provided, FastMCP uses your custom verifier instead of creating a default `JWTVerifier`.
+Custom token verifier for validating tokens. When provided, FastMCP uses your custom verifier instead of creating a
+default `JWTVerifier`.
 
-  Cannot be used with `algorithm` or `required_scopes` parameters - configure these on your verifier instead. The verifier's `required_scopes` are automatically loaded and advertised.
+Cannot be used with `algorithm` or `required_scopes` parameters - configure these on your verifier instead. The verifier's `required_scopes` are automatically loaded and advertised.
+
 </ParamField>
 
 <ParamField body="algorithm" type="str | None">
-  JWT algorithm to use for token verification (e.g., "RS256"). If not specified,
-  uses the provider's default. Only used when `token_verifier` is not provided.
+  JWT algorithm to use for token verification (e.g., "RS256"). If not specified, uses the provider's default. Only used
+  when `token_verifier` is not provided.
 </ParamField>
 
 <ParamField body="required_scopes" type="list[str] | None">
-  List of OAuth scopes for token validation. These are automatically
-  included in authorization requests. Only used when `token_verifier` is not provided.
+  List of OAuth scopes for token validation. These are automatically included in authorization requests. Only used when
+  `token_verifier` is not provided.
 </ParamField>
 
 <ParamField body="redirect_path" type="str" default="/auth/callback">
-  Path for OAuth callbacks. Must match the redirect URI configured in your OAuth
-  application
+  Path for OAuth callbacks. Must match the redirect URI configured in your OAuth application
 </ParamField>
 
 <ParamField body="allowed_client_redirect_uris" type="list[str] | None">
@@ -146,26 +145,30 @@ Set this if your provider requires a specific authentication method and the defa
 <ParamField body="jwt_signing_key" type="str | bytes | None">
 
 <VersionBadge version="2.13.0" />
-  Secret used to sign FastMCP JWT tokens issued to clients. Accepts any string or bytes - will be derived into a proper 32-byte cryptographic key using HKDF.
+Secret used to sign FastMCP JWT tokens issued to clients. Accepts any string or bytes - will be derived into a proper
+32-byte cryptographic key using HKDF.
 
-  **Default behavior (`None`):**
-  - **Mac/Windows**: Auto-managed via system keyring. Keys are generated once and persisted, surviving server restarts with zero configuration. Keys are automatically derived from server attributes, so this approach, while convenient, is **only** suitable for development and local testing. For production, you must provide an explicit secret.
-  - **Linux**: Ephemeral (random salt at startup). Tokens become invalid on server restart, triggering client re-authentication.
+**Default behavior (`None`):**
 
-  **For production:**
-  Provide an explicit secret (e.g., from environment variable) to use a fixed key instead of the auto-generated one.
+- **Mac/Windows**: Auto-managed via system keyring. Keys are generated once and persisted, surviving server restarts with zero configuration. Keys are automatically derived from server attributes, so this approach, while convenient, is **only** suitable for development and local testing. For production, you must provide an explicit secret.
+- **Linux**: Ephemeral (random salt at startup). Tokens become invalid on server restart, triggering client re-authentication.
+
+**For production:**
+Provide an explicit secret (e.g., from environment variable) to use a fixed key instead of the auto-generated one.
+
 </ParamField>
 
 <ParamField body="client_storage" type="AsyncKeyValue | None">
 
 <VersionBadge version="2.13.0" />
-  Storage backend for persisting OAuth client registrations and upstream tokens.
+Storage backend for persisting OAuth client registrations and upstream tokens.
 
-  **Default behavior:**
-  - **Mac/Windows**: Encrypted DiskStore in your platform's data directory (derived from `platformdirs`)
-  - **Linux**: MemoryStore (ephemeral - clients lost on restart)
+**Default behavior:**
 
-  By default on Mac/Windows, clients are automatically persisted to encrypted disk storage, allowing them to survive server restarts as long as the filesystem remains accessible. This means MCP clients only need to register once and can reconnect seamlessly. On Linux where keyring isn't available, ephemeral storage is used to match the ephemeral key strategy.
+- **Mac/Windows**: Encrypted DiskStore in your platform's data directory (derived from `platformdirs`)
+- **Linux**: MemoryStore (ephemeral - clients lost on restart)
+
+By default on Mac/Windows, clients are automatically persisted to encrypted disk storage, allowing them to survive server restarts as long as the filesystem remains accessible. This means MCP clients only need to register once and can reconnect seamlessly. On Linux where keyring isn't available, ephemeral storage is used to match the ephemeral key strategy.
 
 For production deployments with multiple servers or cloud deployments, use a network-accessible storage backend rather than local disk storage. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest.** See [Storage Backends](/v2/servers/storage-backends) for available options.
 
@@ -199,17 +202,22 @@ auth = OIDCProxy(
 </ParamField>
 
 <ParamField body="require_authorization_consent" type='bool | Literal["remember", "external"]' default="True">
-  Consent screen behavior for authorization requests. Accepts `True` (default; always prompt — strongest protection), `"remember"` (silent consent on return visits via signed cookie, gated by `Sec-Fetch-Site` to block AS-in-the-middle attacks), `"external"` (consent handled by upstream IdP or custom page), or `False` (disable entirely; local/testing only). See the [OAuthProxy documentation](/v2/servers/auth/oauth-proxy) for full details on each mode and the security trade-offs.
+  Consent screen behavior for authorization requests. Accepts `True` (default; always prompt — strongest protection),
+  `"remember"` (silent consent on return visits via signed cookie, gated by `Sec-Fetch-Site` to block AS-in-the-middle
+  attacks), `"external"` (consent handled by upstream IdP or custom page), or `False` (disable entirely; local/testing
+  only). See the [OAuthProxy documentation](/v2/servers/auth/oauth-proxy) for full details on each mode and the security
+  trade-offs.
 </ParamField>
 
 <ParamField body="consent_csp_policy" type="str | None" default="None">
   Content Security Policy for the consent page.
 
-  - `None` (default): Uses the built-in CSP policy with appropriate directives for form submission
-  - Empty string `""`: Disables CSP entirely (no meta tag rendered)
-  - Custom string: Uses the provided value as the CSP policy
+- `None` (default): Uses the built-in CSP policy with appropriate directives for form submission
+- Empty string `""`: Disables CSP entirely (no meta tag rendered)
+- Custom string: Uses the provided value as the CSP policy
 
-  This is useful for organizations that have their own CSP policies and need to override or disable FastMCP's built-in CSP directives.
+This is useful for organizations that have their own CSP policies and need to override or disable FastMCP's built-in CSP directives.
+
 </ParamField>
 </Card>
 

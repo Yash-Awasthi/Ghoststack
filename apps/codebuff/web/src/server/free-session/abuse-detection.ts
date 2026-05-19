@@ -234,8 +234,7 @@ export async function identifyBotSuspects(params: {
     if (!s.email || !s.user_created_at) continue
     if (s.banned) continue
 
-    const ageDays =
-      (now.getTime() - s.user_created_at.getTime()) / 86400_000
+    const ageDays = (now.getTime() - s.user_created_at.getTime()) / 86400_000
     const stats = statsByUser.get(s.user_id)
     const msgs24h = Number(stats?.msgs24h ?? 0)
     const distinctHours24h = Number(stats?.distinctHours24h ?? 0)
@@ -282,17 +281,14 @@ export async function identifyBotSuspects(params: {
     // from approved regions may trip this flag, so it only contributes to the
     // score when combined with heavy usage (the combination, not the region
     // alone, is what justifies the score bump).
-    const hasCjkName =
-      !!s.name &&
-      /[一-鿿぀-ヿ가-힯]/.test(s.name)
+    const hasCjkName = !!s.name && /[一-鿿぀-ヿ가-힯]/.test(s.name)
     const hasChineseDomain =
       !!s.email &&
       /@(qq|163|126|sina|sina\.cn|foxmail|aliyun|139|yeah|tom)\.(com|cn|net)$/i.test(
         s.email,
       )
     const hasCnEduDomain = !!s.email && /\.edu\.cn$/i.test(s.email)
-    const nonApprovedRegion =
-      hasCjkName || hasChineseDomain || hasCnEduDomain
+    const nonApprovedRegion = hasCjkName || hasChineseDomain || hasCnEduDomain
     if (nonApprovedRegion) {
       const reasons: string[] = []
       if (hasCjkName) reasons.push('cjk-name')
@@ -310,7 +306,8 @@ export async function identifyBotSuspects(params: {
     // combined with behavioral signals — and even then, the LLM layer is the
     // one that makes that judgment, not this scorer.
     if (s.email && /\+[a-z0-9]{6,}@/i.test(s.email)) flags.push('plus-alias')
-    if (s.email && /^[a-z]{3,8}\d{4,}@/i.test(s.email)) flags.push('email-digits')
+    if (s.email && /^[a-z]{3,8}\d{4,}@/i.test(s.email))
+      flags.push('email-digits')
     if (s.email && /@duck\.com$/i.test(s.email)) flags.push('duck.com-alias')
     if (s.handle && /^user[-_]?\d+/i.test(s.handle)) flags.push('handle-userN')
 
@@ -338,7 +335,12 @@ export async function identifyBotSuspects(params: {
 
     // Skip users with no behavioral signals — email-pattern flags alone
     // shouldn't put a user on the review list.
-    if (score <= 0 && flags.every((f) => !/^24-7|^very-heavy|^heavy|^new-acct|^lifetime/.test(f))) {
+    if (
+      score <= 0 &&
+      flags.every(
+        (f) => !/^24-7|^very-heavy|^heavy|^new-acct|^lifetime/.test(f),
+      )
+    ) {
       continue
     }
 
@@ -456,8 +458,9 @@ async function enrichWithGithubAge(
   }
 
   await Promise.all(
-    Array.from({ length: Math.min(GITHUB_API_CONCURRENCY, targets.length) }, () =>
-      worker(),
+    Array.from(
+      { length: Math.min(GITHUB_API_CONCURRENCY, targets.length) },
+      () => worker(),
     ),
   )
 

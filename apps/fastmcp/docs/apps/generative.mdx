@@ -6,11 +6,18 @@ icon: wand-magic-sparkles
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.2.0" />
 
-<video src="/apps/images/generative-ui.mp4" autoPlay loop muted playsInline style={{width:"100%", borderRadius:"8px", marginBottom:"1rem"}} />
+<video
+  src="/apps/images/generative-ui.mp4"
+  autoPlay
+  loop
+  muted
+  playsInline
+  style={{ width: "100%", borderRadius: "8px", marginBottom: "1rem" }}
+/>
 
 With Generative UI, the LLM writes the UI code at runtime. Instead of calling a pre-built tool with a fixed shape, the model writes Prefab Python tailored to the current data and request. The user watches the UI stream in as the model generates it.
 

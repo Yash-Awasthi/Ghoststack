@@ -104,7 +104,10 @@ const validateSettings = (parsed: unknown): Settings => {
 
   // Validate freebuffModel — drop unknown ids so a removed model doesn't
   // strand the user on a non-existent queue.
-  if (typeof obj.freebuffModel === 'string' && isFreebuffModelId(obj.freebuffModel)) {
+  if (
+    typeof obj.freebuffModel === 'string' &&
+    isFreebuffModelId(obj.freebuffModel)
+  ) {
     settings.freebuffModel = obj.freebuffModel
   }
 
@@ -176,4 +179,3 @@ export const loadFreebuffModelPreference = (): string | undefined => {
 export const saveFreebuffModelPreference = (model: string): void => {
   saveSettings({ freebuffModel: model })
 }
-

@@ -1,12 +1,12 @@
-import { YAMLConfigLoader } from '../runtime/config-loader';
-import * as path from 'path';
+import { YAMLConfigLoader } from "../runtime/config-loader";
+import * as path from "path";
 
 describe("Runtime Config Loader System", () => {
   const loader = new YAMLConfigLoader({
-    portsPath: path.join(__dirname, '../runtime/ports.yaml'),
-    servicesPath: path.join(__dirname, '../runtime/services.yaml'),
-    healthchecksPath: path.join(__dirname, '../runtime/healthchecks.yaml'),
-    runtimePath: path.join(__dirname, '../runtime/ghoststack.runtime.yaml'),
+    portsPath: path.join(__dirname, "../runtime/ports.yaml"),
+    servicesPath: path.join(__dirname, "../runtime/services.yaml"),
+    healthchecksPath: path.join(__dirname, "../runtime/healthchecks.yaml"),
+    runtimePath: path.join(__dirname, "../runtime/ghoststack.runtime.yaml")
   });
 
   it("should successfully load strongly typed ports config", async () => {

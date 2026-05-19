@@ -5,7 +5,7 @@ description: Preview and test your app tools locally without a full MCP host.
 icon: flask
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.2.0" />
 
@@ -49,11 +49,11 @@ The inspector is useful for debugging: you can see exactly what arguments your t
 fastmcp dev apps server.py:mcp --mcp-port 9000 --dev-port 9090 --no-reload
 ```
 
-| Option | Flag | Default | Description |
-| ------ | ---- | ------- | ----------- |
-| MCP Port | `--mcp-port` | `8000` | Port for your MCP server |
-| Dev Port | `--dev-port` | `8080` | Port for the dev UI |
-| Auto-Reload | `--reload` / `--no-reload` | On | Watch files and restart the server on changes |
+| Option      | Flag                       | Default | Description                                   |
+| ----------- | -------------------------- | ------- | --------------------------------------------- |
+| MCP Port    | `--mcp-port`               | `8000`  | Port for your MCP server                      |
+| Dev Port    | `--dev-port`               | `8080`  | Port for the dev UI                           |
+| Auto-Reload | `--reload` / `--no-reload` | On      | Watch files and restart the server on changes |
 
 ## Multiple tools
 

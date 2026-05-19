@@ -1,4 +1,4 @@
-import { ILogger } from './interfaces/logger.interface';
+import { ILogger } from "./interfaces/logger.interface";
 
 export class StructuredLogger implements ILogger {
   info(message: string, context?: any): void {

@@ -1,4 +1,5 @@
 ## TODOs
+
 - [x] Add more tests and increase the code coverage.
 - [x] Structure the tests folder in a better way.
 - [x] Add more documentation.
@@ -11,4 +12,4 @@
 - [ ] Add the ability to auto-detect schemas in pages and manipulate them.
 - [ ] Add `analyzer` ability that tries to learn about the page through meta-elements and return what it learned
 - [ ] Add the ability to generate a regex from a group of elements (Like for all href attributes)
-- 
+-

@@ -1,6 +1,6 @@
-import { IScrapingExecutionAdapter, IScrapingTask, IEnvironmentTelemetry } from './interfaces/environment.interface';
-import { IExecutionContext } from './interfaces/execution.interface';
-import { isSafeUrl } from './security-utils';
+import { IScrapingExecutionAdapter, IScrapingTask, IEnvironmentTelemetry } from "./interfaces/environment.interface";
+import { IExecutionContext } from "./interfaces/execution.interface";
+import { isSafeUrl } from "./security-utils";
 
 export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
   constructor(
@@ -24,11 +24,11 @@ export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
     return this.executeScrapingTask(scrapingTask);
   }
 
-  async executeScrapingTask(task: IScrapingTask): Promise<{ 
-    success: boolean; 
-    data: Record<string, string>; 
-    requestsCount: number; 
-    bytesFetched: number; 
+  async executeScrapingTask(task: IScrapingTask): Promise<{
+    success: boolean;
+    data: Record<string, string>;
+    requestsCount: number;
+    bytesFetched: number;
   }> {
     const maxRequests = task.maxRequests || 5;
     let requestsCount = 0;
@@ -71,10 +71,11 @@ export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
 
     // High fidelity Scrapling wrapper implementation in production node contexts
     try {
-      const axios = require('axios');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const axios = require("axios");
       const response = await axios.get(task.url, { timeout: 10000 });
       requestsCount = 1;
-      bytesFetched = Buffer.byteLength(response.data || '', 'utf8');
+      bytesFetched = Buffer.byteLength(response.data || "", "utf8");
       this.telemetry.recordFetch(bytesFetched);
 
       for (const selector of task.selectors) {

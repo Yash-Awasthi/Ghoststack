@@ -5,14 +5,16 @@ description: Protect your server by validating bearer tokens issued by external 
 icon: key
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.11.0" />
 
 Token verification enables your FastMCP server to validate bearer tokens issued by external systems without participating in user authentication flows. Your server acts as a pure resource server, focusing on token validation and authorization decisions while delegating identity management to other systems in your infrastructure.
 
 <Note>
-Token verification operates somewhat outside the formal MCP authentication flow, which expects OAuth-style discovery. It's best suited for internal systems, microservices architectures, or when you have full control over token generation and distribution.
+  Token verification operates somewhat outside the formal MCP authentication flow, which expects OAuth-style discovery.
+  It's best suited for internal systems, microservices architectures, or when you have full control over token
+  generation and distribution.
 </Note>
 
 ## Understanding Token Verification
@@ -40,7 +42,6 @@ Token-based authentication relies on cryptographic signatures to ensure token in
 Token validation must address several security requirements: signature verification ensures tokens haven't been tampered with, expiration checking prevents use of stale tokens, and audience validation ensures tokens intended for your server aren't accepted by other systems.
 
 The challenge in MCP environments is that clients need to obtain valid tokens before making requests, but the MCP protocol doesn't provide built-in discovery mechanisms for token endpoints. Clients must obtain tokens through separate channels or prior configuration.
-
 
 ## TokenVerifier Class
 
@@ -106,15 +107,14 @@ The verifier will validate tokens signed with the same secret using the specifie
 - **Compatibility**: Works well with existing microservice authentication patterns
 
 <Note>
-The parameter is named `public_key` for backwards compatibility, but when using HMAC algorithms (HS256/384/512), it accepts the symmetric secret string.
+  The parameter is named `public_key` for backwards compatibility, but when using HMAC algorithms (HS256/384/512), it
+  accepts the symmetric secret string.
 </Note>
 
 <Warning>
-**Security Considerations for Symmetric Keys:**
-- Use a strong, randomly generated secret (minimum 32 characters recommended)
-- Never expose the secret in logs, error messages, or version control
-- Implement secure key distribution and rotation mechanisms
-- Consider using asymmetric keys (RSA/ECDSA) for external-facing APIs
+  **Security Considerations for Symmetric Keys:** - Use a strong, randomly generated secret (minimum 32 characters
+  recommended) - Never expose the secret in logs, error messages, or version control - Implement secure key distribution
+  and rotation mechanisms - Consider using asymmetric keys (RSA/ECDSA) for external-facing APIs
 </Warning>
 
 ### Static Public Key Verification
@@ -140,6 +140,7 @@ mcp = FastMCP(name="Protected API", auth=verifier)
 ```
 
 This configuration validates tokens using a specific RSA or ECDSA public key. The key must correspond to the private key used by your token issuer. While less flexible than JWKS endpoints, this approach can be useful in development environments or when testing with fixed keys.
+
 ## Opaque Token Verification
 
 Many authorization servers issue opaque tokens rather than self-contained JWTs. Opaque tokens are random strings that carry no information themselves - the authorization server maintains their state and validation requires querying the server. FastMCP supports opaque token validation through OAuth 2.0 Token Introspection (RFC 7662).
@@ -224,9 +225,9 @@ mcp = FastMCP(name="Development Server", auth=verifier)
 Clients can now authenticate using `Authorization: Bearer dev-alice-token` headers. The server will recognize the token and load the associated claims for authorization decisions. This approach enables immediate development without external dependencies.
 
 <Warning>
-Static token verification stores tokens as plain text and should never be used in production environments. It's designed exclusively for development and testing scenarios.
+  Static token verification stores tokens as plain text and should never be used in production environments. It's
+  designed exclusively for development and testing scenarios.
 </Warning>
-
 
 ### Debug/Custom Token Verification
 
@@ -288,7 +289,9 @@ mcp = FastMCP(name="Custom API", auth=verifier)
 - **Custom token formats**: Implement validation for non-standard token formats or legacy systems
 
 <Warning>
-`DebugTokenVerifier` bypasses standard security checks. Only use in controlled environments (development, testing) or when you fully understand the security implications. For production, use proper JWT or introspection-based verification.
+  `DebugTokenVerifier` bypasses standard security checks. Only use in controlled environments (development, testing) or
+  when you fully understand the security implications. For production, use proper JWT or introspection-based
+  verification.
 </Warning>
 
 ### Test Token Generation
@@ -311,7 +314,7 @@ verifier = JWTVerifier(
 # Generate a test token using the private key
 test_token = key_pair.create_token(
     subject="test-user-123",
-    issuer="https://test.yourcompany.com", 
+    issuer="https://test.yourcompany.com",
     audience="test-mcp-server",
     scopes=["read", "write", "admin"]
 )
@@ -365,7 +368,9 @@ verifier = JWTVerifier(
 ```
 
 <Warning>
-`JWTVerifier` does not support `http_client` when `ssrf_safe=True`. SSRF-safe mode requires a hardened transport that validates DNS resolution and connection targets, which cannot be guaranteed with a user-provided client. Attempting to use both will raise a `ValueError`.
+  `JWTVerifier` does not support `http_client` when `ssrf_safe=True`. SSRF-safe mode requires a hardened transport that
+  validates DNS resolution and connection targets, which cannot be guaranteed with a user-provided client. Attempting to
+  use both will raise a `ValueError`.
 </Warning>
 
 <Note>
@@ -392,6 +397,7 @@ async def lifespan(app):
 
 mcp = FastMCP(name="My API", auth=verifier, lifespan=lifespan)
 ```
+
 </Note>
 
 The convenience providers (`GitHubProvider`, `GoogleProvider`, `DiscordProvider`, `WorkOSProvider`, `AzureProvider`) also accept `http_client` and pass it through to their internal token verifier.
@@ -423,4 +429,3 @@ mcp = FastMCP(name="Production API", auth=verifier)
 This keeps configuration out of your codebase while maintaining explicit setup.
 
 This approach enables the same codebase to run across development, staging, and production environments with different authentication requirements. Development might use static tokens while production uses JWT verification, all controlled through environment configuration.
-

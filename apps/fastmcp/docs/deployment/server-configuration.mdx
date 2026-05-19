@@ -5,7 +5,7 @@ description: Use fastmcp.json for portable, declarative project configuration
 icon: file-code
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.12.0" />
 
@@ -44,13 +44,13 @@ This conceptual model helps you understand the purpose of each configuration sec
   "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
   "source": {
     // WHERE: Location of your server code
-    "type": "filesystem",  // Optional, defaults to "filesystem"
+    "type": "filesystem", // Optional, defaults to "filesystem"
     "path": "server.py",
     "entrypoint": "mcp"
   },
   "environment": {
     // WHAT: Environment setup and dependencies
-    "type": "uv",  // Optional, defaults to "uv"
+    "type": "uv", // Optional, defaults to "uv"
     "python": ">=3.10",
     "dependencies": ["pandas", "numpy"]
   },
@@ -79,6 +79,7 @@ FastMCP provides JSON schemas for IDE autocomplete and validation. Add the schem
 ```
 
 Two schema URLs are available:
+
 - **Version-specific**: `https://gofastmcp.com/public/schemas/fastmcp.json/v1.json`
 - **Latest version**: `https://gofastmcp.com/public/schemas/fastmcp.json/latest.json`
 
@@ -128,9 +129,10 @@ The source configuration determines **WHERE** your server code lives. It tells F
 **Future Source Types**
 
 Future releases will support additional source types:
+
 - **Git repositories** (`type: "git"`) for loading server code directly from version control
 - **Prefect Horizon** (`type: "cloud"`) for hosted servers with automatic scaling and management
-</Note>
+  </Note>
 
 ### Environment Configuration
 
@@ -204,6 +206,7 @@ FastMCP uses an extensible environment system with a base `Environment` class th
 </Card>
 
 When environment configuration is provided, FastMCP:
+
 1. Detects the environment type (defaults to `"uv"` if not specified)
 2. Creates an isolated environment using the appropriate provider
 3. Installs the specified dependencies
@@ -215,6 +218,7 @@ This build-time setup ensures your server always has the dependencies it needs, 
 **Future Environment Types**
 
 Similar to source types, future releases may support additional environment types for different runtime requirements, such as Docker containers or language-specific environments beyond Python.
+
 </Note>
 
 ### Deployment Configuration
@@ -301,6 +305,7 @@ The `env` field in deployment configuration supports runtime interpolation of en
 When the server starts, FastMCP replaces `${ENVIRONMENT}`, `${DB_USER}`, etc. with values from your system's environment variables. If a variable doesn't exist, the placeholder is preserved as-is.
 
 **Example**: If your system has `ENVIRONMENT=production` and `DB_HOST=db.example.com`:
+
 ```json
 // Configuration
 {
@@ -320,6 +325,7 @@ When the server starts, FastMCP replaces `${ENVIRONMENT}`, `${DB_USER}`, etc. wi
 ```
 
 This feature is particularly useful for:
+
 - Deploying the same configuration across development, staging, and production
 - Keeping sensitive values out of configuration files
 - Building dynamic URLs and connection strings
@@ -370,8 +376,9 @@ fastmcp run fastmcp.json --skip-env
 ```
 
 **When you already have an environment:**
+
 - You're in an activated virtual environment with all dependencies installed
-- You're inside a Docker container with pre-installed dependencies  
+- You're inside a Docker container with pre-installed dependencies
 - You're in a CI/CD pipeline that pre-builds the environment
 - You're using a system-wide installation with all required packages
 - You're in a uv-managed environment (prevents infinite recursion)
@@ -387,6 +394,7 @@ fastmcp run fastmcp.json --skip-source
 ```
 
 **When you already have the source:**
+
 - You've previously cloned a git repository and don't need to re-fetch
 - You have a cached copy of a cloud-hosted server
 - You're in a CI/CD pipeline where source checkout is a separate step
@@ -397,8 +405,9 @@ This flag tells FastMCP: "I already have the source code, skip any download/clon
 Note: For filesystem sources (local Python files), this flag has no effect since they don't require preparation.
 
 The configuration file works with all FastMCP commands:
+
 - **`run`** - Start the server in production mode
-- **`dev`** - Launch with the Inspector UI for development  
+- **`dev`** - Launch with the Inspector UI for development
 - **`inspect`** - View server capabilities and configuration
 - **`install`** - Install to Claude Desktop, Cursor, or other MCP clients
 
@@ -420,6 +429,7 @@ fastmcp run fastmcp.json --with requests --with httpx
 ```
 
 This precedence order enables:
+
 - Quick testing of different settings
 - Environment-specific overrides in deployment scripts
 - Debugging with increased log levels
@@ -452,7 +462,9 @@ A minimal configuration for a simple server:
   }
 }
 ```
+
 This configuration explicitly specifies the server entrypoint (`mcp`), making it clear which server instance or factory function to use. Uses all defaults: STDIO transport, no special dependencies, standard logging.
+
 </Tab>
 <Tab title="Development Configuration">
 
@@ -486,6 +498,7 @@ A configuration optimized for local development:
   }
 }
 ```
+
 </Tab>
 <Tab title="Production Configuration">
 
@@ -522,6 +535,7 @@ A production-ready configuration with full dependency management:
   }
 }
 ```
+
 </Tab>
 <Tab title="Data Science Server">
 
@@ -536,13 +550,7 @@ Configuration for a data analysis server with scientific packages:
   },
   "environment": {
     "python": "3.11",
-    "dependencies": [
-      "pandas>=2.0",
-      "numpy",
-      "scikit-learn",
-      "matplotlib",
-      "jupyterlab"
-    ]
+    "dependencies": ["pandas>=2.0", "numpy", "scikit-learn", "matplotlib", "jupyterlab"]
   },
   "deployment": {
     "transport": "stdio",
@@ -553,12 +561,14 @@ Configuration for a data analysis server with scientific packages:
   }
 }
 ```
+
 </Tab>
-<Tab title="Multi-Environment Setup"> 
+<Tab title="Multi-Environment Setup">
 
 You can maintain multiple configuration files for different environments:
 
 **dev.fastmcp.json**:
+
 ```json
 {
   "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
@@ -574,6 +584,7 @@ You can maintain multiple configuration files for different environments:
 ```
 
 **prod.fastmcp.json**:
+
 ```json
 {
   "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
@@ -593,10 +604,12 @@ You can maintain multiple configuration files for different environments:
 ```
 
 Run different configurations:
+
 ```bash
 fastmcp run dev.fastmcp.json   # Development
 fastmcp run prod.fastmcp.json  # Production
 ```
+
 </Tab>
 </Tabs>
 
@@ -605,6 +618,7 @@ fastmcp run prod.fastmcp.json  # Production
 If you're currently using command-line arguments or shell scripts, migrating to `fastmcp.json` simplifies your workflow. Here's how common CLI patterns map to configuration:
 
 **CLI Command**:
+
 ```bash
 uv run --with pandas --with requests \
   fastmcp run server.py \
@@ -614,6 +628,7 @@ uv run --with pandas --with requests \
 ```
 
 **Equivalent fastmcp.json**:
+
 ```json
 {
   "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
@@ -633,6 +648,7 @@ uv run --with pandas --with requests \
 ```
 
 Now simply run:
+
 ```bash
 fastmcp run  # Automatically finds and uses fastmcp.json
 ```

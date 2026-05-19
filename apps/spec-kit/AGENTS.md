@@ -38,12 +38,12 @@ The registry is the **single source of truth for Python integration metadata**. 
 
 ### 1. Choose a base class
 
-| Your agent needs… | Subclass |
-|---|---|
-| Standard markdown commands (`.md`) | `MarkdownIntegration` |
-| TOML-format commands (`.toml`) | `TomlIntegration` |
-| YAML recipe files (`.yaml`) | `YamlIntegration` |
-| Skill directories (`speckit-<name>/SKILL.md`) | `SkillsIntegration` |
+| Your agent needs…                                           | Subclass                   |
+| ----------------------------------------------------------- | -------------------------- |
+| Standard markdown commands (`.md`)                          | `MarkdownIntegration`      |
+| TOML-format commands (`.toml`)                              | `TomlIntegration`          |
+| YAML recipe files (`.yaml`)                                 | `YamlIntegration`          |
+| Skill directories (`speckit-<name>/SKILL.md`)               | `SkillsIntegration`        |
 | Fully custom output (companion files, settings merge, etc.) | `IntegrationBase` directly |
 
 Most agents only need `MarkdownIntegration` — a minimal subclass with zero method overrides.
@@ -145,12 +145,12 @@ class CodexIntegration(SkillsIntegration):
 
 #### Required fields
 
-| Field | Location | Purpose |
-|---|---|---|
-| `key` | Class attribute | Unique identifier; for CLI-based integrations (`requires_cli: True`), must match the CLI executable name |
-| `config` | Class attribute (dict) | Agent metadata: `name`, `folder`, `commands_subdir`, `install_url`, `requires_cli` |
-| `registrar_config` | Class attribute (dict) | Command output config: `dir`, `format`, `args` placeholder, file `extension` |
-| `context_file` | Class attribute (str or None) | Path to agent context/instructions file (e.g., `"CLAUDE.md"`, `".github/copilot-instructions.md"`) |
+| Field              | Location                      | Purpose                                                                                                  |
+| ------------------ | ----------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `key`              | Class attribute               | Unique identifier; for CLI-based integrations (`requires_cli: True`), must match the CLI executable name |
+| `config`           | Class attribute (dict)        | Agent metadata: `name`, `folder`, `commands_subdir`, `install_url`, `requires_cli`                       |
+| `registrar_config` | Class attribute (dict)        | Command output config: `dir`, `format`, `args` placeholder, file `extension`                             |
+| `context_file`     | Class attribute (str or None) | Path to agent context/instructions file (e.g., `"CLAUDE.md"`, `".github/copilot-instructions.md"`)       |
 
 **Key design rule:** For CLI-based integrations (`requires_cli: True`), `key` must be the actual executable name (e.g., `"cursor-agent"` not `"cursor"`). This ensures `shutil.which(key)` works for CLI-tool checks without special-case mappings. IDE-based integrations (`requires_cli: False`) should use their canonical identifier (e.g., `"windsurf"`, `"copilot"`).
 
@@ -203,12 +203,12 @@ pytest tests/integrations/test_integration_<key_with_underscores>.py -v
 
 The base classes handle most work automatically. Override only when the agent deviates from standard patterns:
 
-| Override | When to use | Example |
-|---|---|---|
-| `command_filename(template_name)` | Custom file naming or extension | Copilot → `speckit.{name}.agent.md` |
-| `options()` | Integration-specific CLI flags via `--integration-options` | Codex → `--skills` flag, Copilot → `--skills` flag |
-| `setup()` | Custom install logic (companion files, settings merge) | Copilot → `.agent.md` + `.prompt.md` + `.vscode/settings.json` (default) or `speckit-<name>/SKILL.md` (skills mode) |
-| `teardown()` | Custom uninstall logic | Rarely needed; base handles manifest-tracked files |
+| Override                          | When to use                                                | Example                                                                                                             |
+| --------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `command_filename(template_name)` | Custom file naming or extension                            | Copilot → `speckit.{name}.agent.md`                                                                                 |
+| `options()`                       | Integration-specific CLI flags via `--integration-options` | Codex → `--skills` flag, Copilot → `--skills` flag                                                                  |
+| `setup()`                         | Custom install logic (companion files, settings merge)     | Copilot → `.agent.md` + `.prompt.md` + `.vscode/settings.json` (default) or `speckit-<name>/SKILL.md` (skills mode) |
+| `teardown()`                      | Custom uninstall logic                                     | Rarely needed; base handles manifest-tracked files                                                                  |
 
 **Example — Copilot (fully custom `setup`):**
 
@@ -323,18 +323,21 @@ Some agents require custom processing beyond the standard template transformatio
 ### Copilot Integration
 
 GitHub Copilot has unique requirements:
+
 - Commands use `.agent.md` extension (not `.md`)
 - Each command gets a companion `.prompt.md` file in `.github/prompts/`
 - Installs `.vscode/settings.json` with prompt file recommendations
 - Context file lives at `.github/copilot-instructions.md`
 
 Implementation: Extends `IntegrationBase` with custom `setup()` method that:
+
 1. Processes templates with `process_template()`
 2. Generates companion `.prompt.md` files
 3. Merges VS Code settings
 
 **Skills mode (`--skills`):** Copilot also supports an alternative skills-based layout
 via `--integration-options="--skills"`. When enabled:
+
 - Commands are scaffolded as `speckit-<name>/SKILL.md` under `.github/skills/`
 - No companion `.prompt.md` files are generated
 - No `.vscode/settings.json` merge
@@ -354,11 +357,13 @@ specify init my-project --integration copilot --integration-options="--skills"
 ### Forge Integration
 
 Forge has special frontmatter and argument requirements:
+
 - Uses `{{parameters}}` instead of `$ARGUMENTS`
 - Strips `handoffs` frontmatter key (Forge-specific collaboration feature)
 - Injects `name` field into frontmatter when missing
 
 Implementation: Extends `MarkdownIntegration` with custom `setup()` method that:
+
 1. Inherits standard template processing from `MarkdownIntegration`
 2. Adds extra `$ARGUMENTS` → `{{parameters}}` replacement after template processing
 3. Applies Forge-specific transformations via `_apply_forge_transformations()`
@@ -368,11 +373,13 @@ Implementation: Extends `MarkdownIntegration` with custom `setup()` method that:
 ### Goose Integration
 
 Goose is a YAML-format agent using Block's recipe system:
+
 - Uses `.goose/recipes/` directory for YAML recipe files
 - Uses `{{args}}` argument placeholder
 - Produces YAML with `prompt: |` block scalar for command content
 
 Implementation: Extends `YamlIntegration` (parallel to `TomlIntegration`):
+
 1. Processes templates through the standard placeholder pipeline
 2. Extracts title and description from frontmatter
 3. Renders output as Goose recipe YAML (version, title, description, author, extensions, activities, prompt)
@@ -389,4 +396,4 @@ Implementation: Extends `YamlIntegration` (parallel to `TomlIntegration`):
 
 ---
 
-*This documentation should be updated whenever new integrations are added to maintain accuracy and completeness.*
+_This documentation should be updated whenever new integrations are added to maintain accuracy and completeness._

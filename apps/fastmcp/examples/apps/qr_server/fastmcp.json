@@ -4,10 +4,6 @@
     "path": "qr_server.py"
   },
   "environment": {
-    "dependencies": [
-      "fastmcp",
-      "qrcode[pil]>=8.0",
-      "pillow"
-    ]
+    "dependencies": ["fastmcp", "qrcode[pil]>=8.0", "pillow"]
   }
 }

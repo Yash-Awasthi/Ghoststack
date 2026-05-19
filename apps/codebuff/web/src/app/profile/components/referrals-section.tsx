@@ -77,9 +77,7 @@ export function ReferralsSection() {
         <Card>
           <CardHeader>
             <CardTitle>You're not logged in.</CardTitle>
-            <CardDescription>
-              Log in to access your referrals.
-            </CardDescription>
+            <CardDescription>Log in to access your referrals.</CardDescription>
           </CardHeader>
         </Card>
       </ProfileSection>
@@ -154,7 +152,10 @@ export function ReferralsSection() {
                           <span>
                             {r.name} ({r.email}){r.is_legacy && ' (legacy)'}
                           </span>
-                          <CreditsBadge credits={r.credits} isLegacy={r.is_legacy} />
+                          <CreditsBadge
+                            credits={r.credits}
+                            isLegacy={r.is_legacy}
+                          />
                         </li>
                       ))}
                     </ul>

@@ -1,6 +1,6 @@
-import { IApprovalWorkflow, IApprovalRecord } from './interfaces/governance.interface';
-import { IEventStore } from './interfaces/persistence.interface';
-import { IEventBus } from './event-bus';
+import { IApprovalWorkflow, IApprovalRecord } from "./interfaces/governance.interface";
+import { IEventStore } from "./interfaces/persistence.interface";
+import { IEventBus } from "./event-bus";
 
 export class ApprovalWorkflow implements IApprovalWorkflow {
   private eventStore: IEventStore;
@@ -24,13 +24,13 @@ export class ApprovalWorkflow implements IApprovalWorkflow {
     const events = await this.eventStore.replayEvents();
 
     for (const e of events) {
-      if (e.event === 'approval_requested') {
+      if (e.event === "approval_requested") {
         const payload = e.payload as IApprovalRecord;
         recordsMap.set(payload.approvalId, {
           ...payload,
           requestTimestamp: new Date(payload.requestTimestamp)
         });
-      } else if (e.event === 'approval_approved' || e.event === 'approval_denied' || e.event === 'approval_expired') {
+      } else if (e.event === "approval_approved" || e.event === "approval_denied" || e.event === "approval_expired") {
         const payload = e.payload as IApprovalRecord;
         const existing = recordsMap.get(payload.approvalId);
         if (existing) {
@@ -50,13 +50,13 @@ export class ApprovalWorkflow implements IApprovalWorkflow {
     const record: IApprovalRecord = {
       approvalId,
       taskId,
-      status: 'pending',
+      status: "pending",
       requestTimestamp: new Date()
     };
 
     recordsMap.set(approvalId, record);
-    await this.eventStore.saveEvent('approval_requested', record);
-    await this.eventBus.publish('approval_requested', record);
+    await this.eventStore.saveEvent("approval_requested", record);
+    await this.eventBus.publish("approval_requested", record);
 
     return record;
   }
@@ -67,16 +67,16 @@ export class ApprovalWorkflow implements IApprovalWorkflow {
     if (!record) {
       throw new Error(`Approval record not found: ${approvalId}`);
     }
-    if (record.status !== 'pending') {
+    if (record.status !== "pending") {
       throw new Error(`Approval is not pending: ${approvalId} (status: ${record.status})`);
     }
 
-    record.status = 'approved';
+    record.status = "approved";
     record.decisionTimestamp = new Date();
     record.decidedBy = user;
 
-    await this.eventStore.saveEvent('approval_approved', record);
-    await this.eventBus.publish('approval_approved', record);
+    await this.eventStore.saveEvent("approval_approved", record);
+    await this.eventBus.publish("approval_approved", record);
 
     return record;
   }
@@ -87,16 +87,16 @@ export class ApprovalWorkflow implements IApprovalWorkflow {
     if (!record) {
       throw new Error(`Approval record not found: ${approvalId}`);
     }
-    if (record.status !== 'pending') {
+    if (record.status !== "pending") {
       throw new Error(`Approval is not pending: ${approvalId} (status: ${record.status})`);
     }
 
-    record.status = 'denied';
+    record.status = "denied";
     record.decisionTimestamp = new Date();
     record.decidedBy = user;
 
-    await this.eventStore.saveEvent('approval_denied', record);
-    await this.eventBus.publish('approval_denied', record);
+    await this.eventStore.saveEvent("approval_denied", record);
+    await this.eventBus.publish("approval_denied", record);
 
     return record;
   }
@@ -107,15 +107,15 @@ export class ApprovalWorkflow implements IApprovalWorkflow {
     if (!record) {
       throw new Error(`Approval record not found: ${approvalId}`);
     }
-    if (record.status !== 'pending') {
+    if (record.status !== "pending") {
       throw new Error(`Approval is not pending: ${approvalId} (status: ${record.status})`);
     }
 
-    record.status = 'expired';
+    record.status = "expired";
     record.decisionTimestamp = new Date();
 
-    await this.eventStore.saveEvent('approval_expired', record);
-    await this.eventBus.publish('approval_expired', record);
+    await this.eventStore.saveEvent("approval_expired", record);
+    await this.eventBus.publish("approval_expired", record);
 
     return record;
   }

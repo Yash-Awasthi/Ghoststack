@@ -2,15 +2,15 @@
 
 ## Port Overview
 
-| Port / Range | Protocol | Purpose | docker-compose mapping required? |
-|---|---|---|---|
-| `4566` | HTTP | All AWS API calls (every service) | Yes |
-| `5100–5199` | HTTP | ECR Registry sidecar — bound directly by the `registry:2` container | **No** (see note) |
-| `6379–6399` | TCP | ElastiCache Redis proxy (inside Floci) | Yes |
-| `6500–6599` | HTTPS | EKS k3s API server — bound directly by each k3s container | **No** |
-| `7001–7099` | TCP | RDS proxy (inside Floci) | Yes |
-| `9200–9299` | HTTP | Lambda Runtime API (internal, Docker-network only) | **No** |
-| `9400–9499` | HTTP | OpenSearch data-plane — bound directly by each OpenSearch container | **No** |
+| Port / Range | Protocol | Purpose                                                             | docker-compose mapping required? |
+| ------------ | -------- | ------------------------------------------------------------------- | -------------------------------- |
+| `4566`       | HTTP     | All AWS API calls (every service)                                   | Yes                              |
+| `5100–5199`  | HTTP     | ECR Registry sidecar — bound directly by the `registry:2` container | **No** (see note)                |
+| `6379–6399`  | TCP      | ElastiCache Redis proxy (inside Floci)                              | Yes                              |
+| `6500–6599`  | HTTPS    | EKS k3s API server — bound directly by each k3s container           | **No**                           |
+| `7001–7099`  | TCP      | RDS proxy (inside Floci)                                            | Yes                              |
+| `9200–9299`  | HTTP     | Lambda Runtime API (internal, Docker-network only)                  | **No**                           |
+| `9400–9499`  | HTTP     | OpenSearch data-plane — bound directly by each OpenSearch container | **No**                           |
 
 ## Why some ports don't need docker-compose mapping
 
@@ -64,7 +64,7 @@ redis-cli -h localhost -p 6379
 ```
 
 !!! note
-    Configure the range with `FLOCI_SERVICES_ELASTICACHE_PROXY_BASE_PORT` and `FLOCI_SERVICES_ELASTICACHE_PROXY_MAX_PORT`.
+Configure the range with `FLOCI_SERVICES_ELASTICACHE_PROXY_BASE_PORT` and `FLOCI_SERVICES_ELASTICACHE_PROXY_MAX_PORT`.
 
 ## Ports 6500–6599 — EKS (real mode)
 
@@ -83,7 +83,7 @@ aws eks create-cluster \
 ```
 
 !!! note
-    Configure the range with `FLOCI_SERVICES_EKS_API_SERVER_BASE_PORT` and `FLOCI_SERVICES_EKS_API_SERVER_MAX_PORT`.
+Configure the range with `FLOCI_SERVICES_EKS_API_SERVER_BASE_PORT` and `FLOCI_SERVICES_EKS_API_SERVER_MAX_PORT`.
 
 ## Ports 7001–7099 — RDS
 
@@ -103,7 +103,7 @@ psql -h localhost -p 7001 -U admin
 ```
 
 !!! note
-    Configure the range with `FLOCI_SERVICES_RDS_PROXY_BASE_PORT` and `FLOCI_SERVICES_RDS_PROXY_MAX_PORT`.
+Configure the range with `FLOCI_SERVICES_RDS_PROXY_BASE_PORT` and `FLOCI_SERVICES_RDS_PROXY_MAX_PORT`.
 
 ## Ports 9200–9299 — Lambda Runtime API (internal)
 
@@ -128,7 +128,7 @@ curl http://localhost:9400/_cluster/health
 ```
 
 !!! note
-    Configure the range with `FLOCI_SERVICES_OPENSEARCH_PROXY_BASE_PORT` and `FLOCI_SERVICES_OPENSEARCH_PROXY_MAX_PORT`.
+Configure the range with `FLOCI_SERVICES_OPENSEARCH_PROXY_BASE_PORT` and `FLOCI_SERVICES_OPENSEARCH_PROXY_MAX_PORT`.
 
 ## Ports 5100–5199 — ECR Registry
 
@@ -141,7 +141,7 @@ host:5100  ←──  floci-ecr-registry (registry:2 container, started by Floci
 `docker login localhost:5100` works because the sidecar has a direct host port binding.
 
 !!! warning "Do not expose ECR port range on the floci service"
-    Adding `- "5100-5199:5100-5199"` to the floci service ports will conflict with the ECR sidecar and break `docker push` / `docker pull`.
+Adding `- "5100-5199:5100-5199"` to the floci service ports will conflict with the ECR sidecar and break `docker push` / `docker pull`.
 
 ## Exposing Ports in Docker Compose
 
@@ -152,7 +152,7 @@ services:
   floci:
     image: floci/floci:latest
     ports:
-      - "4566:4566"           # All AWS API calls
+      - "4566:4566" # All AWS API calls
       - "6379-6399:6379-6399" # ElastiCache / Redis proxy (proxy in Floci)
       - "7001-7099:7001-7099" # RDS proxy (proxy in Floci)
     volumes:

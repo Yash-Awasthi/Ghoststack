@@ -5,11 +5,11 @@
 The spider system uses three class attributes to control how aggressively it crawls:
 
 | Attribute                        | Default | Description                                                      |
-|----------------------------------|---------|------------------------------------------------------------------|
+| -------------------------------- | ------- | ---------------------------------------------------------------- |
 | `concurrent_requests`            | `4`     | Maximum number of requests being processed at the same time      |
 | `concurrent_requests_per_domain` | `0`     | Maximum concurrent requests per domain (0 = no per-domain limit) |
 | `download_delay`                 | `0.0`   | Seconds to wait before each request                              |
-| `robots_txt_obey`               | `False` | Respect robots.txt rules (Disallow, Crawl-delay, Request-rate)   |
+| `robots_txt_obey`                | `False` | Respect robots.txt rules (Disallow, Crawl-delay, Request-rate)   |
 
 ```python
 class PoliteSpider(Spider):
@@ -60,7 +60,7 @@ else:
 3. **Resuming**: Run the spider again with the same `crawldir`. It detects the checkpoint, restores the queue and seen set, and continues from where it left off, skipping `start_requests()`.
 4. **Cleanup**: When a crawl completes normally (not paused), the checkpoint files are deleted automatically.
 
-**Checkpoints are also saved periodically during the crawl (every 5 minutes by default).** 
+**Checkpoints are also saved periodically during the crawl (every 5 minutes by default).**
 
 You can change the interval as follows:
 
@@ -169,6 +169,7 @@ async def main():
 
 anyio.run(main)
 ```
+
 You can also use `spider.pause()` to shut down the spider in the code above. If you used it without enabling the checkpoint system, it will just close the crawl.
 
 ## Lifecycle Hooks
@@ -321,7 +322,7 @@ print(stats.to_dict())
 The spider has a built-in logger accessible via `self.logger`. It's pre-configured with the spider's name and supports several customization options:
 
 | Attribute             | Default                                                      | Description                                        |
-|-----------------------|--------------------------------------------------------------|----------------------------------------------------|
+| --------------------- | ------------------------------------------------------------ | -------------------------------------------------- |
 | `logging_level`       | `logging.DEBUG`                                              | Minimum log level                                  |
 | `logging_format`      | `"[%(asctime)s]:({spider_name}) %(levelname)s: %(message)s"` | Log message format                                 |
 | `logging_date_format` | `"%Y-%m-%d %H:%M:%S"`                                        | Date format in log messages                        |

@@ -6,7 +6,7 @@ icon: microsoft
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.13.0" />
 
@@ -17,6 +17,7 @@ This guide shows you how to secure your FastMCP server using **Azure OAuth** (Mi
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. An **[Azure Account](https://portal.azure.com/)** with access to create App registrations
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 3. Your Azure tenant ID (found in Azure Portal under Microsoft Entra ID)
@@ -78,21 +79,14 @@ Create an App registration in Azure Portal to get the credentials needed for aut
     In FastMCP's `AzureProvider`, set `identifier_uri` to your Application ID URI (optional; defaults to `api://{client_id}`) and set `required_scopes` to the unprefixed scope names (e.g., `read`, `write`). During authorization, FastMCP automatically prefixes scopes with your `identifier_uri`.
     </Note>
 
-
 </Step>
 
-
 <Step title="Create Client Secret">
-    After registration, navigate to **Certificates & secrets** in your app's settings.
-    
-    - Click **"New client secret"**
-    - Add a description (e.g., "FastMCP Server")
-    - Choose an expiration period
-    - Click **"Add"**
-    
-    <Warning>
+  After registration, navigate to **Certificates & secrets** in your app's settings. - Click **"New client secret"** -
+  Add a description (e.g., "FastMCP Server") - Choose an expiration period - Click **"Add"**
+  <Warning>
     Copy the secret value immediately - it won't be shown again! You'll need to create a new secret if you lose it.
-    </Warning>
+  </Warning>
 </Step>
 
 <Step title="Note Your Credentials">
@@ -138,7 +132,7 @@ mcp = FastMCP(name="Azure Secured App", auth=auth_provider)
 async def get_user_info() -> dict:
     """Returns information about the authenticated Azure user."""
     from fastmcp.server.dependencies import get_access_token
-    
+
     token = get_access_token()
     # The AzureProvider stores user data in token claims
     return {
@@ -158,10 +152,14 @@ async def get_user_info() -> dict:
 - **"consumers"**: For personal Microsoft accounts only
 
 Using your specific tenant ID is recommended for better security and control.
+
 </Note>
 
 <Note>
-**Important**: The `required_scopes` parameter is **REQUIRED** and must include at least one scope. Azure's OAuth API requires the `scope` parameter in all authorization requests - you cannot authenticate without specifying at least one scope. Use the unprefixed scope names from your Azure App registration (e.g., `["read", "write"]`). These scopes must be created under **Expose an API** in your App registration.
+  **Important**: The `required_scopes` parameter is **REQUIRED** and must include at least one scope. Azure's OAuth API
+  requires the `scope` parameter in all authorization requests - you cannot authenticate without specifying at least one
+  scope. Use the unprefixed scope names from your Azure App registration (e.g., `["read", "write"]`). These scopes must
+  be created under **Expose an API** in your App registration.
 </Note>
 
 ### Scope Handling
@@ -170,26 +168,29 @@ FastMCP automatically prefixes `required_scopes` with your `identifier_uri` (e.g
 
 **`required_scopes`** — Your custom API scopes, defined in Azure "Expose an API":
 
-| You write | Sent to Azure | Validated on tokens |
-|-----------|---------------|---------------------|
-| `mcp-read` | `api://xxx/mcp-read` | ✓ |
-| `my.scope` | `api://xxx/my.scope` | ✓ |
-| `openid` | `openid` | ✗ (OIDC scope) |
-| `api://xxx/read` | `api://xxx/read` | ✓ |
+| You write        | Sent to Azure        | Validated on tokens |
+| ---------------- | -------------------- | ------------------- |
+| `mcp-read`       | `api://xxx/mcp-read` | ✓                   |
+| `my.scope`       | `api://xxx/my.scope` | ✓                   |
+| `openid`         | `openid`             | ✗ (OIDC scope)      |
+| `api://xxx/read` | `api://xxx/read`     | ✓                   |
 
 **`additional_authorize_scopes`** — External scopes (e.g., Microsoft Graph) for server-side use:
 
-| You write | Sent to Azure | Validated on tokens |
-|-----------|---------------|---------------------|
-| `User.Read` | `User.Read` | ✗ |
-| `Mail.Send` | `Mail.Send` | ✗ |
+| You write   | Sent to Azure | Validated on tokens |
+| ----------- | ------------- | ------------------- |
+| `User.Read` | `User.Read`   | ✗                   |
+| `Mail.Send` | `Mail.Send`   | ✗                   |
 
 <Info>
-**Why aren't `additional_authorize_scopes` validated?** Azure issues separate tokens per resource. The access token FastMCP receives is for *your API*—Graph scopes aren't in its `scp` claim. To call Graph APIs, your server uses the upstream Azure token in an on-behalf-of (OBO) flow.
+  **Why aren't `additional_authorize_scopes` validated?** Azure issues separate tokens per resource. The access token
+  FastMCP receives is for *your API*—Graph scopes aren't in its `scp` claim. To call Graph APIs, your server uses the
+  upstream Azure token in an on-behalf-of (OBO) flow.
 </Info>
 
 <Note>
-OIDC scopes (`openid`, `profile`, `email`, `offline_access`) are never prefixed and excluded from validation because Azure doesn't include them in access token `scp` claims.
+  OIDC scopes (`openid`, `profile`, `email`, `offline_access`) are never prefixed and excluded from validation because
+  Azure doesn't include them in access token `scp` claims.
 </Note>
 
 ## Testing
@@ -217,7 +218,7 @@ async def main():
     async with Client("http://localhost:8000/mcp", auth="oauth") as client:
         # First-time connection will open Azure login in your browser
         print("✓ Authenticated with Azure!")
-        
+
         # Test the protected tool
         result = await client.call_tool("get_user_info")
         print(f"Azure user: {result['email']}")
@@ -228,6 +229,7 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to Microsoft's authorization page
 2. Sign in with your Microsoft account (work, school, or personal based on your tenant configuration)
 3. Grant the requested permissions
@@ -235,7 +237,8 @@ When you run the client for the first time:
 5. The client receives the token and can make authenticated requests
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>
 
 ## Production Configuration
@@ -278,6 +281,7 @@ mcp = FastMCP(name="Production Azure App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/v2/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 ## Environment Variables
@@ -291,9 +295,9 @@ For production deployments, use environment variables instead of hardcoding cred
 Setting this environment variable allows the Azure provider to be used automatically without explicitly instantiating it in code.
 
 <Card>
-<ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
-Set to `fastmcp.server.auth.providers.azure.AzureProvider` to use Azure authentication.
-</ParamField>
+  <ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
+    Set to `fastmcp.server.auth.providers.azure.AzureProvider` to use Azure authentication.
+  </ParamField>
 </Card>
 
 ### Azure-Specific Configuration
@@ -306,7 +310,7 @@ Your Azure App registration Client ID (e.g., `835f09b6-0f0f-40cc-85cb-f32c5829a1
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_CLIENT_SECRET" required>
-Your Azure App registration Client Secret
+  Your Azure App registration Client Secret
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_TENANT_ID" required>
@@ -318,15 +322,16 @@ This is **REQUIRED**. Find your tenant ID in Azure Portal under Microsoft Entra 
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_BASE_URL" default="http://localhost:8000">
-Public URL where OAuth endpoints will be accessible (includes any mount path)
+  Public URL where OAuth endpoints will be accessible (includes any mount path)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_ISSUER_URL" default="Uses BASE_URL">
-Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
+  Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to
+  avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_REDIRECT_PATH" default="/auth/callback">
-Redirect path configured in your Azure App registration
+  Redirect path configured in your Azure App registration
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_REQUIRED_SCOPES" required>
@@ -340,11 +345,12 @@ Azure's OAuth API requires the `scope` parameter - you must provide at least one
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_ADDITIONAL_AUTHORIZE_SCOPES" default="">
-Comma-, space-, or JSON-separated list of additional scopes to include in the authorization request without prefixing. Use this to request upstream scopes such as Microsoft Graph permissions. These are not used for token validation.
+  Comma-, space-, or JSON-separated list of additional scopes to include in the authorization request without prefixing.
+  Use this to request upstream scopes such as Microsoft Graph permissions. These are not used for token validation.
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_IDENTIFIER_URI" default="api://{client_id}">
-Application ID URI used to prefix scopes during authorization.
+  Application ID URI used to prefix scopes during authorization.
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AZURE_BASE_AUTHORITY" default="login.microsoftonline.com">
@@ -354,10 +360,12 @@ Azure authority base URL. Override this to use Azure Government:
 - `login.microsoftonline.us` - Azure Government
 
 This setting affects all Azure OAuth endpoints (authorization, token, issuer, JWKS).
+
 </ParamField>
 </Card>
 
 Example `.env` file:
+
 ```bash
 # Use the Azure provider
 FASTMCP_SERVER_AUTH=fastmcp.server.auth.providers.azure.AzureProvider
@@ -388,4 +396,3 @@ async def protected_tool(query: str) -> str:
     # Your tool implementation here
     return f"Processing authenticated request: {query}"
 ```
-

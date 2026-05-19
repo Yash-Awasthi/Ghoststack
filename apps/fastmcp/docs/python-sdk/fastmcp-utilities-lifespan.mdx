@@ -5,7 +5,6 @@ sidebarTitle: lifespan
 
 # `fastmcp.utilities.lifespan`
 
-
 Lifespan utilities for combining async context manager lifespans.
 
 ## Functions
@@ -15,7 +14,6 @@ Lifespan utilities for combining async context manager lifespans.
 ```python
 combine_lifespans(*lifespans: Callable[[AppT], AbstractAsyncContextManager[Mapping[str, Any] | None]]) -> Callable[[AppT], AbstractAsyncContextManager[dict[str, Any]]]
 ```
-
 
 Combine multiple lifespans into a single lifespan.
 
@@ -29,8 +27,9 @@ earlier ones on key conflicts.
 Lifespans are entered in order and exited in reverse order (LIFO).
 
 **Args:**
+
 - `*lifespans`: Lifespan context manager factories to combine.
 
 **Returns:**
-- A combined lifespan context manager factory.
 
+- A combined lifespan context manager factory.

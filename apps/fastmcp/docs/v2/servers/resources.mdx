@@ -5,7 +5,7 @@ description: Expose data sources and dynamic content generators to your MCP clie
 icon: folder-open
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 Resources represent data or files that an MCP client can read, and resource templates extend this concept by allowing clients to request dynamically generated resources based on parameters passed in the URI.
 
@@ -52,11 +52,11 @@ def get_config() -> dict:
 
 **Key Concepts:**
 
-*   **URI:** The first argument to `@resource` is the unique URI (e.g., `"resource://greeting"`) clients use to request this data.
-*   **Lazy Loading:** The decorated function (`get_greeting`, `get_config`) is only executed when a client specifically requests that resource URI via `resources/read`.
-*   **Inferred Metadata:** By default:
-    *   Resource Name: Taken from the function name (`get_greeting`).
-    *   Resource Description: Taken from the function's docstring.
+- **URI:** The first argument to `@resource` is the unique URI (e.g., `"resource://greeting"`) clients use to request this data.
+- **Lazy Loading:** The decorated function (`get_greeting`, `get_config`) is only executed when a client specifically requests that resource URI via `resources/read`.
+- **Inferred Metadata:** By default:
+  - Resource Name: Taken from the function name (`get_greeting`).
+  - Resource Description: Taken from the function's docstring.
 
 #### Decorator Arguments
 
@@ -95,11 +95,13 @@ def get_application_status() -> dict:
 </ParamField>
 
 <ParamField body="mime_type" type="str | None">
-  Specifies the content type. FastMCP often infers a default like `text/plain` or `application/json`, but explicit is better for non-text types
+  Specifies the content type. FastMCP often infers a default like `text/plain` or `application/json`, but explicit is
+  better for non-text types
 </ParamField>
 
 <ParamField body="tags" type="set[str] | None">
-  A set of strings used to categorize the resource. These can be used by the server and, in some cases, by clients to filter or group available resources.
+  A set of strings used to categorize the resource. These can be used by the server and, in some cases, by clients to
+  filter or group available resources.
 </ParamField>
 
 <ParamField body="enabled" type="bool" default="True">
@@ -109,11 +111,12 @@ def get_application_status() -> dict:
 <ParamField body="icons" type="list[Icon] | None">
   <VersionBadge version="2.13.0" />
 
-  Optional list of icon representations for this resource or template. See [Icons](/v2/servers/icons) for detailed examples
+Optional list of icon representations for this resource or template. See [Icons](/v2/servers/icons) for detailed examples
+
 </ParamField>
 
 <ParamField body="annotations" type="Annotations | dict | None">
-    An optional `Annotations` object or dictionary to add additional metadata about the resource.
+  An optional `Annotations` object or dictionary to add additional metadata about the resource.
   <Expandable title="Annotations attributes">
     <ParamField body="readOnlyHint" type="bool | None">
       If true, the resource is read-only and does not modify its environment.
@@ -135,10 +138,10 @@ def get_application_status() -> dict:
 
 FastMCP automatically converts your function's return value into the appropriate MCP resource content:
 
--   **`str`**: Sent as `TextResourceContents` (with `mime_type="text/plain"` by default).
--   **`dict`, `list`, `pydantic.BaseModel`**: Automatically serialized to a JSON string and sent as `TextResourceContents` (with `mime_type="application/json"` by default).
--   **`bytes`**: Base64 encoded and sent as `BlobResourceContents`. You should specify an appropriate `mime_type` (e.g., `"image/png"`, `"application/octet-stream"`).
--   **`None`**: Results in an empty resource content list being returned.
+- **`str`**: Sent as `TextResourceContents` (with `mime_type="text/plain"` by default).
+- **`dict`, `list`, `pydantic.BaseModel`**: Automatically serialized to a JSON string and sent as `TextResourceContents` (with `mime_type="application/json"` by default).
+- **`bytes`**: Base64 encoded and sent as `BlobResourceContents`. You should specify an appropriate `mime_type` (e.g., `"image/png"`, `"application/octet-stream"`).
+- **`None`**: Results in an empty resource content list being returned.
 
 ### Disabling Resources
 
@@ -165,7 +168,6 @@ def get_config(): return {"version": 1}
 get_config.disable()
 get_config.enable()
 ```
-
 
 ### Accessing MCP Context
 
@@ -197,7 +199,6 @@ async def get_details(name: str, ctx: Context) -> dict:
 
 For full documentation on the Context object and all its capabilities, see the [Context documentation](/v2/servers/context).
 
-
 ### Async Resources
 
 Use `async def` for resource functions that perform I/O operations (e.g., reading from a database or network) to avoid blocking the server.
@@ -218,7 +219,6 @@ async def read_important_log() -> str:
     except FileNotFoundError:
         return "Log file not found."
 ```
-
 
 ### Resource Classes
 
@@ -269,12 +269,12 @@ if data_dir_path.is_dir():
 
 **Common Resource Classes:**
 
--   `TextResource`: For simple string content.
--   `BinaryResource`: For raw `bytes` content.
--   `FileResource`: Reads content from a local file path. Handles text/binary modes and lazy reading.
--   `HttpResource`: Fetches content from an HTTP(S) URL (requires `httpx`).
--   `DirectoryResource`: Lists files in a local directory (returns JSON).
--   (`FunctionResource`: Internal class used by `@mcp.resource`).
+- `TextResource`: For simple string content.
+- `BinaryResource`: For raw `bytes` content.
+- `FileResource`: Reads content from a local file path. Handles text/binary modes and lazy reading.
+- `HttpResource`: Fetches content from an HTTP(S) URL (requires `httpx`).
+- `DirectoryResource`: Lists files in a local directory (returns JSON).
+- (`FunctionResource`: Internal class used by `@mcp.resource`).
 
 Use these when the content is static or sourced directly from a file/URL, bypassing the need for a dedicated Python function.
 
@@ -291,7 +291,7 @@ def example_resource() -> str:
 
 # These operations trigger notifications:
 mcp.add_resource(example_resource)  # Sends resources/list_changed notification
-example_resource.disable()          # Sends resources/list_changed notification  
+example_resource.disable()          # Sends resources/list_changed notification
 example_resource.enable()           # Sends resources/list_changed notification
 ```
 
@@ -306,6 +306,7 @@ Clients can handle these notifications using a [message handler](/v2/clients/mes
 FastMCP allows you to add specialized metadata to your resources through annotations. These annotations communicate how resources behave to client applications without consuming token context in LLM prompts.
 
 Annotations serve several purposes in client applications:
+
 - Indicating whether resources are read-only or may have side effects
 - Describing the safety profile of resources (idempotent vs. non-idempotent)
 - Helping clients optimize caching and access patterns
@@ -327,10 +328,10 @@ def get_config() -> dict:
 
 FastMCP supports these standard annotations:
 
-| Annotation | Type | Default | Purpose |
-| :--------- | :--- | :------ | :------ |
-| `readOnlyHint` | boolean | true | Indicates if the resource only provides data without side effects |
-| `idempotentHint` | boolean | true | Indicates if repeated reads have the same effect as a single read |
+| Annotation       | Type    | Default | Purpose                                                           |
+| :--------------- | :------ | :------ | :---------------------------------------------------------------- |
+| `readOnlyHint`   | boolean | true    | Indicates if the resource only provides data without side effects |
+| `idempotentHint` | boolean | true    | Indicates if repeated reads have the same effect as a single read |
 
 Remember that annotations help make better user experiences but should be treated as advisory hints. They help client applications present appropriate UI elements and optimize access patterns, but won't enforce behavior on their own. Always focus on making your annotations accurately represent what your resource actually does.
 
@@ -343,7 +344,9 @@ Resource templates share most configuration options with regular resources (name
 Resource templates generate a new resource for each unique set of parameters, which means that resources can be dynamically created on-demand. For example, if the resource template `"user://profile/{name}"` is registered, MCP clients could request `"user://profile/ford"` or `"user://profile/marvin"` to retrieve either of those two user profiles as resources, without having to register each resource individually.
 
 <Tip>
-Functions with `*args` are not supported as resource templates. However, unlike tools and prompts, resource templates do support `**kwargs` because the URI template defines specific parameter names that will be collected and passed as keyword arguments.
+  Functions with `*args` are not supported as resource templates. However, unlike tools and prompts, resource templates
+  do support `**kwargs` because the URI template defines specific parameter names that will be collected and passed as
+  keyword arguments.
 </Tip>
 
 Here is a complete example that shows how to define two resource templates:
@@ -387,6 +390,7 @@ def get_repo_info(owner: str, repo: str) -> dict:
 ```
 
 With these two templates defined, clients can request a variety of resources:
+
 - `weather://london/current` → Returns weather for London
 - `weather://paris/current` → Returns weather for Paris
 - `repos://PrefectHQ/fastmcp/info` → Returns info about the PrefectHQ/fastmcp repository
@@ -394,14 +398,13 @@ With these two templates defined, clients can request a variety of resources:
 
 ### RFC 6570 URI Templates
 
-
 FastMCP implements [RFC 6570 URI Templates](https://datatracker.ietf.org/doc/html/rfc6570) for resource templates, providing a standardized way to define parameterized URIs. This includes support for simple expansion, wildcard path parameters, and form-style query parameters.
 
 #### Wildcard Parameters
 
 <VersionBadge version="2.2.4" />
 
-Resource templates support wildcard parameters that can match multiple path segments. While standard parameters (`{param}`) only match a single path segment and don't cross "/" boundaries, wildcard parameters (`{param*}`) can capture multiple segments including slashes. Wildcards capture all subsequent path segments *up until* the defined part of the URI template (whether literal or another parameter). This allows you to have multiple wildcard parameters in a single URI template.
+Resource templates support wildcard parameters that can match multiple path segments. While standard parameters (`{param}`) only match a single path segment and don't cross "/" boundaries, wildcard parameters (`{param*}`) can capture multiple segments including slashes. Wildcards capture all subsequent path segments _up until_ the defined part of the URI template (whether literal or another parameter). This allows you to have multiple wildcard parameters in a single URI template.
 
 ```python {15, 23}
 from fastmcp import FastMCP
@@ -487,6 +490,7 @@ def read_file(path: str, encoding: str = "utf-8", lines: int = 100) -> str:
 ```
 
 **Example requests:**
+
 - `data://123` → Uses default format `"json"`
 - `data://123?format=xml` → Uses format `"xml"`
 - `api://users?version=2&limit=50` → `version=2, limit=50, offset=0`
@@ -521,6 +525,7 @@ FastMCP enforces these validation rules when creating resource templates:
 3. **All URI template parameters** (path and query) must exist as function parameters
 
 Optional function parameters (those with default values) can be:
+
 - Included as query parameters (`{?param}`) - clients can override via query string
 - Omitted from URI template - always uses default value, not exposed to clients
 - Used in alternative path templates - enables multiple ways to access the same resource
@@ -550,6 +555,7 @@ mcp.resource("users://name/{name}")(lookup_user)
 ```
 
 Now an LLM or client can retrieve user information in two different ways:
+
 - `users://email/alice@example.com` → Looks up user by email (with name=None)
 - `users://name/Bob` → Looks up user by name (with email=None)
 
@@ -568,11 +574,13 @@ By default, all exceptions (including their details) are logged and converted in
 If you want to mask internal error details for security reasons, you can:
 
 1. Use the `mask_error_details=True` parameter when creating your `FastMCP` instance:
+
 ```python
 mcp = FastMCP(name="SecureServer", mask_error_details=True)
 ```
 
 2. Or use `ResourceError` to explicitly control what error information is sent to clients:
+
 ```python
 from fastmcp import FastMCP
 from fastmcp.exceptions import ResourceError
@@ -631,7 +639,7 @@ def get_config_v1(): return {"version": 1}
 
 The duplicate behavior options are:
 
--   `"warn"` (default): Logs a warning, and the new resource/template replaces the old one.
--   `"error"`: Raises a `ValueError`, preventing the duplicate registration.
--   `"replace"`: Silently replaces the existing resource/template with the new one.
--   `"ignore"`: Keeps the original resource/template and ignores the new registration attempt.
+- `"warn"` (default): Logs a warning, and the new resource/template replaces the old one.
+- `"error"`: Raises a `ValueError`, preventing the duplicate registration.
+- `"replace"`: Silently replaces the existing resource/template with the new one.
+- `"ignore"`: Keeps the original resource/template and ignores the new registration attempt.

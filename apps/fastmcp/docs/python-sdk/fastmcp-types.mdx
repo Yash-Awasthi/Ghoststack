@@ -5,11 +5,10 @@ sidebarTitle: types
 
 # `fastmcp.types`
 
-
 Reusable type annotations for FastMCP tool parameters.
 
 These types can be used in tool function signatures to influence how
-parameters are presented in UIs (e.g. ``fastmcp dev apps``) and
+parameters are presented in UIs (e.g. `fastmcp dev apps`) and
 serialized in JSON Schema.
 
 Example::
@@ -22,4 +21,3 @@ Example::
     @mcp.tool()
     def run_query(sql: Textarea) -> str:
         ...
-

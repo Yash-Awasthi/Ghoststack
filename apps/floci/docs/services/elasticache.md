@@ -8,25 +8,25 @@ Floci manages real Valkey/Redis Docker containers and proxies TCP connections to
 
 ## Supported Management Actions
 
-| Action | Description |
-|---|---|
-| `CreateReplicationGroup` | Start a new Redis/Valkey cluster |
-| `DescribeReplicationGroups` | List clusters and their connection info |
-| `DeleteReplicationGroup` | Stop and remove a cluster |
-| `CreateUser` | Create an ElastiCache IAM user |
-| `DescribeUsers` | List ElastiCache users |
-| `ModifyUser` | Update user access strings |
-| `DeleteUser` | Remove an ElastiCache user |
-| `ValidateIamAuthToken` | Validate an IAM auth token (data-plane auth) |
+| Action                      | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `CreateReplicationGroup`    | Start a new Redis/Valkey cluster             |
+| `DescribeReplicationGroups` | List clusters and their connection info      |
+| `DeleteReplicationGroup`    | Stop and remove a cluster                    |
+| `CreateUser`                | Create an ElastiCache IAM user               |
+| `DescribeUsers`             | List ElastiCache users                       |
+| `ModifyUser`                | Update user access strings                   |
+| `DeleteUser`                | Remove an ElastiCache user                   |
+| `ValidateIamAuthToken`      | Validate an IAM auth token (data-plane auth) |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_ELASTICACHE_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_ELASTICACHE_PROXY_BASE_PORT` | `6379` | First host port in the ElastiCache proxy range |
-| `FLOCI_SERVICES_ELASTICACHE_PROXY_MAX_PORT` | `6399` | Last host port in the ElastiCache proxy range |
-| `FLOCI_SERVICES_ELASTICACHE_DEFAULT_IMAGE` | `valkey/valkey:8` | Docker image for Redis/Valkey containers |
+| Variable                                     | Default           | Description                                    |
+| -------------------------------------------- | ----------------- | ---------------------------------------------- |
+| `FLOCI_SERVICES_ELASTICACHE_ENABLED`         | `true`            | Enable or disable the service                  |
+| `FLOCI_SERVICES_ELASTICACHE_PROXY_BASE_PORT` | `6379`            | First host port in the ElastiCache proxy range |
+| `FLOCI_SERVICES_ELASTICACHE_PROXY_MAX_PORT`  | `6399`            | Last host port in the ElastiCache proxy range  |
+| `FLOCI_SERVICES_ELASTICACHE_DEFAULT_IMAGE`   | `valkey/valkey:8` | Docker image for Redis/Valkey containers       |
 
 ### Docker Compose
 
@@ -38,7 +38,7 @@ services:
     image: floci/floci:latest
     ports:
       - "4566:4566"
-      - "6379-6399:6379-6399"   # ElastiCache proxy ports
+      - "6379-6399:6379-6399" # ElastiCache proxy ports
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:

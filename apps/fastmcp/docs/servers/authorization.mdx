@@ -6,7 +6,7 @@ icon: shield-halved
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -15,11 +15,14 @@ Authorization controls what authenticated users can do with your FastMCP server.
 The authorization model centers on a simple concept: callable functions that receive context about the current request and return `True` to allow access or `False` to deny it. Multiple checks combine with AND logic, meaning all checks must pass for access to be granted.
 
 <Note>
-Authorization relies on OAuth tokens which are only available with HTTP transports (SSE, Streamable HTTP). In STDIO mode, there's no OAuth mechanism, so `get_access_token()` returns `None` and all auth checks are skipped.
+  Authorization relies on OAuth tokens which are only available with HTTP transports (SSE, Streamable HTTP). In STDIO
+  mode, there's no OAuth mechanism, so `get_access_token()` returns `None` and all auth checks are skipped.
 </Note>
 
 <Note>
-When an `AuthProvider` is configured, all requests to the MCP endpoint must carry a valid token—unauthenticated requests are rejected at the transport level before any auth checks run. Authorization checks therefore differentiate between authenticated users based on their scopes and claims, not between authenticated and unauthenticated users.
+  When an `AuthProvider` is configured, all requests to the MCP endpoint must carry a valid token—unauthenticated
+  requests are rejected at the transport level before any auth checks run. Authorization checks therefore differentiate
+  between authenticated users based on their scopes and claims, not between authenticated and unauthenticated users.
 </Note>
 
 ## Auth Checks
@@ -210,7 +213,9 @@ def admin_prompt() -> str:
 ```
 
 <Note>
-Component-level `auth` controls both visibility (list filtering) and access (direct lookups return not-found for unauthorized requests). Additionally use `AuthMiddleware` to apply server-wide authorization rules and get explicit `AuthorizationError` responses on unauthorized execution attempts.
+  Component-level `auth` controls both visibility (list filtering) and access (direct lookups return not-found for
+  unauthorized requests). Additionally use `AuthMiddleware` to apply server-wide authorization rules and get explicit
+  `AuthorizationError` responses on unauthorized execution attempts.
 </Note>
 
 ## Server-Level Authorization
@@ -338,22 +343,22 @@ def user_dashboard() -> dict:
 
 The `AccessToken` object contains information extracted from the OAuth token.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `token` | `str` | The raw token string |
-| `client_id` | `str \| None` | OAuth client identifier |
-| `scopes` | `list[str]` | Granted OAuth scopes |
-| `expires_at` | `datetime \| None` | Token expiration time |
-| `claims` | `dict[str, Any]` | All JWT claims or custom token data |
+| Property     | Type               | Description                         |
+| ------------ | ------------------ | ----------------------------------- |
+| `token`      | `str`              | The raw token string                |
+| `client_id`  | `str \| None`      | OAuth client identifier             |
+| `scopes`     | `list[str]`        | Granted OAuth scopes                |
+| `expires_at` | `datetime \| None` | Token expiration time               |
+| `claims`     | `dict[str, Any]`   | All JWT claims or custom token data |
 
 ### AuthContext
 
 The `AuthContext` dataclass is passed to all auth check functions.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `token` | `AccessToken \| None` | Current access token, or `None` if unauthenticated |
-| `component` | `Tool \| Resource \| Prompt` | The component being accessed |
+| Property    | Type                         | Description                                        |
+| ----------- | ---------------------------- | -------------------------------------------------- |
+| `token`     | `AccessToken \| None`        | Current access token, or `None` if unauthenticated |
+| `component` | `Tool \| Resource \| Prompt` | The component being accessed                       |
 
 Access to the component object enables authorization decisions based on metadata like tags, name, or custom properties.
 

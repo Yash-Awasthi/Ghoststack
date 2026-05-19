@@ -8,11 +8,14 @@ icon: message-smile
 [ChatGPT](https://chatgpt.com/) supports MCP servers through remote HTTP connections in two modes: **Chat mode** for interactive conversations and **Deep Research mode** for comprehensive information retrieval.
 
 <Tip>
-**Developer Mode Required for Chat Mode**: To use MCP servers in regular ChatGPT conversations, you must first enable Developer Mode in your ChatGPT settings. This feature is available for ChatGPT Pro, Team, Enterprise, and Edu users.
+  **Developer Mode Required for Chat Mode**: To use MCP servers in regular ChatGPT conversations, you must first enable
+  Developer Mode in your ChatGPT settings. This feature is available for ChatGPT Pro, Team, Enterprise, and Edu users.
 </Tip>
 
 <Note>
-OpenAI's official MCP documentation and examples are built with **FastMCP v2**! Learn more from their [MCP documentation](https://platform.openai.com/docs/mcp) and [Developer Mode guide](https://platform.openai.com/docs/guides/developer-mode).
+  OpenAI's official MCP documentation and examples are built with **FastMCP v2**! Learn more from their [MCP
+  documentation](https://platform.openai.com/docs/mcp) and [Developer Mode
+  guide](https://platform.openai.com/docs/guides/developer-mode).
 </Note>
 
 ## Build a Server
@@ -46,6 +49,7 @@ python server.py
 ```bash Terminal 2
 ngrok http 8000
 ```
+
 </CodeGroup>
 
 Note your public URL (e.g., `https://abc123.ngrok.io`) for the next steps.
@@ -72,7 +76,8 @@ Chat mode lets you use MCP tools directly in ChatGPT conversations. See [OpenAI'
 5. Click **Create**
 
 <Note>
-**Without Developer Mode**: If you don't have search/fetch tools, ChatGPT will reject the server. With Developer Mode enabled, you don't need search/fetch tools for Chat mode.
+  **Without Developer Mode**: If you don't have search/fetch tools, ChatGPT will reject the server. With Developer Mode
+  enabled, you don't need search/fetch tools for Chat mode.
 </Note>
 
 #### 3. Use in Chat
@@ -83,11 +88,13 @@ Chat mode lets you use MCP tools directly in ChatGPT conversations. See [OpenAI'
 4. Now you can use your tools:
 
 Example usage:
+
 - "Roll a 20-sided dice"
 - "Roll dice" (uses default 6 sides)
 
 <Tip>
-The connector must be explicitly enabled in each chat session through Developer Mode. Once added, it remains active for the entire conversation.
+  The connector must be explicitly enabled in each chat session through Developer Mode. Once added, it remains active
+  for the entire conversation.
 </Tip>
 
 ### Skip Confirmations
@@ -113,7 +120,8 @@ def delete_item(id: str) -> str:
 Deep Research mode provides systematic information retrieval with citations. See [OpenAI's MCP documentation](https://platform.openai.com/docs/mcp) for the latest Deep Research specifications.
 
 <Warning>
-**Search and Fetch Required**: Without Developer Mode, ChatGPT will reject any server that doesn't have both `search` and `fetch` tools. Even in Developer Mode, Deep Research only uses these two tools.
+  **Search and Fetch Required**: Without Developer Mode, ChatGPT will reject any server that doesn't have both `search`
+  and `fetch` tools. Even in Developer Mode, Deep Research only uses these two tools.
 </Warning>
 
 ### Tool Implementation

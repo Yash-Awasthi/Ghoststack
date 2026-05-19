@@ -8,19 +8,22 @@ It allows developers to easily define classes whose methods can be registered as
 
 Includes support for
 Tools:
-* [enable/disable](https://gofastmcp.com/servers/tools#disabling-tools)
-* [annotations](https://gofastmcp.com/servers/tools#annotations-2)
-* [excluded arguments](https://gofastmcp.com/servers/tools#excluding-arguments)
-* [meta](https://gofastmcp.com/servers/tools#param-meta)
+
+- [enable/disable](https://gofastmcp.com/servers/tools#disabling-tools)
+- [annotations](https://gofastmcp.com/servers/tools#annotations-2)
+- [excluded arguments](https://gofastmcp.com/servers/tools#excluding-arguments)
+- [meta](https://gofastmcp.com/servers/tools#param-meta)
 
 Prompts:
-* [enable/disable](https://gofastmcp.com/servers/prompts#disabling-prompts)
-* [meta](https://gofastmcp.com/servers/prompts#param-meta)
+
+- [enable/disable](https://gofastmcp.com/servers/prompts#disabling-prompts)
+- [meta](https://gofastmcp.com/servers/prompts#param-meta)
 
 Resources:
-* [enable/disable](https://gofastmcp.com/servers/resources#disabling-resources)
-* [meta](https://gofastmcp.com/servers/resources#param-meta)
-  
+
+- [enable/disable](https://gofastmcp.com/servers/resources#disabling-resources)
+- [meta](https://gofastmcp.com/servers/resources#param-meta)
+
 ## Usage
 
 Inherit from `MCPMixin` and use the decorators on the methods you want to register.
@@ -135,10 +138,10 @@ component = MyComponent()
 # Register all decorated methods with a prefix
 # Useful if you will have multiple instantiated objects of the same class
 # and want to avoid name collisions.
-component.register_all(mcp_server, prefix="my_comp") 
+component.register_all(mcp_server, prefix="my_comp")
 
 # Register without a prefix
-# component.register_all(mcp_server) 
+# component.register_all(mcp_server)
 
 # Now 'my_comp_my_tool' tool and 'my_comp+component://data' resource are registered (if prefix used)
 # Or 'my_tool' and 'component://data' are registered (if no prefix used)

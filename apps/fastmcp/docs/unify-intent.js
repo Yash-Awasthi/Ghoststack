@@ -14,23 +14,16 @@
   }
 
   function loadUnify() {
-    var e = [
-      "identify",
-      "page",
-      "startAutoPage",
-      "stopAutoPage",
-      "startAutoIdentify",
-      "stopAutoIdentify",
-    ];
+    var e = ["identify", "page", "startAutoPage", "stopAutoPage", "startAutoIdentify", "stopAutoIdentify"];
     function t(o) {
       return Object.assign(
         [],
         e.reduce(function (r, n) {
           r[n] = function () {
-            return o.push([n, [].slice.call(arguments)]), o;
+            return (o.push([n, [].slice.call(arguments)]), o);
           };
           return r;
-        }, {}),
+        }, {})
       );
     }
     if (!window.unify) window.unify = t(window.unify);
@@ -38,14 +31,8 @@
 
     var n = document.createElement("script");
     n.async = true;
-    n.setAttribute(
-      "src",
-      "https://tag.unifyintent.com/v1/Rj9KrQqMhyYcU5qfJtVszE/script.js",
-    );
-    n.setAttribute(
-      "data-api-key",
-      "wk_SBvJ4jyD_wRgPAHCNJb89seVmREhcj2NspRpxAywi",
-    );
+    n.setAttribute("src", "https://tag.unifyintent.com/v1/Rj9KrQqMhyYcU5qfJtVszE/script.js");
+    n.setAttribute("data-api-key", "wk_SBvJ4jyD_wRgPAHCNJb89seVmREhcj2NspRpxAywi");
     n.setAttribute("id", "unifytag");
     (document.body || document.head).appendChild(n);
   }

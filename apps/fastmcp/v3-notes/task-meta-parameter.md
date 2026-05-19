@@ -14,6 +14,7 @@ Background task execution used context variables (`_task_metadata`, `_docket_fn_
 ## Solution
 
 Add explicit `task_meta: TaskMeta | None` parameters to:
+
 - `FastMCP.call_tool()`, `FastMCP.read_resource()`, `FastMCP.render_prompt()`
 - Component methods: `Tool._run()`, `Resource._read()`, `Prompt._render()`, `ResourceTemplate._read()`
 
@@ -31,12 +32,14 @@ result = await server.call_tool("my_tool", {"arg": "value"}, task_meta=TaskMeta(
 Previously, `fn_key` (the Docket registry key) was set in 9 places:
 
 **Component methods (5):**
+
 - `Tool._run()`
 - `Resource._read()`
 - `ResourceTemplate._read()` (2 places)
 - `Prompt._render()`
 
 **Provider wrappers (4):**
+
 - `FastMCPProviderTool._run()`
 - `FastMCPProviderResource._read()`
 - `FastMCPProviderPrompt._render()`
@@ -85,6 +88,7 @@ async def call_tool(
 A key fix from #2663: background tasks now properly pass through all middleware stacks before being submitted to Docket. Previously, background task submission bypassed middleware entirely.
 
 The flow is now:
+
 1. MCP handler extracts task metadata from request
 2. Server method (`call_tool`, etc.) finds component via provider
 3. Server enriches `task_meta.fn_key` with component key

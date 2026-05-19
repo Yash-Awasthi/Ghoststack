@@ -148,7 +148,7 @@ class CustomSpider(Spider):
 ## LinkExtractor reference
 
 | Argument          | Default              | Description                                                                                       |
-|-------------------|----------------------|---------------------------------------------------------------------------------------------------|
+| ----------------- | -------------------- | ------------------------------------------------------------------------------------------------- |
 | `allow`           | `()`                 | URL patterns to keep. Empty means "match all". String, compiled `Pattern`, or iterable of either. |
 | `deny`            | `()`                 | URL patterns to drop. Always overrides `allow`.                                                   |
 | `allow_domains`   | `()`                 | Hostnames to keep. Subdomains match automatically (`example.com` matches `api.example.com`).      |

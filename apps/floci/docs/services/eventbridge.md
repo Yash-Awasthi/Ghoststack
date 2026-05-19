@@ -5,30 +5,30 @@
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateEventBus` | Create a custom event bus |
-| `DeleteEventBus` | Delete an event bus |
-| `DescribeEventBus` | Get event bus details |
-| `UpdateEventBus` | Update event bus description, KMS key, dead-letter config, or log config |
-| `ListEventBuses` | List all event buses |
-| `PutRule` | Create or update a rule with a schedule or event pattern |
-| `DeleteRule` | Delete a rule |
-| `DescribeRule` | Get rule details |
-| `ListRules` | List rules |
-| `EnableRule` | Enable a disabled rule |
-| `DisableRule` | Disable a rule |
-| `PutTargets` | Add targets to a rule |
-| `RemoveTargets` | Remove targets from a rule |
-| `ListTargetsByRule` | List targets for a rule |
-| `PutEvents` | Publish custom events to an event bus |
-| `TestEventPattern` | Test whether a sample event matches a given pattern (no targets fired) |
+| Action              | Description                                                              |
+| ------------------- | ------------------------------------------------------------------------ |
+| `CreateEventBus`    | Create a custom event bus                                                |
+| `DeleteEventBus`    | Delete an event bus                                                      |
+| `DescribeEventBus`  | Get event bus details                                                    |
+| `UpdateEventBus`    | Update event bus description, KMS key, dead-letter config, or log config |
+| `ListEventBuses`    | List all event buses                                                     |
+| `PutRule`           | Create or update a rule with a schedule or event pattern                 |
+| `DeleteRule`        | Delete a rule                                                            |
+| `DescribeRule`      | Get rule details                                                         |
+| `ListRules`         | List rules                                                               |
+| `EnableRule`        | Enable a disabled rule                                                   |
+| `DisableRule`       | Disable a rule                                                           |
+| `PutTargets`        | Add targets to a rule                                                    |
+| `RemoveTargets`     | Remove targets from a rule                                               |
+| `ListTargetsByRule` | List targets for a rule                                                  |
+| `PutEvents`         | Publish custom events to an event bus                                    |
+| `TestEventPattern`  | Test whether a sample event matches a given pattern (no targets fired)   |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_EVENTBRIDGE_ENABLED` | `true` | Enable or disable the service |
+| Variable                             | Default | Description                   |
+| ------------------------------------ | ------- | ----------------------------- |
+| `FLOCI_SERVICES_EVENTBRIDGE_ENABLED` | `true`  | Enable or disable the service |
 
 ## Examples
 

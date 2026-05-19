@@ -2,7 +2,7 @@
  * S3 Notifications integration tests.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   S3Client,
   CreateBucketCommand,
@@ -10,18 +10,13 @@ import {
   DeleteObjectCommand,
   DeleteBucketCommand,
   PutBucketNotificationConfigurationCommand,
-  GetBucketNotificationConfigurationCommand,
-} from '@aws-sdk/client-s3';
-import {
-  SQSClient,
-  CreateQueueCommand,
-  GetQueueAttributesCommand,
-  DeleteQueueCommand,
-} from '@aws-sdk/client-sqs';
-import { SNSClient, CreateTopicCommand, DeleteTopicCommand } from '@aws-sdk/client-sns';
-import { makeClient, uniqueName } from './setup';
+  GetBucketNotificationConfigurationCommand
+} from "@aws-sdk/client-s3";
+import { SQSClient, CreateQueueCommand, GetQueueAttributesCommand, DeleteQueueCommand } from "@aws-sdk/client-sqs";
+import { SNSClient, CreateTopicCommand, DeleteTopicCommand } from "@aws-sdk/client-sns";
+import { makeClient, uniqueName } from "./setup";
 
-describe('S3 Notifications', () => {
+describe("S3 Notifications", () => {
   let s3: S3Client;
   let sqs: SQSClient;
   let sns: SNSClient;
@@ -38,19 +33,13 @@ describe('S3 Notifications', () => {
     bucketName = `notif-test-bucket-${uniqueName()}`;
 
     // Create SQS queue
-    const queueResult = await sqs.send(
-      new CreateQueueCommand({ QueueName: `notif-queue-${uniqueName()}` })
-    );
+    const queueResult = await sqs.send(new CreateQueueCommand({ QueueName: `notif-queue-${uniqueName()}` }));
     queueUrl = queueResult.QueueUrl!;
-    const attrs = await sqs.send(
-      new GetQueueAttributesCommand({ QueueUrl: queueUrl, AttributeNames: ['QueueArn'] })
-    );
+    const attrs = await sqs.send(new GetQueueAttributesCommand({ QueueUrl: queueUrl, AttributeNames: ["QueueArn"] }));
     queueArn = attrs.Attributes!.QueueArn!;
 
     // Create SNS topic
-    const topicResult = await sns.send(
-      new CreateTopicCommand({ Name: `notif-topic-${uniqueName()}` })
-    );
+    const topicResult = await sns.send(new CreateTopicCommand({ Name: `notif-topic-${uniqueName()}` }));
     topicArn = topicResult.TopicArn!;
 
     // Create S3 bucket
@@ -59,7 +48,7 @@ describe('S3 Notifications', () => {
 
   afterAll(async () => {
     try {
-      await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: 'test-object.txt' }));
+      await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: "test-object.txt" }));
     } catch {
       // ignore
     }
@@ -80,82 +69,78 @@ describe('S3 Notifications', () => {
     }
   });
 
-  it('should put bucket notification configuration', async () => {
+  it("should put bucket notification configuration", async () => {
     await s3.send(
       new PutBucketNotificationConfigurationCommand({
         Bucket: bucketName,
         NotificationConfiguration: {
           QueueConfigurations: [
             {
-              Id: 'sqs-filtered',
+              Id: "sqs-filtered",
               QueueArn: queueArn,
-              Events: ['s3:ObjectCreated:*'],
+              Events: ["s3:ObjectCreated:*"],
               Filter: {
                 Key: {
                   FilterRules: [
-                    { Name: 'prefix', Value: 'incoming/' },
-                    { Name: 'suffix', Value: '.csv' },
-                  ],
-                },
-              },
-            },
+                    { Name: "prefix", Value: "incoming/" },
+                    { Name: "suffix", Value: ".csv" }
+                  ]
+                }
+              }
+            }
           ],
           TopicConfigurations: [
             {
-              Id: 'sns-filtered',
+              Id: "sns-filtered",
               TopicArn: topicArn,
-              Events: ['s3:ObjectRemoved:*'],
+              Events: ["s3:ObjectRemoved:*"],
               Filter: {
                 Key: {
                   FilterRules: [
-                    { Name: 'prefix', Value: '' },
-                    { Name: 'suffix', Value: '.txt' },
-                  ],
-                },
-              },
-            },
-          ],
-        },
+                    { Name: "prefix", Value: "" },
+                    { Name: "suffix", Value: ".txt" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
       })
     );
   });
 
-  it('should get bucket notification configuration', async () => {
-    const response = await s3.send(
-      new GetBucketNotificationConfigurationCommand({ Bucket: bucketName })
-    );
+  it("should get bucket notification configuration", async () => {
+    const response = await s3.send(new GetBucketNotificationConfigurationCommand({ Bucket: bucketName }));
 
     // Verify SQS configuration
-    const sqsConfig = response.QueueConfigurations?.find((c) => c.Id === 'sqs-filtered');
+    const sqsConfig = response.QueueConfigurations?.find((c) => c.Id === "sqs-filtered");
     expect(sqsConfig).toBeTruthy();
     expect(sqsConfig?.QueueArn).toBe(queueArn);
-    expect(sqsConfig?.Events).toContain('s3:ObjectCreated:*');
+    expect(sqsConfig?.Events).toContain("s3:ObjectCreated:*");
 
     const sqsRules = sqsConfig?.Filter?.Key?.FilterRules || [];
-    expect(sqsRules.some((r) => r.Name === 'prefix' && r.Value === 'incoming/')).toBe(true);
-    expect(sqsRules.some((r) => r.Name === 'suffix' && r.Value === '.csv')).toBe(true);
+    expect(sqsRules.some((r) => r.Name === "prefix" && r.Value === "incoming/")).toBe(true);
+    expect(sqsRules.some((r) => r.Name === "suffix" && r.Value === ".csv")).toBe(true);
 
     // Verify SNS configuration
-    const snsConfig = response.TopicConfigurations?.find((c) => c.Id === 'sns-filtered');
+    const snsConfig = response.TopicConfigurations?.find((c) => c.Id === "sns-filtered");
     expect(snsConfig).toBeTruthy();
     expect(snsConfig?.TopicArn).toBe(topicArn);
-    expect(snsConfig?.Events).toContain('s3:ObjectRemoved:*');
+    expect(snsConfig?.Events).toContain("s3:ObjectRemoved:*");
 
     const snsRules = snsConfig?.Filter?.Key?.FilterRules || [];
-    expect(snsRules.some((r) => r.Name === 'suffix' && r.Value === '.txt')).toBe(true);
+    expect(snsRules.some((r) => r.Name === "suffix" && r.Value === ".txt")).toBe(true);
   });
 
-  it('should clear notification configuration', async () => {
+  it("should clear notification configuration", async () => {
     await s3.send(
       new PutBucketNotificationConfigurationCommand({
         Bucket: bucketName,
-        NotificationConfiguration: {},
+        NotificationConfiguration: {}
       })
     );
 
-    const response = await s3.send(
-      new GetBucketNotificationConfigurationCommand({ Bucket: bucketName })
-    );
+    const response = await s3.send(new GetBucketNotificationConfigurationCommand({ Bucket: bucketName }));
     expect(response.QueueConfigurations?.length || 0).toBe(0);
     expect(response.TopicConfigurations?.length || 0).toBe(0);
   });

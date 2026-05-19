@@ -9,12 +9,12 @@ The Bedrock management plane (`aws bedrock ...`: `ListFoundationModels`, `GetFou
 
 ## Supported Operations
 
-| Operation | Endpoint | Notes |
-|-----------|----------|-------|
-| `Converse` | `POST /model/{modelId}/converse` | Returns static assistant message |
-| `InvokeModel` | `POST /model/{modelId}/invoke` | Returns Anthropic-shaped body for `anthropic.*` and `*.anthropic.*` model ids; generic `{"outputs": [...]}` shape otherwise |
-| `ConverseStream` | `POST /model/{modelId}/converse-stream` | Returns 501 `UnsupportedOperationException` |
-| `InvokeModelWithResponseStream` | `POST /model/{modelId}/invoke-with-response-stream` | Returns 501 `UnsupportedOperationException` |
+| Operation                       | Endpoint                                            | Notes                                                                                                                       |
+| ------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `Converse`                      | `POST /model/{modelId}/converse`                    | Returns static assistant message                                                                                            |
+| `InvokeModel`                   | `POST /model/{modelId}/invoke`                      | Returns Anthropic-shaped body for `anthropic.*` and `*.anthropic.*` model ids; generic `{"outputs": [...]}` shape otherwise |
+| `ConverseStream`                | `POST /model/{modelId}/converse-stream`             | Returns 501 `UnsupportedOperationException`                                                                                 |
+| `InvokeModelWithResponseStream` | `POST /model/{modelId}/invoke-with-response-stream` | Returns 501 `UnsupportedOperationException`                                                                                 |
 
 `modelId` is URL-decoded by JAX-RS and echoed verbatim. Plain model ids (e.g. `anthropic.claude-3-haiku-20240307-v1:0`), inference-profile ids (e.g. `us.anthropic.claude-3-5-sonnet-20241022-v2:0`), and full ARNs containing slashes (e.g. `arn:aws:bedrock:us-east-1:123456789012:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0`) are all accepted.
 
@@ -24,9 +24,9 @@ InvokeModel bodies are passed through as opaque bytes; the stub does not parse r
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_BEDROCKRUNTIME_ENABLED` | `true` | Enable or disable the service |
+| Variable                                | Default | Description                   |
+| --------------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_BEDROCKRUNTIME_ENABLED` | `true`  | Enable or disable the service |
 
 ## Examples
 

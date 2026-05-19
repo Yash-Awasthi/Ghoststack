@@ -12,7 +12,8 @@ This is where **FastMCP** comes in. It's a high-level framework that handles all
 This guide will walk you through creating a fully-featured MCP server from scratch using FastMCP.
 
 <Tip>
-Every code block in this tutorial is a complete, runnable example. You can copy and paste it into a file and run it, or paste it directly into a Python REPL like IPython to try it out.
+  Every code block in this tutorial is a complete, runnable example. You can copy and paste it into a file and run it,
+  or paste it directly into a Python REPL like IPython to try it out.
 </Tip>
 
 ### Prerequisites
@@ -22,7 +23,6 @@ Make sure you have FastMCP installed. If not, follow the [installation guide](/g
 ```bash
 pip install fastmcp
 ```
-
 
 ## Step 1: Create the Basic Server
 
@@ -57,6 +57,7 @@ def add(a: int, b: int) -> int:
 ```
 
 FastMCP automatically handles the rest:
+
 - **Tool Name:** It uses the function name (`add`) as the tool's name.
 - **Description:** It uses the function's docstring as the tool's description for the LLM.
 - **Schema:** It inspects the type hints (`a: int`, `b: int`) to generate a JSON schema for the inputs.
@@ -115,6 +116,7 @@ def personalized_greeting(name: str) -> str:
 ```
 
 Now, clients can request dynamic URIs:
+
 - `greetings://Ford` will call `personalized_greeting(name="Ford")`.
 - `greetings://Marvin` will call `personalized_greeting(name="Marvin")`.
 
@@ -149,9 +151,11 @@ if __name__ == "__main__":
 ```
 
 Now you can run your server from the command line:
+
 ```bash
 python my_mcp_server.py
 ```
+
 This starts the server using the default **STDIO transport**, which is how clients like Claude Desktop communicate with local servers. To learn about other transports, like HTTP, see the [Running Your Server](/deployment/running-server) guide.
 
 ## The Complete Server
@@ -191,8 +195,7 @@ if __name__ == "__main__":
 
 You've successfully built an MCP server! From here, you can explore more advanced topics:
 
--   [**Tools in Depth**](/servers/tools): Learn about asynchronous tools, error handling, and custom return types.
--   [**Resources & Templates**](/servers/resources): Discover different resource types, including files and HTTP endpoints.
--   [**Prompts**](/servers/prompts): Create reusable prompt templates for your LLM.
--   [**Running Your Server**](/deployment/running-server): Deploy your server with different transports like HTTP.
-
+- [**Tools in Depth**](/servers/tools): Learn about asynchronous tools, error handling, and custom return types.
+- [**Resources & Templates**](/servers/resources): Discover different resource types, including files and HTTP endpoints.
+- [**Prompts**](/servers/prompts): Create reusable prompt templates for your LLM.
+- [**Running Your Server**](/deployment/running-server): Deploy your server with different transports like HTTP.

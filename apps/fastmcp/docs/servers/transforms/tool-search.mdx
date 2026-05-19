@@ -6,7 +6,7 @@ icon: magnifying-glass
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.1.0" />
 
@@ -19,7 +19,7 @@ When you add a search transform, `list_tools()` returns just two synthetic tools
 - **`search_tools`** finds tools matching a query and returns their full definitions
 - **`call_tool`** executes a discovered tool by name
 
-The original tools are still callable. They're hidden from the listing but remain fully functional — the search transform controls *discovery*, not *access*.
+The original tools are still callable. They're hidden from the listing but remain fully functional — the search transform controls _discovery_, not _access_.
 
 Both synthetic tools search across tool names, descriptions, parameter names, and parameter descriptions. A search for `"email"` would match a tool named `send_email`, a tool with "email" in its description, or a tool with an `email_address` parameter.
 

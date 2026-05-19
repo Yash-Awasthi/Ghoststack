@@ -54,7 +54,7 @@ const CANOPYWAVE_MODELS: Record<
     pricing: {
       inputCostPerToken: 0.95 / 1_000_000,
       cachedInputCostPerToken: 0.16 / 1_000_000,
-      outputCostPerToken: 4.00 / 1_000_000,
+      outputCostPerToken: 4.0 / 1_000_000,
     },
   },
 }
@@ -77,7 +77,12 @@ function getCanopyWavePricing(model: string): CanopyWavePricing {
   return entry.pricing
 }
 
-type StreamState = { responseText: string; reasoningText: string; ttftMs: number | null; billedAlready: boolean }
+type StreamState = {
+  responseText: string
+  reasoningText: string
+  ttftMs: number | null
+  billedAlready: boolean
+}
 
 type LineResult = {
   state: StreamState
@@ -126,15 +131,39 @@ function createCanopyWaveRequest(params: {
   })
 }
 
-function extractUsageAndCost(usage: Record<string, unknown> | undefined | null, model: string): UsageData {
-  if (!usage) return { inputTokens: 0, outputTokens: 0, cacheReadInputTokens: 0, reasoningTokens: 0, cost: 0 }
-  const promptDetails = usage.prompt_tokens_details as Record<string, unknown> | undefined | null
-  const completionDetails = usage.completion_tokens_details as Record<string, unknown> | undefined | null
+function extractUsageAndCost(
+  usage: Record<string, unknown> | undefined | null,
+  model: string,
+): UsageData {
+  if (!usage)
+    return {
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadInputTokens: 0,
+      reasoningTokens: 0,
+      cost: 0,
+    }
+  const promptDetails = usage.prompt_tokens_details as
+    | Record<string, unknown>
+    | undefined
+    | null
+  const completionDetails = usage.completion_tokens_details as
+    | Record<string, unknown>
+    | undefined
+    | null
 
-  const inputTokens = typeof usage.prompt_tokens === 'number' ? usage.prompt_tokens : 0
-  const outputTokens = typeof usage.completion_tokens === 'number' ? usage.completion_tokens : 0
-  const cacheReadInputTokens = typeof promptDetails?.cached_tokens === 'number' ? promptDetails.cached_tokens : 0
-  const reasoningTokens = typeof completionDetails?.reasoning_tokens === 'number' ? completionDetails.reasoning_tokens : 0
+  const inputTokens =
+    typeof usage.prompt_tokens === 'number' ? usage.prompt_tokens : 0
+  const outputTokens =
+    typeof usage.completion_tokens === 'number' ? usage.completion_tokens : 0
+  const cacheReadInputTokens =
+    typeof promptDetails?.cached_tokens === 'number'
+      ? promptDetails.cached_tokens
+      : 0
+  const reasoningTokens =
+    typeof completionDetails?.reasoning_tokens === 'number'
+      ? completionDetails.reasoning_tokens
+      : 0
 
   const pricing = getCanopyWavePricing(model)
   const nonCachedInputTokens = Math.max(0, inputTokens - cacheReadInputTokens)
@@ -143,7 +172,13 @@ function extractUsageAndCost(usage: Record<string, unknown> | undefined | null, 
     cacheReadInputTokens * pricing.cachedInputCostPerToken +
     outputTokens * pricing.outputCostPerToken
 
-  return { inputTokens, outputTokens, cacheReadInputTokens, reasoningTokens, cost }
+  return {
+    inputTokens,
+    outputTokens,
+    cacheReadInputTokens,
+    reasoningTokens,
+    cost,
+  }
 }
 
 export async function handleCanopyWaveNonStream({
@@ -165,7 +200,10 @@ export async function handleCanopyWaveNonStream({
 }) {
   const originalModel = body.model
   const startTime = new Date()
-  const { clientId, clientRequestId, costMode } = extractRequestMetadata({ body, logger })
+  const { clientId, clientRequestId, costMode } = extractRequestMetadata({
+    body,
+    logger,
+  })
   const auditRequest = createRequestAuditRecord(body)
 
   const response = await createCanopyWaveRequest({ body, originalModel, fetch })
@@ -176,7 +214,10 @@ export async function handleCanopyWaveNonStream({
 
   const data = await response.json()
   const content = data.choices?.[0]?.message?.content ?? ''
-  const reasoningText = data.choices?.[0]?.message?.reasoning_content ?? data.choices?.[0]?.message?.reasoning ?? ''
+  const reasoningText =
+    data.choices?.[0]?.message?.reasoning_content ??
+    data.choices?.[0]?.message?.reasoning ??
+    ''
   const usageData = extractUsageAndCost(data.usage, originalModel)
 
   insertMessageToBigQuery({
@@ -243,7 +284,10 @@ export async function handleCanopyWaveStream({
 }) {
   const originalModel = body.model
   const startTime = new Date()
-  const { clientId, clientRequestId, costMode } = extractRequestMetadata({ body, logger })
+  const { clientId, clientRequestId, costMode } = extractRequestMetadata({
+    body,
+    logger,
+  })
   const auditRequest = createRequestAuditRecord(body)
 
   const response = await createCanopyWaveRequest({ body, originalModel, fetch })
@@ -258,7 +302,12 @@ export async function handleCanopyWaveStream({
   }
 
   let heartbeatInterval: NodeJS.Timeout
-  let state: StreamState = { responseText: '', reasoningText: '', ttftMs: null, billedAlready: false }
+  let state: StreamState = {
+    responseText: '',
+    reasoningText: '',
+    ttftMs: null,
+    billedAlready: false,
+  }
   let clientDisconnected = false
 
   const stream = new ReadableStream({
@@ -319,9 +368,13 @@ export async function handleCanopyWaveStream({
 
             if (!clientDisconnected) {
               try {
-                controller.enqueue(new TextEncoder().encode(lineResult.patchedLine))
+                controller.enqueue(
+                  new TextEncoder().encode(lineResult.patchedLine),
+                )
               } catch {
-                logger.warn('Client disconnected during stream, continuing for billing')
+                logger.warn(
+                  'Client disconnected during stream, continuing for billing',
+                )
                 clientDisconnected = true
               }
             }
@@ -441,13 +494,17 @@ async function handleLine({
   }
 
   const patchedLine = `data: ${JSON.stringify(obj)}\n`
-  return { state: result.state, billedCredits: result.billedCredits, patchedLine }
+  return {
+    state: result.state,
+    billedCredits: result.billedCredits,
+    patchedLine,
+  }
 }
 
 function isFinalChunk(data: Record<string, unknown>): boolean {
   const choices = data.choices as Array<Record<string, unknown>> | undefined
   if (!choices || choices.length === 0) return true
-  return choices.some(c => c.finish_reason != null)
+  return choices.some((c) => c.finish_reason != null)
 }
 
 async function handleResponse({
@@ -479,11 +536,24 @@ async function handleResponse({
   logger: Logger
   insertMessage: InsertMessageBigqueryFn
 }): Promise<{ state: StreamState; billedCredits?: number }> {
-  state = handleStreamChunk({ data, state, startTime, logger, userId, agentId, model: originalModel })
+  state = handleStreamChunk({
+    data,
+    state,
+    startTime,
+    logger,
+    userId,
+    agentId,
+    model: originalModel,
+  })
 
   // Some providers send cumulative usage on EVERY chunk (not just the final one),
   // so we must only bill once on the final chunk to avoid charging N times.
-  if ('error' in data || !data.usage || state.billedAlready || !isFinalChunk(data)) {
+  if (
+    'error' in data ||
+    !data.usage ||
+    state.billedAlready ||
+    !isFinalChunk(data)
+  ) {
     // Strip usage from non-final chunks and duplicate final chunks
     // so the SDK doesn't see multiple usage objects
     if (data.usage && (!isFinalChunk(data) || state.billedAlready)) {
@@ -492,7 +562,10 @@ async function handleResponse({
     return { state }
   }
 
-  const usageData = extractUsageAndCost(data.usage as Record<string, unknown>, originalModel)
+  const usageData = extractUsageAndCost(
+    data.usage as Record<string, unknown>,
+    originalModel,
+  )
   const messageId = typeof data.id === 'string' ? data.id : 'unknown'
 
   state.billedAlready = true
@@ -580,17 +653,27 @@ function handleStreamChunk({
     if (state.responseText.length >= MAX_BUFFER_SIZE) {
       state.responseText =
         state.responseText.slice(0, MAX_BUFFER_SIZE) + '\n---[TRUNCATED]---'
-      logger.warn({ userId, agentId, model }, 'Response text buffer truncated at 1MB')
+      logger.warn(
+        { userId, agentId, model },
+        'Response text buffer truncated at 1MB',
+      )
     }
   }
 
-  const reasoningDelta = typeof delta?.reasoning_content === 'string' ? delta.reasoning_content
-    : typeof delta?.reasoning === 'string' ? delta.reasoning
-    : ''
+  const reasoningDelta =
+    typeof delta?.reasoning_content === 'string'
+      ? delta.reasoning_content
+      : typeof delta?.reasoning === 'string'
+        ? delta.reasoning
+        : ''
 
   // Track time to first token (TTFT) - set on first meaningful delta (content, reasoning, or tool_calls)
-  const hasToolCallsDelta = delta?.tool_calls != null && (delta.tool_calls as unknown[])?.length > 0
-  if (state.ttftMs === null && (contentDelta !== '' || reasoningDelta !== '' || hasToolCallsDelta)) {
+  const hasToolCallsDelta =
+    delta?.tool_calls != null && (delta.tool_calls as unknown[])?.length > 0
+  if (
+    state.ttftMs === null &&
+    (contentDelta !== '' || reasoningDelta !== '' || hasToolCallsDelta)
+  ) {
     state.ttftMs = Date.now() - startTime.getTime()
   }
 
@@ -599,7 +682,10 @@ function handleStreamChunk({
     if (state.reasoningText.length >= MAX_BUFFER_SIZE) {
       state.reasoningText =
         state.reasoningText.slice(0, MAX_BUFFER_SIZE) + '\n---[TRUNCATED]---'
-      logger.warn({ userId, agentId, model }, 'Reasoning text buffer truncated at 1MB')
+      logger.warn(
+        { userId, agentId, model },
+        'Reasoning text buffer truncated at 1MB',
+      )
     }
   }
 
@@ -633,7 +719,9 @@ export class CanopyWaveError extends Error {
   }
 }
 
-async function parseCanopyWaveError(response: Response): Promise<CanopyWaveError> {
+async function parseCanopyWaveError(
+  response: Response,
+): Promise<CanopyWaveError> {
   const errorText = await response.text()
   let errorBody: CanopyWaveError['errorBody']
   try {

@@ -52,7 +52,8 @@ POST /resources/{uri:path}/enable
 POST /resources/{uri:path}/disable
 ```
 
- * Supports template URIs as well
+- Supports template URIs as well
+
 ```http
 POST /resources/example://test/{id}/enable
 POST /resources/example://test/{id}/disable
@@ -64,6 +65,7 @@ POST /resources/example://test/{id}/disable
 POST /prompts/{prompt_name}/enable
 POST /prompts/{prompt_name}/disable
 ```
+
 ---
 
 #### 🧪 Example Response
@@ -157,7 +159,6 @@ curl -X POST \
 This module is not officially maintained by the core FastMCP team. It is an independent extension developed by [gorocode](https://github.com/gorocode).
 
 If you encounter any issues or wish to contribute, please feel free to open an issue or submit a pull request, and kindly notify me. I'd love to stay up to date.
-
 
 ## 📄 License
 

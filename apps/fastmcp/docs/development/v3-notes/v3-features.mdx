@@ -47,6 +47,7 @@ async with Client("http://server/mcp", sampling_handler=handler) as client:
 ```
 
 Key features:
+
 - Converts MCP tool schemas to Google's function calling format
 - Supports all Google GenAI models that implement function calling
 - Handles nullable types, nested objects, and arrays in tool schemas
@@ -158,6 +159,7 @@ The `_deprecated_settings` attribute and `.settings` property are also removed. 
 ### Breaking: `ui=` Renamed to `app=`
 
 The MCP Apps decorator parameter has been renamed from `ui=ToolUI(...)` / `ui=ResourceUI(...)` to `app=AppConfig(...)` ([#3117](https://github.com/PrefectHQ/fastmcp/pull/3117)). `ToolUI` and `ResourceUI` are consolidated into a single `AppConfig` class. Wire format is unchanged. See the MCP Apps section under beta2 for full details.
+
 ## 3.0.0beta2
 
 ### CLI: `fastmcp list` and `fastmcp call`
@@ -177,6 +179,7 @@ fastmcp call server.py create_item '{"name": "Widget", "tags": ["a", "b"]}'
 ```
 
 Key features:
+
 - Tool arguments are auto-coerced using the tool's JSON schema (`limit=5` → int)
 - Single JSON objects work as positional args alongside `key=value` and `--input-json`
 - `--input-schema` / `--output-schema` for full JSON schemas, `--json` for machine-readable output
@@ -266,6 +269,7 @@ fastmcp auth cimd validate https://myapp.example.com/oauth/client.json
 CIMD is enabled by default on `OAuthProxy` and its provider subclasses (GitHub, Google, etc.). The server-side implementation includes SSRF-hardened document fetching with DNS pinning, dual redirect URI validation (both CIMD document patterns and proxy patterns must match), HTTP cache-aware revalidation, and `private_key_jwt` assertion validation for clients that need stronger authentication than public client auth.
 
 Key details:
+
 - CIMD URLs must be HTTPS with a non-root path
 - `token_endpoint_auth_method` limited to `none` or `private_key_jwt` (no shared secrets)
 - `redirect_uris` in CIMD documents support wildcard port patterns (`http://localhost:*/callback`)
@@ -347,6 +351,7 @@ mcp.add_middleware(ResponseLimitingMiddleware(
 ```
 
 Key features:
+
 - Configurable size limit (default 1MB)
 - Tool-specific filtering via `tools` parameter
 - Size metadata added to result's `meta` field for monitoring
@@ -432,6 +437,7 @@ async def dashboard(ctx: Context) -> dict:
 ```
 
 **Key details:**
+
 - `AppConfig` fields: `resource_uri`, `visibility`, `csp`, `permissions`, `domain`, `prefers_border` (all optional). On resources, `resource_uri` and `visibility` are validated as not-applicable and will raise `ValueError` if set.
 - `csp` accepts a `ResourceCSP` model with structured domain lists: `connect_domains`, `resource_domains`, `frame_domains`, `base_uri_domains`
 - `permissions` accepts a `ResourcePermissions` model: `camera`, `microphone`, `geolocation`, `clipboard_write` (each set to `{}` to request)
@@ -455,6 +461,7 @@ Implementation: `fastmcp_slim/fastmcp/server/apps.py` (models and constants), wi
 v3.0 introduces a provider-based component system that replaces v2's static-only registration ([#2622](https://github.com/PrefectHQ/fastmcp/pull/2622)). Providers dynamically source tools, resources, templates, and prompts at runtime.
 
 **Core abstraction** (`fastmcp_slim/fastmcp/server/providers/base.py`):
+
 ```python
 class Provider:
     async def list_tools(self) -> Sequence[Tool]: ...
@@ -468,6 +475,7 @@ class Provider:
 ```
 
 Providers support:
+
 - **Lifecycle management**: `async def lifespan()` for setup/teardown
 - **Visibility control**: `enable()` / `disable()` with name, version, tags, components, and allowlist mode
 - **Transform stacking**: `provider.add_transform(Namespace(...))`, `provider.add_transform(ToolTransform(...))`
@@ -516,6 +524,7 @@ mcp = FastMCP("API Server", providers=[provider])
 ```
 
 Features:
+
 - Automatic route-to-component mapping (GET → resource, POST/PUT/DELETE → tool)
 - Custom route mappings via `route_maps` or `route_map_fn`
 - Component customization via `mcp_component_fn`
@@ -591,6 +600,7 @@ class TagFilter(Transform):
 ```
 
 Transforms apply at two levels:
+
 - **Provider-level**: `provider.add_transform()` - affects only that provider's components
 - **Server-level**: `server.add_transform()` - affects all components from all providers
 
@@ -637,6 +647,7 @@ mcp.add_transform(PromptsAsTools(mcp))
 The `list_prompts` tool returns JSON with prompt metadata including argument information. The `get_prompt` tool accepts a prompt name and optional arguments dict, returning the rendered prompt as a messages array. Non-text content (like embedded resources) is preserved as structured JSON.
 
 Both transforms:
+
 - Capture a provider reference at construction for deferred querying
 - Route through `FastMCP.read_resource()` / `FastMCP.render_prompt()` when the provider is FastMCP, ensuring middleware chains execute
 - Fall back to direct provider methods for plain providers
@@ -668,6 +679,7 @@ mcp = FastMCP("server", session_state_store=RedisStore(...))
 ```
 
 **Key details:**
+
 - Methods are now async: `await ctx.get_state()`, `await ctx.set_state()`, `await ctx.delete_state()`
 - State expires after 1 day (TTL) to prevent unbounded memory growth
 - Works during `on_initialize` middleware when using the same session object
@@ -702,6 +714,7 @@ mcp.enable(names={"safe_tool"})  # safe_tool is visible despite internal tag
 ```
 
 Works at both server and provider level. Supports:
+
 - **Blocklist mode** (default): All components visible except explicitly disabled
 - **Allowlist mode** (`only=True`): Only explicitly enabled components visible
 - **Tag-based filtering**: Enable/disable groups of components by tag
@@ -739,6 +752,7 @@ mcp.disable(tags={"premium"})
 ```
 
 Session visibility methods:
+
 - `await ctx.enable_components(...)`: Enable components for this session
 - `await ctx.disable_components(...)`: Disable components for this session
 - `await ctx.reset_visibility()`: Clear session rules, return to global defaults
@@ -769,6 +783,7 @@ def add(x: int, y: int, z: int = 0) -> int:
 ```
 
 **Version comparison:**
+
 - Uses PEP 440 semantic versioning (1.10 > 1.9 > 1.2)
 - Falls back to string comparison for non-PEP 440 versions (dates like `2025-01-15` work)
 - Unversioned components sort lower than any versioned component
@@ -854,12 +869,14 @@ api_v2.add_transform(VersionFilter(version_gte="2.0"))
 ```
 
 Parameters mirror comparison operators:
+
 - `version_gte`: Versions >= this value pass through
 - `version_lt`: Versions < this value pass through
 
 **Key format:**
 
 Component keys now include a version suffix using `@` as a delimiter:
+
 - Versioned: `tool:add@1.0`, `resource:data://config@2.0`
 - Unversioned: `tool:add@`, `resource:data://config@`
 
@@ -888,6 +905,7 @@ def process(data: str) -> ToolResult:
 ```
 
 Fields:
+
 - `content`: List of MCP ContentBlocks (text, images, etc.)
 - `structured_content`: Dict matching tool's output schema
 - `meta`: Runtime metadata passed to MCP as `_meta`
@@ -957,6 +975,7 @@ async def simple_task():
 ```
 
 Task modes:
+
 - `"forbidden"`: Component does not support task execution (default)
 - `"optional"`: Supports both synchronous and task execution
 - `"required"`: Must be executed as background task
@@ -970,6 +989,7 @@ Requires Docket server for task scheduling and result polling.
 v3.0 changes what decorators (`@tool`, `@resource`, `@prompt`) return ([#2856](https://github.com/PrefectHQ/fastmcp/pull/2856)). Decorators now return the original function unchanged, rather than transforming it into a component object.
 
 **v3 behavior (default):**
+
 ```python
 @mcp.tool
 def greet(name: str) -> str:
@@ -980,6 +1000,7 @@ greet("World")  # "Hello, World!"
 ```
 
 **Why this matters:**
+
 - Functions stay callable - useful for testing and reuse
 - Instance methods just work: `mcp.add_tool(obj.method)`
 - Matches how Flask, FastAPI, and Typer decorators behave
@@ -1013,6 +1034,7 @@ fastmcp run server.py --reload --transport http --port 8080
 ```
 
 Implementation (`fastmcp_slim/fastmcp/cli/run.py`):
+
 - Uses `watchfiles` for efficient file monitoring
 - Runs server as subprocess for clean restarts
 - Stateless mode for seamless reconnection after restart
@@ -1020,6 +1042,7 @@ Implementation (`fastmcp_slim/fastmcp/cli/run.py`):
 - HTTP: Limited bidirectional features during reload
 
 Also available with `fastmcp dev inspector`:
+
 ```bash
 fastmcp dev inspector server.py  # Includes --reload by default
 ```
@@ -1064,6 +1087,7 @@ mcp = FastMCP(middleware=[
 ```
 
 Built-in checks:
+
 - `require_scopes(*scopes)`: Requires specific OAuth scopes
 - `restrict_tag(tag, scopes)`: Requires scopes only for tagged components
 
@@ -1107,6 +1131,7 @@ def greet(name: str) -> str:
 ```
 
 Features:
+
 - **Standalone decorators**: `@tool`, `@resource`, `@prompt` from `fastmcp.tools`, `fastmcp.resources`, `fastmcp.prompts` ([#2832](https://github.com/PrefectHQ/fastmcp/pull/2832))
 - **Reload mode**: `FileSystemProvider("mcp/", reload=True)` re-scans on every request for development
 - **Package support**: Directories with `__init__.py` support relative imports
@@ -1132,26 +1157,28 @@ mcp.add_provider(SkillsDirectoryProvider(roots=Path.home() / ".claude" / "skills
 ```
 
 Each subdirectory with a `SKILL.md` file becomes a discoverable skill. Clients see:
+
 - `skill://{name}/SKILL.md` - Main instruction file
 - `skill://{name}/_manifest` - JSON listing of all files with sizes and hashes
 - `skill://{name}/{path}` - Supporting files (via template or resources)
 
 **Two-layer architecture**:
+
 - `SkillProvider` - Handles a single skill folder
 - `SkillsDirectoryProvider` - Scans directories, creates a `SkillProvider` per valid skill
 
 **Vendor providers** with locked default paths:
 
-| Provider | Directory |
-|----------|-----------|
-| `ClaudeSkillsProvider` | `~/.claude/skills/` |
-| `CursorSkillsProvider` | `~/.cursor/skills/` |
-| `VSCodeSkillsProvider` | `~/.copilot/skills/` |
-| `CodexSkillsProvider` | `/etc/codex/skills/`, `~/.codex/skills/` |
-| `GeminiSkillsProvider` | `~/.gemini/skills/` |
-| `GooseSkillsProvider` | `~/.config/agents/skills/` |
-| `CopilotSkillsProvider` | `~/.copilot/skills/` |
-| `OpenCodeSkillsProvider` | `~/.config/opencode/skills/` |
+| Provider                 | Directory                                |
+| ------------------------ | ---------------------------------------- |
+| `ClaudeSkillsProvider`   | `~/.claude/skills/`                      |
+| `CursorSkillsProvider`   | `~/.cursor/skills/`                      |
+| `VSCodeSkillsProvider`   | `~/.copilot/skills/`                     |
+| `CodexSkillsProvider`    | `/etc/codex/skills/`, `~/.codex/skills/` |
+| `GeminiSkillsProvider`   | `~/.gemini/skills/`                      |
+| `GooseSkillsProvider`    | `~/.config/agents/skills/`               |
+| `CopilotSkillsProvider`  | `~/.copilot/skills/`                     |
+| `OpenCodeSkillsProvider` | `~/.config/opencode/skills/`             |
 
 **Progressive disclosure**: By default, supporting files are hidden from `list_resources()` and accessed via template. Set `supporting_files="resources"` for full enumeration.
 
@@ -1329,6 +1356,7 @@ Three concurrent calls now execute in parallel (~10s) rather than sequentially (
 The CLI notifies users when a newer FastMCP version is available on PyPI ([#2840](https://github.com/PrefectHQ/fastmcp/pull/2840)).
 
 **Setting**: `FASTMCP_CHECK_FOR_UPDATES`
+
 - `"stable"` - Check for stable releases (default)
 - `"prerelease"` - Include alpha/beta/rc versions
 - `"off"` - Disable

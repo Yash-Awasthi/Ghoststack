@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 
-import { addKimiToolCompatibilityFields, isKimiModel } from '../kimi-tool-compat'
+import {
+  addKimiToolCompatibilityFields,
+  isKimiModel,
+} from '../kimi-tool-compat'
 
 import type { ChatCompletionRequestBody } from '../types'
 

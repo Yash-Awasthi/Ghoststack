@@ -21,10 +21,10 @@ The answer lies in **standardization**. The AI ecosystem is fragmented. Every mo
 
 1.  **Interoperability:** Build one MCP server, and it can be used by any MCP-compliant client (Claude, Gemini, OpenAI, custom agents, etc.) without custom integration code. This is the protocol's most important promise.
 2.  **Discoverability:** Clients can dynamically ask a server what it's capable of at runtime. They receive a structured, machine-readable "menu" of tools and resources.
-3.  **Security & Safety:** MCP provides a clear, sandboxed boundary. An LLM can't execute arbitrary code on your server; it can only *request* to run the specific, typed, and validated functions you explicitly expose.
+3.  **Security & Safety:** MCP provides a clear, sandboxed boundary. An LLM can't execute arbitrary code on your server; it can only _request_ to run the specific, typed, and validated functions you explicitly expose.
 4.  **Composability:** You can build small, specialized MCP servers and combine them to create powerful, complex applications.
 
-## Core MCP Components 
+## Core MCP Components
 
 An MCP server exposes its capabilities through three primary components: Tools, Resources, and Prompts.
 
@@ -32,7 +32,7 @@ An MCP server exposes its capabilities through three primary components: Tools, 
 
 Tools are functions that the LLM can ask the server to execute. They are the action-oriented part of MCP.
 
-In the spirit of a REST API, you can think of **Tools as being like `POST` requests.** They are used to *perform an action*, *change state*, or *trigger a side effect*, like sending an email, adding a user to a database, or making a calculation.
+In the spirit of a REST API, you can think of **Tools as being like `POST` requests.** They are used to _perform an action_, _change state_, or _trigger a side effect_, like sending an email, adding a user to a database, or making a calculation.
 
 With FastMCP, creating a tool is as simple as decorating a Python function.
 
@@ -55,7 +55,7 @@ def get_weather(city: str) -> dict:
 
 Resources are data sources that the LLM can read. They are used to load information into the LLM's context, providing it with knowledge it doesn't have from its training data.
 
-Following the REST API analogy, **Resources are like `GET` requests.** Their purpose is to *retrieve information* idempotently, ideally without causing side effects. A resource can be anything from a static text file to a dynamic piece of data from a database. Each resource is identified by a unique URI.
+Following the REST API analogy, **Resources are like `GET` requests.** Their purpose is to _retrieve information_ idempotently, ideally without causing side effects. A resource can be anything from a static text file to a dynamic piece of data from a database. Each resource is identified by a unique URI.
 
 ```python
 from fastmcp import FastMCP
@@ -102,7 +102,7 @@ def summarize_text(text_to_summarize: str) -> str:
     """Creates a prompt asking the LLM to summarize a piece of text."""
     return f"""
         Please provide a concise, one-paragraph summary of the following text:
-        
+
         {text_to_summarize}
         """
 ```
@@ -111,7 +111,7 @@ def summarize_text(text_to_summarize: str) -> str:
 
 ## Advanced Capabilities
 
-Beyond the core components, MCP also supports more advanced interaction patterns, such as a server requesting that the *client's* LLM generate a completion (known as **sampling**), or a server sending asynchronous **notifications** to a client. These features enable more complex, bidirectional workflows and are fully supported by FastMCP.
+Beyond the core components, MCP also supports more advanced interaction patterns, such as a server requesting that the _client's_ LLM generate a completion (known as **sampling**), or a server sending asynchronous **notifications** to a client. These features enable more complex, bidirectional workflows and are fully supported by FastMCP.
 
 ## Next Steps
 

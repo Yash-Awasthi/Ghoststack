@@ -16,7 +16,7 @@ scrapling install --force
 ## Examples
 
 | File                     | Tool              | Type                        | Best For                              |
-|--------------------------|-------------------|-----------------------------|---------------------------------------|
+| ------------------------ | ----------------- | --------------------------- | ------------------------------------- |
 | `01_fetcher_session.py`  | `FetcherSession`  | Python - persistent HTTP    | APIs, fast multi-page scraping        |
 | `02_dynamic_session.py`  | `DynamicSession`  | Python - browser automation | Dynamic/SPA pages                     |
 | `03_stealthy_session.py` | `StealthySession` | Python - stealth browser    | Cloudflare, fingerprint bypass        |

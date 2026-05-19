@@ -7,24 +7,24 @@ Floci emulates Amazon MSK by orchestrating **Redpanda** containers. This provide
 
 ## Supported Actions
 
-| Action | Description |
-|---|---|
-| `CreateCluster` | Spawns a new Redpanda container for the cluster |
-| `CreateClusterV2` | Modern serverless/provisioned creation (mapped to provisioned) |
-| `ListClusters` | List all emulated clusters |
-| `ListClustersV2` | List all emulated clusters using V2 API |
-| `DescribeCluster` | Get cluster metadata and state |
-| `DescribeClusterV2` | Get cluster metadata and state using V2 API |
-| `DeleteCluster` | Stops and removes the Redpanda container |
-| `GetBootstrapBrokers` | Get the connection strings for the cluster |
+| Action                | Description                                                    |
+| --------------------- | -------------------------------------------------------------- |
+| `CreateCluster`       | Spawns a new Redpanda container for the cluster                |
+| `CreateClusterV2`     | Modern serverless/provisioned creation (mapped to provisioned) |
+| `ListClusters`        | List all emulated clusters                                     |
+| `ListClustersV2`      | List all emulated clusters using V2 API                        |
+| `DescribeCluster`     | Get cluster metadata and state                                 |
+| `DescribeClusterV2`   | Get cluster metadata and state using V2 API                    |
+| `DeleteCluster`       | Stops and removes the Redpanda container                       |
+| `GetBootstrapBrokers` | Get the connection strings for the cluster                     |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_MSK_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_MSK_MOCK` | `false` | `true` = metadata-only CRUD, no Docker containers |
-| `FLOCI_SERVICES_MSK_DEFAULT_IMAGE` | `redpandadata/redpanda:latest` | Docker image for Redpanda (Kafka) containers |
+| Variable                           | Default                        | Description                                       |
+| ---------------------------------- | ------------------------------ | ------------------------------------------------- |
+| `FLOCI_SERVICES_MSK_ENABLED`       | `true`                         | Enable or disable the service                     |
+| `FLOCI_SERVICES_MSK_MOCK`          | `false`                        | `true` = metadata-only CRUD, no Docker containers |
+| `FLOCI_SERVICES_MSK_DEFAULT_IMAGE` | `redpandadata/redpanda:latest` | Docker image for Redpanda (Kafka) containers      |
 
 ## How it works
 

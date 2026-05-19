@@ -1,4 +1,4 @@
-import { IConfigLoader } from '../runtime/config-loader';
+import { IConfigLoader } from "../runtime/config-loader";
 
 export interface IRuntimeManager {
   getActiveServices(): Promise<string[]>;

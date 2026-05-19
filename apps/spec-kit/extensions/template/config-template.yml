@@ -6,18 +6,18 @@
 # Example: Connection settings
 connection:
   # URL to external service
-  url: ""  # REQUIRED: e.g., "https://api.example.com"
+  url: "" # REQUIRED: e.g., "https://api.example.com"
 
   # API key or token
-  api_key: ""  # REQUIRED: Your API key
+  api_key: "" # REQUIRED: Your API key
 
 # Example: Project settings
 project:
   # Project identifier
-  id: ""  # REQUIRED: e.g., "my-project"
+  id: "" # REQUIRED: e.g., "my-project"
 
   # Workspace or organization
-  workspace: ""  # OPTIONAL: e.g., "my-org"
+  workspace: "" # OPTIONAL: e.g., "my-org"
 
 # Example: Feature flags
 features:
@@ -33,13 +33,13 @@ features:
 # Example: Default values
 defaults:
   # Labels to apply
-  labels: []  # e.g., ["automated", "spec-kit"]
+  labels: [] # e.g., ["automated", "spec-kit"]
 
   # Priority level
-  priority: "medium"  # Options: "low", "medium", "high"
+  priority: "medium" # Options: "low", "medium", "high"
 
   # Assignee
-  assignee: ""  # OPTIONAL: Default assignee
+  assignee: "" # OPTIONAL: Default assignee
 
 # Example: Field mappings
 # Map internal names to external field IDs

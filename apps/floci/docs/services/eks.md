@@ -7,15 +7,15 @@ EKS uses a standard REST API with JSON bodies — not the JSON 1.1 (`X-Amz-Targe
 
 ## Supported Operations
 
-| Operation | Description |
-|---|---|
-| `CreateCluster` | Create a new EKS cluster |
-| `DescribeCluster` | Describe a cluster by name |
-| `ListClusters` | List all cluster names |
-| `DeleteCluster` | Delete a cluster |
-| `TagResource` | Add tags to a cluster |
-| `UntagResource` | Remove tags from a cluster |
-| `ListTagsForResource` | List tags on a cluster |
+| Operation             | Description                |
+| --------------------- | -------------------------- |
+| `CreateCluster`       | Create a new EKS cluster   |
+| `DescribeCluster`     | Describe a cluster by name |
+| `ListClusters`        | List all cluster names     |
+| `DeleteCluster`       | Delete a cluster           |
+| `TagResource`         | Add tags to a cluster      |
+| `UntagResource`       | Remove tags from a cluster |
+| `ListTagsForResource` | List tags on a cluster     |
 
 ## Modes
 
@@ -28,7 +28,7 @@ Cluster metadata is stored in-process. No Docker containers are started. The clu
 Floci starts a **k3s** (`rancher/k3s`) container for each cluster. The k3s API server is exposed on a host port from the configured range (`6500–6599`). Once `/readyz` responds, the cluster transitions to `ACTIVE` and the CA certificate is extracted from the kubeconfig.
 
 !!! note "Docker socket required"
-    Real mode starts privileged Docker containers. Mount the Docker socket and set the Docker network so containers can reach each other.
+Real mode starts privileged Docker containers. Mount the Docker socket and set the Docker network so containers can reach each other.
 
 ```yaml
 services:
@@ -43,20 +43,20 @@ services:
 ```
 
 !!! note "No port mapping needed for k3s ports"
-    k3s containers bind their API server port (6500–6599) directly on the host via Docker — no `ports:` entry is required in `docker-compose.yml`. See [Ports Reference](../configuration/ports.md#ports-65006599-eks-real-mode) for the full explanation.
+k3s containers bind their API server port (6500–6599) directly on the host via Docker — no `ports:` entry is required in `docker-compose.yml`. See [Ports Reference](../configuration/ports.md#ports-65006599-eks-real-mode) for the full explanation.
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_EKS_ENABLED` | `true` | Enable the EKS service |
-| `FLOCI_SERVICES_EKS_MOCK` | `false` | Metadata-only mode (no Docker) |
-| `FLOCI_SERVICES_EKS_DEFAULT_IMAGE` | `rancher/k3s:latest` | k3s Docker image |
-| `FLOCI_SERVICES_EKS_API_SERVER_BASE_PORT` | `6500` | First port in the k3s API server range |
-| `FLOCI_SERVICES_EKS_API_SERVER_MAX_PORT` | `6599` | Last port in the k3s API server range |
-| `FLOCI_SERVICES_EKS_DATA_PATH` | `./data/eks` | Host bind-mount root for cluster data |
-| `FLOCI_SERVICES_EKS_DOCKER_NETWORK` | *(unset)* | Docker network for k3s containers |
-| `FLOCI_SERVICES_EKS_KEEP_RUNNING_ON_SHUTDOWN` | `false` | Leave k3s containers running after Floci stops |
+| Variable                                      | Default              | Description                                    |
+| --------------------------------------------- | -------------------- | ---------------------------------------------- |
+| `FLOCI_SERVICES_EKS_ENABLED`                  | `true`               | Enable the EKS service                         |
+| `FLOCI_SERVICES_EKS_MOCK`                     | `false`              | Metadata-only mode (no Docker)                 |
+| `FLOCI_SERVICES_EKS_DEFAULT_IMAGE`            | `rancher/k3s:latest` | k3s Docker image                               |
+| `FLOCI_SERVICES_EKS_API_SERVER_BASE_PORT`     | `6500`               | First port in the k3s API server range         |
+| `FLOCI_SERVICES_EKS_API_SERVER_MAX_PORT`      | `6599`               | Last port in the k3s API server range          |
+| `FLOCI_SERVICES_EKS_DATA_PATH`                | `./data/eks`         | Host bind-mount root for cluster data          |
+| `FLOCI_SERVICES_EKS_DOCKER_NETWORK`           | _(unset)_            | Docker network for k3s containers              |
+| `FLOCI_SERVICES_EKS_KEEP_RUNNING_ON_SHUTDOWN` | `false`              | Leave k3s containers running after Floci stops |
 
 ### Mock mode (CI / tests)
 

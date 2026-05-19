@@ -1,12 +1,12 @@
-import { IRuntimeInspector, ITaskSnapshot, IQueueSnapshot, IEventSnapshot } from './interfaces/observability.interface';
-import { IMetricsCollector } from './interfaces/observability.interface';
-import { IQueueBackend } from './interfaces/queue.interface';
-import { IServiceDiscovery } from './interfaces/discovery.interface';
-import { IEventStore } from './interfaces/persistence.interface';
-import { IMCPRuntime, IMCPServerRegistry } from './interfaces/mcp.interface';
-import { IGovernanceEngine, IApprovalWorkflow, ICognitiveTrace } from './interfaces/governance.interface';
-import { IEnvironmentTelemetry, IFilesystemSandbox, IExecutionEnvironment } from './interfaces/environment.interface';
-import { IWorkflowRegistry, IWorkflowTelemetry } from './interfaces/workflow.interface';
+import { IRuntimeInspector, ITaskSnapshot, IQueueSnapshot, IEventSnapshot } from "./interfaces/observability.interface";
+import { IMetricsCollector } from "./interfaces/observability.interface";
+import { IQueueBackend } from "./interfaces/queue.interface";
+import { IServiceDiscovery } from "./interfaces/discovery.interface";
+import { IEventStore } from "./interfaces/persistence.interface";
+import { IMCPRuntime, IMCPServerRegistry } from "./interfaces/mcp.interface";
+import { IGovernanceEngine, IApprovalWorkflow, ICognitiveTrace } from "./interfaces/governance.interface";
+import { IEnvironmentTelemetry, IFilesystemSandbox, IExecutionEnvironment } from "./interfaces/environment.interface";
+import { IWorkflowRegistry, IWorkflowTelemetry } from "./interfaces/workflow.interface";
 
 export class RuntimeInspector implements IRuntimeInspector {
   private metrics: IMetricsCollector;
@@ -56,7 +56,7 @@ export class RuntimeInspector implements IRuntimeInspector {
     this.mcpRegistry = mcpRegistry;
     this.governanceEngine = governanceEngine;
     this.approvalWorkflow = approvalWorkflow;
-    
+
     this.browserTelemetry = browserTelemetry;
     this.scrapingTelemetry = scrapingTelemetry;
     this.fsSandbox = fsSandbox;
@@ -69,9 +69,9 @@ export class RuntimeInspector implements IRuntimeInspector {
 
   async getHealth(): Promise<any> {
     const services = await this.discovery.listServices();
-    const anyUnhealthy = services.some(s => s.status !== 'healthy');
+    const anyUnhealthy = services.some((s) => s.status !== "healthy");
     return {
-      status: anyUnhealthy && services.length > 0 ? 'degraded' : 'healthy',
+      status: anyUnhealthy && services.length > 0 ? "degraded" : "healthy",
       uptimeSeconds: Math.floor((Date.now() - this.bootTime.getTime()) / 1000),
       servicesCount: services.length
     };
@@ -86,27 +86,27 @@ export class RuntimeInspector implements IRuntimeInspector {
     const taskMap = new Map<string, ITaskSnapshot>();
 
     for (const event of events) {
-      if (event.event === 'task_routed' || event.event === 'task_queued') {
+      if (event.event === "task_routed" || event.event === "task_queued") {
         const task = event.payload;
         taskMap.set(task.id, {
           id: task.id,
-          status: task.status || 'queued',
-          priority: task.priority || 'medium',
+          status: task.status || "queued",
+          priority: task.priority || "medium",
           dependencies: task.dependencies || [],
           retries: task.retries || 0
         });
-      } else if (event.event === 'execution_succeeded') {
+      } else if (event.event === "execution_succeeded") {
         const task = event.payload;
         const existing = taskMap.get(task.taskId);
         if (existing) {
-          existing.status = 'succeeded';
+          existing.status = "succeeded";
           existing.executionTimeMs = task.durationMs;
         }
-      } else if (event.event === 'execution_failed') {
+      } else if (event.event === "execution_failed") {
         const task = event.payload;
         const existing = taskMap.get(task.taskId);
         if (existing) {
-          existing.status = 'failed';
+          existing.status = "failed";
           existing.retries = task.attempts;
         }
       }
@@ -116,7 +116,7 @@ export class RuntimeInspector implements IRuntimeInspector {
 
   async getEvents(): Promise<IEventSnapshot[]> {
     const replayed = await this.eventStore.replayEvents();
-    return replayed.map(r => ({
+    return replayed.map((r) => ({
       event: r.event,
       timestamp: r.timestamp || new Date(),
       payload: r.payload
@@ -131,7 +131,7 @@ export class RuntimeInspector implements IRuntimeInspector {
     return {
       activeJobsCount: activeCount,
       deadLetterJobsCount: dlq.length,
-      jobs: activeJobs.map(j => ({
+      jobs: activeJobs.map((j) => ({
         id: j.id,
         priority: j.priority,
         retries: j.retries
@@ -141,7 +141,7 @@ export class RuntimeInspector implements IRuntimeInspector {
 
   async getServices(): Promise<any[]> {
     const list = await this.discovery.listServices();
-    return list.map(s => ({
+    return list.map((s) => ({
       name: s.name,
       status: s.status,
       lastCheck: s.lastCheck,
@@ -154,7 +154,7 @@ export class RuntimeInspector implements IRuntimeInspector {
     const metrics = this.mcpRuntime ? await this.mcpRuntime.getMetrics() : null;
     const list = this.mcpRegistry ? await this.mcpRegistry.listServers() : [];
     const logs = this.mcpRuntime ? await this.mcpRuntime.getExecutionsLog() : [];
-    
+
     return {
       metrics,
       serversCount: list.length,
@@ -171,7 +171,7 @@ export class RuntimeInspector implements IRuntimeInspector {
     const servers = await this.mcpRegistry.listServers();
     const tools: string[] = [];
     for (const s of servers) {
-      tools.push(...s.tools.map(t => `${s.name}:${t}`));
+      tools.push(...s.tools.map((t) => `${s.name}:${t}`));
     }
     return tools;
   }
@@ -236,7 +236,7 @@ export class RuntimeInspector implements IRuntimeInspector {
 
   getEnvironmentsList(): any[] {
     if (!this.envsList) return [];
-    return this.envsList.map(e => ({
+    return this.envsList.map((e) => ({
       name: e.name,
       capabilities: e.capabilities
     }));
@@ -245,7 +245,7 @@ export class RuntimeInspector implements IRuntimeInspector {
   // Phase 8 Workflow Diagnostics Observability APIs
   getWorkflowsList(): any[] {
     if (!this.workflowRegistry) return [];
-    return this.workflowRegistry.listWorkflows().map(w => ({
+    return this.workflowRegistry.listWorkflows().map((w) => ({
       id: w.id,
       name: w.name,
       description: w.description,
@@ -256,18 +256,18 @@ export class RuntimeInspector implements IRuntimeInspector {
   getWorkflowExecution(executionId: string): any {
     if (!this.workflowTelemetry) return null;
     const history = this.workflowTelemetry.getExecutionHistory();
-    return history.find(e => e.id === executionId) || null;
+    return history.find((e) => e.id === executionId) || null;
   }
 
   getWorkflowReplays(): any[] {
     if (!this.workflowTelemetry) return [];
     // Filter executions that have replay patterns
-    return this.workflowTelemetry.getExecutionHistory().filter(e => e.id.includes("replay"));
+    return this.workflowTelemetry.getExecutionHistory().filter((e) => e.id.includes("replay"));
   }
 
   getWorkflowTemplates(): any[] {
     if (!this.workflowRegistry) return [];
-    return this.workflowRegistry.listTemplates().map(t => ({
+    return this.workflowRegistry.listTemplates().map((t) => ({
       templateId: t.templateId,
       name: t.name,
       description: t.description
@@ -279,10 +279,10 @@ export class RuntimeInspector implements IRuntimeInspector {
     const history = this.workflowTelemetry.getExecutionHistory();
     return {
       totalExecutions: history.length,
-      succeededCount: history.filter(h => h.status === 'succeeded').length,
-      failedCount: history.filter(h => h.status === 'failed').length,
-      rejectedCount: history.filter(h => h.status === 'rejected').length,
-      pendingCount: history.filter(h => h.status === 'pending').length
+      succeededCount: history.filter((h) => h.status === "succeeded").length,
+      failedCount: history.filter((h) => h.status === "failed").length,
+      rejectedCount: history.filter((h) => h.status === "rejected").length,
+      pendingCount: history.filter((h) => h.status === "pending").length
     };
   }
 

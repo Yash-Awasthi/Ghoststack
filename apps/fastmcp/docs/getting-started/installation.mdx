@@ -3,6 +3,7 @@ title: Installation
 description: Install FastMCP and verify your setup
 icon: arrow-down-to-line
 ---
+
 ## Install FastMCP
 
 We recommend using [uv](https://docs.astral.sh/uv/getting-started/installation/) to install and manage FastMCP.
@@ -59,6 +60,7 @@ pip install "cyclopts>=5.0.0a1"
 ```
 
 Alternatively, wait for the stable v5 release. See [this issue](https://github.com/BrianPugh/cyclopts/issues/672) for details.
+
 </Info>
 ## Upgrading
 
@@ -70,7 +72,7 @@ See the [Upgrade Guide](/getting-started/upgrading/from-fastmcp-2) for a complet
 
 #### From FastMCP 1.0
 
-If you're using FastMCP 1.0 via the `mcp` package (meaning you import FastMCP as  `from mcp.server.fastmcp import FastMCP`), upgrading is straightforward — for most servers, it's a single import change. See the [full upgrade guide](/getting-started/upgrading/from-mcp-sdk) for details.
+If you're using FastMCP 1.0 via the `mcp` package (meaning you import FastMCP as `from mcp.server.fastmcp import FastMCP`), upgrading is straightforward — for most servers, it's a single import change. See the [full upgrade guide](/getting-started/upgrading/from-mcp-sdk) for details.
 
 #### From the Low-Level Server API
 
@@ -81,6 +83,7 @@ If you built your server directly on the `mcp` package's `Server` class — with
 FastMCP follows semantic versioning with pragmatic adaptations for the rapidly evolving MCP ecosystem. Breaking changes may occur in minor versions (e.g., 2.3.x to 2.4.0) when necessary to stay current with the MCP Protocol.
 
 For production use, always pin to exact versions:
+
 ```
 fastmcp==3.0.0  # Good
 fastmcp>=3.0.0  # Bad - may install breaking changes
@@ -91,6 +94,7 @@ See the full [versioning and release policy](/development/releases#versioning-po
 ## Contributing to FastMCP
 
 Interested in contributing to FastMCP? See the [Contributing Guide](/development/contributing) for details on:
+
 - Setting up your development environment
 - Running tests and pre-commit hooks
 - Submitting issues and pull requests

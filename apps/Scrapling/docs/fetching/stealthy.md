@@ -12,11 +12,13 @@ As with [DynamicFetcher](dynamic.md#introduction), you will need some knowledge 
     4. You've completed or read the [Main classes](../parsing/main_classes.md) page to know what properties/methods the [Response](../fetching/choosing.md#response-object) class is inheriting from the [Selector](../parsing/main_classes.md#selector) class.
 
 ## Basic Usage
+
 You have one primary way to import this Fetcher, which is the same for all fetchers.
 
 ```python
  from scrapling.fetchers import StealthyFetcher
 ```
+
 Check out how to configure the parsing options [here](choosing.md#parser-configuration-in-all-fetchers)
 
 !!! abstract
@@ -27,7 +29,7 @@ Check out how to configure the parsing options [here](choosing.md#parser-configu
 
 The `StealthyFetcher` class is a stealthy version of the [DynamicFetcher](dynamic.md#introduction) class, and here are some of the things it does:
 
-1. It easily bypasses all types of Cloudflare's Turnstile/Interstitial automatically. 
+1. It easily bypasses all types of Cloudflare's Turnstile/Interstitial automatically.
 2. It bypasses CDP runtime leaks and WebRTC leaks.
 3. It isolates JS execution, removes many Playwright fingerprints, and stops detection through some of the known behaviors that bots do.
 4. It generates canvas noise to prevent fingerprinting through canvas.
@@ -35,12 +37,12 @@ The `StealthyFetcher` class is a stealthy version of the [DynamicFetcher](dynami
 6. and other anti-protection options...
 
 ## Full list of arguments
+
 Scrapling provides many options with this fetcher and its session classes. Before jumping to the [examples](#examples), here's the full list of arguments
 
-
 |      Argument       | Description                                                                                                                                                                                                                         | Optional |
-|:-------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------:|
-|         url         | Target url                                                                                                                                                                                                                          |    ❌     |
+| :-----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+|         url         | Target url                                                                                                                                                                                                                          |    ❌    |
 |      headless       | Pass `True` to run the browser in headless/hidden (**default**) or `False` for headful/visible mode.                                                                                                                                |    ✔️    |
 |  disable_resources  | Drop requests for unnecessary resources for a speed boost. Requests dropped are of type `font`, `image`, `media`, `beacon`, `object`, `imageset`, `texttrack`, `websocket`, `csp_report`, and `stylesheet`.                         |    ✔️    |
 |       cookies       | Set cookies for the next request.                                                                                                                                                                                                   |    ✔️    |
@@ -88,6 +90,7 @@ In session classes, all these arguments can be set globally for the session. Sti
     4. If you didn't set a user agent and enabled headless mode, the fetcher will generate a real user agent for the same browser version and use it. If you didn't set a user agent and didn't enable headless mode, the fetcher will use the browser's default user agent, which is the same as in standard browsers in the latest versions.
 
 ## Examples
+
 It's easier to understand with examples, so we will now review most of the arguments individually. Since it's the same class as the [DynamicFetcher](dynamic.md#introduction), you can refer to that page for more examples, as we won't repeat all the examples from there.
 
 ### Cloudflare and stealth options
@@ -123,11 +126,13 @@ And even solves the custom pages with embedded captcha.
     3. This feature works seamlessly with proxies and other stealth options.
 
 ### Browser Automation
+
 This is where your knowledge about [Playwright's Page API](https://playwright.dev/python/docs/api/class-page) comes into play. The function you pass here takes the page object from Playwright's API, performs the desired action, and then the fetcher continues.
 
 This function is executed immediately after waiting for `network_idle` (if enabled) and before waiting for the `wait_selector` argument, allowing it to be used for purposes beyond automation. You can alter the page as you want.
 
 In the example below, I used the pages' [mouse events](https://playwright.dev/python/docs/api/class-mouse) to scroll the page with the mouse wheel, then move the mouse.
+
 ```python
 from playwright.sync_api import Page
 
@@ -138,7 +143,9 @@ def scroll_page(page: Page):
 
 page = StealthyFetcher.fetch('https://example.com', page_action=scroll_page)
 ```
+
 Of course, if you use the async fetch version, the function must also be async.
+
 ```python
 from playwright.async_api import Page
 
@@ -151,6 +158,7 @@ page = await StealthyFetcher.async_fetch('https://example.com', page_action=scro
 ```
 
 ### Wait Conditions
+
 ```python
 # Wait for the selector
 page = StealthyFetcher.fetch(
@@ -159,6 +167,7 @@ page = StealthyFetcher.fetch(
     wait_selector_state='visible'
 )
 ```
+
 This is the last wait the fetcher will do before returning the response (if enabled). You pass a CSS selector to the `wait_selector` argument, and the fetcher will wait for the state you passed in the `wait_selector_state` argument to be fulfilled. If you didn't pass a state, the default would be `attached`, which means it will wait for the element to be present in the DOM.
 
 After that, if `load_dom` is enabled (the default), the fetcher will check again to see if all JavaScript files are loaded and executed (in the `domcontentloaded` state) or continue waiting. If you have enabled `network_idle`, the fetcher will wait for `network_idle` to be fulfilled again, as explained above.
@@ -170,9 +179,10 @@ The states the fetcher can wait for can be any of the following ([source](https:
 - `visible`: wait for an element to have a non-empty bounding box and no `visibility:hidden`. Note that an element without any content or with `display:none` has an empty bounding box and is not considered visible.
 - `hidden`: wait for an element to be either detached from the DOM, or have an empty bounding box, or `visibility:hidden`. This is opposite to the `'visible'` option.
 
-
 ### Real-world example (Amazon)
+
 This is for educational purposes only; this example was generated by AI, which also shows how easy it is to work with Scrapling through AI
+
 ```python
 def scrape_amazon_product(url):
     # Use StealthyFetcher to bypass protection
@@ -210,9 +220,9 @@ with StealthySession(
 ) as session:
     # Make multiple requests with the same browser instance
     page1 = session.fetch('https://example1.com')
-    page2 = session.fetch('https://example2.com') 
+    page2 = session.fetch('https://example2.com')
     page3 = session.fetch('https://nopecha.com/demo/cloudflare')
-    
+
     # All requests reuse the same tab on the same browser instance
 ```
 
@@ -233,7 +243,7 @@ async def scrape_multiple_sites():
         # Make async requests with shared browser configuration
         pages = await asyncio.gather(
             session.fetch('https://site1.com'),
-            session.fetch('https://site2.com'), 
+            session.fetch('https://site2.com'),
             session.fetch('https://protected-site.com')
         )
         return pages
@@ -260,12 +270,15 @@ In versions 0.3 and 0.3.1, the pool was reusing finished tabs to save more resou
 This fetcher used a custom version of [Camoufox](https://github.com/daijro/camoufox) as an engine before version 0.3.13, which was replaced by [patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright) for many reasons. If you see that Camoufox is stable on your device, has no high memory issues, and you want to continue using it, then you can.
 
 First, you will need to install the Camoufox library, browser, and Firefox system dependencies if you didn't already:
+
 ```commandline
 pip install camoufox
 playwright install-deps firefox
 camoufox fetch
 ```
+
 Then you will inherit from `StealthySession` and set it as below:
+
 ```python
 from scrapling.fetchers import StealthySession
 from playwright.sync_api import sync_playwright
@@ -303,7 +316,9 @@ class StealthySession(StealthySession):
         else:
             raise RuntimeError("Session has been already started")
 ```
+
 After that, you can use it normally as before, even for solving Cloudflare challenges:
+
 ```python
 with StealthySession(solve_cloudflare=True, headless=True) as session:
     page = session.fetch('https://sergiodemo.com/security/challenge/legacy-challenge')
@@ -312,6 +327,7 @@ with StealthySession(solve_cloudflare=True, headless=True) as session:
 ```
 
 The same logic applies to the `AsyncStealthySession` class with a few differences:
+
 ```python
 from scrapling.fetchers import AsyncStealthySession
 from playwright.async_api import async_playwright
@@ -328,7 +344,7 @@ class AsyncStealthySession(AsyncStealthySession):
             self.context = await self.playwright.firefox.launch_persistent_context(**launch_options)
         else:
             raise RuntimeError("Session has been already started")
- 
+
 async with AsyncStealthySession(solve_cloudflare=True, headless=True) as session:
     page = await session.fetch('https://sergiodemo.com/security/challenge/legacy-challenge')
     if page.css('#page-not-found-404'):

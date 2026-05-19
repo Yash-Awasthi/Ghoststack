@@ -8,6 +8,7 @@ This example demonstrates mounting multiple OAuth-protected MCP servers in a sin
 - **Google MCP**: `http://127.0.0.1:8000/api/mcp/google/mcp`
 
 Discovery endpoints (RFC 8414 path-aware):
+
 - **GitHub**: `http://127.0.0.1:8000/.well-known/oauth-authorization-server/api/mcp/github`
 - **Google**: `http://127.0.0.1:8000/.well-known/oauth-authorization-server/api/mcp/google`
 
@@ -23,17 +24,20 @@ export FASTMCP_SERVER_AUTH_GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```
 
 Configure redirect URIs in each provider's developer console (note the `/api/mcp/{provider}` prefix since the servers are mounted):
+
 - GitHub: `http://127.0.0.1:8000/api/mcp/github/auth/callback/github`
 - Google: `http://127.0.0.1:8000/api/mcp/google/auth/callback/google`
 
 ## Running
 
 Start the server:
+
 ```bash
 python server.py
 ```
 
 Connect with the client:
+
 ```bash
 python client.py
 ```

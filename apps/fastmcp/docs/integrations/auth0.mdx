@@ -5,7 +5,7 @@ description: Secure your FastMCP server with Auth0 OAuth
 icon: shield-check
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.12.4" />
 
@@ -16,6 +16,7 @@ This guide shows you how to secure your FastMCP server using **Auth0 OAuth**. Wh
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. An **[Auth0 Account](https://auth0.com/)** with access to create Applications
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 
@@ -28,12 +29,12 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     Go to **Applications → Applications** in your Auth0 account.
 
     Click **"+ Create Application"** to create a new application.
+
 </Step>
 
 <Step title="Create Your Application">
-    - **Name**: Choose a name users will recognize (e.g., "My FastMCP Server")
-    - **Choose an application type**: Choose "Single Page Web Applications"
-    - Click **Create** to create the application
+  - **Name**: Choose a name users will recognize (e.g., "My FastMCP Server") - **Choose an application type**: Choose
+  "Single Page Web Applications" - Click **Create** to create the application
 </Step>
 
 <Step title="Configure Your Application">
@@ -49,6 +50,7 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     <Tip>
     If you want to use a custom callback path (e.g., `/auth/auth0/callback`), make sure to set the same path in both your Auth0 Application settings and the `redirect_path` parameter when configuring the Auth0Provider.
     </Tip>
+
 </Step>
 
 <Step title="Save Your Credentials">
@@ -60,6 +62,7 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     <Tip>
     Store these credentials securely. Never commit them to version control. Use environment variables or a secrets manager in production.
     </Tip>
+
 </Step>
 
 <Step title="Select Your Audience">
@@ -71,6 +74,7 @@ Create an Application in your Auth0 settings to get the credentials needed for a
     <Tip>
     Store this along with of the credentials above. Never commit this to version control. Use environment variables or a secrets manager in production.
     </Tip>
+
 </Step>
 </Steps>
 
@@ -144,6 +148,7 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to Auth0's authorization page
 2. After you authorize the app, you'll be redirected back
 3. The client receives the token and can make authenticated requests
@@ -188,8 +193,10 @@ mcp = FastMCP(name="Production Auth0 App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>

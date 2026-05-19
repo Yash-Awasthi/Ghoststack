@@ -68,9 +68,7 @@ function createDbMockForUnion(options: {
   // 4. Ordered by priority ASC, expires_at ASC NULLS LAST, created_at ASC
 
   const now = new Date()
-  const activeGrants = grants.filter(
-    (g) => !g.expires_at || g.expires_at > now,
-  )
+  const activeGrants = grants.filter((g) => !g.expires_at || g.expires_at > now)
 
   // Non-zero grants
   const nonZeroGrants = activeGrants.filter((g) => g.balance !== 0)
@@ -134,9 +132,7 @@ function createDbMockForUnion(options: {
         where: () => {
           if (updateCallback) {
             // Find which grant is being updated based on the balance change
-            const targetGrant = grants.find(
-              (g) => g.balance !== values.balance,
-            )
+            const targetGrant = grants.find((g) => g.balance !== values.balance)
             if (targetGrant) {
               updateCallback(targetGrant.operation_id, values.balance)
             }
@@ -197,9 +193,8 @@ describe('Balance Calculator - calculateUsageAndBalance', () => {
         trackEvent: () => {},
       }))
 
-      const { calculateUsageAndBalance } = await import(
-        '@codebuff/billing/balance-calculator'
-      )
+      const { calculateUsageAndBalance } =
+        await import('@codebuff/billing/balance-calculator')
 
       const result = await calculateUsageAndBalance({
         userId: 'user-123',
@@ -259,9 +254,8 @@ describe('Balance Calculator - calculateUsageAndBalance', () => {
         trackEvent: () => {},
       }))
 
-      const { calculateUsageAndBalance } = await import(
-        '@codebuff/billing/balance-calculator'
-      )
+      const { calculateUsageAndBalance } =
+        await import('@codebuff/billing/balance-calculator')
 
       const result = await calculateUsageAndBalance({
         userId: 'user-123',
@@ -322,9 +316,8 @@ describe('Balance Calculator - calculateUsageAndBalance', () => {
         trackEvent: () => {},
       }))
 
-      const { calculateUsageAndBalance } = await import(
-        '@codebuff/billing/balance-calculator'
-      )
+      const { calculateUsageAndBalance } =
+        await import('@codebuff/billing/balance-calculator')
 
       const result = await calculateUsageAndBalance({
         userId: 'user-123',
@@ -384,9 +377,8 @@ describe('Balance Calculator - calculateUsageAndBalance', () => {
         trackEvent: () => {},
       }))
 
-      const { calculateUsageAndBalance } = await import(
-        '@codebuff/billing/balance-calculator'
-      )
+      const { calculateUsageAndBalance } =
+        await import('@codebuff/billing/balance-calculator')
 
       const result = await calculateUsageAndBalance({
         userId: 'user-123',

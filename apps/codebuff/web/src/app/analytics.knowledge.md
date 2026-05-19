@@ -73,10 +73,10 @@ The application uses the following event categories for consistent tracking:
 6. Documentation Events (`docs.*`)
    - docs.viewed
 
-8. Banner Events (`banner.*`)
+7. Banner Events (`banner.*`)
    - banner.clicked
 
-9. Usage Events (`usage.*`)
+8. Usage Events (`usage.*`)
    - usage.warning_shown
 
 Progress bar color coding:
@@ -305,4 +305,3 @@ Important: This pattern ensures accurate attribution even when users don't conve
      - Ignore protocol (http/https) differences
      - Handle missing or malformed origin headers
      - Keep CORS headers consistent in both success and error responses
-

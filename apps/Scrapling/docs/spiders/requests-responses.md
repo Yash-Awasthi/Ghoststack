@@ -27,8 +27,8 @@ request = response.follow("/page", callback=self.parse_page)
 Here are all the arguments you can pass to `Request`:
 
 | Argument      | Type       | Default    | Description                                                                                           |
-|---------------|------------|------------|-------------------------------------------------------------------------------------------------------|
-| `url`         | `str`      | *required* | The URL to fetch                                                                                      |
+| ------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `url`         | `str`      | _required_ | The URL to fetch                                                                                      |
 | `sid`         | `str`      | `""`       | Session ID - routes the request to a specific session (see [Sessions](sessions.md))                   |
 | `callback`    | `callable` | `None`     | Async generator method to process the response. Defaults to `parse()`                                 |
 | `priority`    | `int`      | `0`        | Higher values are processed first                                                                     |
@@ -77,8 +77,8 @@ async def parse(self, response: Response):
 ```
 
 | Argument           | Type       | Default    | Description                                                |
-|--------------------|------------|------------|------------------------------------------------------------|
-| `url`              | `str`      | *required* | URL to follow (absolute or relative)                       |
+| ------------------ | ---------- | ---------- | ---------------------------------------------------------- |
+| `url`              | `str`      | _required_ | URL to follow (absolute or relative)                       |
 | `sid`              | `str`      | `""`       | Session ID (inherits from original request if empty)       |
 | `callback`         | `callable` | `None`     | Callback method (inherits from original request if `None`) |
 | `priority`         | `int`      | `None`     | Priority (inherits from original request if `None`)        |
@@ -158,7 +158,7 @@ yield response.follow("/dashboard", dont_filter=True, callback=self.parse_dashbo
 You can fine-tune what goes into the fingerprint using class attributes on your spider:
 
 | Attribute            | Default | Effect                                                                                                          |
-|----------------------|---------|-----------------------------------------------------------------------------------------------------------------|
+| -------------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
 | `fp_include_kwargs`  | `False` | Include extra request kwargs (arguments you passed to the session fetch, like headers, etc.) in the fingerprint |
 | `fp_keep_fragments`  | `False` | Keep URL fragments (`#section`) when computing fingerprints                                                     |
 | `fp_include_headers` | `False` | Include request headers in the fingerprint                                                                      |

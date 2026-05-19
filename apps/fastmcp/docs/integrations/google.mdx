@@ -5,7 +5,7 @@ description: Secure your FastMCP server with Google OAuth
 icon: google
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.12.0" />
 
@@ -16,6 +16,7 @@ This guide shows you how to secure your FastMCP server using **Google OAuth**. S
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. A **[Google Cloud Account](https://console.cloud.google.com/)** with access to create OAuth 2.0 Client IDs
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 
@@ -31,22 +32,19 @@ Create an OAuth 2.0 Client ID in your Google Cloud Console to get the credential
 </Step>
 
 <Step title="Create OAuth 2.0 Client ID">
-    Navigate to **APIs & Services → Credentials** and click **"+ CREATE CREDENTIALS"** → **"OAuth client ID"**.
-    
-    Configure your OAuth client:
-    
-    - **Application type**: Web application
-    - **Name**: Choose a descriptive name (e.g., "FastMCP Server")
-    - **Authorized JavaScript origins**: Add your server's base URL (e.g., `http://localhost:8000`)
-    - **Authorized redirect URIs**: Add your server URL + `/auth/callback` (e.g., `http://localhost:8000/auth/callback`)
-    
-    <Warning>
-    The redirect URI must match exactly. The default path is `/auth/callback`, but you can customize it using the `redirect_path` parameter. For local development, Google allows `http://localhost` URLs with various ports. For production, you must use HTTPS.
-    </Warning>
-    
-    <Tip>
-    If you want to use a custom callback path (e.g., `/auth/google/callback`), make sure to set the same path in both your Google OAuth Client settings and the `redirect_path` parameter when configuring the GoogleProvider.
-    </Tip>
+  Navigate to **APIs & Services → Credentials** and click **"+ CREATE CREDENTIALS"** → **"OAuth client ID"**. Configure
+  your OAuth client: - **Application type**: Web application - **Name**: Choose a descriptive name (e.g., "FastMCP
+  Server") - **Authorized JavaScript origins**: Add your server's base URL (e.g., `http://localhost:8000`) -
+  **Authorized redirect URIs**: Add your server URL + `/auth/callback` (e.g., `http://localhost:8000/auth/callback`)
+  <Warning>
+    The redirect URI must match exactly. The default path is `/auth/callback`, but you can customize it using the
+    `redirect_path` parameter. For local development, Google allows `http://localhost` URLs with various ports. For
+    production, you must use HTTPS.
+  </Warning>
+  <Tip>
+    If you want to use a custom callback path (e.g., `/auth/google/callback`), make sure to set the same path in both
+    your Google OAuth Client settings and the `redirect_path` parameter when configuring the GoogleProvider.
+  </Tip>
 </Step>
 
 <Step title="Save Your Credentials">
@@ -90,7 +88,7 @@ mcp = FastMCP(name="Google Secured App", auth=auth_provider)
 async def get_user_info() -> dict:
     """Returns information about the authenticated Google user."""
     from fastmcp.server.dependencies import get_access_token
-    
+
     token = get_access_token()
     # The GoogleProvider stores user data in token claims
     return {
@@ -127,7 +125,7 @@ async def main():
     async with Client("http://localhost:8000/mcp", auth="oauth") as client:
         # First-time connection will open Google login in your browser
         print("✓ Authenticated with Google!")
-        
+
         # Test the protected tool
         result = await client.call_tool("get_user_info")
         print(f"Google user: {result['email']}")
@@ -138,13 +136,15 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to Google's authorization page
 2. Sign in with your Google account and grant the requested permissions
 3. After authorization, you'll be redirected back
 4. The client receives the token and can make authenticated requests
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>
 
 ## Production Configuration
@@ -186,4 +186,5 @@ mcp = FastMCP(name="Production Google App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>

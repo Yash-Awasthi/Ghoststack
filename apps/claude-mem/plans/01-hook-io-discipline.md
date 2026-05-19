@@ -197,7 +197,7 @@ Add a comment block immediately above the new `installHookStderrBuffer()` call i
 
 (From audit row `bun-runner.js:196–198`.) The current code exits 1 when Bun cannot be spawned. Per CLAUDE.md exit-code strategy, hook errors should exit 0. But this is _before_ any hook runs — Bun is the prerequisite, not the hook itself.
 
-**Decision:** Keep `exit 1` for the Bun-not-found case (and `exit 1` for the missing-arg usage at line 83). Justification: this is BLOCKING_FEEDBACK to the _user_ (their environment is broken), not a transient hook failure. Document the exception inline:
+**Decision:** Keep `exit 1` for the Bun-not-found case (and `exit 1` for the missing-arg usage at line 83). Justification: this is BLOCKING*FEEDBACK to the \_user* (their environment is broken), not a transient hook failure. Document the exception inline:
 
 ```js
 // EXCEPTION to CLAUDE.md exit-0-on-error: Bun-not-found is a user environment

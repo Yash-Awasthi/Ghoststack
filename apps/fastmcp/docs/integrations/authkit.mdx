@@ -5,7 +5,7 @@ description: Secure your FastMCP server with AuthKit by WorkOS
 icon: shield-check
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.11.0" />
 
@@ -16,6 +16,7 @@ This guide shows you how to secure your FastMCP server using WorkOS's **AuthKit*
 ### Prerequisites
 
 Before you begin, you will need:
+
 1.  A **[WorkOS Account](https://workos.com/)** and a new **Project**.
 2.  An **[AuthKit](https://www.authkit.com/)** instance configured within your WorkOS project.
 3.  Your FastMCP server's URL (can be localhost for development, e.g., `http://127.0.0.1:8000`).
@@ -35,6 +36,7 @@ In the WorkOS Dashboard, go to **Connect → Configuration** and configure:
     This must exactly match what FastMCP advertises in its protected resource metadata. Start your server first and it will log the correct URL on startup — copy that value.
 
     Without this step, AuthKit falls back to a default environment-scoped audience and audience validation will fail with a 401.
+
 </Step>
 
 <Step title="Note Your AuthKit Domain">

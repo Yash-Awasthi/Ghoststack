@@ -8,9 +8,9 @@ Workflows automate multi-step Spec-Driven Development processes — chaining com
 specify workflow run <source>
 ```
 
-| Option              | Description                                              |
-| ------------------- | -------------------------------------------------------- |
-| `-i` / `--input`    | Pass input values as `key=value` (repeatable)            |
+| Option           | Description                                   |
+| ---------------- | --------------------------------------------- |
+| `-i` / `--input` | Pass input values as `key=value` (repeatable) |
 
 Runs a workflow from a catalog ID, URL, or local file path. Inputs declared by the workflow can be provided via `--input` or will be prompted interactively.
 
@@ -68,9 +68,9 @@ Removes an installed workflow from the project.
 specify workflow search [query]
 ```
 
-| Option  | Description     |
-| ------- | --------------- |
-| `--tag` | Filter by tag   |
+| Option  | Description   |
+| ------- | ------------- |
+| `--tag` | Filter by tag |
 
 Searches all active catalogs for workflows matching the query.
 
@@ -100,9 +100,9 @@ Shows all active catalog sources.
 specify workflow catalog add <url>
 ```
 
-| Option          | Description                      |
-| --------------- | -------------------------------- |
-| `--name <name>` | Optional name for the catalog    |
+| Option          | Description                   |
+| --------------- | ----------------------------- |
+| `--name <name>` | Optional name for the catalog |
 
 Adds a custom catalog URL to the project's `.specify/workflow-catalogs.yml`.
 
@@ -223,28 +223,28 @@ specify workflow run speckit -i spec="Build a kanban board with drag-and-drop ta
 
 ## Step Types
 
-| Type         | Purpose                                          |
-| ------------ | ------------------------------------------------ |
-| `command`    | Invoke a Spec Kit command (e.g., `speckit.plan`) |
-| `prompt`     | Send an arbitrary prompt to the AI coding agent  |
-| `shell`      | Execute a shell command and capture output       |
-| `gate`       | Pause for human approval before continuing       |
-| `if`         | Conditional branching (then/else)                |
-| `switch`     | Multi-branch dispatch on an expression           |
-| `while`      | Loop while a condition is true                   |
-| `do-while`   | Execute at least once, then loop on condition    |
-| `fan-out`    | Dispatch a step for each item in a list          |
-| `fan-in`     | Aggregate results from a fan-out step            |
+| Type       | Purpose                                          |
+| ---------- | ------------------------------------------------ |
+| `command`  | Invoke a Spec Kit command (e.g., `speckit.plan`) |
+| `prompt`   | Send an arbitrary prompt to the AI coding agent  |
+| `shell`    | Execute a shell command and capture output       |
+| `gate`     | Pause for human approval before continuing       |
+| `if`       | Conditional branching (then/else)                |
+| `switch`   | Multi-branch dispatch on an expression           |
+| `while`    | Loop while a condition is true                   |
+| `do-while` | Execute at least once, then loop on condition    |
+| `fan-out`  | Dispatch a step for each item in a list          |
+| `fan-in`   | Aggregate results from a fan-out step            |
 
 ## Expressions
 
 Steps can reference inputs and previous step outputs using `{{ expression }}` syntax:
 
-| Namespace                      | Description                          |
-| ------------------------------ | ------------------------------------ |
-| `inputs.spec`                  | Workflow input values                |
-| `steps.specify.output.file`    | Output from a previous step          |
-| `item`                         | Current item in a fan-out iteration  |
+| Namespace                   | Description                         |
+| --------------------------- | ----------------------------------- |
+| `inputs.spec`               | Workflow input values               |
+| `steps.specify.output.file` | Output from a previous step         |
+| `item`                      | Current item in a fan-out iteration |
 
 Available filters: `default`, `join`, `contains`, `map`.
 
@@ -258,11 +258,11 @@ message: "{{ status | default('pending') }}"
 
 ## Input Types
 
-| Type      | Coercion                                          |
-| --------- | ------------------------------------------------- |
-| `string`  | Pass-through                                      |
-| `number`  | `"42"` → `42`, `"3.14"` → `3.14`                 |
-| `boolean` | `"true"` / `"1"` / `"yes"` → `True`              |
+| Type      | Coercion                            |
+| --------- | ----------------------------------- |
+| `string`  | Pass-through                        |
+| `number`  | `"42"` → `42`, `"3.14"` → `3.14`    |
+| `boolean` | `"true"` / `"1"` / `"yes"` → `True` |
 
 ## State and Resume
 

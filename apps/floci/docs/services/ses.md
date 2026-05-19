@@ -7,52 +7,52 @@ Floci exposes the classic Amazon SES Query API used by `aws ses ...` commands an
 
 ## Supported Actions
 
-| Action                              | Description                                               |
-|-------------------------------------|-----------------------------------------------------------|
-| `VerifyEmailIdentity`               | Mark an email address as verified                         |
-| `VerifyEmailAddress`                | Legacy alias for email verification                       |
-| `VerifyDomainIdentity`              | Mark a domain as verified and return a verification token |
-| `DeleteIdentity`                    | Delete an email or domain identity                        |
-| `ListIdentities`                    | List verified identities                                  |
-| `GetIdentityVerificationAttributes` | Get verification status for one or more identities        |
-| `SendEmail`                         | Send a structured email with text or HTML body            |
-| `SendRawEmail`                      | Send a raw MIME payload                                   |
-| `SendTemplatedEmail`                | Send an email by resolving a stored template             |
-| `SendBulkTemplatedEmail`            | Send a templated email to multiple destinations          |
-| `CreateTemplate`                    | Create an email template with subject / text / html parts |
-| `GetTemplate`                       | Read a stored template                                    |
-| `UpdateTemplate`                    | Replace the content of a stored template                  |
-| `DeleteTemplate`                    | Remove a stored template                                  |
-| `ListTemplates`                     | List stored templates                                     |
-| `TestRenderTemplate`                | Render a stored template against supplied data, returning the MIME message |
-| `GetSendQuota`                      | Return local send quota counters                          |
-| `GetSendStatistics`                 | Return aggregate delivery stats for sent messages         |
-| `GetAccountSendingEnabled`          | Report whether sending is enabled                         |
-| `UpdateAccountSendingEnabled`       | Enable or disable account-wide sending                    |
-| `ListVerifiedEmailAddresses`        | List verified email identities                            |
-| `DeleteVerifiedEmailAddress`        | Delete a verified email identity                          |
-| `SetIdentityNotificationTopic`      | Store SNS notification topic ARNs for an identity         |
-| `GetIdentityNotificationAttributes` | Read stored notification topic settings                   |
-| `SetIdentityFeedbackForwardingEnabled`     | Toggle feedback forwarding for an identity        |
-| `SetIdentityHeadersInNotificationsEnabled` | Toggle headers-in-notifications per notification type |
-| `SetIdentityMailFromDomain`         | Set or clear the MAIL FROM domain for an identity         |
-| `GetIdentityMailFromDomainAttributes` | Read MAIL FROM domain settings                          |
-| `GetIdentityDkimAttributes`         | Return DKIM status for identities                         |
-| `CreateConfigurationSet`            | Create a configuration set                                |
-| `DescribeConfigurationSet`          | Read a configuration set                                  |
-| `ListConfigurationSets`             | List configuration sets                                   |
-| `DeleteConfigurationSet`            | Delete a configuration set                                |
+| Action                                     | Description                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| `VerifyEmailIdentity`                      | Mark an email address as verified                                          |
+| `VerifyEmailAddress`                       | Legacy alias for email verification                                        |
+| `VerifyDomainIdentity`                     | Mark a domain as verified and return a verification token                  |
+| `DeleteIdentity`                           | Delete an email or domain identity                                         |
+| `ListIdentities`                           | List verified identities                                                   |
+| `GetIdentityVerificationAttributes`        | Get verification status for one or more identities                         |
+| `SendEmail`                                | Send a structured email with text or HTML body                             |
+| `SendRawEmail`                             | Send a raw MIME payload                                                    |
+| `SendTemplatedEmail`                       | Send an email by resolving a stored template                               |
+| `SendBulkTemplatedEmail`                   | Send a templated email to multiple destinations                            |
+| `CreateTemplate`                           | Create an email template with subject / text / html parts                  |
+| `GetTemplate`                              | Read a stored template                                                     |
+| `UpdateTemplate`                           | Replace the content of a stored template                                   |
+| `DeleteTemplate`                           | Remove a stored template                                                   |
+| `ListTemplates`                            | List stored templates                                                      |
+| `TestRenderTemplate`                       | Render a stored template against supplied data, returning the MIME message |
+| `GetSendQuota`                             | Return local send quota counters                                           |
+| `GetSendStatistics`                        | Return aggregate delivery stats for sent messages                          |
+| `GetAccountSendingEnabled`                 | Report whether sending is enabled                                          |
+| `UpdateAccountSendingEnabled`              | Enable or disable account-wide sending                                     |
+| `ListVerifiedEmailAddresses`               | List verified email identities                                             |
+| `DeleteVerifiedEmailAddress`               | Delete a verified email identity                                           |
+| `SetIdentityNotificationTopic`             | Store SNS notification topic ARNs for an identity                          |
+| `GetIdentityNotificationAttributes`        | Read stored notification topic settings                                    |
+| `SetIdentityFeedbackForwardingEnabled`     | Toggle feedback forwarding for an identity                                 |
+| `SetIdentityHeadersInNotificationsEnabled` | Toggle headers-in-notifications per notification type                      |
+| `SetIdentityMailFromDomain`                | Set or clear the MAIL FROM domain for an identity                          |
+| `GetIdentityMailFromDomainAttributes`      | Read MAIL FROM domain settings                                             |
+| `GetIdentityDkimAttributes`                | Return DKIM status for identities                                          |
+| `CreateConfigurationSet`                   | Create a configuration set                                                 |
+| `DescribeConfigurationSet`                 | Read a configuration set                                                   |
+| `ListConfigurationSets`                    | List configuration sets                                                    |
+| `DeleteConfigurationSet`                   | Delete a configuration set                                                 |
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_SES_ENABLED` | `true` | Enable or disable the SES service |
-| `FLOCI_SERVICES_SES_SMTP_HOST` | *(unset)* | SMTP server host for email relay (empty = store only) |
-| `FLOCI_SERVICES_SES_SMTP_PORT` | `25` | SMTP server port |
-| `FLOCI_SERVICES_SES_SMTP_USER` | *(unset)* | SMTP authentication username |
-| `FLOCI_SERVICES_SES_SMTP_PASS` | *(unset)* | SMTP authentication password |
-| `FLOCI_SERVICES_SES_SMTP_STARTTLS` | `DISABLED` | STARTTLS mode: `DISABLED`, `OPTIONAL`, or `REQUIRED` |
+| Variable                           | Default    | Description                                           |
+| ---------------------------------- | ---------- | ----------------------------------------------------- |
+| `FLOCI_SERVICES_SES_ENABLED`       | `true`     | Enable or disable the SES service                     |
+| `FLOCI_SERVICES_SES_SMTP_HOST`     | _(unset)_  | SMTP server host for email relay (empty = store only) |
+| `FLOCI_SERVICES_SES_SMTP_PORT`     | `25`       | SMTP server port                                      |
+| `FLOCI_SERVICES_SES_SMTP_USER`     | _(unset)_  | SMTP authentication username                          |
+| `FLOCI_SERVICES_SES_SMTP_PASS`     | _(unset)_  | SMTP authentication password                          |
+| `FLOCI_SERVICES_SES_SMTP_STARTTLS` | `DISABLED` | STARTTLS mode: `DISABLED`, `OPTIONAL`, or `REQUIRED`  |
 
 ### SMTP Relay
 
@@ -75,8 +75,8 @@ services:
   mailpit:
     image: axllent/mailpit
     ports:
-      - "8025:8025"   # Web UI
-      - "1025:1025"   # SMTP
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP
     networks: [floci]
 
 networks:
@@ -159,37 +159,37 @@ Alongside the classic Query API, Floci implements a subset of the SES v2 REST JS
 
 ### Supported Operations
 
-| Method | Path | Action |
-|---|---|---|
-| `POST` | `/v2/email/identities` | `CreateEmailIdentity` |
-| `GET` | `/v2/email/identities` | `ListEmailIdentities` |
-| `GET` | `/v2/email/identities/{emailIdentity}` | `GetEmailIdentity` |
-| `DELETE` | `/v2/email/identities/{emailIdentity}` | `DeleteEmailIdentity` |
-| `PUT` | `/v2/email/identities/{emailIdentity}/dkim` | `PutEmailIdentityDkimAttributes` |
-| `PUT` | `/v2/email/identities/{emailIdentity}/feedback` | `PutEmailIdentityFeedbackAttributes` |
-| `PUT` | `/v2/email/identities/{emailIdentity}/mail-from` | `PutEmailIdentityMailFromAttributes` |
-| `POST` | `/v2/email/outbound-emails` | `SendEmail` (simple / raw / templated) |
-| `POST` | `/v2/email/outbound-bulk-emails` | `SendBulkEmail` (templated, multiple destinations) |
-| `GET` | `/v2/email/account` | `GetAccount` |
-| `PUT` | `/v2/email/account/sending` | `PutAccountSendingAttributes` |
-| `PUT` | `/v2/email/account/suppression` | `PutAccountSuppressionAttributes` |
-| `POST` | `/v2/email/templates` | `CreateEmailTemplate` |
-| `GET` | `/v2/email/templates` | `ListEmailTemplates` |
-| `GET` | `/v2/email/templates/{templateName}` | `GetEmailTemplate` |
-| `PUT` | `/v2/email/templates/{templateName}` | `UpdateEmailTemplate` |
-| `DELETE` | `/v2/email/templates/{templateName}` | `DeleteEmailTemplate` |
-| `POST` | `/v2/email/templates/{templateName}/render` | `TestRenderEmailTemplate` |
-| `POST` | `/v2/email/configuration-sets` | `CreateConfigurationSet` |
-| `GET` | `/v2/email/configuration-sets` | `ListConfigurationSets` |
-| `GET` | `/v2/email/configuration-sets/{name}` | `GetConfigurationSet` |
-| `DELETE` | `/v2/email/configuration-sets/{name}` | `DeleteConfigurationSet` |
-| `PUT` | `/v2/email/suppression/addresses` | `PutSuppressedDestination` |
-| `GET` | `/v2/email/suppression/addresses/{EmailAddress}` | `GetSuppressedDestination` |
-| `DELETE` | `/v2/email/suppression/addresses/{EmailAddress}` | `DeleteSuppressedDestination` |
-| `GET` | `/v2/email/suppression/addresses` | `ListSuppressedDestinations` (optional `Reason` query filter) |
-| `POST` | `/v2/email/tags` | `TagResource` |
-| `DELETE` | `/v2/email/tags?ResourceArn=...&TagKeys=...` | `UntagResource` |
-| `GET` | `/v2/email/tags?ResourceArn=...` | `ListTagsForResource` |
+| Method   | Path                                             | Action                                                        |
+| -------- | ------------------------------------------------ | ------------------------------------------------------------- |
+| `POST`   | `/v2/email/identities`                           | `CreateEmailIdentity`                                         |
+| `GET`    | `/v2/email/identities`                           | `ListEmailIdentities`                                         |
+| `GET`    | `/v2/email/identities/{emailIdentity}`           | `GetEmailIdentity`                                            |
+| `DELETE` | `/v2/email/identities/{emailIdentity}`           | `DeleteEmailIdentity`                                         |
+| `PUT`    | `/v2/email/identities/{emailIdentity}/dkim`      | `PutEmailIdentityDkimAttributes`                              |
+| `PUT`    | `/v2/email/identities/{emailIdentity}/feedback`  | `PutEmailIdentityFeedbackAttributes`                          |
+| `PUT`    | `/v2/email/identities/{emailIdentity}/mail-from` | `PutEmailIdentityMailFromAttributes`                          |
+| `POST`   | `/v2/email/outbound-emails`                      | `SendEmail` (simple / raw / templated)                        |
+| `POST`   | `/v2/email/outbound-bulk-emails`                 | `SendBulkEmail` (templated, multiple destinations)            |
+| `GET`    | `/v2/email/account`                              | `GetAccount`                                                  |
+| `PUT`    | `/v2/email/account/sending`                      | `PutAccountSendingAttributes`                                 |
+| `PUT`    | `/v2/email/account/suppression`                  | `PutAccountSuppressionAttributes`                             |
+| `POST`   | `/v2/email/templates`                            | `CreateEmailTemplate`                                         |
+| `GET`    | `/v2/email/templates`                            | `ListEmailTemplates`                                          |
+| `GET`    | `/v2/email/templates/{templateName}`             | `GetEmailTemplate`                                            |
+| `PUT`    | `/v2/email/templates/{templateName}`             | `UpdateEmailTemplate`                                         |
+| `DELETE` | `/v2/email/templates/{templateName}`             | `DeleteEmailTemplate`                                         |
+| `POST`   | `/v2/email/templates/{templateName}/render`      | `TestRenderEmailTemplate`                                     |
+| `POST`   | `/v2/email/configuration-sets`                   | `CreateConfigurationSet`                                      |
+| `GET`    | `/v2/email/configuration-sets`                   | `ListConfigurationSets`                                       |
+| `GET`    | `/v2/email/configuration-sets/{name}`            | `GetConfigurationSet`                                         |
+| `DELETE` | `/v2/email/configuration-sets/{name}`            | `DeleteConfigurationSet`                                      |
+| `PUT`    | `/v2/email/suppression/addresses`                | `PutSuppressedDestination`                                    |
+| `GET`    | `/v2/email/suppression/addresses/{EmailAddress}` | `GetSuppressedDestination`                                    |
+| `DELETE` | `/v2/email/suppression/addresses/{EmailAddress}` | `DeleteSuppressedDestination`                                 |
+| `GET`    | `/v2/email/suppression/addresses`                | `ListSuppressedDestinations` (optional `Reason` query filter) |
+| `POST`   | `/v2/email/tags`                                 | `TagResource`                                                 |
+| `DELETE` | `/v2/email/tags?ResourceArn=...&TagKeys=...`     | `UntagResource`                                               |
+| `GET`    | `/v2/email/tags?ResourceArn=...`                 | `ListTagsForResource`                                         |
 
 Suppression list entries are stored per region. `Reason` is `BOUNCE` or `COMPLAINT`. `SendEmail` is not yet integrated with the suppression list, so suppressed addresses are still delivered locally.
 

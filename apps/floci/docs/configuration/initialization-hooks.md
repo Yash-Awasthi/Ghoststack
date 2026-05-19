@@ -4,19 +4,19 @@ Floci supports init hook scripts that run at defined points in the startup and s
 Use them to seed resources, configure state, or clean up after a run — before or after the AWS APIs are available.
 
 !!! tip "Use the compat image for scripts that call `aws` or `boto3`"
-    Scripts that invoke the AWS CLI or Python boto3 require the compat image, which bundles Python 3, the AWS CLI, and boto3 — all pre-configured for `http://localhost:4566`.
-    Use `floci/floci:latest-compat` (or a pinned `x.y.z-compat`) instead of the standard image.
+Scripts that invoke the AWS CLI or Python boto3 require the compat image, which bundles Python 3, the AWS CLI, and boto3 — all pre-configured for `http://localhost:4566`.
+Use `floci/floci:latest-compat` (or a pinned `x.y.z-compat`) instead of the standard image.
 
 ## Lifecycle Phases
 
 Floci runs hooks in four ordered phases:
 
-| Phase | When it runs | AWS APIs available? | Directory |
-|---|---|---|---|
-| **boot** | Before storage is loaded, before services start | No | `boot.d` |
-| **start** | After the HTTP server is ready on port 4566 | Yes ✅ | `start.d` |
-| **ready** | After all `start` hooks complete | Yes ✅ | `ready.d` |
-| **stop** | During pre-shutdown, while HTTP server is still up | Yes ✅ | `stop.d` |
+| Phase     | When it runs                                       | AWS APIs available? | Directory |
+| --------- | -------------------------------------------------- | ------------------- | --------- |
+| **boot**  | Before storage is loaded, before services start    | No                  | `boot.d`  |
+| **start** | After the HTTP server is ready on port 4566        | Yes ✅              | `start.d` |
+| **ready** | After all `start` hooks complete                   | Yes ✅              | `ready.d` |
+| **stop**  | During pre-shutdown, while HTTP server is still up | Yes ✅              | `stop.d`  |
 
 The `/_floci/init` and `/_localstack/init` endpoints reflect each phase's completion status in real time, so external tooling can wait for `ready` before proceeding.
 
@@ -24,12 +24,12 @@ The `/_floci/init` and `/_localstack/init` endpoints reflect each phase's comple
 
 Floci merges scripts from two directory trees. The Floci-native tree has priority — if the same filename exists in both, the Floci copy runs and the LocalStack copy is skipped:
 
-| Phase | Floci path | LocalStack-compat path |
-|---|---|---|
-| boot | `/etc/floci/init/boot.d` | `/etc/localstack/init/boot.d` |
-| start | `/etc/floci/init/start.d` | `/etc/localstack/init/start.d` |
-| ready | `/etc/floci/init/ready.d` | `/etc/localstack/init/ready.d` |
-| stop | `/etc/floci/init/stop.d` or `/etc/floci/init/shutdown.d` | `/etc/localstack/init/shutdown.d` |
+| Phase | Floci path                                               | LocalStack-compat path            |
+| ----- | -------------------------------------------------------- | --------------------------------- |
+| boot  | `/etc/floci/init/boot.d`                                 | `/etc/localstack/init/boot.d`     |
+| start | `/etc/floci/init/start.d`                                | `/etc/localstack/init/start.d`    |
+| ready | `/etc/floci/init/ready.d`                                | `/etc/localstack/init/ready.d`    |
+| stop  | `/etc/floci/init/stop.d` or `/etc/floci/init/shutdown.d` | `/etc/localstack/init/shutdown.d` |
 
 The LocalStack-compat paths let existing LocalStack bootstrap scripts work without modification.
 Mount them under `/etc/localstack/init/` and they run as-is.
@@ -70,13 +70,13 @@ aws ssm put-parameter --name /app/config --type String --value production
 
 The following environment variables are pre-set in the compat image:
 
-| Variable | Value |
-|---|---|
-| `AWS_DEFAULT_REGION` | `us-east-1` |
-| `AWS_ACCESS_KEY_ID` | `test` |
-| `AWS_SECRET_ACCESS_KEY` | `test` |
-| `AWS_ENDPOINT_URL` | `http://localhost:4566` |
-| `AWS_CONFIG_FILE` | `/etc/floci/aws/config` |
+| Variable                | Value                   |
+| ----------------------- | ----------------------- |
+| `AWS_DEFAULT_REGION`    | `us-east-1`             |
+| `AWS_ACCESS_KEY_ID`     | `test`                  |
+| `AWS_SECRET_ACCESS_KEY` | `test`                  |
+| `AWS_ENDPOINT_URL`      | `http://localhost:4566` |
+| `AWS_CONFIG_FILE`       | `/etc/floci/aws/config` |
 
 Override any of them via `docker run -e` or the compose `environment` block.
 
@@ -123,8 +123,8 @@ To override individual scripts with Floci-specific versions while keeping the re
 
 ```yaml title="docker-compose.yml"
 volumes:
-  - ./localstack-init/ready.d:/etc/localstack/init/ready.d:ro   # existing scripts
-  - ./floci-init/ready.d:/etc/floci/init/ready.d:ro             # overrides (take priority)
+  - ./localstack-init/ready.d:/etc/localstack/init/ready.d:ro # existing scripts
+  - ./floci-init/ready.d:/etc/floci/init/ready.d:ro # overrides (take priority)
 ```
 
 ## Examples
@@ -158,17 +158,17 @@ aws ssm delete-parameter --name /app/bootstrapped
 ```
 
 !!! note "Shutdown timing"
-    Stop hooks run before the HTTP server shuts down, so Floci's total shutdown time grows by
-    the cumulative runtime of all stop hooks. Adjust your orchestrator grace period accordingly
-    (e.g. Kubernetes `terminationGracePeriodSeconds`, Docker Compose `stop_grace_period`).
+Stop hooks run before the HTTP server shuts down, so Floci's total shutdown time grows by
+the cumulative runtime of all stop hooks. Adjust your orchestrator grace period accordingly
+(e.g. Kubernetes `terminationGracePeriodSeconds`, Docker Compose `stop_grace_period`).
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_INIT_HOOKS_SHELL_EXECUTABLE` | `/bin/sh` | Shell used to run `.sh` scripts |
-| `FLOCI_INIT_HOOKS_TIMEOUT_SECONDS` | `30` | Maximum runtime per script before it is killed and treated as a failure |
-| `FLOCI_INIT_HOOKS_SHUTDOWN_GRACE_PERIOD_SECONDS` | `2` | Extra wait after terminating a timed-out script |
+| Variable                                         | Default   | Description                                                             |
+| ------------------------------------------------ | --------- | ----------------------------------------------------------------------- |
+| `FLOCI_INIT_HOOKS_SHELL_EXECUTABLE`              | `/bin/sh` | Shell used to run `.sh` scripts                                         |
+| `FLOCI_INIT_HOOKS_TIMEOUT_SECONDS`               | `30`      | Maximum runtime per script before it is killed and treated as a failure |
+| `FLOCI_INIT_HOOKS_SHUTDOWN_GRACE_PERIOD_SECONDS` | `2`       | Extra wait after terminating a timed-out script                         |
 
 Example — extend the timeout for slow seed scripts:
 

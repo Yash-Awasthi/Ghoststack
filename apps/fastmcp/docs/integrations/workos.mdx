@@ -5,14 +5,15 @@ description: Authenticate FastMCP servers with WorkOS Connect
 icon: shield-check
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.12.0" />
 
 Secure your FastMCP server with WorkOS Connect authentication. This integration uses the OAuth Proxy pattern to handle authentication through WorkOS Connect while maintaining compatibility with MCP clients.
 
 <Note>
-This guide covers WorkOS Connect applications. For Dynamic Client Registration (DCR) with AuthKit, see the [AuthKit integration](/integrations/authkit) instead.
+  This guide covers WorkOS Connect applications. For Dynamic Client Registration (DCR) with AuthKit, see the [AuthKit
+  integration](/integrations/authkit) instead.
 </Note>
 
 ## Configuration
@@ -20,6 +21,7 @@ This guide covers WorkOS Connect applications. For Dynamic Client Registration (
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. A **[WorkOS Account](https://workos.com/)** with access to create OAuth Apps
 2. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
 
@@ -37,10 +39,8 @@ In your WorkOS dashboard:
 </Step>
 
 <Step title="Get Credentials">
-In your OAuth application settings:
-1. Copy your **Client ID** (starts with `client_`)
-2. Click **Generate Client Secret** and save it securely
-3. Copy your **AuthKit Domain** (e.g., `https://your-app.authkit.app`)
+  In your OAuth application settings: 1. Copy your **Client ID** (starts with `client_`) 2. Click **Generate Client
+  Secret** and save it securely 3. Copy your **AuthKit Domain** (e.g., `https://your-app.authkit.app`)
 </Step>
 
 <Step title="Configure Redirect URI">
@@ -102,12 +102,12 @@ Create a test client that authenticates with your WorkOS-protected server:
 from fastmcp import Client
 import asyncio
 
-async def main():    
+async def main():
     # The client will automatically handle WorkOS OAuth
     async with Client("http://localhost:8000/mcp", auth="oauth") as client:
         # First-time connection will open WorkOS login in your browser
         print("✓ Authenticated with WorkOS!")
-        
+
         # Test the protected tool
         result = await client.call_tool("protected_tool", {"message": "Hello!"})
         print(result)
@@ -117,12 +117,14 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to WorkOS's authorization page
 2. After you authorize the app, you'll be redirected back
 3. The client receives the token and can make authenticated requests
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>
 
 ## Production Configuration
@@ -165,6 +167,7 @@ mcp = FastMCP(name="Production WorkOS App", auth=auth)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 ## Configuration Options
@@ -175,23 +178,23 @@ WorkOS OAuth application client ID
 </ParamField>
 
 <ParamField path="client_secret" required>
-WorkOS OAuth application client secret
+  WorkOS OAuth application client secret
 </ParamField>
 
 <ParamField path="authkit_domain" required>
-Your WorkOS AuthKit domain URL (e.g., `https://your-app.authkit.app`)
+  Your WorkOS AuthKit domain URL (e.g., `https://your-app.authkit.app`)
 </ParamField>
 
 <ParamField path="base_url" required>
-Your FastMCP server's public URL
+  Your FastMCP server's public URL
 </ParamField>
 
 <ParamField path="required_scopes" default="[]">
-OAuth scopes to request
+  OAuth scopes to request
 </ParamField>
 
 <ParamField path="redirect_path" default="/auth/callback">
-OAuth callback path
+  OAuth callback path
 </ParamField>
 
 <ParamField path="timeout_seconds" default="10">

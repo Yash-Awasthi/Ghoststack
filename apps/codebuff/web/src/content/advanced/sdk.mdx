@@ -305,12 +305,16 @@ async function generateComponentWithContext() {
   // Provide existing files as context
   const projectFiles = {
     'src/types.ts': fs.readFileSync('src/types.ts', 'utf-8'),
-    'src/components/Button.tsx': fs.readFileSync('src/components/Button.tsx', 'utf-8'),
+    'src/components/Button.tsx': fs.readFileSync(
+      'src/components/Button.tsx',
+      'utf-8',
+    ),
   }
 
   const { output } = await client.run({
     agent: 'codebuff/base@latest',
-    prompt: 'Create a new Card component that follows the same patterns as Button',
+    prompt:
+      'Create a new Card component that follows the same patterns as Button',
     projectFiles,
   })
 

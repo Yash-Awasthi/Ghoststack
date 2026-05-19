@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: An AWS API call returns wrong behavior or an error
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
-assignees: ''
+assignees: ""
 ---
 
 ## Service

@@ -6,7 +6,7 @@ icon: toggle-on
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -65,12 +65,12 @@ Visibility filtering works with two identifiers: keys (for specific components) 
 
 Every component has a unique key in the format `{type}:{identifier}`.
 
-| Component | Key Format | Example |
-|-----------|------------|---------|
-| Tool | `tool:{name}` | `tool:delete_everything` |
-| Resource | `resource:{uri}` | `resource:data://config` |
-| Template | `template:{uri}` | `template:file://{path}` |
-| Prompt | `prompt:{name}` | `prompt:analyze` |
+| Component | Key Format       | Example                  |
+| --------- | ---------------- | ------------------------ |
+| Tool      | `tool:{name}`    | `tool:delete_everything` |
+| Resource  | `resource:{uri}` | `resource:data://config` |
+| Template  | `template:{uri}` | `template:file://{path}` |
+| Prompt    | `prompt:{name}`  | `prompt:analyze`         |
 
 Use keys to target specific components.
 
@@ -319,14 +319,14 @@ Each call adds a rule to the session. The `dangerous_admin_tool` ends up disable
 
 The session visibility methods accept the same filter criteria as `server.enable()` and `server.disable()`:
 
-| Parameter | Description |
-|-----------|-------------|
-| `names` | Component names or URIs to match |
-| `keys` | Component keys (e.g., `{"tool:my_tool"}`) |
-| `tags` | Tags to match (component must have at least one) |
-| `version` | Version specification to match |
+| Parameter    | Description                                                                |
+| ------------ | -------------------------------------------------------------------------- |
+| `names`      | Component names or URIs to match                                           |
+| `keys`       | Component keys (e.g., `{"tool:my_tool"}`)                                  |
+| `tags`       | Tags to match (component must have at least one)                           |
+| `version`    | Version specification to match                                             |
 | `components` | Component types (`{"tool"}`, `{"resource"}`, `{"prompt"}`, `{"template"}`) |
-| `match_all` | If `True`, matches all components regardless of other criteria |
+| `match_all`  | If `True`, matches all components regardless of other criteria             |
 
 ```python
 from fastmcp.utilities.versions import VersionSpec

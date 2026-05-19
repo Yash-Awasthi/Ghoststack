@@ -4,13 +4,13 @@ Spec Kit is a toolkit for spec-driven development. At its core, it is a coordina
 
 **Essential project documents:**
 
-| Document                                                   | Role                                                                                  |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [README.md](README.md)                                     | Primary user-facing overview of Spec Kit and its workflow.                            |
-| [DEVELOPMENT.md](DEVELOPMENT.md)                           | This document.                                                                        |
-| [spec-driven.md](spec-driven.md)                           | End-to-end explanation of the Spec-Driven Development workflow supported by Spec Kit. |
-| [RELEASE-PROCESS.md](.github/workflows/RELEASE-PROCESS.md) | Release workflow, versioning rules, and changelog generation process.                 |
-| [docs/index.md](docs/index.md)                             | Entry point to the `docs/` documentation set.                                         |
+| Document                                                   | Role                                                                                    |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [README.md](README.md)                                     | Primary user-facing overview of Spec Kit and its workflow.                              |
+| [DEVELOPMENT.md](DEVELOPMENT.md)                           | This document.                                                                          |
+| [spec-driven.md](spec-driven.md)                           | End-to-end explanation of the Spec-Driven Development workflow supported by Spec Kit.   |
+| [RELEASE-PROCESS.md](.github/workflows/RELEASE-PROCESS.md) | Release workflow, versioning rules, and changelog generation process.                   |
+| [docs/index.md](docs/index.md)                             | Entry point to the `docs/` documentation set.                                           |
 | [CONTRIBUTING.md](CONTRIBUTING.md)                         | Contribution process, review expectations, testing, and required development practices. |
 
 **Main repository components:**

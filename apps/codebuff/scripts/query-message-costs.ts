@@ -159,18 +159,20 @@ async function main() {
     const cacheRead = Number(row.cache_read_input_tokens ?? 0)
     const output = Number(row.output_tokens ?? 0)
     const uncachedIn = Math.max(0, input - cacheRead)
-    const cost = row.cost === null || row.cost === undefined ? null : Number(row.cost)
+    const cost =
+      row.cost === null || row.cost === undefined ? null : Number(row.cost)
     const upstream =
       row.upstream_inference_cost === null ||
       row.upstream_inference_cost === undefined
         ? null
         : Number(row.upstream_inference_cost)
     const sum = (cost ?? 0) + (upstream ?? 0)
-    const ratio =
-      cost && upstream !== null && cost > 0 ? upstream / cost : null
+    const ratio = cost && upstream !== null && cost > 0 ? upstream / cost : null
 
     const finished =
-      row.finished_at?.value ?? row.finished_at?.toString() ?? String(row.finished_at)
+      row.finished_at?.value ??
+      row.finished_at?.toString() ??
+      String(row.finished_at)
 
     const model = row.model ?? '-'
     const isOpus = typeof model === 'string' && model.includes('opus')
@@ -222,7 +224,9 @@ async function main() {
   )
   console.log(`Σ cost (billed):                 ${fmtCost(totalCost)}`)
   console.log(`Σ upstream_inference_cost:       ${fmtCost(totalUpstream)}`)
-  console.log(`Σ cost + upstream:               ${fmtCost(totalCost + totalUpstream)}`)
+  console.log(
+    `Σ cost + upstream:               ${fmtCost(totalCost + totalUpstream)}`,
+  )
 
   if (opusExpectedSum > 0) {
     console.log('')
@@ -230,9 +234,9 @@ async function main() {
     console.log(`Σ actual cost (opus rows):       ${fmtCost(opusCostSum)}`)
     console.log(`Σ expected (Opus 4.6/4.7 list):  ${fmtCost(opusExpectedSum)}`)
     console.log(
-      `Actual / expected ratio:         ${(opusCostSum / opusExpectedSum).toFixed(
-        2,
-      )}x`,
+      `Actual / expected ratio:         ${(
+        opusCostSum / opusExpectedSum
+      ).toFixed(2)}x`,
     )
     console.log(
       '  (If ≈2.0x → double-count confirmed. If ≈1.0x → cost is accurate.)',

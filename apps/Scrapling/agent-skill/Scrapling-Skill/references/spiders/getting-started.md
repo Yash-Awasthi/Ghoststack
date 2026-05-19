@@ -161,4 +161,3 @@ When enabled, the spider will:
 Robots.txt files are fetched using the spider's default session and cached per domain for the entire crawl. Domains discovered mid-crawl (not in `start_urls`) have their robots.txt fetched on the first request to that domain.
 
 **Note:** `robots_txt_obey` is turned off by default. It does not affect your concurrency settings -- only the delay between requests is adjusted.
-

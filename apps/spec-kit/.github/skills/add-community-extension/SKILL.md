@@ -1,7 +1,7 @@
 ---
 name: add-community-extension
-description: 'Add a community extension to the Spec Kit catalog from a GitHub issue submission. USE FOR: processing extension submission issues, validating catalog entries, updating catalog.community.json and docs/community/extensions.md, creating PRs. DO NOT USE FOR: creating new extensions from scratch, or first-party extension work.'
-argument-hint: 'GitHub issue URL or number for the extension submission'
+description: "Add a community extension to the Spec Kit catalog from a GitHub issue submission. USE FOR: processing extension submission issues, validating catalog entries, updating catalog.community.json and docs/community/extensions.md, creating PRs. DO NOT USE FOR: creating new extensions from scratch, or first-party extension work."
+argument-hint: "GitHub issue URL or number for the extension submission"
 ---
 
 # Add Community Extension
@@ -19,6 +19,7 @@ Process an extension submission issue and add or update it in the community cata
 ### 1. Fetch the submission issue
 
 Read the GitHub issue to extract all metadata:
+
 - Extension ID, name, version, description, author
 - Repository URL, download URL, homepage, documentation, changelog
 - License, required spec-kit version, optional tool dependencies
@@ -29,17 +30,17 @@ Read the GitHub issue to extract all metadata:
 
 Check **all** of the following (per `extensions/EXTENSION-PUBLISHING-GUIDE.md`):
 
-| Check | How |
-|-------|-----|
-| Repository exists and is public | Fetch the repository URL |
-| `extension.yml` manifest present | Confirm in repo file listing |
-| README.md present | Confirm in repo file listing |
-| LICENSE file present | Confirm in repo file listing |
-| GitHub release exists matching version | Check releases on the repo page |
-| Download URL is accessible | Verify it follows `archive/refs/tags/vX.Y.Z.zip` pattern and release exists |
-| Extension ID is lowercase-with-hyphens only | Regex: `^[a-z][a-z0-9-]*$` |
-| Version follows semver | Format: `X.Y.Z` |
-| Submission checklists are all checked | Confirm in issue body |
+| Check                                       | How                                                                         |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| Repository exists and is public             | Fetch the repository URL                                                    |
+| `extension.yml` manifest present            | Confirm in repo file listing                                                |
+| README.md present                           | Confirm in repo file listing                                                |
+| LICENSE file present                        | Confirm in repo file listing                                                |
+| GitHub release exists matching version      | Check releases on the repo page                                             |
+| Download URL is accessible                  | Verify it follows `archive/refs/tags/vX.Y.Z.zip` pattern and release exists |
+| Extension ID is lowercase-with-hyphens only | Regex: `^[a-z][a-z0-9-]*$`                                                  |
+| Version follows semver                      | Format: `X.Y.Z`                                                             |
+| Submission checklists are all checked       | Confirm in issue body                                                       |
 
 ### 3. Determine if this is an add or update
 
@@ -153,6 +154,7 @@ git push origin <branch-name>
 ```
 
 Then create a PR to `upstream` (`github/spec-kit`) with:
+
 - **Title:** `Add <Name> extension to community catalog` (or `Update <Name> extension to v<version>`)
 - **Body:** Include validation summary, `Closes #<issue-number>`, and `cc @<issue-author>`
 - **Head:** `<fork-owner>:<branch-name>`

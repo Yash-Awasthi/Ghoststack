@@ -5,7 +5,7 @@ description: View a server's components and metadata
 icon: magnifying-glass
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.9.0" />
 
@@ -51,10 +51,10 @@ fastmcp inspect server.py --format mcp -o manifest.json
 
 ## Options
 
-| Option | Flag | Description |
-| ------ | ---- | ----------- |
-| Format | `--format`, `-f` | `fastmcp` or `mcp` (required when using `-o`) |
-| Output File | `--output`, `-o` | Save to file instead of stdout |
+| Option      | Flag             | Description                                   |
+| ----------- | ---------------- | --------------------------------------------- |
+| Format      | `--format`, `-f` | `fastmcp` or `mcp` (required when using `-o`) |
+| Output File | `--output`, `-o` | Save to file instead of stdout                |
 
 ## Entrypoints
 
@@ -68,5 +68,6 @@ fastmcp inspect fastmcp.json               # config file
 ```
 
 <Warning>
-`inspect` only works with local files and `fastmcp.json` — it doesn't connect to remote URLs or standard MCP config files.
+  `inspect` only works with local files and `fastmcp.json` — it doesn't connect to remote URLs or standard MCP config
+  files.
 </Warning>

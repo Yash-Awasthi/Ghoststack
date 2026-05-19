@@ -1,4 +1,4 @@
-import { Task } from '../task-router';
+import { Task } from "../task-router";
 
 export interface IWorkflowConstraint {
   name: string;
@@ -22,7 +22,7 @@ export interface IWorkflowDefinition {
 export interface IWorkflowExecution {
   id: string;
   workflowId: string;
-  status: 'pending' | 'running' | 'succeeded' | 'failed' | 'rejected';
+  status: "pending" | "running" | "succeeded" | "failed" | "rejected";
   taskResults: Record<string, any>;
   startedAt: Date;
   completedAt?: Date;

@@ -3,7 +3,7 @@ export interface Agent {
   name: string;
   type: string;
   capabilities: string[];
-  status: 'idle' | 'busy' | 'offline';
+  status: "idle" | "busy" | "offline";
 }
 
 export interface IAgentRegistry {

@@ -1,9 +1,9 @@
-import { ITaskExecutor, IExecutionAdapter, IExecutionContext } from './interfaces/execution.interface';
-import { IQueueBackend } from './interfaces/queue.interface';
-import { IEventBus } from './event-bus';
-import { IRuntimePersistence } from './interfaces/persistence.interface';
-import { ILogger } from './interfaces/logger.interface';
-import { IMetricsCollector, ITraceRecorder } from './interfaces/observability.interface';
+import { ITaskExecutor, IExecutionAdapter, IExecutionContext } from "./interfaces/execution.interface";
+import { IQueueBackend } from "./interfaces/queue.interface";
+import { IEventBus } from "./event-bus";
+import { IRuntimePersistence } from "./interfaces/persistence.interface";
+import { ILogger } from "./interfaces/logger.interface";
+import { IMetricsCollector, ITraceRecorder } from "./interfaces/observability.interface";
 
 export class TaskExecutor implements ITaskExecutor {
   private queue: IQueueBackend;
@@ -45,7 +45,7 @@ export class TaskExecutor implements ITaskExecutor {
     this.metrics?.recordGauge("queue.size", length);
 
     const taskType = job.payload?.type || "floci";
-    const adapter = this.adapters.find(a => a.canExecute(taskType));
+    const adapter = this.adapters.find((a) => a.canExecute(taskType));
 
     if (!adapter) {
       this.logger.error(`No executable adapter found for task type: ${taskType}`);
@@ -72,7 +72,7 @@ export class TaskExecutor implements ITaskExecutor {
       const startTimeMs = Date.now();
       const result = await adapter.execute(job.payload, context);
       const durationMs = Date.now() - startTimeMs;
-      
+
       this.metrics?.recordTiming("task.latency", durationMs);
       this.metrics?.increment("task.success");
 
@@ -97,7 +97,7 @@ export class TaskExecutor implements ITaskExecutor {
     } catch (err: any) {
       const errorMessage = err?.message || String(err);
       this.logger.error(`Task ${job.id} execution failed: ${errorMessage}`);
-      
+
       this.metrics?.increment("task.failed");
 
       await this.persistence.saveState(job.id, {

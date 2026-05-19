@@ -5,7 +5,7 @@ description: Modify tool schemas - rename, reshape arguments, and customize beha
 icon: wrench
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -84,28 +84,28 @@ Both mechanisms support the same modifications.
 
 **Tool-level options:**
 
-| Option | Description |
-|--------|-------------|
-| `name` | New name for the tool |
-| `description` | New description |
-| `title` | Human-readable title |
-| `tags` | Set of tags for categorization |
-| `annotations` | MCP ToolAnnotations |
-| `meta` | Custom metadata dictionary |
-| `enabled` | Whether the tool is visible to clients (default `True`) |
+| Option        | Description                                             |
+| ------------- | ------------------------------------------------------- |
+| `name`        | New name for the tool                                   |
+| `description` | New description                                         |
+| `title`       | Human-readable title                                    |
+| `tags`        | Set of tags for categorization                          |
+| `annotations` | MCP ToolAnnotations                                     |
+| `meta`        | Custom metadata dictionary                              |
+| `enabled`     | Whether the tool is visible to clients (default `True`) |
 
 **Argument-level options** (via `ArgTransform` or `ArgTransformConfig`):
 
-| Option | Description |
-|--------|-------------|
-| `name` | Rename the argument |
-| `description` | New description for the argument |
-| `default` | New default value |
+| Option            | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `name`            | Rename the argument                                      |
+| `description`     | New description for the argument                         |
+| `default`         | New default value                                        |
 | `default_factory` | Callable that generates a default (requires `hide=True`) |
-| `hide` | Remove from client-visible schema |
-| `required` | Make an optional argument required |
-| `type` | Change the argument's type |
-| `examples` | Example values for the argument |
+| `hide`            | Remove from client-visible schema                        |
+| `required`        | Make an optional argument required                       |
+| `type`            | Change the argument's type                               |
+| `examples`        | Example values for the argument                          |
 
 ## Hiding Arguments
 
@@ -129,7 +129,7 @@ transform_args = {
 Hidden arguments disappear from the tool's schema. The client never sees them, but the underlying function receives the configured value.
 
 <Warning>
-`default_factory` requires `hide=True`. Visible arguments need static defaults that can be represented in JSON Schema.
+  `default_factory` requires `hide=True`. Visible arguments need static defaults that can be represented in JSON Schema.
 </Warning>
 
 ## Renaming Arguments

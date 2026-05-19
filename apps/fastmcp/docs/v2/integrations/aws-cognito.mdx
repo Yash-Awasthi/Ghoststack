@@ -6,7 +6,7 @@ icon: aws
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.12.4" />
 
@@ -17,6 +17,7 @@ This guide shows you how to secure your FastMCP server using **AWS Cognito user 
 ### Prerequisites
 
 Before you begin, you will need:
+
 1. An **[AWS Account](https://aws.amazon.com/)** with access to create AWS Cognito user pools
 2. Basic familiarity with AWS Cognito concepts (user pools, app clients)
 3. Your FastMCP server's URL (can be localhost for development, e.g., `http://localhost:8000`)
@@ -30,6 +31,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     Go to the **[AWS Cognito Console](https://console.aws.amazon.com/cognito/)** and ensure you're in your desired AWS region.
 
     Select **"User pools"** from the side navigation (click on the hamburger icon at the top left in case you don't see any), and click **"Create user pool"** to create a new user pool.
+
 </Step>
 
 <Step title="Define Your Application">
@@ -46,6 +48,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     <Info>
     Choose "Traditional web application" rather than SPA, Mobile app, or Machine-to-machine options. This ensures proper OAuth 2.0 configuration for FastMCP.
     </Info>
+
 </Step>
 
 <Step title="Configure Options">
@@ -58,6 +61,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     <Tip>
     The simplified interface handles most OAuth security settings automatically based on your application type selection.
     </Tip>
+
 </Step>
 
 <Step title="Review and Create">
@@ -71,6 +75,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     <Tip>
     The user pool ID and app client credentials are all you need for FastMCP configuration.
     </Tip>
+
 </Step>
 
 <Step title="Configure OAuth Settings">
@@ -84,6 +89,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     <Tip>
     For local development, you can use `http://localhost` URLs. For production, you must use HTTPS.
     </Tip>
+
 </Step>
 
 <Step title="Configure Resource Server">
@@ -99,6 +105,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     <Warning>
     The resource server identifier must exactly match your `base_url + mcp_path`. For the default configuration with `base_url="http://localhost:8000"` and `path="/mcp"`, use `http://localhost:8000/mcp`.
     </Warning>
+
 </Step>
 
 <Step title="Save Your Credentials">
@@ -112,6 +119,7 @@ Set up AWS Cognito user pool with an app client to get the credentials needed fo
     <Tip>
     Store these credentials securely. Never commit them to version control. Use environment variables or AWS Secrets Manager in production.
     </Tip>
+
 </Step>
 </Steps>
 
@@ -188,12 +196,14 @@ if __name__ == "__main__":
 ```
 
 When you run the client for the first time:
+
 1. Your browser will open to AWS Cognito's hosted UI login page
 2. After you sign in (or sign up), you'll be redirected back to your MCP server
 3. The client receives the JWT token and can make authenticated requests
 
 <Info>
-The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or you explicitly clear the cache.
+  The client caches tokens locally, so you won't need to re-authenticate for subsequent runs unless the token expires or
+  you explicitly clear the cache.
 </Info>
 
 ## Production Configuration
@@ -236,6 +246,7 @@ mcp = FastMCP(name="Production AWS Cognito App", auth=auth_provider)
 Parameters (`jwt_signing_key` and `client_storage`) work together to ensure tokens and client registrations survive server restarts. **Wrap your storage in `FernetEncryptionWrapper` to encrypt sensitive OAuth tokens at rest** - without it, tokens are stored in plaintext. Store secrets in environment variables and use a persistent storage backend like Redis for distributed deployments.
 
 For complete details on these parameters, see the [OAuth Proxy documentation](/v2/servers/auth/oauth-proxy#configuration-parameters).
+
 </Note>
 
 ## Environment Variables
@@ -247,9 +258,9 @@ For production deployments, use environment variables instead of hardcoding cred
 Setting this environment variable allows the AWS Cognito provider to be used automatically without explicitly instantiating it in code.
 
 <Card>
-<ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
-Set to `fastmcp.server.auth.providers.aws.AWSCognitoProvider` to use AWS Cognito authentication.
-</ParamField>
+  <ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
+    Set to `fastmcp.server.auth.providers.aws.AWSCognitoProvider` to use AWS Cognito authentication.
+  </ParamField>
 </Card>
 
 ### AWS Cognito-Specific Configuration
@@ -262,27 +273,28 @@ Your AWS Cognito user pool ID (e.g., `eu-central-1_XXXXXXXXX`)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_AWS_REGION" default="eu-central-1">
-AWS region where your AWS Cognito user pool is located
+  AWS region where your AWS Cognito user pool is located
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_CLIENT_ID" required>
-Your AWS Cognito app client ID
+  Your AWS Cognito app client ID
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_CLIENT_SECRET" required>
-Your AWS Cognito app client secret
+  Your AWS Cognito app client secret
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_BASE_URL" default="http://localhost:8000">
-Public URL where OAuth endpoints will be accessible (includes any mount path)
+  Public URL where OAuth endpoints will be accessible (includes any mount path)
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_ISSUER_URL" default="Uses BASE_URL">
-Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
+  Issuer URL for OAuth metadata (defaults to `BASE_URL`). Set to root-level URL when mounting under a path prefix to
+  avoid 404 logs. See [HTTP Deployment guide](/v2/deployment/http#mounting-authenticated-servers) for details.
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_REDIRECT_PATH" default="/auth/callback">
-One of the redirect paths configured in your AWS Cognito app client
+  One of the redirect paths configured in your AWS Cognito app client
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_AWS_COGNITO_REQUIRED_SCOPES" default='["openid"]'>
@@ -291,6 +303,7 @@ Comma-, space-, or JSON-separated list of required OAuth scopes (e.g., `openid e
 </Card>
 
 Example `.env` file:
+
 ```bash
 # Use the AWS Cognito provider
 FASTMCP_SERVER_AUTH=fastmcp.server.auth.providers.aws.AWSCognitoProvider

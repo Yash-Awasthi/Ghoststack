@@ -4,7 +4,8 @@ sidebarTitle: Proxy Servers
 description: Use FastMCP to act as an intermediary or change transport for other MCP servers.
 icon: arrows-retweet
 ---
-import { VersionBadge } from '/snippets/version-badge.mdx'
+
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.0.0" />
 
@@ -12,7 +13,7 @@ FastMCP provides a powerful proxying capability that allows one FastMCP server i
 
 ## What is Proxying?
 
-Proxying means setting up a FastMCP server that doesn't implement its own tools or resources directly. Instead, when it receives a request (like `tools/call` or `resources/read`), it forwards that request to a *backend* MCP server, receives the response, and then relays that response back to the original client.
+Proxying means setting up a FastMCP server that doesn't implement its own tools or resources directly. Instead, when it receives a request (like `tools/call` or `resources/read`), it forwards that request to a _backend_ MCP server, receives the response, and then relays that response back to the original client.
 
 ```mermaid
 sequenceDiagram
@@ -66,6 +67,7 @@ if __name__ == "__main__":
 ```
 
 This single setup gives you:
+
 - Safe concurrent request handling
 - Automatic forwarding of advanced MCP features (sampling, elicitation, etc.)
 - Session isolation to prevent context mixing
@@ -73,7 +75,7 @@ This single setup gives you:
 
 You can also pass a FastMCP [client transport](/v2/clients/transports) (or parameter that can be inferred to a transport) to `as_proxy()`. This will automatically create a `ProxyClient` instance for you.
 
-Finally, you can pass a regular FastMCP `Client` instance to `as_proxy()`. This will work for many use cases, but may break if advanced MCP features like sampling or elicitation are invoked by the server. 
+Finally, you can pass a regular FastMCP `Client` instance to `as_proxy()`. This will work for many use cases, but may break if advanced MCP features like sampling or elicitation are invoked by the server.
 
 ## Session Isolation & Concurrency
 
@@ -93,7 +95,7 @@ proxy = FastMCP.as_proxy(ProxyClient("backend_server.py"))
 
 # Multiple clients can use this proxy simultaneously without interference:
 # - Client A calls a tool -> gets isolated backend session
-# - Client B calls a tool -> gets different isolated backend session  
+# - Client B calls a tool -> gets different isolated backend session
 # - No context mixing between requests
 ```
 
@@ -108,7 +110,7 @@ from fastmcp import Client
 async with Client("backend_server.py") as connected_client:
     # This proxy will reuse the connected session for all requests
     proxy = FastMCP.as_proxy(connected_client)
-    
+
     # ⚠️ Warning: All requests share the same backend session
     # This may cause context mixing in concurrent scenarios
 ```
@@ -148,7 +150,6 @@ if __name__ == "__main__":
     local_proxy.run(transport="http", host="0.0.0.0", port=8080)
 ```
 
-
 ## Advanced MCP Features
 
 <VersionBadge version="2.10.3" />
@@ -158,7 +159,7 @@ if __name__ == "__main__":
 ### Supported Features
 
 - **Roots**: Forwards filesystem root access requests to the client
-- **Sampling**: Forwards LLM completion requests from backend to client  
+- **Sampling**: Forwards LLM completion requests from backend to client
 - **Elicitation**: Forwards user input requests to the client
 - **Logging**: Forwards log messages from backend through to client
 - **Progress**: Forwards progress notifications during long operations
@@ -220,7 +221,9 @@ if __name__ == "__main__":
 ```
 
 <Note>
-The MCPConfig format follows an emerging standard for MCP server configuration and may evolve as the specification matures. While FastMCP aims to maintain compatibility with future versions, be aware that field names or structure might change.
+  The MCPConfig format follows an emerging standard for MCP server configuration and may evolve as the specification
+  matures. While FastMCP aims to maintain compatibility with future versions, be aware that field names or structure
+  might change.
 </Note>
 
 ### Multi-Server Configurations
@@ -262,6 +265,7 @@ When proxying one or more servers, component names are prefixed the same way as 
 - Resource templates: `protocol://{prefix}/...` and template names are also prefixed
 
 These rules apply uniformly whether you:
+
 - Mount a proxy on another server
 - Create a multi-server proxy from an `MCPConfig`
 - Use `FastMCP.as_proxy()` directly
@@ -295,7 +299,6 @@ my_server.add_tool(local_tool)
 # Now you can disable YOUR copy
 local_tool.disable()
 ```
-
 
 ## `FastMCPProxy` Class
 

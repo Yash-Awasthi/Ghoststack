@@ -29,7 +29,9 @@ page = StealthyFetcher.fetch('https://example.com', headless=True, network_idle=
 products = page.css('.product', auto_save=True)                                        # Scrape data that survives website design changes!
 products = page.css('.product', adaptive=True)                                         # Later, if the website structure changes, pass `adaptive=True` to find them!
 ```
+
 Or scale up to full crawls
+
 ```python
 from scrapling.spiders import Spider, Response
 
@@ -44,7 +46,7 @@ class MySpider(Spider):
 MySpider().start()
 ```
 
-## Top Sponsors 
+## Top Sponsors
 
 <style>
 .ad {
@@ -101,6 +103,7 @@ MySpider().start()
 ## Key Features
 
 ### Spiders - A Full Crawling Framework
+
 - 🕷️ **Scrapy-like Spider API**: Define spiders with `start_urls`, async `parse` callbacks, and `Request`/`Response` objects.
 - ⚡ **Concurrent Crawling**: Configurable concurrency limits, per-domain throttling, and download delays.
 - 🔄 **Multi-Session Support**: Unified interface for HTTP requests, and stealthy headless browsers in a single spider - route requests to different sessions by ID.
@@ -112,6 +115,7 @@ MySpider().start()
 - 📦 **Built-in Export**: Export results through hooks and your own pipeline or the built-in JSON/JSONL with `result.items.to_json()` / `result.items.to_jsonl()` respectively.
 
 ### Advanced Websites Fetching with Session Support
+
 - **HTTP Requests**: Fast and stealthy HTTP requests with the `Fetcher` class. Can impersonate browsers' TLS fingerprint, headers, and use HTTP/3.
 - **Dynamic Loading**: Fetch dynamic websites with full browser automation through the `DynamicFetcher` class supporting Playwright's Chromium and Google's Chrome.
 - **Anti-bot Bypass**: Advanced stealth capabilities with `StealthyFetcher` and fingerprint spoofing. Can easily bypass all types of Cloudflare's Turnstile/Interstitial with automation.
@@ -122,18 +126,21 @@ MySpider().start()
 - **Async Support**: Complete async support across all fetchers and dedicated async session classes.
 
 ### Adaptive Scraping & AI Integration
+
 - 🔄 **Smart Element Tracking**: Relocate elements after website changes using intelligent similarity algorithms.
 - 🎯 **Smart Flexible Selection**: CSS selectors, XPath selectors, filter-based search, text search, regex search, and more.
 - 🔍 **Find Similar Elements**: Automatically locate elements similar to found elements.
 - 🤖 **MCP Server to be used with AI**: Built-in MCP server for AI-assisted Web Scraping and data extraction. The MCP server features powerful, custom capabilities that leverage Scrapling to extract targeted content before passing it to the AI (Claude/Cursor/etc), thereby speeding up operations and reducing costs by minimizing token usage. ([demo video](https://www.youtube.com/watch?v=qyFk3ZNwOxE))
 
 ### High-Performance & battle-tested Architecture
+
 - 🚀 **Lightning Fast**: Optimized performance outperforming most Python scraping libraries.
 - 🔋 **Memory Efficient**: Optimized data structures and lazy loading for a minimal memory footprint.
 - ⚡ **Fast JSON Serialization**: 10x faster than the standard library.
 - 🏗️ **Battle tested**: Not only does Scrapling have 92% test coverage and full type hints coverage, but it has been used daily by hundreds of Web Scrapers over the past year.
 
 ### Developer/Web Scraper Friendly Experience
+
 - 🎯 **Interactive Web Scraping Shell**: Optional built-in IPython shell with Scrapling integration, shortcuts, and new tools to speed up Web Scraping scripts development, like converting curl requests to Scrapling requests and viewing requests results in your browser.
 - 🚀 **Use it directly from the Terminal**: Optionally, you can use Scrapling to scrape a URL without writing a single line of code!
 - 🛠️ **Rich Navigation API**: Advanced DOM traversal with parent, sibling, and child navigation methods.
@@ -143,8 +150,8 @@ MySpider().start()
 - 📘 **Complete Type Coverage**: Full type hints for excellent IDE support and code completion. The entire codebase is automatically scanned with **PyRight** and **MyPy** with each change.
 - 🔋 **Ready Docker image**: With each release, a Docker image containing all browsers is automatically built and pushed.
 
-
 ## Star History
+
 Scrapling’s GitHub stars have grown steadily since its release (see chart below).
 
 <div id="chartContainer">
@@ -177,8 +184,8 @@ observer.observe(document.body, {
 });
 </script>
 
-
 ## Installation
+
 Scrapling requires Python 3.10 or higher:
 
 ```bash
@@ -190,52 +197,58 @@ This installation only includes the parser engine and its dependencies, without 
 ### Optional Dependencies
 
 1. If you are going to use any of the extra features below, the fetchers, or their classes, you will need to install fetchers' dependencies and their browser dependencies as follows:
-    ```bash
-    pip install "scrapling[fetchers]"
-    
-    scrapling install           # normal install
-    scrapling install  --force  # force reinstall
-    ```
 
-    This downloads all browsers, along with their system dependencies and fingerprint manipulation dependencies.
+   ```bash
+   pip install "scrapling[fetchers]"
 
-    Or you can install them from the code instead of running a command like this:
-    ```python
-    from scrapling.cli import install
-    
-    install([], standalone_mode=False)          # normal install
-    install(["--force"], standalone_mode=False) # force reinstall
-    ```
+   scrapling install           # normal install
+   scrapling install  --force  # force reinstall
+   ```
+
+   This downloads all browsers, along with their system dependencies and fingerprint manipulation dependencies.
+
+   Or you can install them from the code instead of running a command like this:
+
+   ```python
+   from scrapling.cli import install
+
+   install([], standalone_mode=False)          # normal install
+   install(["--force"], standalone_mode=False) # force reinstall
+   ```
 
 2. Extra features:
-
-
-     - Install the MCP server feature:
-       ```bash
-       pip install "scrapling[ai]"
-       ```
-     - Install shell features (Web Scraping shell and the `extract` command): 
-         ```bash
-         pip install "scrapling[shell]"
-         ```
-     - Install everything: 
-         ```bash
-         pip install "scrapling[all]"
-         ```
+   - Install the MCP server feature:
+     ```bash
+     pip install "scrapling[ai]"
+     ```
+   - Install shell features (Web Scraping shell and the `extract` command):
+     ```bash
+     pip install "scrapling[shell]"
+     ```
+   - Install everything:
+     `bash
+    pip install "scrapling[all]"
+    `
      Don't forget that you need to install the browser dependencies with `scrapling install` after any of these extras (if you didn't already)
 
 ### Docker
+
 You can also install a Docker image with all extras and browsers with the following command from DockerHub:
+
 ```bash
 docker pull pyd4vinci/scrapling
 ```
+
 Or download it from the GitHub registry:
+
 ```bash
 docker pull ghcr.io/d4vinci/scrapling:latest
 ```
+
 This image is automatically built and pushed using GitHub Actions and the repository's main branch.
 
 ## How the documentation is organized
+
 Scrapling has extensive documentation, so we try to follow the [Diátaxis documentation framework](https://diataxis.fr/).
 
 ## Support

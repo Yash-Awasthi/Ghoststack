@@ -5,7 +5,7 @@ description: Receive and handle log messages from MCP servers.
 icon: receipt
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.0.0" />
 
@@ -58,6 +58,7 @@ client = Client(
 The `message.data` attribute is a dictionary that contains the log payload from the server. This enables structured logging, allowing you to receive rich, contextual information.
 
 The dictionary contains two keys:
+
 - `msg`: The string log message.
 - `extra`: A dictionary containing any extra data sent from the server.
 
@@ -81,6 +82,7 @@ The `log_handler` is called every time a log message is received. It receives a 
     <ResponseField name="data" type="dict">
       The log payload, containing `msg` and `extra` keys.
     </ResponseField>
+
   </Expandable>
 </ResponseField>
 </Card>

@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom'
 import { TextDecoder, TextEncoder } from 'node:util'
-import { ReadableStream, WritableStream, TransformStream } from 'node:stream/web'
+import {
+  ReadableStream,
+  WritableStream,
+  TransformStream,
+} from 'node:stream/web'
 
 // JSDOM lacks Node's Web API globals — undici (loaded transitively via
 // `next/server` and `openai`) needs these at module-load time.

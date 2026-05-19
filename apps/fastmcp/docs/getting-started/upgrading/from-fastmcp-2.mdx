@@ -31,6 +31,7 @@ git remote set-url origin https://github.com/PrefectHQ/fastmcp.git
 ```
 
 If you reference the repository URL in dependency specifications (e.g., `git+https://github.com/jlowin/fastmcp.git`), update those to the new location.
+
 </Info>
 
 <Prompt description="Copy this prompt into any LLM along with your server code to get automated upgrade guidance.">
@@ -60,7 +61,7 @@ BREAKING CHANGES (will crash at import or runtime):
 
 4. PROMPTS: mcp.types.PromptMessage replaced by fastmcp.prompts.Message.
    Before: PromptMessage(role="user", content=TextContent(type="text", text="Hello"))
-   After:  Message("Hello")  # role defaults to "user", accepts plain strings
+   After: Message("Hello") # role defaults to "user", accepts plain strings
    Also: if prompts return raw dicts like `{"role": "user", "content": "..."}`, these must become Message objects.
    v2 silently coerced dicts; v3 requires typed Message objects or plain strings.
 
@@ -70,12 +71,12 @@ BREAKING CHANGES (will crash at import or runtime):
 
 7. OPENAPI: timeout parameter removed from OpenAPIProvider. Set timeout on the httpx.AsyncClient instead.
 
-8. METADATA: Namespace changed from "_fastmcp" to "fastmcp" in tool.meta. The include_fastmcp_meta parameter is removed (always included).
+8. METADATA: Namespace changed from "\_fastmcp" to "fastmcp" in tool.meta. The include_fastmcp_meta parameter is removed (always included).
 
 9. ENV VAR: FASTMCP_SHOW_CLI_BANNER renamed to FASTMCP_SHOW_SERVER_BANNER.
 
 10. DECORATORS: @mcp.tool, @mcp.resource, @mcp.prompt now return the original function, not a component object. Code that accesses .name, .description, or other component attributes on the decorated result will crash with AttributeError.
-   Fix: set FASTMCP_DECORATOR_MODE=object for v2 compat (itself deprecated).
+    Fix: set FASTMCP_DECORATOR_MODE=object for v2 compat (itself deprecated).
 
 11. OAUTH STORAGE: Default OAuth client storage changed from DiskStore to FileTreeStore due to pickle deserialization vulnerability in diskcache (CVE-2025-69872). Clients using default storage will re-register automatically on first connection. If using DiskStore explicitly, switch to FileTreeStore (with key/collection sanitization strategies) or add pip install 'py-key-value-aio[disk]'.
 
@@ -93,6 +94,7 @@ DEPRECATIONS (still work but emit warnings):
 - mcp.add_tool_transformation(name, cfg) -> from fastmcp.server.transforms import ToolTransform; mcp.add_transform(ToolTransform(...))
 
 For each issue found, show the original line, explain why it breaks, and provide the corrected code.
+
 </Prompt>
 
 ### Breaking Changes
@@ -129,11 +131,14 @@ If you were using the default storage (i.e., not passing an explicit `client_sto
 If you were passing a `DiskStore` explicitly, you can either [switch to `FileTreeStore`](/servers/storage-backends) (recommended) or keep using `DiskStore` by adding the dependency yourself.
 
 <Warning>
-When switching to `FileTreeStore`, you **must** configure key and collection sanitization strategies. Without them, keys containing special characters (such as URL-based OAuth client IDs) will cause filesystem errors. See the [File Storage](/servers/storage-backends#file-storage) section for the recommended setup.
+  When switching to `FileTreeStore`, you **must** configure key and collection sanitization strategies. Without them,
+  keys containing special characters (such as URL-based OAuth client IDs) will cause filesystem errors. See the [File
+  Storage](/servers/storage-backends#file-storage) section for the recommended setup.
 </Warning>
 
 <Warning>
-Keeping `DiskStore` requires `pip install 'py-key-value-aio[disk]'`, which re-introduces the vulnerable `diskcache` package into your dependency tree.
+  Keeping `DiskStore` requires `pip install 'py-key-value-aio[disk]'`, which re-introduces the vulnerable `diskcache`
+  package into your dependency tree.
 </Warning>
 
 **Component enable()/disable() moved to server**

@@ -95,7 +95,7 @@ import { SQSClient } from "@aws-sdk/client-sqs";
 const config = {
   endpoint: "http://localhost:4566",
   region: "us-east-1",
-  credentials: { accessKeyId: "test", secretAccessKey: "test" },
+  credentials: { accessKeyId: "test", secretAccessKey: "test" }
 };
 
 const dynamo = new DynamoDBClient(config);
@@ -103,7 +103,7 @@ const sqs = new SQSClient(config);
 ```
 
 !!! tip "S3 path-style URLs"
-    When using S3 with the AWS SDK v3 (Node.js), add `forcePathStyle: true` to the config object. Floci serves S3 in path-style mode (`http://localhost:4566/bucket-name`).
+When using S3 with the AWS SDK v3 (Node.js), add `forcePathStyle: true` to the config object. Floci serves S3 in path-style mode (`http://localhost:4566/bucket-name`).
 
 ### Go
 

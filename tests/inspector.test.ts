@@ -1,14 +1,14 @@
-import { RuntimeInspector } from '../orchestration/runtime-inspector';
-import { MetricsCollector } from '../orchestration/observability-manager';
-import { MemoryQueueBackend } from '../orchestration/queue-backend';
-import { LocalServiceDiscovery } from '../orchestration/service-discovery';
-import { FileEventStore } from '../orchestration/persistence-manager';
-import * as path from 'path';
-import * as fs from 'fs';
+import { RuntimeInspector } from "../orchestration/runtime-inspector";
+import { MetricsCollector } from "../orchestration/observability-manager";
+import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { LocalServiceDiscovery } from "../orchestration/service-discovery";
+import { FileEventStore } from "../orchestration/persistence-manager";
+import * as path from "path";
+import * as fs from "fs";
 
 describe("Milestone 2: System Diagnostic Inspector & Snapshots", () => {
-  const testDir = path.join(__dirname, '../temp-inspector-db');
-  const eventLogPath = path.join(testDir, 'inspector_events.jsonl');
+  const testDir = path.join(__dirname, "../temp-inspector-db");
+  const eventLogPath = path.join(testDir, "inspector_events.jsonl");
 
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {

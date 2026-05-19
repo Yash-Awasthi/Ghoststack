@@ -6,7 +6,7 @@ icon: shield-check
 tag: NEW
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.13.0" />
 
@@ -24,10 +24,7 @@ Before you begin
 <Steps>
 <Step title="Register MCP server and set environment">
 
-In your Scalekit dashboard:
-    1. Open the **MCP Servers** section, then select **Create new server**
-    2. Enter server details: a name, a resource identifier, and the desired MCP client authentication settings
-    3. Save, then copy the **Resource ID** (for example, res_92015146095)
+In your Scalekit dashboard: 1. Open the **MCP Servers** section, then select **Create new server** 2. Enter server details: a name, a resource identifier, and the desired MCP client authentication settings 3. Save, then copy the **Resource ID** (for example, res_92015146095)
 
 In your FastMCP project's `.env`:
 
@@ -76,7 +73,8 @@ def auth_status() -> dict:
 ```
 
 <Tip>
-Set `required_scopes` when you need tokens to carry specific permissions. Leave it unset to allow any token issued for the resource.
+  Set `required_scopes` when you need tokens to carry specific permissions. Leave it unset to allow any token issued for
+  the resource.
 </Tip>
 
 ## Testing
@@ -94,9 +92,9 @@ Use any MCP client (for example, mcp-inspector, Claude, VS Code, or Windsurf) to
 Setting this environment variable allows the Scalekit provider to be used automatically without explicitly instantiating it in code.
 
 <Card>
-<ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
-Set to `fastmcp.server.auth.providers.scalekit.ScalekitProvider` to use Scalekit authentication.
-</ParamField>
+  <ParamField path="FASTMCP_SERVER_AUTH" default="Not set">
+    Set to `fastmcp.server.auth.providers.scalekit.ScalekitProvider` to use Scalekit authentication.
+  </ParamField>
 </Card>
 
 ### Scalekit-specific configuration
@@ -109,11 +107,11 @@ Your Scalekit environment URL from the Admin Portal (e.g., `https://your-env.sca
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_SCALEKITPROVIDER_RESOURCE_ID" required>
-Your Scalekit resource server ID from the MCP Servers section
+  Your Scalekit resource server ID from the MCP Servers section
 </ParamField>
 
 <ParamField path="FASTMCP_SERVER_AUTH_SCALEKITPROVIDER_BASE_URL" required>
-Public URL of your FastMCP server (e.g., `https://your-server.com` or `http://localhost:8000/` for development)
+  Public URL of your FastMCP server (e.g., `https://your-server.com` or `http://localhost:8000/` for development)
 </ParamField>
 
 Legacy `FASTMCP_SERVER_AUTH_SCALEKITPROVIDER_MCP_URL` is still recognized for backward compatibility but will be removed soon-rename it to `...BASE_URL`.

@@ -5,28 +5,32 @@ description: Connect FastMCP servers to Claude Desktop
 icon: message-smile
 ---
 
-import { VersionBadge } from "/snippets/version-badge.mdx"
-import { LocalFocusTip } from "/snippets/local-focus.mdx"
+import { VersionBadge } from "/snippets/version-badge.mdx";
+import { LocalFocusTip } from "/snippets/local-focus.mdx";
 
 <LocalFocusTip />
 
 [Claude Desktop](https://www.claude.com/download) supports MCP servers through local STDIO connections and remote servers (beta), allowing you to extend Claude's capabilities with custom tools, resources, and prompts from your FastMCP servers.
 
 <Note>
-Remote MCP server support is currently in beta and available for users on Claude Pro, Max, Team, and Enterprise plans (as of June 2025). Most users will still need to use local STDIO connections.
+  Remote MCP server support is currently in beta and available for users on Claude Pro, Max, Team, and Enterprise plans
+  (as of June 2025). Most users will still need to use local STDIO connections.
 </Note>
 
 <Note>
-This guide focuses specifically on using FastMCP servers with Claude Desktop. For general Claude Desktop MCP setup and official examples, see the [official Claude Desktop quickstart guide](https://modelcontextprotocol.io/quickstart/user).
+  This guide focuses specifically on using FastMCP servers with Claude Desktop. For general Claude Desktop MCP setup and
+  official examples, see the [official Claude Desktop quickstart
+  guide](https://modelcontextprotocol.io/quickstart/user).
 </Note>
-
 
 ## Requirements
 
 Claude Desktop traditionally requires MCP servers to run locally using STDIO transport, where your server communicates with Claude through standard input/output rather than HTTP. However, users on certain plans now have access to remote server support as well.
 
 <Tip>
-If you don't have access to remote server support or need to connect to remote servers, you can create a **proxy server** that runs locally via STDIO and forwards requests to remote HTTP servers. See the [Proxy Servers](#proxy-servers) section below.
+  If you don't have access to remote server support or need to connect to remote servers, you can create a **proxy
+  server** that runs locally via STDIO and forwards requests to remote HTTP servers. See the [Proxy
+  Servers](#proxy-servers) section below.
 </Tip>
 
 ## Create a Server
@@ -51,6 +55,7 @@ if __name__ == "__main__":
 ## Install the Server
 
 ### FastMCP CLI
+
 <VersionBadge version="2.10.3" />
 
 The easiest way to install a FastMCP server in Claude Desktop is using the `fastmcp install claude-desktop` command. This automatically handles the configuration and dependency management.
@@ -113,7 +118,6 @@ Alternatively, you can use a `fastmcp.json` configuration file (recommended):
 }
 ```
 
-
 #### Python Version and Project Directory
 
 FastMCP allows you to control the Python environment for your server:
@@ -135,7 +139,8 @@ When you specify a project directory, all relative paths in your server will be 
 #### Environment Variables
 
 <Warning>
-Claude Desktop runs servers in a completely isolated environment with no access to your shell environment or locally installed applications. You must explicitly pass any environment variables your server needs.
+  Claude Desktop runs servers in a completely isolated environment with no access to your shell environment or locally
+  installed applications. You must explicitly pass any environment variables your server needs.
 </Warning>
 
 If your server needs environment variables (like API keys), you must include them:
@@ -151,15 +156,18 @@ Or load them from a `.env` file:
 ```bash
 fastmcp install claude-desktop server.py --server-name "Weather Server" --env-file .env
 ```
-<Warning>
-- **`uv` must be installed and available in your system PATH**. Claude Desktop runs in its own isolated environment and needs `uv` to manage dependencies.
-- **On macOS, it is recommended to install `uv` globally with Homebrew** so that Claude Desktop will detect it: `brew install uv`. Installing `uv` with other methods may not make it accessible to Claude Desktop.
-</Warning>
 
+<Warning>
+  - **`uv` must be installed and available in your system PATH**. Claude Desktop runs in its own isolated environment
+  and needs `uv` to manage dependencies. - **On macOS, it is recommended to install `uv` globally with Homebrew** so
+  that Claude Desktop will detect it: `brew install uv`. Installing `uv` with other methods may not make it accessible
+  to Claude Desktop.
+</Warning>
 
 ### Manual Configuration
 
 For more control over the configuration, you can manually edit Claude Desktop's configuration file. You can open the configuration file from Claude's developer settings, or find it in the following locations:
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -182,7 +190,6 @@ After updating the configuration file, restart Claude Desktop completely. Look f
 
 If your server has dependencies, you can use `uv` or another package manager to set up the environment.
 
-
 When manually configuring dependencies, the recommended approach is to use `uv` with FastMCP. The configuration uses `uv run` to create an isolated environment with your specified packages:
 
 ```json
@@ -192,9 +199,12 @@ When manually configuring dependencies, the recommended approach is to use `uv` 
       "command": "uv",
       "args": [
         "run",
-        "--with", "fastmcp",
-        "--with", "pandas",
-        "--with", "requests", 
+        "--with",
+        "fastmcp",
+        "--with",
+        "pandas",
+        "--with",
+        "requests",
         "fastmcp",
         "run",
         "path/to/your/server.py"
@@ -213,9 +223,12 @@ You can also manually specify Python versions and project directories in your co
       "command": "uv",
       "args": [
         "run",
-        "--python", "3.11",
-        "--project", "/path/to/project",
-        "--with", "fastmcp",
+        "--python",
+        "3.11",
+        "--project",
+        "/path/to/project",
+        "--with",
+        "fastmcp",
         "fastmcp",
         "run",
         "path/to/your/server.py"
@@ -228,8 +241,10 @@ You can also manually specify Python versions and project directories in your co
 The order of arguments matters: Python version and project settings come before package specifications, which come before the actual command to run.
 
 <Warning>
-- **`uv` must be installed and available in your system PATH**. Claude Desktop runs in its own isolated environment and needs `uv` to manage dependencies.
-- **On macOS, it is recommended to install `uv` globally with Homebrew** so that Claude Desktop will detect it: `brew install uv`. Installing `uv` with other methods may not make it accessible to Claude Desktop.
+  - **`uv` must be installed and available in your system PATH**. Claude Desktop runs in its own isolated environment
+  and needs `uv` to manage dependencies. - **On macOS, it is recommended to install `uv` globally with Homebrew** so
+  that Claude Desktop will detect it: `brew install uv`. Installing `uv` with other methods may not make it accessible
+  to Claude Desktop.
 </Warning>
 
 #### Environment Variables
@@ -250,13 +265,13 @@ You can also specify environment variables in the configuration:
   }
 }
 ```
+
 <Warning>
-Claude Desktop runs servers in a completely isolated environment with no access to your shell environment or locally installed applications. You must explicitly pass any environment variables your server needs.
+  Claude Desktop runs servers in a completely isolated environment with no access to your shell environment or locally
+  installed applications. You must explicitly pass any environment variables your server needs.
 </Warning>
 
-
 ## Remote Servers
-
 
 Users on Claude Pro, Max, Team, and Enterprise plans have first-class remote server support via integrations. For other users, or as an alternative approach, FastMCP can create a proxy server that forwards requests to a remote HTTP server. You can install the proxy server in Claude Desktop.
 
@@ -296,4 +311,3 @@ proxy = create_proxy(client, name="Authenticated Proxy")
 if __name__ == "__main__":
     proxy.run()
 ```
-

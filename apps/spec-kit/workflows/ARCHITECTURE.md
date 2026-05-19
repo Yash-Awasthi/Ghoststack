@@ -79,18 +79,18 @@ When a `gate` step pauses execution, the engine persists `current_step_index` an
 
 The engine ships with 10 built-in step types, each in its own subpackage under `src/specify_cli/workflows/steps/`:
 
-| Type Key | Class | Purpose | Returns `next_steps`? |
-|----------|-------|---------|-----------------------|
-| `command` | `CommandStep` | Invoke an installed Spec Kit command via integration CLI | No |
-| `prompt` | `PromptStep` | Send an arbitrary inline prompt to integration CLI | No |
-| `shell` | `ShellStep` | Run a shell command, capture output | No |
-| `gate` | `GateStep` | Interactive human review/approval | No (pauses in CI) |
-| `if` | `IfThenStep` | Conditional branching (then/else) | Yes |
-| `switch` | `SwitchStep` | Multi-branch dispatch on expression | Yes |
-| `while` | `WhileStep` | Loop while condition is truthy | Yes (if true) |
-| `do-while` | `DoWhileStep` | Loop, always runs body at least once | Yes (always) |
-| `fan-out` | `FanOutStep` | Dispatch per item over a collection | No (engine expands) |
-| `fan-in` | `FanInStep` | Aggregate results from fan-out | No |
+| Type Key   | Class         | Purpose                                                  | Returns `next_steps`? |
+| ---------- | ------------- | -------------------------------------------------------- | --------------------- |
+| `command`  | `CommandStep` | Invoke an installed Spec Kit command via integration CLI | No                    |
+| `prompt`   | `PromptStep`  | Send an arbitrary inline prompt to integration CLI       | No                    |
+| `shell`    | `ShellStep`   | Run a shell command, capture output                      | No                    |
+| `gate`     | `GateStep`    | Interactive human review/approval                        | No (pauses in CI)     |
+| `if`       | `IfThenStep`  | Conditional branching (then/else)                        | Yes                   |
+| `switch`   | `SwitchStep`  | Multi-branch dispatch on expression                      | Yes                   |
+| `while`    | `WhileStep`   | Loop while condition is truthy                           | Yes (if true)         |
+| `do-while` | `DoWhileStep` | Loop, always runs body at least once                     | Yes (always)          |
+| `fan-out`  | `FanOutStep`  | Dispatch per item over a collection                      | No (engine expands)   |
+| `fan-in`   | `FanInStep`   | Aggregate results from fan-out                           | No                    |
 
 ## Step Registry
 
@@ -106,18 +106,18 @@ Registration is explicit — each step class is imported and instantiated. New s
 
 Workflow definitions use Jinja2-like `{{ expression }}` syntax for dynamic values. The expression engine in `src/specify_cli/workflows/expressions.py` supports:
 
-| Feature | Syntax | Example |
-|---------|--------|---------|
-| Variable access | `{{ inputs.name }}` | Dot-path traversal into context |
-| Step outputs | `{{ steps.plan.output.file }}` | Access previous step results |
-| Comparisons | `==`, `!=`, `>`, `<`, `>=`, `<=` | `{{ count > 5 }}` |
-| Boolean logic | `and`, `or`, `not` | `{{ items and status == 'ok' }}` |
-| Membership | `in`, `not in` | `{{ 'error' not in status }}` |
-| Literals | strings, numbers, booleans, lists | `{{ true }}`, `{{ [1, 2] }}` |
-| Filter: `default` | `{{ val \| default('fallback') }}` | Fallback for None/empty |
-| Filter: `join` | `{{ list \| join(', ') }}` | Join list elements |
-| Filter: `contains` | `{{ text \| contains('sub') }}` | Substring/membership check |
-| Filter: `map` | `{{ list \| map('attr') }}` | Extract attribute from each item |
+| Feature            | Syntax                             | Example                          |
+| ------------------ | ---------------------------------- | -------------------------------- |
+| Variable access    | `{{ inputs.name }}`                | Dot-path traversal into context  |
+| Step outputs       | `{{ steps.plan.output.file }}`     | Access previous step results     |
+| Comparisons        | `==`, `!=`, `>`, `<`, `>=`, `<=`   | `{{ count > 5 }}`                |
+| Boolean logic      | `and`, `or`, `not`                 | `{{ items and status == 'ok' }}` |
+| Membership         | `in`, `not in`                     | `{{ 'error' not in status }}`    |
+| Literals           | strings, numbers, booleans, lists  | `{{ true }}`, `{{ [1, 2] }}`     |
+| Filter: `default`  | `{{ val \| default('fallback') }}` | Fallback for None/empty          |
+| Filter: `join`     | `{{ list \| join(', ') }}`         | Join list elements               |
+| Filter: `contains` | `{{ text \| contains('sub') }}`    | Substring/membership check       |
+| Filter: `map`      | `{{ list \| map('attr') }}`        | Extract attribute from each item |
 
 **Single expressions** (`{{ expr }}` only) return typed values. **Mixed templates** (`"text {{ expr }} more"`) return interpolated strings.
 
@@ -125,23 +125,23 @@ Workflow definitions use Jinja2-like `{{ expression }}` syntax for dynamic value
 
 The expression evaluator builds a namespace from the `StepContext`:
 
-| Key | Source | Available when |
-|-----|--------|----------------|
-| `inputs` | Resolved workflow inputs | Always |
-| `steps` | Accumulated step results | After first step |
-| `item` | Current iteration item | Inside fan-out |
-| `fan_in` | Aggregated results | Inside fan-in |
+| Key      | Source                   | Available when   |
+| -------- | ------------------------ | ---------------- |
+| `inputs` | Resolved workflow inputs | Always           |
+| `steps`  | Accumulated step results | After first step |
+| `item`   | Current iteration item   | Inside fan-out   |
+| `fan_in` | Aggregated results       | Inside fan-in    |
 
 ## Input Resolution
 
 When a workflow is executed, `_resolve_inputs()` validates and coerces provided values against the `inputs:` schema:
 
-| Declared Type | Coercion | Example |
-|---------------|----------|---------|
-| `string` | None (pass-through) | `"my-feature"` |
-| `number` | `float()` → `int()` if whole | `"42"` → `42` |
-| `boolean` | `"true"/"1"/"yes"` → `True` | `"false"` → `False` |
-| `enum` | Validates against allowed values | `["full", "backend-only"]` |
+| Declared Type | Coercion                         | Example                    |
+| ------------- | -------------------------------- | -------------------------- |
+| `string`      | None (pass-through)              | `"my-feature"`             |
+| `number`      | `float()` → `int()` if whole     | `"42"` → `42`              |
+| `boolean`     | `"true"/"1"/"yes"` → `True`      | `"false"` → `False`        |
+| `enum`        | Validates against allowed values | `["full", "backend-only"]` |
 
 Missing required inputs raise `ValueError`. Inputs with `default` values use the default when not provided.
 
@@ -173,16 +173,16 @@ When `specify workflow add <id>` installs from catalog, it downloads the workflo
 
 ## State and Configuration Locations
 
-| Component | Location | Format | Purpose |
-|-----------|----------|--------|---------|
-| Workflow definitions | `.specify/workflows/{id}/workflow.yml` | YAML | Installed workflow definitions |
-| Workflow registry | `.specify/workflows/workflow-registry.json` | JSON | Installed workflows metadata |
-| Run state | `.specify/workflows/runs/{run_id}/state.json` | JSON | Persisted execution state |
-| Run inputs | `.specify/workflows/runs/{run_id}/inputs.json` | JSON | Resolved input values |
-| Run log | `.specify/workflows/runs/{run_id}/log.jsonl` | JSONL | Append-only event log |
-| Catalog cache | `.specify/workflows/.cache/*.json` | JSON | Cached catalog entries (1hr TTL) |
-| Project catalogs | `.specify/workflow-catalogs.yml` | YAML | Project-level catalog sources |
-| User catalogs | `~/.specify/workflow-catalogs.yml` | YAML | User-level catalog sources |
+| Component            | Location                                       | Format | Purpose                          |
+| -------------------- | ---------------------------------------------- | ------ | -------------------------------- |
+| Workflow definitions | `.specify/workflows/{id}/workflow.yml`         | YAML   | Installed workflow definitions   |
+| Workflow registry    | `.specify/workflows/workflow-registry.json`    | JSON   | Installed workflows metadata     |
+| Run state            | `.specify/workflows/runs/{run_id}/state.json`  | JSON   | Persisted execution state        |
+| Run inputs           | `.specify/workflows/runs/{run_id}/inputs.json` | JSON   | Resolved input values            |
+| Run log              | `.specify/workflows/runs/{run_id}/log.jsonl`   | JSONL  | Append-only event log            |
+| Catalog cache        | `.specify/workflows/.cache/*.json`             | JSON   | Cached catalog entries (1hr TTL) |
+| Project catalogs     | `.specify/workflow-catalogs.yml`               | YAML   | Project-level catalog sources    |
+| User catalogs        | `~/.specify/workflow-catalogs.yml`             | YAML   | User-level catalog sources       |
 
 ## Module Structure
 

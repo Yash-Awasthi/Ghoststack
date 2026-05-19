@@ -45,7 +45,7 @@ provides:
       name: "spec-template"
       file: "templates/spec-template.md"
       description: "Custom feature specification template"
-      replaces: "spec-template"  # Which core template this overrides (optional)
+      replaces: "spec-template" # Which core template this overrides (optional)
 
     # ADD MORE TEMPLATES: Copy this block for each template
     # - type: "template"

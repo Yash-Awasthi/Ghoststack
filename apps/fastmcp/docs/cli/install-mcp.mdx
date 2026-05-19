@@ -5,7 +5,7 @@ description: Install MCP servers into Claude, Cursor, Gemini, and other clients
 icon: download
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.10.3" />
 
@@ -18,20 +18,22 @@ fastmcp install cursor server.py -e .
 ```
 
 <Warning>
-`uv` must be installed and available in your system PATH. Both Claude Desktop and Cursor run servers in isolated environments managed by `uv`. On macOS, install it globally with Homebrew for Claude Desktop compatibility: `brew install uv`.
+  `uv` must be installed and available in your system PATH. Both Claude Desktop and Cursor run servers in isolated
+  environments managed by `uv`. On macOS, install it globally with Homebrew for Claude Desktop compatibility: `brew
+  install uv`.
 </Warning>
 
 ## Supported Clients
 
-| Client | Install method |
-| ------ | -------------- |
-| `claude-code` | Claude Code's built-in MCP management |
-| `claude-desktop` | Direct config file modification |
-| `cursor` | Deeplink that opens Cursor for confirmation |
-| `gemini-cli` | Gemini CLI's built-in MCP management |
-| `goose` | Deeplink that opens Goose for confirmation (uses `uvx`) |
-| `mcp-json` | Generates standard MCP JSON config for manual use |
-| `stdio` | Outputs the shell command to run via stdio |
+| Client           | Install method                                          |
+| ---------------- | ------------------------------------------------------- |
+| `claude-code`    | Claude Code's built-in MCP management                   |
+| `claude-desktop` | Direct config file modification                         |
+| `cursor`         | Deeplink that opens Cursor for confirmation             |
+| `gemini-cli`     | Gemini CLI's built-in MCP management                    |
+| `goose`          | Deeplink that opens Goose for confirmation (uses `uvx`) |
+| `mcp-json`       | Generates standard MCP JSON config for manual use       |
+| `stdio`          | Outputs the shell command to run via stdio              |
 
 ## Declaring Dependencies
 
@@ -55,17 +57,17 @@ See [Server Configuration](/deployment/server-configuration) for the full config
 
 ## Options
 
-| Option | Flag | Description |
-| ------ | ---- | ----------- |
-| Server Name | `--server-name`, `-n` | Custom name for the server |
-| Editable Package | `--with-editable`, `-e` | Install a directory in editable mode |
-| Extra Packages | `--with` | Additional packages (repeatable) |
-| Environment Variables | `--env` | `KEY=VALUE` pairs (repeatable) |
-| Environment File | `--env-file`, `-f` | Load env vars from a `.env` file |
-| Python | `--python` | Python version (e.g., `3.11`) |
-| Project | `--project` | Run within a uv project directory |
-| Requirements | `--with-requirements` | Install from a requirements file |
-| Config Path | `--config-path` | Custom path to Claude Desktop config directory (`claude-desktop` only) |
+| Option                | Flag                    | Description                                                            |
+| --------------------- | ----------------------- | ---------------------------------------------------------------------- |
+| Server Name           | `--server-name`, `-n`   | Custom name for the server                                             |
+| Editable Package      | `--with-editable`, `-e` | Install a directory in editable mode                                   |
+| Extra Packages        | `--with`                | Additional packages (repeatable)                                       |
+| Environment Variables | `--env`                 | `KEY=VALUE` pairs (repeatable)                                         |
+| Environment File      | `--env-file`, `-f`      | Load env vars from a `.env` file                                       |
+| Python                | `--python`              | Python version (e.g., `3.11`)                                          |
+| Project               | `--project`             | Run within a uv project directory                                      |
+| Requirements          | `--with-requirements`   | Install from a requirements file                                       |
+| Config Path           | `--config-path`         | Custom path to Claude Desktop config directory (`claude-desktop` only) |
 
 ## Examples
 
@@ -142,5 +144,7 @@ fastmcp install stdio fastmcp.json
 Use `--copy` to copy to clipboard.
 
 <Tip>
-`fastmcp install` is designed for local server files with stdio transport. For remote servers running over HTTP, use your client's native configuration — FastMCP's value here is simplifying the complex local setup with `uv`, dependencies, and environment variables.
+  `fastmcp install` is designed for local server files with stdio transport. For remote servers running over HTTP, use
+  your client's native configuration — FastMCP's value here is simplifying the complex local setup with `uv`,
+  dependencies, and environment variables.
 </Tip>

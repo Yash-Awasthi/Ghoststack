@@ -15,62 +15,62 @@ Floci implements the CodeDeploy API — stored-state management for applications
 
 ### Applications
 
-| Operation | Notes |
-|---|---|
-| `CreateApplication` | Supports `computePlatform`: `Server`, `Lambda`, `ECS` |
-| `GetApplication` | Returns application metadata |
-| `UpdateApplication` | Renames an application |
-| `DeleteApplication` | Removes application and all its deployment groups |
-| `ListApplications` | Returns all application names |
-| `BatchGetApplications` | Returns info for multiple applications |
+| Operation              | Notes                                                 |
+| ---------------------- | ----------------------------------------------------- |
+| `CreateApplication`    | Supports `computePlatform`: `Server`, `Lambda`, `ECS` |
+| `GetApplication`       | Returns application metadata                          |
+| `UpdateApplication`    | Renames an application                                |
+| `DeleteApplication`    | Removes application and all its deployment groups     |
+| `ListApplications`     | Returns all application names                         |
+| `BatchGetApplications` | Returns info for multiple applications                |
 
 ### Deployment Groups
 
-| Operation | Notes |
-|---|---|
-| `CreateDeploymentGroup` | Stores group config; supports `ecsServices` and `loadBalancerInfo` for ECS blue/green; deployment config defaults to `CodeDeployDefault.OneAtATime` |
-| `GetDeploymentGroup` | Returns group metadata |
-| `UpdateDeploymentGroup` | Partial update; supports rename via `newDeploymentGroupName` |
-| `DeleteDeploymentGroup` | Returns `hooksNotCleanedUp: []` |
-| `ListDeploymentGroups` | Returns all group names for an application |
-| `BatchGetDeploymentGroups` | Returns info for multiple groups |
+| Operation                  | Notes                                                                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateDeploymentGroup`    | Stores group config; supports `ecsServices` and `loadBalancerInfo` for ECS blue/green; deployment config defaults to `CodeDeployDefault.OneAtATime` |
+| `GetDeploymentGroup`       | Returns group metadata                                                                                                                              |
+| `UpdateDeploymentGroup`    | Partial update; supports rename via `newDeploymentGroupName`                                                                                        |
+| `DeleteDeploymentGroup`    | Returns `hooksNotCleanedUp: []`                                                                                                                     |
+| `ListDeploymentGroups`     | Returns all group names for an application                                                                                                          |
+| `BatchGetDeploymentGroups` | Returns info for multiple groups                                                                                                                    |
 
 ### Deployment Configs
 
-| Operation | Notes |
-|---|---|
+| Operation                | Notes                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------ |
 | `CreateDeploymentConfig` | Creates a custom config; names starting with `CodeDeployDefault.` are rejected |
-| `GetDeploymentConfig` | Returns config including built-ins |
-| `DeleteDeploymentConfig` | Custom configs only; built-ins cannot be deleted |
-| `ListDeploymentConfigs` | Returns all configs including all 17 pre-seeded built-ins |
+| `GetDeploymentConfig`    | Returns config including built-ins                                             |
+| `DeleteDeploymentConfig` | Custom configs only; built-ins cannot be deleted                               |
+| `ListDeploymentConfigs`  | Returns all configs including all 17 pre-seeded built-ins                      |
 
 ### Deployment Execution
 
-| Operation | Notes |
-|---|---|
-| `CreateDeployment` | Starts a real Lambda or ECS blue/green deployment; shifts traffic via alias weights (Lambda) or ELB listener rules (ECS); invokes lifecycle hooks |
-| `GetDeployment` | Returns current deployment state; poll `status` until `Succeeded`, `Failed`, or `Stopped` |
-| `StopDeployment` | Signals an in-progress deployment to stop; transitions to `Stopped` |
-| `ContinueDeployment` | Accepted (no-op for fully automated deployments) |
-| `ListDeployments` | Returns deployment IDs filtered by application, group, or status |
-| `BatchGetDeployments` | Returns info for multiple deployments |
-| `ListDeploymentTargets` | Returns target IDs for a deployment |
-| `BatchGetDeploymentTargets` | Returns target details including lifecycle event status |
-| `PutLifecycleEventHookExecutionStatus` | Called by lifecycle hook Lambda to report `Succeeded` or `Failed`; failure triggers auto-rollback |
+| Operation                              | Notes                                                                                                                                             |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateDeployment`                     | Starts a real Lambda or ECS blue/green deployment; shifts traffic via alias weights (Lambda) or ELB listener rules (ECS); invokes lifecycle hooks |
+| `GetDeployment`                        | Returns current deployment state; poll `status` until `Succeeded`, `Failed`, or `Stopped`                                                         |
+| `StopDeployment`                       | Signals an in-progress deployment to stop; transitions to `Stopped`                                                                               |
+| `ContinueDeployment`                   | Accepted (no-op for fully automated deployments)                                                                                                  |
+| `ListDeployments`                      | Returns deployment IDs filtered by application, group, or status                                                                                  |
+| `BatchGetDeployments`                  | Returns info for multiple deployments                                                                                                             |
+| `ListDeploymentTargets`                | Returns target IDs for a deployment                                                                                                               |
+| `BatchGetDeploymentTargets`            | Returns target details including lifecycle event status                                                                                           |
+| `PutLifecycleEventHookExecutionStatus` | Called by lifecycle hook Lambda to report `Succeeded` or `Failed`; failure triggers auto-rollback                                                 |
 
 ### Tagging
 
-| Operation | Notes |
-|---|---|
-| `TagResource` | Tags any resource by ARN |
-| `UntagResource` | Removes specific tag keys |
+| Operation             | Notes                           |
+| --------------------- | ------------------------------- |
+| `TagResource`         | Tags any resource by ARN        |
+| `UntagResource`       | Removes specific tag keys       |
 | `ListTagsForResource` | Returns tags for a resource ARN |
 
 ### On-Premises (no-op)
 
-| Operation | Notes |
-|---|---|
-| `AddTagsToOnPremisesInstances` | Accepted, no-op |
+| Operation                           | Notes           |
+| ----------------------------------- | --------------- |
+| `AddTagsToOnPremisesInstances`      | Accepted, no-op |
 | `RemoveTagsFromOnPremisesInstances` | Accepted, no-op |
 
 ## Pre-seeded Built-in Deployment Configs
@@ -78,11 +78,13 @@ Floci implements the CodeDeploy API — stored-state management for applications
 The following 17 configurations are always available (matching real AWS):
 
 **Server:**
+
 - `CodeDeployDefault.OneAtATime`
 - `CodeDeployDefault.HalfAtATime`
 - `CodeDeployDefault.AllAtOnce`
 
 **Lambda:**
+
 - `CodeDeployDefault.LambdaAllAtOnce`
 - `CodeDeployDefault.LambdaCanary10Percent5Minutes`
 - `CodeDeployDefault.LambdaCanary10Percent10Minutes`
@@ -94,6 +96,7 @@ The following 17 configurations are always available (matching real AWS):
 - `CodeDeployDefault.LambdaLinear10PercentEvery10Minutes`
 
 **ECS:**
+
 - `CodeDeployDefault.ECSAllAtOnce`
 - `CodeDeployDefault.ECSCanary10Percent5Minutes`
 - `CodeDeployDefault.ECSCanary10Percent15Minutes`
@@ -121,18 +124,20 @@ For `computePlatform: ECS`, `CreateDeployment` performs a full blue/green traffi
 ```json
 {
   "version": 0.0,
-  "Resources": [{
-    "TargetService": {
-      "Type": "AWS::ECS::Service",
-      "Properties": {
-        "TaskDefinition": "my-task:2",
-        "LoadBalancerInfo": {
-          "ContainerName": "app",
-          "ContainerPort": 80
+  "Resources": [
+    {
+      "TargetService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "TaskDefinition": "my-task:2",
+          "LoadBalancerInfo": {
+            "ContainerName": "app",
+            "ContainerPort": 80
+          }
         }
       }
     }
-  }],
+  ],
   "Hooks": [
     { "BeforeInstall": "my-before-install-hook" },
     { "AfterInstall": "my-after-install-hook" },
@@ -156,20 +161,21 @@ All hook fields are optional.
     "deploymentType": "BLUE_GREEN",
     "deploymentOption": "WITH_TRAFFIC_CONTROL"
   },
-  "ecsServices": [{
-    "clusterName": "my-cluster",
-    "serviceName": "my-service"
-  }],
+  "ecsServices": [
+    {
+      "clusterName": "my-cluster",
+      "serviceName": "my-service"
+    }
+  ],
   "loadBalancerInfo": {
-    "targetGroupPairInfoList": [{
-      "targetGroups": [
-        { "name": "my-blue-tg" },
-        { "name": "my-green-tg" }
-      ],
-      "prodTrafficRoute": {
-        "listenerArns": ["arn:aws:elasticloadbalancing:..."]
+    "targetGroupPairInfoList": [
+      {
+        "targetGroups": [{ "name": "my-blue-tg" }, { "name": "my-green-tg" }],
+        "prodTrafficRoute": {
+          "listenerArns": ["arn:aws:elasticloadbalancing:..."]
+        }
       }
-    }]
+    ]
   }
 }
 ```
@@ -189,9 +195,9 @@ For `computePlatform: Lambda`, `CreateDeployment` performs real traffic shifting
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_CODEDEPLOY_ENABLED` | `true` | Enable or disable the service |
+| Variable                            | Default | Description                   |
+| ----------------------------------- | ------- | ----------------------------- |
+| `FLOCI_SERVICES_CODEDEPLOY_ENABLED` | `true`  | Enable or disable the service |
 
 ## CLI Examples
 

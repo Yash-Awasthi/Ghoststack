@@ -216,11 +216,9 @@ async def analyze_sentiment(text: str, ctx: Context) -> SentimentResult:
 When you call this tool, the LLM returns a structured response that FastMCP validates against your Pydantic model. You access the validated object through `result.result`, while `result.text` contains the JSON representation.
 
 <Note>
-  When you pass `result_type`, `sample()` automatically creates a
-  `final_response` tool that the LLM calls to provide its response. If
-  validation fails, the error is sent back to the LLM for retry. This automatic
-  handling only applies to `sample()`—with `sample_step()`, you must manage
-  structured output yourself.
+  When you pass `result_type`, `sample()` automatically creates a `final_response` tool that the LLM calls to provide
+  its response. If validation fails, the error is sent back to the LLM for retry. This automatic handling only applies
+  to `sample()`—with `sample_step()`, you must manage structured output yourself.
 </Note>
 
 ## Sampling with Tools
@@ -371,6 +369,7 @@ Each `SampleStep` provides information about what the LLM returned:
 - `step.history` — All messages exchanged so far
 
 The contents of `step.history` depend on `execute_tools`:
+
 - **`execute_tools=True`** (default): Includes tool results, ready for the next iteration
 - **`execute_tools=False`**: Includes the assistant's tool request, but you add results yourself
 
@@ -445,9 +444,7 @@ Client support for sampling is optional—some clients may not implement it. To 
 
 FastMCP provides built-in handlers for [OpenAI and Anthropic APIs](/v2/clients/sampling#built-in-handlers). These handlers support the full sampling API including tools, automatically converting your Python functions to each provider's format.
 
-<Note>
-Install handlers with `pip install fastmcp[openai]` or `pip install fastmcp[anthropic]`.
-</Note>
+<Note>Install handlers with `pip install fastmcp[openai]` or `pip install fastmcp[anthropic]`.</Note>
 
 ```python
 from fastmcp import FastMCP
@@ -481,8 +478,7 @@ The `sampling_handler_behavior` parameter controls when the handler is used:
 - **`"always"`**: Always use the handler, bypassing the client entirely. Use this when you need guaranteed control over which LLM processes requests—for cost control, compliance requirements, or when specific model characteristics are essential.
 
 <Note>
-  Sampling with tools requires the client to advertise the `sampling.tools`
-  capability. FastMCP clients do this automatically. For external clients that
-  don't support tool-enabled sampling, configure a fallback handler with
+  Sampling with tools requires the client to advertise the `sampling.tools` capability. FastMCP clients do this
+  automatically. For external clients that don't support tool-enabled sampling, configure a fallback handler with
   `sampling_handler_behavior="always"`.
 </Note>

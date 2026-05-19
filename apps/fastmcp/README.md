@@ -12,7 +12,7 @@
 
 <strong>Move fast and make things.</strong>
 
-*Made with 💙 by [Prefect](https://www.prefect.io/)*
+_Made with 💙 by [Prefect](https://www.prefect.io/)_
 
 [![Docs](https://img.shields.io/badge/docs-gofastmcp.com-blue)](https://gofastmcp.com)
 [![Discord](https://img.shields.io/badge/community-discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/uu8dJCgttd)
@@ -21,6 +21,7 @@
 [![License](https://img.shields.io/github/license/PrefectHQ/fastmcp.svg)](https://github.com/PrefectHQ/fastmcp/blob/main/LICENSE)
 
 <a href="https://trendshift.io/repositories/13266" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13266" alt="prefecthq%2Ffastmcp | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 </div>
 
 ---
@@ -100,6 +101,7 @@ uv pip install fastmcp
 For full installation instructions, including verification and upgrading, see the [**Installation Guide**](https://gofastmcp.com/getting-started/installation).
 
 **Upgrading?** We have guides for:
+
 - [Upgrading from FastMCP v2](https://gofastmcp.com/getting-started/upgrading/from-fastmcp-2)
 - [Upgrading from the MCP Python SDK](https://gofastmcp.com/getting-started/upgrading/from-mcp-sdk)
 - [Upgrading from the low-level SDK](https://gofastmcp.com/getting-started/upgrading/from-low-level-sdk)

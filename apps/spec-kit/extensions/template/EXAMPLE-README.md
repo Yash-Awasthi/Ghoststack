@@ -46,6 +46,7 @@ specify extension add --dev /path/to/my-extension
 
 3. Set required values:
    <!-- CUSTOMIZE: List required configuration -->
+
    ```yaml
    connection:
      url: "https://api.example.com"
@@ -84,17 +85,17 @@ Description of what this command does.
 
 ### Connection Settings
 
-| Setting | Type | Required | Description |
-|---------|------|----------|-------------|
-| `connection.url` | string | Yes | API endpoint URL |
-| `connection.api_key` | string | Yes | API authentication key |
+| Setting              | Type   | Required | Description            |
+| -------------------- | ------ | -------- | ---------------------- |
+| `connection.url`     | string | Yes      | API endpoint URL       |
+| `connection.api_key` | string | Yes      | API authentication key |
 
 ### Project Settings
 
-| Setting | Type | Required | Description |
-|---------|------|----------|-------------|
-| `project.id` | string | Yes | Project identifier |
-| `project.workspace` | string | No | Workspace or organization |
+| Setting             | Type   | Required | Description               |
+| ------------------- | ------ | -------- | ------------------------- |
+| `project.id`        | string | Yes      | Project identifier        |
+| `project.workspace` | string | No       | Workspace or organization |
 
 ## Environment Variables
 
@@ -154,5 +155,5 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
-*Extension Version: 1.0.0*
-*Spec Kit: >=0.1.0*
+_Extension Version: 1.0.0_
+_Spec Kit: >=0.1.0_

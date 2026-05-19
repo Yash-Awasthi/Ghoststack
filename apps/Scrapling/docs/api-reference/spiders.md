@@ -14,29 +14,35 @@ from scrapling.spiders import Spider, Request, CrawlResult, SessionManager, Resp
 ```
 
 ## ::: scrapling.spiders.Spider
+
     handler: python
     :docstring:
 
 ## ::: scrapling.spiders.Request
+
     handler: python
     :docstring:
 
 ## Result Classes
 
 ## ::: scrapling.spiders.result.CrawlResult
+
     handler: python
     :docstring:
 
 ## ::: scrapling.spiders.result.CrawlStats
+
     handler: python
     :docstring:
 
 ## ::: scrapling.spiders.result.ItemList
+
     handler: python
     :docstring:
 
 ## Session Management
 
 ## ::: scrapling.spiders.session.SessionManager
+
     handler: python
     :docstring:

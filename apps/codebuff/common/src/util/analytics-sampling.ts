@@ -38,7 +38,9 @@ function getStringProperty(
   return typeof value === 'string' && value.trim() ? value : undefined
 }
 
-function getPropertyUserId(properties: AnalyticsProperties): string | undefined {
+function getPropertyUserId(
+  properties: AnalyticsProperties,
+): string | undefined {
   const direct =
     getStringProperty(properties, 'userId') ??
     getStringProperty(properties, 'user_id') ??
@@ -91,8 +93,7 @@ export function isFullTelemetryEnabled(params: {
     getStringProperty(params.properties, 'userEmail'),
     getStringProperty(params.properties, 'email'),
   ].filter(
-    (value): value is string =>
-      typeof value === 'string' && value.length > 0,
+    (value): value is string => typeof value === 'string' && value.length > 0,
   )
 
   return candidates.some((candidate) => ids.has(candidate))

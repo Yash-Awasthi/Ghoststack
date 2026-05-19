@@ -7,42 +7,42 @@ Floci Lambda runs your function code locally inside real Docker containers - clo
 
 ## Supported Operations
 
-| Operation | Description |
-|---|---|
-| `CreateFunction` | Deploy a Lambda function |
-| `GetFunction` | Get function details and download URL |
-| `GetFunctionConfiguration` | Get runtime configuration |
-| `ListFunctions` | List all functions |
-| `UpdateFunctionCode` | Upload new code |
-| `UpdateFunctionConfiguration` | Update runtime, handler, memory, timeout, environment, architectures, tracing, layers, and more |
-| `DeleteFunction` | Remove a function |
-| `Invoke` | Invoke a function synchronously or asynchronously |
-| `CreateEventSourceMapping` | Connect SQS / Kinesis / DynamoDB Streams to a function |
-| `GetEventSourceMapping` | Get event source mapping details |
-| `ListEventSourceMappings` | List all event source mappings |
-| `UpdateEventSourceMapping` | Update a mapping |
-| `DeleteEventSourceMapping` | Remove a mapping |
-| `PublishVersion` | Publish an immutable version |
-| `ListVersionsByFunction` | List all published versions of a function |
-| `CreateAlias` | Create a named alias pointing to a version |
-| `GetAlias` | Get alias details |
-| `ListAliases` | List all aliases for a function |
-| `UpdateAlias` | Update an alias |
-| `DeleteAlias` | Delete an alias |
-| `AddPermission` | Add a resource-policy statement |
-| `GetPolicy` | Get the function resource policy |
-| `RemovePermission` | Remove a resource-policy statement |
-| `GetFunctionCodeSigningConfig` | Return code-signing config (always empty) |
-| `CreateFunctionUrlConfig` | Provision a function URL |
-| `GetFunctionUrlConfig` | Read function URL config |
-| `UpdateFunctionUrlConfig` | Update function URL config |
-| `DeleteFunctionUrlConfig` | Delete function URL config |
-| `ListTags` | List tags on a function |
-| `TagResource` | Tag a function |
-| `UntagResource` | Untag a function |
-| `PutFunctionConcurrency` | Set reserved concurrent executions |
-| `GetFunctionConcurrency` | Get reserved concurrent executions |
-| `DeleteFunctionConcurrency` | Clear reserved concurrent executions |
+| Operation                      | Description                                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `CreateFunction`               | Deploy a Lambda function                                                                        |
+| `GetFunction`                  | Get function details and download URL                                                           |
+| `GetFunctionConfiguration`     | Get runtime configuration                                                                       |
+| `ListFunctions`                | List all functions                                                                              |
+| `UpdateFunctionCode`           | Upload new code                                                                                 |
+| `UpdateFunctionConfiguration`  | Update runtime, handler, memory, timeout, environment, architectures, tracing, layers, and more |
+| `DeleteFunction`               | Remove a function                                                                               |
+| `Invoke`                       | Invoke a function synchronously or asynchronously                                               |
+| `CreateEventSourceMapping`     | Connect SQS / Kinesis / DynamoDB Streams to a function                                          |
+| `GetEventSourceMapping`        | Get event source mapping details                                                                |
+| `ListEventSourceMappings`      | List all event source mappings                                                                  |
+| `UpdateEventSourceMapping`     | Update a mapping                                                                                |
+| `DeleteEventSourceMapping`     | Remove a mapping                                                                                |
+| `PublishVersion`               | Publish an immutable version                                                                    |
+| `ListVersionsByFunction`       | List all published versions of a function                                                       |
+| `CreateAlias`                  | Create a named alias pointing to a version                                                      |
+| `GetAlias`                     | Get alias details                                                                               |
+| `ListAliases`                  | List all aliases for a function                                                                 |
+| `UpdateAlias`                  | Update an alias                                                                                 |
+| `DeleteAlias`                  | Delete an alias                                                                                 |
+| `AddPermission`                | Add a resource-policy statement                                                                 |
+| `GetPolicy`                    | Get the function resource policy                                                                |
+| `RemovePermission`             | Remove a resource-policy statement                                                              |
+| `GetFunctionCodeSigningConfig` | Return code-signing config (always empty)                                                       |
+| `CreateFunctionUrlConfig`      | Provision a function URL                                                                        |
+| `GetFunctionUrlConfig`         | Read function URL config                                                                        |
+| `UpdateFunctionUrlConfig`      | Update function URL config                                                                      |
+| `DeleteFunctionUrlConfig`      | Delete function URL config                                                                      |
+| `ListTags`                     | List tags on a function                                                                         |
+| `TagResource`                  | Tag a function                                                                                  |
+| `UntagResource`                | Untag a function                                                                                |
+| `PutFunctionConcurrency`       | Set reserved concurrent executions                                                              |
+| `GetFunctionConcurrency`       | Get reserved concurrent executions                                                              |
+| `DeleteFunctionConcurrency`    | Clear reserved concurrent executions                                                            |
 
 ## Hot-Reloading via Reactive S3 Sync
 
@@ -77,7 +77,7 @@ aws lambda invoke --function-name my-function out.json
 ```
 
 !!! note "Standard Behavior"
-    This mechanism requires no custom configuration or non-standard magic strings. It works with standard AWS SDKs and CLI tools, providing a "live" development feel while staying within the AWS API contract.
+This mechanism requires no custom configuration or non-standard magic strings. It works with standard AWS SDKs and CLI tools, providing a "live" development feel while staying within the AWS API contract.
 
 ## Hot-Reload via Bind Mount
 
@@ -135,26 +135,25 @@ services:
 
 ### Difference from Reactive S3 Sync
 
-| | Reactive S3 Sync | Bind-Mount Hot-Reload |
-|---|---|---|
-| Trigger | Upload a new ZIP to S3 | Edit files on disk |
-| Cold start | Only after upload | Every invocation |
-| Requires upload step | Yes | No |
-| Works without `hot-reload` enabled | Yes | No |
-| Path on host required | No | Yes |
+|                                    | Reactive S3 Sync       | Bind-Mount Hot-Reload |
+| ---------------------------------- | ---------------------- | --------------------- |
+| Trigger                            | Upload a new ZIP to S3 | Edit files on disk    |
+| Cold start                         | Only after upload      | Every invocation      |
+| Requires upload step               | Yes                    | No                    |
+| Works without `hot-reload` enabled | Yes                    | No                    |
+| Path on host required              | No                     | Yes                   |
 
 !!! note "Concurrency enforcement"
-    Reserved concurrency is enforced: invocations beyond the reserved value
-    return `TooManyRequestsException` (HTTP 429). Functions without a reserved
-    value share a **per-region** pool — AWS Lambda's "account-level" limit is
-    in fact a per-account-per-region quota, and Floci mirrors that by
-    partitioning counters on the ARN's region segment. The pool size (default
-    1000) is configurable via `floci.services.lambda.region-concurrency-limit`
-    and applies independently to each region. `PutFunctionConcurrency`
-    validates that the requested value leaves at least
-    `floci.services.lambda.unreserved-concurrency-min` (default 100) available
-    for unreserved functions in that region. `PutProvisionedConcurrencyConfig`
-    and related provisioned-concurrency operations remain unimplemented.
+Reserved concurrency is enforced: invocations beyond the reserved value
+return `TooManyRequestsException` (HTTP 429). Functions without a reserved
+value share a **per-region** pool — AWS Lambda's "account-level" limit is
+in fact a per-account-per-region quota, and Floci mirrors that by
+partitioning counters on the ARN's region segment. The pool size (default 1000) is configurable via `floci.services.lambda.region-concurrency-limit`
+and applies independently to each region. `PutFunctionConcurrency`
+validates that the requested value leaves at least
+`floci.services.lambda.unreserved-concurrency-min` (default 100) available
+for unreserved functions in that region. `PutProvisionedConcurrencyConfig`
+and related provisioned-concurrency operations remain unimplemented.
 
     Reducing or clearing a function's reserved value does not kill
     invocations that are already in flight — this matches AWS, which
@@ -179,21 +178,21 @@ These AWS Lambda operations have no handler in Floci. Calls will return `404` or
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_SERVICES_LAMBDA_ENABLED` | `true` | Enable or disable the service |
-| `FLOCI_SERVICES_LAMBDA_EPHEMERAL` | `false` | Remove containers after each invocation |
-| `FLOCI_SERVICES_LAMBDA_DEFAULT_MEMORY_MB` | `128` | Default function memory (MB) |
-| `FLOCI_SERVICES_LAMBDA_DEFAULT_TIMEOUT_SECONDS` | `3` | Default function timeout (seconds) |
-| `FLOCI_SERVICES_LAMBDA_RUNTIME_API_BASE_PORT` | `9200` | First port in the Lambda Runtime API range |
-| `FLOCI_SERVICES_LAMBDA_RUNTIME_API_MAX_PORT` | `9299` | Last port in the Lambda Runtime API range |
-| `FLOCI_SERVICES_LAMBDA_CODE_PATH` | `./data/lambda-code` | Directory where Lambda ZIP files are stored |
-| `FLOCI_SERVICES_LAMBDA_POLL_INTERVAL_MS` | `1000` | Event-source mapping poll interval (milliseconds) |
-| `FLOCI_SERVICES_LAMBDA_CONTAINER_IDLE_TIMEOUT_SECONDS` | `300` | Idle container shutdown timeout (seconds) |
-| `FLOCI_SERVICES_LAMBDA_REGION_CONCURRENCY_LIMIT` | `1000` | Maximum concurrent executions per region |
-| `FLOCI_SERVICES_LAMBDA_UNRESERVED_CONCURRENCY_MIN` | `100` | Minimum unreserved capacity `PutFunctionConcurrency` must leave |
-| `FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ENABLED` | `false` | Enable bind-mount hot-reload via `S3Bucket=hot-reload` |
-| `FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ALLOWED_PATHS` | *(unset)* | Comma-separated allowlist of host paths that may be bind-mounted |
+| Variable                                               | Default              | Description                                                      |
+| ------------------------------------------------------ | -------------------- | ---------------------------------------------------------------- |
+| `FLOCI_SERVICES_LAMBDA_ENABLED`                        | `true`               | Enable or disable the service                                    |
+| `FLOCI_SERVICES_LAMBDA_EPHEMERAL`                      | `false`              | Remove containers after each invocation                          |
+| `FLOCI_SERVICES_LAMBDA_DEFAULT_MEMORY_MB`              | `128`                | Default function memory (MB)                                     |
+| `FLOCI_SERVICES_LAMBDA_DEFAULT_TIMEOUT_SECONDS`        | `3`                  | Default function timeout (seconds)                               |
+| `FLOCI_SERVICES_LAMBDA_RUNTIME_API_BASE_PORT`          | `9200`               | First port in the Lambda Runtime API range                       |
+| `FLOCI_SERVICES_LAMBDA_RUNTIME_API_MAX_PORT`           | `9299`               | Last port in the Lambda Runtime API range                        |
+| `FLOCI_SERVICES_LAMBDA_CODE_PATH`                      | `./data/lambda-code` | Directory where Lambda ZIP files are stored                      |
+| `FLOCI_SERVICES_LAMBDA_POLL_INTERVAL_MS`               | `1000`               | Event-source mapping poll interval (milliseconds)                |
+| `FLOCI_SERVICES_LAMBDA_CONTAINER_IDLE_TIMEOUT_SECONDS` | `300`                | Idle container shutdown timeout (seconds)                        |
+| `FLOCI_SERVICES_LAMBDA_REGION_CONCURRENCY_LIMIT`       | `1000`               | Maximum concurrent executions per region                         |
+| `FLOCI_SERVICES_LAMBDA_UNRESERVED_CONCURRENCY_MIN`     | `100`                | Minimum unreserved capacity `PutFunctionConcurrency` must leave  |
+| `FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ENABLED`             | `false`              | Enable bind-mount hot-reload via `S3Bucket=hot-reload`           |
+| `FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ALLOWED_PATHS`       | _(unset)_            | Comma-separated allowlist of host paths that may be bind-mounted |
 
 ### Docker socket requirement
 
@@ -230,22 +229,22 @@ No extra configuration or `cap_add` is needed — Docker containers have
 non-root user) can bind UDP/53 without any changes to your Compose file.
 
 !!! tip "Docker Compose service names"
-    If Floci runs as a Docker Compose service, set `FLOCI_HOSTNAME` to the
-    service name, for example `FLOCI_HOSTNAME=floci`. When no explicit Lambda
-    Docker network is configured, Floci automatically attaches Lambda
-    containers to the current Compose network. Floci then injects
-    `AWS_ENDPOINT_URL=http://floci:4566` into Lambda containers and returns
-    SQS `QueueUrl` values with the same reachable host.
+If Floci runs as a Docker Compose service, set `FLOCI_HOSTNAME` to the
+service name, for example `FLOCI_HOSTNAME=floci`. When no explicit Lambda
+Docker network is configured, Floci automatically attaches Lambda
+containers to the current Compose network. Floci then injects
+`AWS_ENDPOINT_URL=http://floci:4566` into Lambda containers and returns
+SQS `QueueUrl` values with the same reachable host.
 
     This avoids function-side rewrites from `localhost` or `localhost.floci.io`
     to `floci`, and keeps normal AWS SDK clients pointed at the Docker DNS name
     that the Lambda container can resolve.
 
 !!! note "Path-style as a workaround"
-    If you cannot use virtual-hosted-style (e.g. Floci is running natively on
-    the host, not in Docker), configure the SDK client with
-    `forcePathStyle: true` / `s3ForcePathStyle: true`. Requests will go to
-    `http://localhost:4566/my-bucket/key` instead and work without DNS.
+If you cannot use virtual-hosted-style (e.g. Floci is running natively on
+the host, not in Docker), configure the SDK client with
+`forcePathStyle: true` / `s3ForcePathStyle: true`. Requests will go to
+`http://localhost:4566/my-bucket/key` instead and work without DNS.
 
 #### Migrating from LocalStack
 
@@ -288,7 +287,7 @@ When `aws-config-path` is set:
 When unset (default), Floci reads credentials from its own environment and falls back to `test`/`test`/`test`.
 
 !!! tip "Routing specific services to real AWS"
-    To keep some services on Floci while others hit real AWS, clear the global endpoint and set service-specific overrides in your function's `--environment`:
+To keep some services on Floci while others hit real AWS, clear the global endpoint and set service-specific overrides in your function's `--environment`:
 
     ```
     AWS_ENDPOINT_URL=                                          # clear Floci's global endpoint
@@ -299,7 +298,7 @@ When unset (default), Floci reads credentials from its own environment and falls
     The AWS SDK supports `AWS_ENDPOINT_URL_<SERVICE>` natively. Services without an override will use real AWS endpoints.
 
 !!! note "Credential passthrough without mounting"
-    If you don't need the full `~/.aws` directory (e.g., you only have static credentials), you can pass them to Floci's environment directly. When `aws-config-path` is unset, Floci forwards its own `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` env vars into Lambda containers:
+If you don't need the full `~/.aws` directory (e.g., you only have static credentials), you can pass them to Floci's environment directly. When `aws-config-path` is unset, Floci forwards its own `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` env vars into Lambda containers:
 
     ```yaml
     environment:
@@ -403,11 +402,11 @@ source (Kinesis / DynamoDB Streams) is also rejected — those services
 use `ParallelizationFactor` instead, which is a separate field.
 
 !!! note "Enforcement status"
-    The configured `MaximumConcurrency` is persisted and returned on the
-    wire, but the SQS poller does not yet cap concurrent invocations at
-    this value (the poller today serializes invocations per ESM to one
-    at a time regardless). Real parallel dispatch capped by
-    `MaximumConcurrency` is tracked as a follow-up.
+The configured `MaximumConcurrency` is persisted and returned on the
+wire, but the SQS poller does not yet cap concurrent invocations at
+this value (the poller today serializes invocations per ESM to one
+at a time regardless). Real parallel dispatch capped by
+`MaximumConcurrency` is tracked as a follow-up.
 
 ## Supported Runtimes
 

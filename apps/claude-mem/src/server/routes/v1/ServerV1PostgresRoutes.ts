@@ -1484,9 +1484,7 @@ export class ServerV1PostgresRoutes implements RouteHandler {
 
   // Phase 12 — pick the right queue lane for a given source_type so retries
   // and cancels can publish to the same lane the original ingest used.
-  private resolveEventQueueForRetry(row: {
-    source_type: string;
-  }): {
+  private resolveEventQueueForRetry(row: { source_type: string }): {
     add: (jobId: string, payload: unknown, options?: unknown) => Promise<unknown>;
     remove: (jobId: string) => Promise<void>;
   } | null {

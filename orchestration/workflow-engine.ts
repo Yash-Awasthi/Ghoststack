@@ -1,4 +1,4 @@
-import { Task } from './task-router';
+import { Task } from "./task-router";
 import {
   IWorkflowDefinition,
   IWorkflowExecution,
@@ -8,14 +8,17 @@ import {
   IWorkflowReplay,
   IWorkflowApprovalPolicy,
   IWorkflowConstraint
-} from './interfaces/workflow.interface';
-import { GhostStackOrchestrator } from '../runtime/orchestrator';
-import { IRuntimePersistence } from './interfaces/persistence.interface';
-import { IApprovalWorkflow } from './interfaces/governance.interface';
+} from "./interfaces/workflow.interface";
+import { GhostStackOrchestrator } from "../runtime/orchestrator";
+import { IRuntimePersistence } from "./interfaces/persistence.interface";
+import { IApprovalWorkflow } from "./interfaces/governance.interface";
 
 // 1. Generic Workflow Constraint Implementation
 export class WorkflowConstraint implements IWorkflowConstraint {
-  constructor(public name: string, private checker: (tasks: Task[]) => Promise<{ allowed: boolean; reason?: string }>) {}
+  constructor(
+    public name: string,
+    private checker: (tasks: Task[]) => Promise<{ allowed: boolean; reason?: string }>
+  ) {}
   async evaluate(tasks: Task[]): Promise<{ allowed: boolean; reason?: string }> {
     return this.checker(tasks);
   }
@@ -23,7 +26,10 @@ export class WorkflowConstraint implements IWorkflowConstraint {
 
 // 2. Generic Workflow Approval Policy Implementation
 export class WorkflowApprovalPolicy implements IWorkflowApprovalPolicy {
-  constructor(public workflowName: string, private decider: (tasks: Task[]) => Promise<boolean>) {}
+  constructor(
+    public workflowName: string,
+    private decider: (tasks: Task[]) => Promise<boolean>
+  ) {}
   async requiresApproval(tasks: Task[]): Promise<boolean> {
     return this.decider(tasks);
   }
@@ -85,12 +91,12 @@ export class WorkflowTelemetry implements IWorkflowTelemetry {
   }
 
   recordExecutionStart(executionId: string, workflowId: string): void {
-    const existing = this.memoryLogs.find(e => e.id === executionId);
+    const existing = this.memoryLogs.find((e) => e.id === executionId);
     if (!existing) {
       this.memoryLogs.push({
         id: executionId,
         workflowId,
-        status: 'pending',
+        status: "pending",
         taskResults: {},
         startedAt: new Date()
       });
@@ -99,9 +105,9 @@ export class WorkflowTelemetry implements IWorkflowTelemetry {
   }
 
   recordExecutionSuccess(executionId: string, results: Record<string, any>): void {
-    const record = this.memoryLogs.find(e => e.id === executionId);
+    const record = this.memoryLogs.find((e) => e.id === executionId);
     if (record) {
-      record.status = 'succeeded';
+      record.status = "succeeded";
       record.taskResults = results;
       record.completedAt = new Date();
       this.sync();
@@ -109,9 +115,9 @@ export class WorkflowTelemetry implements IWorkflowTelemetry {
   }
 
   recordExecutionFailure(executionId: string, error: string): void {
-    const record = this.memoryLogs.find(e => e.id === executionId);
+    const record = this.memoryLogs.find((e) => e.id === executionId);
     if (record) {
-      record.status = 'failed';
+      record.status = "failed";
       record.error = error;
       record.completedAt = new Date();
       this.sync();
@@ -119,11 +125,11 @@ export class WorkflowTelemetry implements IWorkflowTelemetry {
   }
 
   recordApprovalDecision(executionId: string, approved: boolean): void {
-    const record = this.memoryLogs.find(e => e.id === executionId);
+    const record = this.memoryLogs.find((e) => e.id === executionId);
     if (record) {
       record.approved = approved;
       if (!approved) {
-        record.status = 'rejected';
+        record.status = "rejected";
       }
       this.sync();
     }
@@ -161,7 +167,7 @@ export class WorkflowEngine implements IWorkflowReplay {
           return {
             id: executionId,
             workflowId,
-            status: 'failed',
+            status: "failed",
             taskResults: {},
             startedAt: new Date(),
             completedAt: new Date(),
@@ -186,7 +192,7 @@ export class WorkflowEngine implements IWorkflowReplay {
       return {
         id: executionId,
         workflowId,
-        status: 'pending',
+        status: "pending",
         taskResults: {},
         startedAt: new Date(),
         approved: false
@@ -199,7 +205,7 @@ export class WorkflowEngine implements IWorkflowReplay {
     // 3. Submit and Drive Execution using GhostStack Orchestrator
     try {
       await this.orchestrator.submitAndExecuteTasks(def.tasks);
-      
+
       const results: Record<string, any> = {};
       for (const t of def.tasks) {
         results[t.id] = { status: "completed" };
@@ -209,7 +215,7 @@ export class WorkflowEngine implements IWorkflowReplay {
       return {
         id: executionId,
         workflowId,
-        status: 'succeeded',
+        status: "succeeded",
         taskResults: results,
         startedAt: new Date(),
         completedAt: new Date(),
@@ -221,7 +227,7 @@ export class WorkflowEngine implements IWorkflowReplay {
       return {
         id: executionId,
         workflowId,
-        status: 'failed',
+        status: "failed",
         taskResults: {},
         startedAt: new Date(),
         completedAt: new Date(),
@@ -242,7 +248,7 @@ export class WorkflowEngine implements IWorkflowReplay {
     }
 
     const history = this.telemetry.getExecutionHistory();
-    const record = history.find(h => h.id === executionId);
+    const record = history.find((h) => h.id === executionId);
     if (!record) {
       throw new Error(`Execution record ${executionId} not found.`);
     }
@@ -256,7 +262,7 @@ export class WorkflowEngine implements IWorkflowReplay {
 
     try {
       await this.orchestrator.submitAndExecuteTasks(def.tasks);
-      
+
       const results: Record<string, any> = {};
       for (const t of def.tasks) {
         results[t.id] = { status: "completed" };
@@ -266,7 +272,7 @@ export class WorkflowEngine implements IWorkflowReplay {
       return {
         id: executionId,
         workflowId: record.workflowId,
-        status: 'succeeded',
+        status: "succeeded",
         taskResults: results,
         startedAt: record.startedAt,
         completedAt: new Date(),
@@ -278,7 +284,7 @@ export class WorkflowEngine implements IWorkflowReplay {
       return {
         id: executionId,
         workflowId: record.workflowId,
-        status: 'failed',
+        status: "failed",
         taskResults: {},
         startedAt: record.startedAt,
         completedAt: new Date(),
@@ -290,7 +296,7 @@ export class WorkflowEngine implements IWorkflowReplay {
 
   async replayExecution(executionId: string): Promise<IWorkflowExecution> {
     const history = this.telemetry.getExecutionHistory();
-    const record = history.find(h => h.id === executionId);
+    const record = history.find((h) => h.id === executionId);
     if (!record) {
       throw new Error(`Execution record ${executionId} not found to replay.`);
     }
@@ -331,14 +337,17 @@ export class BrowserResearchWorkflowTemplate implements IWorkflowTemplate {
           dependencies: [`${params.id || "browser-research-wf"}-nav-task`]
         }
       ],
-      approvalPolicy: new WorkflowApprovalPolicy(this.name, async (tasks) => {
+      approvalPolicy: new WorkflowApprovalPolicy(this.name, async (_tasks) => {
         // Enforce approval if browser requests bypass secure sites or use large quotas
         return limitBytes > 10000;
       }),
       constraints: [
         new WorkflowConstraint("Path Restriction Gate", async (tasks) => {
-          const hasIllegalPaths = tasks.some(t => t.description.includes("illegal") || t.id.includes("passwd"));
-          return { allowed: !hasIllegalPaths, reason: hasIllegalPaths ? "Illegal system file path protocol blocked" : undefined };
+          const hasIllegalPaths = tasks.some((t) => t.description.includes("illegal") || t.id.includes("passwd"));
+          return {
+            allowed: !hasIllegalPaths,
+            reason: hasIllegalPaths ? "Illegal system file path protocol blocked" : undefined
+          };
         })
       ]
     };
@@ -418,7 +427,10 @@ export class DocumentProcessingTemplate implements IWorkflowTemplate {
       constraints: [
         new WorkflowConstraint("Sandbox Size Limit Gate", async () => {
           const limitBytes = params.limitBytes || 50000;
-          return { allowed: limitBytes < 1000000, reason: limitBytes >= 1000000 ? "Size exceeds sandboxed quota limit" : undefined };
+          return {
+            allowed: limitBytes < 1000000,
+            reason: limitBytes >= 1000000 ? "Size exceeds sandboxed quota limit" : undefined
+          };
         })
       ]
     };

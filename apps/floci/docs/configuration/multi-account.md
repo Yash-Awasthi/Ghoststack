@@ -18,7 +18,7 @@ Authorization: AWS4-HMAC-SHA256 Credential=111111111111/20260510/us-east-1/sqs/a
 Once the account ID is determined, every storage read and write is transparently namespaced under it. An SQS queue named `orders` created by account `111111111111` is stored and retrieved as `111111111111/orders` — completely separate from the same queue name under account `222222222222`.
 
 !!! note "Same convention as LocalStack"
-    This 12-digit AKID → account ID rule matches LocalStack's multi-account behavior, so existing multi-account test setups work without changes.
+This 12-digit AKID → account ID rule matches LocalStack's multi-account behavior, so existing multi-account test setups work without changes.
 
 ## Default Behavior (Single Account)
 
@@ -153,8 +153,8 @@ Storage keys are namespaced per account at the persistence layer. When using `pe
 
 ## Configuration Reference
 
-| Variable | Default | Description |
-|---|---|---|
-| `FLOCI_DEFAULT_ACCOUNT_ID` | `000000000000` | Account ID used when the AKID is not exactly 12 digits |
-| `FLOCI_DEFAULT_REGION` | `us-east-1` | Region used when not derivable from the `Authorization` header |
-| `FLOCI_AUTH_VALIDATE_SIGNATURES` | `false` | Enforce SigV4 signature verification |
+| Variable                         | Default        | Description                                                    |
+| -------------------------------- | -------------- | -------------------------------------------------------------- |
+| `FLOCI_DEFAULT_ACCOUNT_ID`       | `000000000000` | Account ID used when the AKID is not exactly 12 digits         |
+| `FLOCI_DEFAULT_REGION`           | `us-east-1`    | Region used when not derivable from the `Authorization` header |
+| `FLOCI_AUTH_VALIDATE_SIGNATURES` | `false`        | Enforce SigV4 signature verification                           |

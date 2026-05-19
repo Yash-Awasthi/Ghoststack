@@ -99,8 +99,7 @@ function createOpenRouterRequest(params: {
  * See: investigation notes + scripts/refund-openrouter-overcharge.ts
  */
 export function extractUsageAndCost(usage: any): UsageData {
-  const openRouterCost =
-    typeof usage?.cost === 'number' ? usage.cost : 0
+  const openRouterCost = typeof usage?.cost === 'number' ? usage.cost : 0
   const upstreamCost =
     typeof usage?.cost_details?.upstream_inference_cost === 'number'
       ? usage.cost_details.upstream_inference_cost
@@ -119,7 +118,10 @@ function extractRequestMetadataWithN(params: {
   logger: Logger
 }) {
   const { body, logger } = params
-  const { clientId, clientRequestId, costMode } = extractRequestMetadata({ body, logger })
+  const { clientId, clientRequestId, costMode } = extractRequestMetadata({
+    body,
+    logger,
+  })
   const typedBody = body as ChatCompletionRequestBody | undefined
   const n = typedBody?.codebuff_metadata?.n
   return { clientId, clientRequestId, costMode, ...(n && { n }) }
@@ -151,10 +153,11 @@ export async function handleOpenRouterNonStream({
   body.usage.include = true
 
   const startTime = new Date()
-  const { clientId, clientRequestId, costMode, n } = extractRequestMetadataWithN({
-    body,
-    logger,
-  })
+  const { clientId, clientRequestId, costMode, n } =
+    extractRequestMetadataWithN({
+      body,
+      logger,
+    })
   const auditRequest = createRequestAuditRecord(body)
   const byok = openrouterApiKey !== null
 
@@ -338,7 +341,10 @@ export async function handleOpenRouterStream({
   body.usage.include = true
 
   const startTime = new Date()
-  const { clientId, clientRequestId, costMode } = extractRequestMetadata({ body, logger })
+  const { clientId, clientRequestId, costMode } = extractRequestMetadata({
+    body,
+    logger,
+  })
   const auditRequest = createRequestAuditRecord(body)
 
   const byok = openrouterApiKey !== null
@@ -462,9 +468,13 @@ export async function handleOpenRouterStream({
             if (!clientDisconnected) {
               try {
                 // Overwrite cost in final chunk so SDK calculates exact credits we charged
-                const lineToSend = lineResult.billedCredits !== undefined
-                  ? overwriteCostWithBilledCredits(line, lineResult.billedCredits)
-                  : line
+                const lineToSend =
+                  lineResult.billedCredits !== undefined
+                    ? overwriteCostWithBilledCredits(
+                        line,
+                        lineResult.billedCredits,
+                      )
+                    : line
                 controller.enqueue(new TextEncoder().encode(lineToSend))
               } catch (error) {
                 logger.warn(
@@ -771,10 +781,17 @@ async function handleStreamChunk({
   const choice = data.choices[0]
 
   // Track time to first token (TTFT) - set on first meaningful delta (content, reasoning, or tool_calls)
-  const hasContentDelta = choice?.delta?.content != null && choice?.delta?.content !== ''
-  const hasReasoningDelta = choice?.delta?.reasoning != null && choice?.delta?.reasoning !== ''
-  const hasToolCallsDelta = choice?.delta?.tool_calls != null && (choice?.delta?.tool_calls as unknown[])?.length > 0
-  if (state.ttftMs === null && (hasContentDelta || hasReasoningDelta || hasToolCallsDelta)) {
+  const hasContentDelta =
+    choice?.delta?.content != null && choice?.delta?.content !== ''
+  const hasReasoningDelta =
+    choice?.delta?.reasoning != null && choice?.delta?.reasoning !== ''
+  const hasToolCallsDelta =
+    choice?.delta?.tool_calls != null &&
+    (choice?.delta?.tool_calls as unknown[])?.length > 0
+  if (
+    state.ttftMs === null &&
+    (hasContentDelta || hasReasoningDelta || hasToolCallsDelta)
+  ) {
     state.ttftMs = Date.now() - startTime.getTime()
   }
 
@@ -1082,7 +1099,10 @@ async function fallbackBillFromGeneration(params: {
  * This ensures the SDK calculates the exact credits value we stored in the database,
  * making the server the single source of truth for credit tracking.
  */
-function overwriteCostWithBilledCredits(line: string, billedCredits: number): string {
+function overwriteCostWithBilledCredits(
+  line: string,
+  billedCredits: number,
+): string {
   if (!line.startsWith('data: ')) {
     return line
   }

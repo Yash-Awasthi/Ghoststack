@@ -1,4 +1,4 @@
-import { IQueueBackend, QueueJob } from './interfaces/queue.interface';
+import { IQueueBackend, QueueJob } from "./interfaces/queue.interface";
 
 export class MemoryQueueBackend implements IQueueBackend {
   private activeQueue: QueueJob[] = [];
@@ -35,8 +35,8 @@ export class MemoryQueueBackend implements IQueueBackend {
     return this.activeQueue.shift();
   }
 
-  async moveToDeadLetter(job: QueueJob, error: string): Promise<void> {
-    this.activeQueue = this.activeQueue.filter(j => j.id !== job.id);
+  async moveToDeadLetter(job: QueueJob, _error: string): Promise<void> {
+    this.activeQueue = this.activeQueue.filter((j) => j.id !== job.id);
     this.deadLetterQueue.push(job);
   }
 

@@ -1,7 +1,7 @@
-import { IFilesystemSandbox, ISandboxConstraint } from './interfaces/environment.interface';
-import { isSafeSandboxPath } from './security-utils';
-import * as fs from 'fs';
-import * as path from 'path';
+import { IFilesystemSandbox, ISandboxConstraint } from "./interfaces/environment.interface";
+import { isSafeSandboxPath } from "./security-utils";
+import * as fs from "fs";
+import * as path from "path";
 
 export class SandboxConstraint implements ISandboxConstraint {
   constructor(
@@ -46,7 +46,7 @@ export class FilesystemSandbox implements IFilesystemSandbox {
 
   async writeFile(filePath: string, content: string): Promise<void> {
     const targetFile = path.resolve(filePath);
-    const contentSize = Buffer.byteLength(content, 'utf8');
+    const contentSize = Buffer.byteLength(content, "utf8");
 
     if (!this.constraint.validateWrite(targetFile, contentSize, this.totalBytesWritten)) {
       throw new Error(`Sandbox Write violation: Path isolation constraint or capacity ceiling overrun: ${targetFile}`);
@@ -57,7 +57,7 @@ export class FilesystemSandbox implements IFilesystemSandbox {
       fs.mkdirSync(parentDir, { recursive: true });
     }
 
-    fs.writeFileSync(targetFile, content, 'utf8');
+    fs.writeFileSync(targetFile, content, "utf8");
     this.writeLog.push({
       timestamp: new Date(),
       file: targetFile,
@@ -74,7 +74,7 @@ export class FilesystemSandbox implements IFilesystemSandbox {
     if (!fs.existsSync(targetFile)) {
       throw new Error(`File not found: ${targetFile}`);
     }
-    return fs.readFileSync(targetFile, 'utf8');
+    return fs.readFileSync(targetFile, "utf8");
   }
 
   async deleteFile(filePath: string): Promise<void> {

@@ -1,6 +1,6 @@
 export interface ServiceHeartbeat {
   name: string;
-  status: 'healthy' | 'unhealthy' | 'offline';
+  status: "healthy" | "unhealthy" | "offline";
   lastCheck: Date;
   details?: any;
 }

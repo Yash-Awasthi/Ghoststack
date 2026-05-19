@@ -1,5 +1,5 @@
-import { URL } from 'url';
-import * as path from 'path';
+import { URL } from "url";
+import * as path from "path";
 
 /**
  * Checks if a URL is safe to load, preventing path traversal, loopback access,
@@ -9,9 +9,9 @@ export function isSafeUrl(urlStr: string): boolean {
   try {
     const parsed = new URL(urlStr);
     const protocol = parsed.protocol.toLowerCase();
-    
+
     // 1. Strict Protocol Allowlist
-    if (protocol !== 'http:' && protocol !== 'https:') {
+    if (protocol !== "http:" && protocol !== "https:") {
       return false;
     }
 
@@ -19,13 +19,13 @@ export function isSafeUrl(urlStr: string): boolean {
 
     // 2. Block Localhost, Loopbacks, Metadata services, and DNS Rebinding targets
     const forbiddenHosts = new Set([
-      'localhost',
-      '127.0.0.1',
-      '[::1]',
-      '169.254.169.254',
-      'metadata.google.internal',
-      'metadata',
-      'instance-data'
+      "localhost",
+      "127.0.0.1",
+      "[::1]",
+      "169.254.169.254",
+      "metadata.google.internal",
+      "metadata",
+      "instance-data"
     ]);
 
     if (forbiddenHosts.has(host)) {
@@ -33,7 +33,12 @@ export function isSafeUrl(urlStr: string): boolean {
     }
 
     // Block subnet ranges, internal mappings
-    if (host.includes('169.254.169.254') || host.startsWith('127.') || host.startsWith('10.') || host.startsWith('192.168.')) {
+    if (
+      host.includes("169.254.169.254") ||
+      host.startsWith("127.") ||
+      host.startsWith("10.") ||
+      host.startsWith("192.168.")
+    ) {
       return false;
     }
 

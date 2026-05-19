@@ -16,6 +16,7 @@ Spec Kit provides two catalog files with different purposes:
 - **Customization**: Copy entries from the community catalog into your org catalog, or add your own extensions directly
 
 **Example override:**
+
 ```bash
 # Override the default upstream catalog with your organization's catalog
 export SPECKIT_CATALOG_URL="https://your-org.com/spec-kit/catalog.json"
@@ -80,7 +81,6 @@ See the [Community Extensions](../README.md#-community-extensions) section in th
 
 For the raw catalog data, see [`catalog.community.json`](catalog.community.json).
 
-
 ## Adding Your Extension
 
 ### Submission Process
@@ -106,6 +106,7 @@ Before submitting, ensure:
 - ✅ All commands working as documented
 
 ## Installing Extensions
+
 Once extensions are available (either in your catalog or via direct URL), install them:
 
 ```bash

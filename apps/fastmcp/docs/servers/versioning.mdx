@@ -6,7 +6,7 @@ icon: code-branch
 tag: NEW
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="3.0.0" />
 
@@ -60,7 +60,10 @@ VersionFilter(version_gte="2.0", version_lt="3.0")
 ```
 
 <Note>
-**Unversioned components are exempt from version filtering by default.** Set `include_unversioned=False` to exclude them. Including them by default ensures that adding version filtering to a server with mixed versioned and unversioned components doesn't accidentally hide the unversioned ones. To prevent confusion, FastMCP forbids mixing versioned and unversioned components with the same name.
+  **Unversioned components are exempt from version filtering by default.** Set `include_unversioned=False` to exclude
+  them. Including them by default ensures that adding version filtering to a server with mixed versioned and unversioned
+  components doesn't accidentally hide the unversioned ones. To prevent confusion, FastMCP forbids mixing versioned and
+  unversioned components with the same name.
 </Note>
 
 ### Filtering Mounted Servers
@@ -234,6 +237,7 @@ For generic MCP clients that don't have built-in version support, pass the versi
   }
 }
 ```
+
 </CodeGroup>
 
 The `_meta` field is part of the MCP request params, not arguments, so your component implementation never sees it. This convention allows version selection to work across any MCP client without requiring protocol changes. The FastMCP client handles this automatically when you pass the `version` parameter.

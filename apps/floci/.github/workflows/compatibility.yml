@@ -3,11 +3,11 @@ name: Compatibility Tests
 on:
   pull_request:
     paths:
-      - 'src/**'
-      - 'pom.xml'
-      - 'docker/Dockerfile.jvm-package'
-      - 'compatibility-tests/**'
-      - '.github/workflows/compatibility.yml'
+      - "src/**"
+      - "pom.xml"
+      - "docker/Dockerfile.jvm-package"
+      - "compatibility-tests/**"
+      - ".github/workflows/compatibility.yml"
 
 permissions:
   contents: read
@@ -26,8 +26,8 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          java-version: '25'
-          distribution: 'temurin'
+          java-version: "25"
+          distribution: "temurin"
           cache: maven
 
       - name: Build JVM artifact

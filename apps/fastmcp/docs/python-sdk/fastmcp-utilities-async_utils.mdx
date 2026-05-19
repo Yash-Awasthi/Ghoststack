@@ -5,7 +5,6 @@ sidebarTitle: async_utils
 
 # `fastmcp.utilities.async_utils`
 
-
 Async utilities for FastMCP.
 
 ## Functions
@@ -16,13 +15,11 @@ Async utilities for FastMCP.
 is_coroutine_function(fn: Any) -> bool
 ```
 
-
 Check if a callable is a coroutine function, unwrapping functools.partial.
 
-``inspect.iscoroutinefunction`` returns ``False`` for
-``functools.partial`` objects wrapping an async function on Python < 3.12.
-This helper unwraps any layers of ``partial`` before checking.
-
+`inspect.iscoroutinefunction` returns `False` for
+`functools.partial` objects wrapping an async function on Python < 3.12.
+This helper unwraps any layers of `partial` before checking.
 
 ### `call_sync_fn_in_threadpool` <sup><a href="https://github.com/PrefectHQ/fastmcp/blob/main/fastmcp_slim/fastmcp/utilities/async_utils.py#L26" target="_blank"><Icon icon="github" style="width: 14px; height: 14px;" /></a></sup>
 
@@ -30,12 +27,10 @@ This helper unwraps any layers of ``partial`` before checking.
 call_sync_fn_in_threadpool(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
 ```
 
-
 Call a sync function in a threadpool to avoid blocking the event loop.
 
 Uses anyio.to_thread.run_sync which properly propagates contextvars,
 making this safe for functions that depend on context (like dependency injection).
-
 
 ### `gather` <sup><a href="https://github.com/PrefectHQ/fastmcp/blob/main/fastmcp_slim/fastmcp/utilities/async_utils.py#L51" target="_blank"><Icon icon="github" style="width: 14px; height: 14px;" /></a></sup>
 
@@ -43,16 +38,16 @@ making this safe for functions that depend on context (like dependency injection
 gather(*awaitables: Awaitable[T]) -> list[T] | list[T | BaseException]
 ```
 
-
 Run awaitables concurrently and return results in order.
 
 Uses anyio TaskGroup for structured concurrency.
 
 **Args:**
+
 - `*awaitables`: Awaitables to run concurrently
 - `return_exceptions`: If True, exceptions are returned in results.
-              If False, first exception cancels all and raises.
+  If False, first exception cancels all and raises.
 
 **Returns:**
-- List of results in the same order as input awaitables.
 
+- List of results in the same order as input awaitables.

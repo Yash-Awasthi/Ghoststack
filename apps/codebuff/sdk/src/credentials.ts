@@ -115,7 +115,9 @@ export const getChatGptOAuthCredentials = (
   if (fs.existsSync(credentialsPath)) {
     try {
       const credentialsFile = fs.readFileSync(credentialsPath, 'utf8')
-      const parsed = credentialsFileSchema.safeParse(JSON.parse(credentialsFile))
+      const parsed = credentialsFileSchema.safeParse(
+        JSON.parse(credentialsFile),
+      )
       if (parsed.success && parsed.data.chatgptOAuth) {
         return parsed.data.chatgptOAuth
       }
@@ -208,7 +210,9 @@ export const refreshChatGptOAuthToken = async (
       })
 
       if (!response.ok) {
-        console.debug(`ChatGPT OAuth token refresh failed (status ${response.status})`)
+        console.debug(
+          `ChatGPT OAuth token refresh failed (status ${response.status})`,
+        )
         return null
       }
 
@@ -223,7 +227,9 @@ export const refreshChatGptOAuthToken = async (
       }
 
       const expiresIn =
-        typeof data.expires_in === 'number' ? data.expires_in * 1000 : 3600 * 1000
+        typeof data.expires_in === 'number'
+          ? data.expires_in * 1000
+          : 3600 * 1000
 
       const newCredentials: ChatGptOAuthCredentials = {
         accessToken: data.access_token,
@@ -236,7 +242,10 @@ export const refreshChatGptOAuthToken = async (
 
       return newCredentials
     } catch (error) {
-      console.debug('ChatGPT OAuth token refresh failed:', error instanceof Error ? error.message : String(error))
+      console.debug(
+        'ChatGPT OAuth token refresh failed:',
+        error instanceof Error ? error.message : String(error),
+      )
       return null
     } finally {
       chatGptRefreshPromise = null

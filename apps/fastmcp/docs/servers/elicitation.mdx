@@ -5,7 +5,7 @@ description: Request structured input from users during tool execution through t
 icon: message-question
 ---
 
-import { VersionBadge } from '/snippets/version-badge.mdx'
+import { VersionBadge } from "/snippets/version-badge.mdx";
 
 <VersionBadge version="2.10.0" />
 
@@ -54,11 +54,11 @@ async def collect_user_info(ctx: Context) -> str:
 
 The elicitation result contains an `action` field indicating how the user responded:
 
-| Action | Description |
-|--------|-------------|
-| `accept` | User provided valid input—data is available in the `data` field |
-| `decline` | User chose not to provide the requested information |
-| `cancel` | User cancelled the entire operation |
+| Action    | Description                                                     |
+| --------- | --------------------------------------------------------------- |
+| `accept`  | User provided valid input—data is available in the `data` field |
+| `decline` | User chose not to provide the requested information             |
+| `cancel`  | User cancelled the entire operation                             |
 
 FastMCP also provides typed result classes for pattern matching:
 
@@ -135,7 +135,8 @@ async def get_user_name(ctx: Context) -> str:
     if result.action == "accept":
         return f"Hello, {result.data}!"
     return "No name provided"
-```
+
+````
 ```python title="Integer"
 @mcp.tool
 async def pick_a_number(ctx: Context) -> str:
@@ -144,7 +145,8 @@ async def pick_a_number(ctx: Context) -> str:
     if result.action == "accept":
         return f"You picked {result.data}"
     return "No number provided"
-```
+````
+
 ```python title="Boolean"
 @mcp.tool
 async def pick_a_boolean(ctx: Context) -> str:
@@ -154,6 +156,7 @@ async def pick_a_boolean(ctx: Context) -> str:
         return f"You picked {result.data}"
     return "No boolean provided"
 ```
+
 </CodeGroup>
 
 #### Customizing the Field Label
@@ -208,7 +211,8 @@ async def set_priority(ctx: Context) -> str:
 
     if result.action == "accept":
         return f"Priority set to: {result.data}"
-```
+
+````
 ```python title="Literal type"
 from typing import Literal
 
@@ -222,7 +226,8 @@ async def set_priority(ctx: Context) -> str:
     if result.action == "accept":
         return f"Priority set to: {result.data}"
     return "No priority set"
-```
+````
+
 ```python title="Python enum"
 from enum import Enum
 
@@ -239,6 +244,7 @@ async def set_priority(ctx: Context) -> str:
         return f"Priority set to: {result.data.value}"
     return "No priority set"
 ```
+
 </CodeGroup>
 
 ### Multi-Select
@@ -259,7 +265,8 @@ async def select_tags(ctx: Context) -> str:
     if result.action == "accept":
         tags = result.data
         return f"Selected tags: {', '.join(tags)}"
-```
+
+````
 ```python title="list[Enum] type"
 from enum import Enum
 
@@ -277,7 +284,8 @@ async def select_tags(ctx: Context) -> str:
     if result.action == "accept":
         tags = [tag.value for tag in result.data]
         return f"Selected: {', '.join(tags)}"
-```
+````
+
 </CodeGroup>
 
 ### Titled Options
