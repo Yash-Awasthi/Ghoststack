@@ -10,6 +10,7 @@ RUN npm ci
 COPY orchestration/ ./orchestration/
 COPY runtime/ ./runtime/
 COPY schemas/ ./schemas/
+COPY specs/ ./specs/
 
 # Compile TypeScript (output: dist/)
 RUN npx tsc
@@ -26,6 +27,9 @@ RUN npm ci --only=production
 # Copy compiled output and schemas from builder
 COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/schemas/ ./schemas/
+COPY --from=builder /app/specs/ ./specs/
+COPY --from=builder /app/runtime/*.yaml ./runtime/
 
 EXPOSE 8080
-CMD ["node", "dist/runtime/bootstrap.js"]
+ENV GHOSTSTACK_API_PORT=8080
+CMD ["node", "dist/runtime/server.js"]

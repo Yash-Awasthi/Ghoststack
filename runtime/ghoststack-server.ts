@@ -1,0 +1,193 @@
+import * as http from "http";
+import * as path from "path";
+import { createRuntimeContext, startRuntime, stopRuntime, GhostStackRuntimeContext } from "./runtime-context";
+import { RuntimeDiagnosticAPI } from "../orchestration/diagnostic-api";
+import { metricsToPrometheus } from "../orchestration/prometheus-format";
+import { ADAPTER_MANIFEST } from "./adapters/manifest";
+import { registerGhostStackMcpBridge } from "../orchestration/ghoststack-mcp-bridge";
+import { IExecutionContext } from "../orchestration/interfaces/execution.interface";
+import { runFederationE2e } from "./e2e-federation";
+
+function readBody(req: http.IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+export type GhostStackServer = {
+  server: http.Server;
+  ctx: GhostStackRuntimeContext;
+  port: number;
+  stop: () => Promise<void>;
+};
+
+export async function createGhostStackServer(repoRoot: string): Promise<GhostStackServer> {
+  const bootStarted = Date.now();
+  const ctx = await createRuntimeContext(repoRoot);
+  await startRuntime(ctx);
+
+  if (process.env.GHOSTSTACK_MCP_BRIDGE !== "0") {
+    const mcpBridge = await registerGhostStackMcpBridge(ctx);
+    const servers = await mcpBridge.registry.listServers();
+    ctx.logger.info("GhostStack in-process MCP bridge registered", {
+      server: servers[0]?.name,
+      tools: servers[0]?.tools
+    });
+  }
+
+  const diagnosticApi = new RuntimeDiagnosticAPI(ctx.inspector);
+  const port = Number(process.env.GHOSTSTACK_API_PORT || "3000");
+  ctx.metrics.recordTiming("ghoststack.boot_ms", Date.now() - bootStarted);
+
+  const server = http.createServer(async (req, res) => {
+    const reqStarted = Date.now();
+    const method = req.method || "GET";
+    const url = new URL(req.url || "/", `http://127.0.0.1:${port}`);
+    const pathname = url.pathname;
+
+    try {
+      if (method === "GET" && pathname === "/metrics/prometheus") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/plain; version=0.0.4");
+        res.end(metricsToPrometheus(ctx.metrics.getMetrics()));
+        return;
+      }
+
+      if (method === "GET" && pathname === "/runtime/adapters") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({ manifest: ADAPTER_MANIFEST, floci: ctx.flociAdapter.getLastHealth() }, null, 2)
+        );
+        return;
+      }
+
+      if (method === "GET" && pathname === "/runtime/federation/status") {
+        const { FederationSupervisor } = await import("./federation-supervisor");
+        const status = await FederationSupervisor.readPersistedStatus(repoRoot);
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(status ?? { mode: "standalone" }, null, 2));
+        return;
+      }
+
+      res.setHeader("Content-Type", "application/json");
+
+      if (method === "GET") {
+        const data = await diagnosticApi.handle("GET", pathname);
+        res.statusCode = 200;
+        res.end(JSON.stringify(data, null, 2));
+        ctx.metrics.increment("http.requests", 1);
+        return;
+      }
+
+      if (method === "POST" && pathname === "/runtime/floci/execute") {
+        const bodyRaw = await readBody(req);
+        const body = bodyRaw ? JSON.parse(bodyRaw) : {};
+        const action = body.action as string;
+        if (!action) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: "action is required" }));
+          return;
+        }
+        const payload: Record<string, unknown> = {
+          ...((body.payload as Record<string, unknown>) ?? {}),
+          ...body
+        };
+        delete payload.action;
+        delete payload.payload;
+        const flociCtx: IExecutionContext = {
+          taskId: `http-floci-${Date.now()}`,
+          startTime: new Date(),
+          attempt: 1,
+          environment: {},
+          logger: ctx.logger
+        };
+        const result = await ctx.flociAdapter.executeAction(action, payload, flociCtx);
+        res.statusCode = 200;
+        res.end(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      if (method === "POST" && pathname === "/runtime/e2e/federation") {
+        const bodyRaw = await readBody(req);
+        const body = bodyRaw ? JSON.parse(bodyRaw) : {};
+        const result = await runFederationE2e(ctx, {
+          strict: body.strict === true,
+          cleanup: body.cleanup !== false
+        });
+        res.statusCode = result.status === "succeeded" ? 200 : 500;
+        res.end(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      if (method === "POST" && pathname === "/runtime/workflows/execute") {
+        const bodyRaw = await readBody(req);
+        const body = bodyRaw ? JSON.parse(bodyRaw) : {};
+        const workflowId = body.workflowId as string;
+        const executionId = (body.executionId as string) || `exec-${Date.now()}`;
+        if (!workflowId) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: "workflowId is required" }));
+          return;
+        }
+        const result = await ctx.workflowEngine.executeWorkflow(workflowId, executionId);
+        res.statusCode = 200;
+        res.end(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      if (method === "POST" && pathname.startsWith("/runtime/approvals/") && pathname.endsWith("/approve")) {
+        const parts = pathname.split("/");
+        const approvalId = parts[parts.length - 2];
+        const result = await ctx.workflowEngine.approveAndTriggerWorkflow(approvalId);
+        res.statusCode = 200;
+        res.end(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      res.statusCode = 405;
+      res.end(JSON.stringify({ error: `Method not allowed: ${method} ${pathname}` }));
+    } catch (err: any) {
+      const message = err?.message || String(err);
+      res.statusCode = message.startsWith("Not Found") ? 404 : 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: message }));
+      ctx.metrics.increment("http.errors", 1);
+    } finally {
+      ctx.metrics.recordTiming("http.request_ms", Date.now() - reqStarted, { route: pathname });
+    }
+  });
+
+  await new Promise<void>((resolve) => {
+    server.listen(port, () => resolve());
+  });
+
+  const stop = async () => {
+    ctx.logger.info("GhostStack HTTP server stopping");
+    await stopRuntime(ctx);
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  };
+
+  return { server, ctx, port, stop };
+}
+
+export async function startHttpServer(): Promise<http.Server> {
+  const repoRoot = path.resolve(__dirname, "..");
+  const { loadGhostStackConfig } = await import("./ghoststack-config");
+  loadGhostStackConfig(repoRoot);
+  const gs = await createGhostStackServer(repoRoot);
+  console.log(
+    `[GhostStack] API http://127.0.0.1:${gs.port} | /health | POST /runtime/e2e/federation | POST /runtime/workflows/execute`
+  );
+  const shutdown = async () => {
+    await gs.stop();
+    process.exit(0);
+  };
+  process.on("SIGINT", () => void shutdown());
+  process.on("SIGTERM", () => void shutdown());
+  return gs.server;
+}

@@ -8,6 +8,10 @@ export interface Task {
   priority: string;
   status: string;
   dependencies: string[];
+  /** Explicit adapter routing (from workflow spec files). */
+  type?: string;
+  action?: string;
+  arguments?: Record<string, unknown>;
 }
 
 export class TaskRouter {

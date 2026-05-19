@@ -1,0 +1,23 @@
+# Local federation stack: Floci emulator for hybrid dev (orchestrator runs via `gs start:federation`).
+# Full Docker orchestrator: docker compose -f docker/docker-compose.yaml -f docker/docker-compose.floci.yaml up
+version: "3.8"
+
+services:
+  floci:
+    image: floci/floci:latest
+    container_name: ghoststack-floci
+    ports:
+      - "4566:4566"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://127.0.0.1:4566/health"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped

@@ -2,11 +2,21 @@
   "name": "ghoststack",
   "version": "1.1.0",
   "description": "GhostStack v1.1 - Local-First Autonomous Cloud Engine",
-  "main": "index.js",
+  "main": "dist/runtime/server.js",
+  "bin": {
+    "gs": "./runtime/cli.ts",
+    "ghoststack": "./runtime/cli.ts"
+  },
   "directories": {
     "doc": "docs"
   },
   "scripts": {
+    "gs": "ts-node runtime/cli.ts",
+    "start": "ts-node runtime/server.ts",
+    "start:federation": "ts-node runtime/cli.ts start:federation",
+    "stop:federation": "ts-node runtime/cli.ts stop",
+    "e2e": "ts-node runtime/cli.ts e2e",
+    "e2e:http": "ts-node runtime/cli.ts e2e:http",
     "bootstrap": "ts-node runtime/bootstrap.ts",
     "healthcheck": "ts-node runtime/healthcheck.ts",
     "diagnose": "ts-node runtime/diagnose-export.ts",

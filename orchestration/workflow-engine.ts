@@ -437,6 +437,69 @@ export class DocumentProcessingTemplate implements IWorkflowTemplate {
   }
 }
 
+export class GovernedEtlWorkflowTemplate implements IWorkflowTemplate {
+  templateId = "governed-etl-template";
+  name = "Governed ETL Data Pipeline";
+  description = "Extract, transform, and load pipeline with scraping, filter, and S3 provisioning steps.";
+
+  createWorkflow(params: Record<string, any>): IWorkflowDefinition {
+    const prefix = params.id || "governed-etl";
+    const sourceUrl = (params.source_url as string) || "https://news.ycombinator.com";
+    const bucketName = (params.target_s3_bucket as string) || "ghoststack-etl-archive";
+    const pattern = (params.transform_pattern as string) || "(?:AI|LLM|Agent|GPT|Cognitive)";
+
+    return {
+      id: prefix,
+      name: this.name,
+      description: this.description,
+      tasks: [
+        {
+          id: `${prefix}-extract`,
+          title: "Extract Page Scraped Data",
+          description: "Scrapes data from the target website using the sandbox-safe scraping execution adapter.",
+          priority: "normal",
+          status: "pending",
+          dependencies: [],
+          type: "scraping",
+          action: "scrape_url",
+          arguments: { url: sourceUrl, maxLengthBytes: 50000, selectors: ["title"] }
+        },
+        {
+          id: `${prefix}-transform`,
+          title: "Transform & Filter Content",
+          description: "Filters extracted content by pattern.",
+          priority: "normal",
+          status: "pending",
+          dependencies: [`${prefix}-extract`],
+          type: "floci",
+          action: "filter_content",
+          arguments: { pattern, sourceTaskId: `${prefix}-extract` }
+        },
+        {
+          id: `${prefix}-load`,
+          title: "Load Content to Storage",
+          description: "Creates S3 bucket for transformed archive.",
+          priority: "high",
+          status: "pending",
+          dependencies: [`${prefix}-transform`],
+          type: "floci",
+          action: "create_s3_bucket",
+          arguments: { bucketName, sourceTaskId: `${prefix}-transform` }
+        }
+      ],
+      constraints: [
+        new WorkflowConstraint("ETL byte quota gate", async () => {
+          const maxBytes = (params.maxLengthBytes as number) || 50000;
+          return {
+            allowed: maxBytes <= 1_000_000,
+            reason: maxBytes > 1_000_000 ? "ETL extract exceeds sandbox byte quota" : undefined
+          };
+        })
+      ]
+    };
+  }
+}
+
 export class SpecToExecutionTemplate implements IWorkflowTemplate {
   templateId = "spec-execution-template";
   name = "Spec-to-Execution Workflow";

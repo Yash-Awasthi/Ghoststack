@@ -8,8 +8,9 @@ services:
     container_name: ghoststack-core-runner
     environment:
       - NODE_ENV=production
-      - PORT=8080
-      - STORAGE_PATH=/app/data-runtime
+      - GHOSTSTACK_API_PORT=8080
+      - GHOSTSTACK_DATA_DIR=/app/data-runtime
+      - GHOSTSTACK_OFFLINE_MODE=true
     volumes:
       - ghoststack-data:/app/data-runtime
       - ghoststack-logs:/app/logs
@@ -17,7 +18,13 @@ services:
       - "8080:8080"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "dist/runtime/healthcheck.js"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3

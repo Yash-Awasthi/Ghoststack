@@ -74,6 +74,16 @@ export class TaskExecutor implements ITaskExecutor {
       const durationMs = Date.now() - startTimeMs;
 
       this.metrics?.recordTiming("task.latency", durationMs);
+      if (taskType === "floci" && result && typeof result === "object") {
+        if (typeof result.flociRequestMs === "number") {
+          this.metrics?.recordTiming("floci.request_ms", result.flociRequestMs);
+        }
+        if (result.mocked === true) {
+          this.metrics?.increment("floci.mocked");
+        } else if (result.mocked === false) {
+          this.metrics?.increment("floci.live");
+        }
+      }
       this.metrics?.increment("task.success");
 
       await this.persistence.saveState(job.id, {
