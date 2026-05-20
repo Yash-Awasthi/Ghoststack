@@ -13,7 +13,18 @@ describe("Milestone 1: Observability Core (Metrics & Tracing)", () => {
       expect(collector.getMetrics()["queue.size"]).toBe(5);
 
       collector.recordTiming("execution.duration", 120);
-      expect(collector.getMetrics()["execution.duration"]).toEqual([120]);
+      const metrics = collector.getMetrics();
+      // Timing metrics are now stored as Histograms with percentile snapshots
+      expect(metrics["execution.duration_histogram"]).toBeDefined();
+      expect(metrics["execution.duration_histogram"].count).toBe(1);
+      expect(metrics["execution.duration_histogram"].sum).toBe(120);
+      expect(metrics["execution.duration_histogram"].avg).toBe(120);
+      expect(metrics["execution.duration_histogram"].min).toBe(120);
+      expect(metrics["execution.duration_histogram"].max).toBe(120);
+
+      // Also verify getCounter and recordGauge paths
+      expect(collector.getCounter("task.executed")).toBe(3);
+      expect(collector.getGauge("queue.size")).toBe(5);
     });
   });
 

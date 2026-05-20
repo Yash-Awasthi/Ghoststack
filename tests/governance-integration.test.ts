@@ -34,9 +34,10 @@ describe("Milestone 4: End-to-End Orchestrator Governance & Diagnostics", () => 
   const cacheDbPath = path.join(testDir, "gov_integration_cache.json");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {

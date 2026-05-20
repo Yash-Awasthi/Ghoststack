@@ -17,6 +17,14 @@ export interface IWorkflowDefinition {
   tasks: Task[];
   approvalPolicy?: IWorkflowApprovalPolicy;
   constraints?: IWorkflowConstraint[];
+  /**
+   * Optional metadata for extensible configuration.
+   * Supports S3 event trigger bindings under `s3Triggers`, e.g.:
+   *   metadata: {
+   *     s3Triggers: [{ bucket: "my-bucket", prefix: "uploads/", workflowId: "..." }]
+   *   }
+   */
+  metadata?: Record<string, unknown>;
 }
 
 export interface IWorkflowExecution {
@@ -28,6 +36,12 @@ export interface IWorkflowExecution {
   completedAt?: Date;
   approved?: boolean;
   error?: string;
+  /** Set when result comes from an idempotency cache hit rather than actual execution */
+  idempotent?: boolean;
+  /** Original execution ID when result is an idempotent replay */
+  originalExecutionId?: string;
+  /** Set by orderedReplay to indicate state verification passed */
+  stateVerified?: boolean;
 }
 
 export interface IWorkflowTemplate {

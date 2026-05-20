@@ -11,9 +11,10 @@ describe("Milestone 2: System Diagnostic Inspector & Snapshots", () => {
   const eventLogPath = path.join(testDir, "inspector_events.jsonl");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {

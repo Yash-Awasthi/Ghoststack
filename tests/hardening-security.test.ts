@@ -15,9 +15,10 @@ describe("GhostStack v1.1 Hardening & Security Verification", () => {
   const testDir = path.join(__dirname, "../temp-hardening-db");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {

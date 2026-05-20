@@ -8,6 +8,31 @@ import { IGovernanceEngine, IApprovalWorkflow, ICognitiveTrace } from "./interfa
 import { IEnvironmentTelemetry, IFilesystemSandbox, IExecutionEnvironment } from "./interfaces/environment.interface";
 import { IWorkflowRegistry, IWorkflowTelemetry } from "./interfaces/workflow.interface";
 
+import type { IMemoryStore } from "./memory-store";
+import type { IAgentBus, AgentMessage, AgentCapability } from "./agent-bus";
+import type { CircuitBreaker } from "./circuit-breaker";
+
+// Forward reference to avoid circular dependency — context type is used
+// only at construction time via the static factory method.
+export interface GhostStackContextLike {
+  metrics: IMetricsCollector;
+  queue: IQueueBackend;
+  discovery: IServiceDiscovery;
+  eventStore: IEventStore;
+  governanceEngine?: IGovernanceEngine;
+  approval: IApprovalWorkflow;
+  browserTelemetry: IEnvironmentTelemetry;
+  scrapingTelemetry: IEnvironmentTelemetry;
+  registry: IWorkflowRegistry;
+  workflowTelemetry: IWorkflowTelemetry;
+  workflowEngine: any;
+  memoryStore: IMemoryStore;
+  agentBus: IAgentBus;
+  circuitBreaker: CircuitBreaker;
+  circuitBreakerWrapper?: any;
+  traceIndexer?: any;
+}
+
 export class RuntimeInspector implements IRuntimeInspector {
   private metrics: IMetricsCollector;
   private queue: IQueueBackend;
@@ -31,6 +56,40 @@ export class RuntimeInspector implements IRuntimeInspector {
   private workflowTelemetry?: IWorkflowTelemetry;
   private workflowEngine?: any;
 
+  // New Layer: Unified Memory & Knowledge
+  private memoryStore?: IMemoryStore;
+  private agentBus?: IAgentBus;
+  private circuitBreaker?: CircuitBreaker;
+
+  /**
+   * Static factory: construct from a context-like object instead of 20 positional params.
+   * Usage: `RuntimeInspector.fromContext(ctx)` where ctx satisfies GhostStackContextLike.
+   */
+  static fromContext(ctx: GhostStackContextLike): RuntimeInspector {
+    return new RuntimeInspector(
+      ctx.metrics,
+      ctx.queue,
+      ctx.discovery,
+      ctx.eventStore,
+      undefined,
+      undefined,
+      ctx.governanceEngine,
+      ctx.approval,
+      ctx.browserTelemetry,
+      ctx.scrapingTelemetry,
+      undefined,
+      undefined,
+      ctx.registry,
+      ctx.workflowTelemetry,
+      ctx.workflowEngine,
+      ctx.memoryStore,
+      ctx.agentBus,
+      ctx.circuitBreaker,
+      ctx.circuitBreakerWrapper,
+      ctx.traceIndexer
+    );
+  }
+
   constructor(
     metrics: IMetricsCollector,
     queue: IQueueBackend,
@@ -46,7 +105,12 @@ export class RuntimeInspector implements IRuntimeInspector {
     envsList?: IExecutionEnvironment[],
     workflowRegistry?: IWorkflowRegistry,
     workflowTelemetry?: IWorkflowTelemetry,
-    workflowEngine?: any
+    workflowEngine?: any,
+    memoryStore?: IMemoryStore,
+    agentBus?: IAgentBus,
+    circuitBreaker?: CircuitBreaker,
+    circuitBreakerWrapper?: any,
+    traceIndexer?: any
   ) {
     this.metrics = metrics;
     this.queue = queue;
@@ -65,6 +129,10 @@ export class RuntimeInspector implements IRuntimeInspector {
     this.workflowRegistry = workflowRegistry;
     this.workflowTelemetry = workflowTelemetry;
     this.workflowEngine = workflowEngine;
+
+    this.memoryStore = memoryStore;
+    this.agentBus = agentBus;
+    this.circuitBreaker = circuitBreaker;
   }
 
   async getHealth(): Promise<any> {
@@ -259,6 +327,11 @@ export class RuntimeInspector implements IRuntimeInspector {
     return history.find((e) => e.id === executionId) || null;
   }
 
+  getWorkflowExecutionHistory(): any[] {
+    if (!this.workflowTelemetry) return [];
+    return this.workflowTelemetry.getExecutionHistory();
+  }
+
   getWorkflowReplays(): any[] {
     if (!this.workflowTelemetry) return [];
     // Filter executions that have replay patterns
@@ -290,6 +363,65 @@ export class RuntimeInspector implements IRuntimeInspector {
     this.plansLog.push(plan);
   }
 
+  // ── Memory Store ────────────────────────────────────────────────
+
+  async getMemoryStats(): Promise<any> {
+    if (!this.memoryStore) return { available: false };
+    const stats = await this.memoryStore.getStats();
+    return {
+      available: true,
+      ...stats,
+      oldest: stats.oldest?.toISOString(),
+      newest: stats.newest?.toISOString()
+    };
+  }
+
+  async getMemoryEntries(query?: {
+    types?: string[];
+    keyPrefix?: string;
+    limit?: number;
+  }): Promise<any[]> {
+    if (!this.memoryStore) return [];
+    const result = await this.memoryStore.query({
+      types: query?.types as any,
+      keyPrefix: query?.keyPrefix,
+      limit: query?.limit || 20
+    });
+    return result.entries.map((e) => ({
+      id: e.id,
+      type: e.type,
+      key: e.key,
+      agentId: e.agentId,
+      workflowId: e.workflowId,
+      tags: e.tags,
+      timestamp: e.timestamp.toISOString()
+    }));
+  }
+
+  // ── Agent Bus ────────────────────────────────────────────────────
+
+  async getAgentCapabilities(): Promise<AgentCapability[]> {
+    if (!this.agentBus) return [];
+    return this.agentBus.getCapabilities();
+  }
+
+  async getAgentMessages(options?: { limit?: number }): Promise<AgentMessage[]> {
+    if (!this.agentBus) return [];
+    return this.agentBus.getMessages({ limit: options?.limit || 20 });
+  }
+
+  // ── Circuit Breaker ────────────────────────────────────────────────
+
+  getCircuitBreakerState(): any {
+    if (!this.circuitBreaker) return { available: false };
+    return {
+      available: true,
+      ...this.circuitBreaker.getMetrics()
+    };
+  }
+
+  // ── Snapshots ─────────────────────────────────────────────────────
+
   async getSnapshots(): Promise<any> {
     return {
       timestamp: new Date(),
@@ -300,7 +432,9 @@ export class RuntimeInspector implements IRuntimeInspector {
       events: await this.getEvents(),
       tasks: await this.getTasks(),
       mcp: await this.getMCPSummary(),
-      governance: await this.getGovernanceInfo()
+      governance: await this.getGovernanceInfo(),
+      memory: await this.getMemoryStats(),
+      circuitBreaker: this.getCircuitBreakerState()
     };
   }
 }

@@ -80,6 +80,22 @@ export class RuntimeDiagnosticAPI {
       case "/runtime/workflows":
         return (this.inspector as any).getWorkflowsList ? (this.inspector as any).getWorkflowsList() : [];
 
+      // Memory & Knowledge Layer Endpoints
+      case "/runtime/memory":
+        return (this.inspector as any).getMemoryStats ? (this.inspector as any).getMemoryStats() : { available: false };
+      case "/runtime/memory/entries":
+        return (this.inspector as any).getMemoryEntries ? (this.inspector as any).getMemoryEntries({ limit: 50 }) : [];
+
+      // Agent Bus Endpoints
+      case "/runtime/agents":
+        return (this.inspector as any).getAgentCapabilities ? (this.inspector as any).getAgentCapabilities() : [];
+      case "/runtime/agents/messages":
+        return (this.inspector as any).getAgentMessages ? (this.inspector as any).getAgentMessages({ limit: 50 }) : [];
+
+      // Circuit Breaker Endpoints
+      case "/runtime/circuits":
+        return (this.inspector as any).getCircuitBreakerState ? (this.inspector as any).getCircuitBreakerState() : { available: false };
+
       default:
         throw new Error(`Not Found: ${path}`);
     }

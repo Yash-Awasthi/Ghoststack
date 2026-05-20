@@ -204,7 +204,15 @@ public class ContainerLauncher {
         specBuilder.withEmbeddedDns();
 
         if (fn.isHotReload()) {
-            specBuilder.withBind(fn.getHotReloadHostPath(), TASK_DIR);
+            String rawPath = fn.getHotReloadHostPath();
+            String allowedRoot = "./data/hotreload";
+            Optional<List<String>> allowedPathsOpt = config.services().lambda().hotReload().allowedPaths();
+            if (allowedPathsOpt.isPresent() && !allowedPathsOpt.get().isEmpty()) {
+                allowedRoot = allowedPathsOpt.get().get(0);
+            }
+            Path validatedPath = io.github.hectorvent.floci.core.common.security.PathBoundaryValidator.validate(rawPath, allowedRoot);
+            specBuilder.withReadOnlyBind(validatedPath.toString(), TASK_DIR);
+            LOG.infov("ContainerLauncher: Structural mount boundary successfully verified for path: {0}", validatedPath);
         }
 
         // For Image package type use ImageConfig.Command/EntryPoint/WorkingDirectory if set, otherwise fall back to Handler (Zip-style)

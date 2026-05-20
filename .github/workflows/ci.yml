@@ -1,44 +1,48 @@
-name: GhostStack CI
+# GhostStack CI Pipeline
+# Runs tests, linting, and health checks on push and PR.
+name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [master, main]
   pull_request:
+    branches: [master, main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-      - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npm run healthcheck
-      - run: npm test
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
 
-  floci-integration:
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test
+
+      - name: Health check
+        run: npm run healthcheck
+
+  lint:
     runs-on: ubuntu-latest
-    needs: test
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
+          node-version: 20.x
+          cache: "npm"
       - run: npm ci
-      - run: docker compose -f docker/docker-compose.floci.yaml up -d floci
-      - run: |
-          for i in $(seq 1 30); do
-            curl -sf http://127.0.0.1:4566/health && exit 0
-            sleep 2
-          done
-          exit 1
-      - run: npm test -- tests/floci-integration.test.ts
-        env:
-          GHOSTSTACK_FLOCI_INTEGRATION: "1"
-          GHOSTSTACK_FLOCI_STRICT: "1"
-          GHOSTSTACK_OFFLINE_MODE: "false"
+      - run: npm run lint

@@ -34,6 +34,10 @@ export class FastMcpHost {
     return this.proc !== null && !this.proc.killed;
   }
 
+  getPid(): number | undefined {
+    return this.proc?.pid;
+  }
+
   async start(): Promise<void> {
     if (this.proc) return;
     if (!fs.existsSync(this.scriptPath)) {

@@ -1,56 +1,51 @@
 {
   "spec_version": "v1.1",
   "metadata": {
-    "name": "Governed ETL Data Pipeline",
-    "description": "Standard Extract, Transform, and Load pipeline executing under strict quota governance and sandbox policies.",
-    "author": "GhostStack Core Developer",
-    "created_at": "2026-05-18T17:00:00Z"
+    "name": "Demo ETL Pipeline",
+    "description": "Scrapes news articles, transforms key headers, and stores in local Floci S3 buckets.",
+    "author": "GhostStack Operator"
   },
   "template_id": "governed-etl-template",
-  "variables": {
-    "source_url": "https://news.ycombinator.com",
-    "target_s3_bucket": "ghoststack-etl-archive",
-    "transform_pattern": "(?:AI|LLM|Agent|GPT|Cognitive)"
-  },
   "tasks": [
     {
-      "id": "etl-task-1",
-      "title": "Extract Page Scraped Data",
-      "description": "Scrapes data from the target website using the sandbox-safe scraping execution adapter.",
+      "id": "extract-news",
+      "title": "Scrape HN news frontpage",
+      "description": "Scrapes Hacker News title metrics",
       "type": "scraping",
       "action": "scrape_url",
-      "priority": "normal",
+      "priority": "high",
       "arguments": {
         "url": "https://news.ycombinator.com",
-        "maxLengthBytes": 50000
+        "maxLengthBytes": 40000,
+        "selectors": ["a.storylink"]
       },
       "dependencies": []
     },
     {
-      "id": "etl-task-2",
-      "title": "Transform & Filter Content",
-      "description": "Extracts matches matching high-priority patterns using the memory planning-engine.",
+      "id": "transform-news",
+      "title": "Filter and match tech headers",
+      "description": "Runs custom regex transforms on news tags",
       "type": "floci",
       "action": "filter_content",
-      "priority": "normal",
+      "priority": "medium",
       "arguments": {
-        "pattern": "(?:AI|LLM|Agent|GPT|Cognitive)",
-        "sourceTaskId": "etl-task-1"
+        "pattern": "(?:AI|Rust|TypeScript|Cognitive)",
+        "sourceTaskId": "extract-news"
       },
-      "dependencies": ["etl-task-1"]
+      "dependencies": ["extract-news"]
     },
     {
-      "id": "etl-task-3",
-      "title": "Load Content to Storage",
-      "description": "Saves transformed content to persistent S3 bucket and verifies checksum via the runtime manager.",
+      "id": "load-archive",
+      "title": "Create persistent storage node",
+      "description": "Ingests transformed artifacts into Floci S3",
       "type": "floci",
       "action": "create_s3_bucket",
-      "priority": "high",
+      "priority": "medium",
       "arguments": {
         "bucketName": "ghoststack-etl-archive",
-        "sourceTaskId": "etl-task-2"
+        "sourceTaskId": "transform-news"
       },
-      "dependencies": ["etl-task-2"]
+      "dependencies": ["transform-news"]
     }
   ]
 }

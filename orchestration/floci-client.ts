@@ -24,7 +24,7 @@ export type FlociRequestResult<T = unknown> = {
 export class FlociClientError extends Error {
   constructor(
     message: string,
-    public readonly code: "UNREACHABLE" | "HTTP_ERROR" | "TIMEOUT",
+    public readonly code: "UNREACHABLE" | "HTTP_ERROR" | "TIMEOUT" | "UNKNOWN_ACTION",
     public readonly status?: number,
     public readonly body?: string
   ) {
@@ -49,6 +49,22 @@ export async function probeFlociHealth(
 ): Promise<FlociHealthStatus> {
   const base = normalizeFlociEndpoint(endpoint);
   const started = Date.now();
+
+  // In offline mode, skip HTTP entirely — AbortSignal.timeout() can fail to
+  // abort socket-level connects on some platforms (Windows), causing the probe
+  // to block for the OS TCP timeout (~120s) instead of the intended timeoutMs.
+  const offline = process.env.GHOSTSTACK_OFFLINE_MODE === "1" ||
+    (process.env.GHOSTSTACK_OFFLINE_MODE ?? "").toLowerCase() === "true";
+  if (offline) {
+    return {
+      reachable: false,
+      endpoint: base,
+      latencyMs: Date.now() - started,
+      error: "offline mode — probe skipped",
+      checkedAt: new Date().toISOString()
+    };
+  }
+
   let lastError: string | undefined;
 
   for (const healthPath of HEALTH_PATHS) {

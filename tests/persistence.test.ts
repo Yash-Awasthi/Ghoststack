@@ -8,9 +8,10 @@ describe("Milestone 1: Persistence & Replay Engine", () => {
   const statePath = path.join(testDir, "state.json");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {
@@ -30,6 +31,20 @@ describe("Milestone 1: Persistence & Replay Engine", () => {
     expect(replayed[0].event).toBe("task_routed");
     expect(replayed[0].payload.id).toBe("task-01");
     expect(replayed[1].event).toBe("task_completed");
+  });
+
+  it("skips corrupt JSONL lines during replay and records count", async () => {
+    const eventStore = new FileEventStore(eventLogPath);
+    fs.writeFileSync(
+      eventLogPath,
+      '{"event":"ok","payload":{},"timestamp":"2020-01-01T00:00:00.000Z"}\nNOT_JSON\n{"event":"ok2","payload":{},"timestamp":"2020-01-02T00:00:00.000Z"}\n',
+      "utf8"
+    );
+    const replayed = await eventStore.replayEvents();
+    expect(replayed.length).toBe(2);
+    expect(replayed[0].event).toBe("ok");
+    expect(replayed[1].event).toBe("ok2");
+    expect(eventStore.lastReplayCorruptLines).toBe(1);
   });
 
   it("should save, retrieve, and clear key-value runtime states", async () => {

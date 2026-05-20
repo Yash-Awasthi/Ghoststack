@@ -3,6 +3,8 @@ import type { GhostStackRuntimeContext } from "../runtime/runtime-context";
 import { FlociExecutionAdapter } from "./floci-adapter";
 import { resolveSandboxPath } from "./runtime-sandbox";
 import { loadWorkflowSpecFile, specToWorkflowDefinition } from "./spec-loader";
+import { dispatchExtendedAction, EXTENDED_FLOCI_ACTIONS } from "./floci-extended";
+import { resolveFlociEndpoint } from "./floci-client";
 import { runFederationE2e } from "../runtime/e2e-federation";
 import { MCPServerRegistry } from "./mcp-registry";
 import { MCPRuntime } from "./mcp-adapter";
@@ -36,8 +38,12 @@ export class GhostStackMcpBridge implements IMCPTransport {
 
     const name = message.params?.name as string;
     const args = (message.params?.arguments as Record<string, unknown>) ?? {};
-    const text = await this.dispatchTool(name, args);
-    return { content: [{ type: "text", text }] };
+    try {
+      const text = await this.dispatchTool(name, args);
+      return { content: [{ type: "text", text }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: JSON.stringify({ error: (err as Error).message, tool: name }) }] };
+    }
   }
 
   private async dispatchTool(name: string, args: Record<string, unknown>): Promise<string> {
@@ -77,6 +83,28 @@ export class GhostStackMcpBridge implements IMCPTransport {
         if (!workflowId) throw new Error("workflowId is required");
         const result = await this.ctx.workflowEngine.executeWorkflow(workflowId, executionId);
         return JSON.stringify(result, null, 2);
+      }
+      case "ghoststack_workflow_cancel": {
+        const executionId = args.executionId as string;
+        if (!executionId) throw new Error("executionId is required");
+        const result = this.ctx.workflowEngine.cancelExecution(executionId);
+        return JSON.stringify({ cancelled: !!result, execution: result ?? null }, null, 2);
+      }
+      case "ghoststack_workflow_resume": {
+        const executionId = args.executionId as string;
+        if (!executionId) throw new Error("executionId is required");
+        const result = await this.ctx.workflowEngine.resumeExecution(executionId);
+        return JSON.stringify({ resumed: !!result, execution: result ?? null }, null, 2);
+      }
+      case "ghoststack_workflow_checkpoints": {
+        const checkpoints = this.ctx.workflowEngine.listCheckpoints();
+        return JSON.stringify({ count: checkpoints.length, checkpoints }, null, 2);
+      }
+      case "ghoststack_workflow_replay": {
+        const executionId = args.executionId as string;
+        if (!executionId) throw new Error("executionId is required");
+        const result = await this.ctx.workflowEngine.replayExecution(executionId);
+        return JSON.stringify({ replayed: true, execution: result }, null, 2);
       }
       case "ghoststack_run_e2e": {
         const result = await runFederationE2e(this.ctx, {
@@ -124,6 +152,111 @@ export class GhostStackMcpBridge implements IMCPTransport {
         }));
         return JSON.stringify({ path: target, entries }, null, 2);
       }
+
+      // ── Memory & Knowledge Layer ──────────────────────────────────
+      case "ghoststack_memory_stats": {
+        const stats = await this.ctx.memoryStore.getStats();
+        return JSON.stringify(stats, null, 2);
+      }
+      case "ghoststack_memory_store": {
+        const id = await this.ctx.memoryStore.store({
+          type: (args.type as "observation" | "decision" | "result" | "error" | "state" | "knowledge") ?? "knowledge",
+          key: args.key as string,
+          value: args.value,
+          tags: (args.tags as string[]) || [],
+          agentId: args.agentId as string,
+          workflowId: args.workflowId as string
+        });
+        return JSON.stringify({ id }, null, 2);
+      }
+      case "ghoststack_memory_query": {
+        const result = await this.ctx.memoryStore.query({
+          types: args.types as Array<"observation" | "decision" | "result" | "error" | "state" | "knowledge">,
+          keyPrefix: args.keyPrefix as string,
+          tags: args.tags as string[],
+          limit: (args.limit as number) || 20
+        });
+        return JSON.stringify({
+          total: result.total,
+          entries: result.entries.map((e) => ({
+            id: e.id,
+            type: e.type,
+            key: e.key,
+            agentId: e.agentId,
+            tags: e.tags,
+            timestamp: e.timestamp.toISOString()
+          }))
+        }, null, 2);
+      }
+
+      // ── Agent Bus ──────────────────────────────────────────────────
+      case "ghoststack_agent_capabilities": {
+        const caps = await this.ctx.agentBus.getCapabilities();
+        return JSON.stringify(caps, null, 2);
+      }
+      case "ghoststack_agent_send": {
+        const msgId = await this.ctx.agentBus.send({
+          from: args.from as string,
+          to: args.to as string,
+          type: (args.type as "result" | "error" | "request" | "response" | "broadcast" | "delegation") ?? "broadcast",
+          subject: args.subject as string,
+          body: args.body
+        });
+        return JSON.stringify({ messageId: msgId }, null, 2);
+      }
+      case "ghoststack_agent_find": {
+        const agents = await this.ctx.agentBus.findAgents(args.action as string);
+        return JSON.stringify(agents, null, 2);
+      }
+
+      // ── Circuit Breaker ────────────────────────────────────────────
+      case "ghoststack_circuit_state": {
+        return JSON.stringify({
+          state: this.ctx.circuitBreaker.getState(),
+          metrics: this.ctx.circuitBreaker.getMetrics()
+        }, null, 2);
+      }
+      case "ghoststack_circuit_reset": {
+        this.ctx.circuitBreaker.reset();
+        return JSON.stringify({ reset: true, state: this.ctx.circuitBreaker.getState() }, null, 2);
+      }
+
+      // ── Diagnostic Enricher ──────────────────────────────────────────
+      case "ghoststack_diagnostics": {
+        const diag = this.ctx.diagnosticEnricher.getRichDiagnostics();
+        return JSON.stringify(diag, null, 2);
+      }
+      case "ghoststack_health_history": {
+        const history = this.ctx.diagnosticEnricher.getHealthHistory();
+        return JSON.stringify({
+          stats: history.getStats(),
+          latest: history.getLatest(),
+          history: history.getHistory().slice(-50)
+        }, null, 2);
+      }
+
+      // ── Runtime Graph ────────────────────────────────────────────────
+      case "ghoststack_runtime_graph": {
+        if (!this.ctx.runtimeGraph) {
+          return JSON.stringify({ available: false, message: "RuntimeGraph not initialized" }, null, 2);
+        }
+        const graph = await this.ctx.runtimeGraph.getSnapshot();
+        return JSON.stringify(graph, null, 2);
+      }
+      case "ghoststack_floci_extended": {
+        const action = args.action as string;
+        if (!action) throw new Error("action is required for extended Floci ops");
+        if (!EXTENDED_FLOCI_ACTIONS.includes(action)) {
+          throw new Error(`Unknown extended Floci action: ${action}. Valid: ${EXTENDED_FLOCI_ACTIONS.join(", ")}`);
+        }
+        const endpoint = resolveFlociEndpoint();
+        // Thread emitEvent so S3 object creation events propagate through the event bus
+        const result = await dispatchExtendedAction(endpoint, action, args, async (event, payload) => {
+          await this.ctx.eventBus.publish(event, payload);
+        });
+        return JSON.stringify(result, null, 2);
+      }
+
       default:
         throw new Error(`Unknown GhostStack MCP tool: ${name}`);
     }
@@ -156,9 +289,31 @@ export const GHOSTSTACK_MCP_TOOLS = [
   "ghoststack_list_workflows",
   "ghoststack_load_spec",
   "ghoststack_execute_workflow",
+  "ghoststack_workflow_cancel",
+  "ghoststack_workflow_resume",
+  "ghoststack_workflow_checkpoints",
+  "ghoststack_workflow_replay",
   "ghoststack_run_e2e",
   "ghoststack_floci_execute",
   "ghoststack_sandbox_write",
   "ghoststack_sandbox_read",
-  "ghoststack_sandbox_list"
+  "ghoststack_sandbox_list",
+  // Memory & Knowledge Layer
+  "ghoststack_memory_stats",
+  "ghoststack_memory_store",
+  "ghoststack_memory_query",
+  // Agent Bus
+  "ghoststack_agent_capabilities",
+  "ghoststack_agent_send",
+  "ghoststack_agent_find",
+  // Circuit Breaker
+  "ghoststack_circuit_state",
+  "ghoststack_circuit_reset",
+  // Extended Floci Operations
+  "ghoststack_floci_extended",
+  // Diagnostics
+  "ghoststack_diagnostics",
+  "ghoststack_health_history",
+  // Runtime Graph
+  "ghoststack_runtime_graph"
 ];

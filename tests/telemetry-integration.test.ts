@@ -19,9 +19,10 @@ describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
   const cacheDbPath = path.join(testDir, "telemetry_cache.json");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {
@@ -81,7 +82,9 @@ describe("Milestone 3: Telemetry & Core Orchestrator Integration", () => {
     expect(currentMetrics["task.executed"]).toBe(1);
     expect(currentMetrics["task.success"]).toBe(1);
     expect(currentMetrics["queue.size"]).toBe(0);
-    expect(currentMetrics["task.latency"]).toBeDefined();
+    // With Histogram-based MetricsCollector, timings are exposed under "_histogram" suffix
+    const timingMetric = currentMetrics["task.latency_histogram"] || currentMetrics["task.latency"];
+    expect(timingMetric).toBeDefined();
 
     // 2. Assert traces capture execution spans
     const spans = tracer.getSpans();

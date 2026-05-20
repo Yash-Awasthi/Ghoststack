@@ -1,102 +1,144 @@
-#!/usr/bin/env python3
 """
-GhostStack composite MCP server (FastMCP).
-Proxies orchestration capabilities to the GhostStack HTTP API.
-Requires: pip install fastmcp  (or run from apps/fastmcp venv)
+GhostStack FastMCP Composite Server
+=====================================
+Exposes GhostStack runtime capabilities as MCP tools via HTTP transport.
+
+Communicates with the GhostStack HTTP API (default http://127.0.0.1:3000).
+Serves on GHOSTSTACK_MCP_PORT (default 8100) at /mcp.
+
+Usage:
+    python runtime/mcp/ghoststack_mcp_server.py
 """
-from __future__ import annotations
 
 import json
 import os
-import urllib.error
+import sys
 import urllib.request
+import urllib.error
+from typing import Any
 
 try:
-    from fastmcp import FastMCP
-except ImportError as exc:  # pragma: no cover
-    raise SystemExit(
-        "fastmcp is required. Install with: pip install fastmcp\n"
-        "Or: cd apps/fastmcp && uv sync"
-    ) from exc
+    from mcp.server.fastmcp import FastMCP
+except ImportError:
+    print(
+        "Error: 'mcp' package not found. Install with: pip install mcp",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
-API_BASE = os.environ.get("GHOSTSTACK_API_URL", "http://127.0.0.1:3000").rstrip("/")
-MCP_HOST = os.environ.get("GHOSTSTACK_MCP_HOST", "127.0.0.1")
+GHOSTSTACK_API_URL = os.environ.get("GHOSTSTACK_API_URL", "http://127.0.0.1:3000")
 MCP_PORT = int(os.environ.get("GHOSTSTACK_MCP_PORT", "8100"))
 
-mcp = FastMCP("GhostStack Federation")
+mcp = FastMCP("ghoststack", port=MCP_PORT)
 
 
-def _request(method: str, path: str, body: dict | None = None) -> dict:
-    url = f"{API_BASE}{path}"
-    data = None
-    headers = {"Accept": "application/json"}
-    if body is not None:
-        data = json.dumps(body).encode("utf-8")
-        headers["Content-Type"] = "application/json"
-    req = urllib.request.Request(url, data=data, headers=headers, method=method)
+def _api_get(path: str) -> dict[str, Any]:
+    """Make a GET request to the GhostStack HTTP API."""
+    url = f"{GHOSTSTACK_API_URL}{path}"
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            raw = resp.read().decode("utf-8")
-            return json.loads(raw) if raw else {}
+        req = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {e.code} {path}: {detail[:500]}") from e
+        body = e.read().decode("utf-8", errors="replace")
+        return {"error": f"HTTP {e.code}: {body}"}
+    except urllib.error.URLError as e:
+        return {"error": f"Connection failed: {e.reason}"}
+    except Exception as e:
+        return {"error": str(e)}
 
 
-@mcp.tool
-def ghoststack_health() -> dict:
-    """Return orchestrator and federation health."""
-    return _request("GET", "/health")
+def _api_post(path: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Make a POST request to the GhostStack HTTP API."""
+    url = f"{GHOSTSTACK_API_URL}{path}"
+    data = json.dumps(body).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            url,
+            data=data,
+            method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        resp_body = e.read().decode("utf-8", errors="replace")
+        return {"error": f"HTTP {e.code}: {resp_body}"}
+    except urllib.error.URLError as e:
+        return {"error": f"Connection failed: {e.reason}"}
+    except Exception as e:
+        return {"error": str(e)}
 
 
-@mcp.tool
-def ghoststack_list_workflows() -> list:
-    """List loaded workflow definitions."""
-    return _request("GET", "/runtime/workflows")
+# ---------------------------------------------------------------------------
+# MCP Tools
+# ---------------------------------------------------------------------------
 
 
-@mcp.tool
-def ghoststack_execute_workflow(workflow_id: str, execution_id: str | None = None) -> dict:
-    """Execute a registered workflow by id."""
-    return _request(
-        "POST",
-        "/runtime/workflows/execute",
-        {"workflowId": workflow_id, "executionId": execution_id or f"mcp-{workflow_id}"},
+@mcp.tool()
+def ghoststack_health() -> str:
+    """Get GhostStack runtime health status."""
+    return json.dumps(_api_get("/health"), indent=2)
+
+
+@mcp.tool()
+def ghoststack_runtime_snapshot() -> str:
+    """Get a full runtime snapshot (metrics, queues, services, events, tasks)."""
+    return json.dumps(_api_get("/runtime/snapshots"), indent=2)
+
+
+@mcp.tool()
+def ghoststack_list_workflows() -> str:
+    """List all registered workflow definitions."""
+    return json.dumps(_api_get("/runtime/workflows"), indent=2)
+
+
+@mcp.tool()
+def ghoststack_execute_workflow(workflow_id: str, execution_id: str = "") -> str:
+    """Execute a registered workflow by its ID."""
+    body = {"workflowId": workflow_id}
+    if execution_id:
+        body["executionId"] = execution_id
+    return json.dumps(_api_post("/runtime/workflows/execute", body), indent=2)
+
+
+@mcp.tool()
+def ghoststack_floci_execute(action: str, **kwargs: Any) -> str:
+    """Execute a Floci action (e.g., create_s3_bucket, invoke_lambda)."""
+    body = {"action": action, **kwargs}
+    return json.dumps(_api_post("/runtime/floci/execute", body), indent=2)
+
+
+@mcp.tool()
+def ghoststack_run_e2e(strict: bool = True, cleanup: bool = True) -> str:
+    """Run the federation E2E test (S3 -> Lambda -> invoke)."""
+    body = {"strict": strict, "cleanup": cleanup}
+    return json.dumps(_api_post("/runtime/e2e/federation", body), indent=2)
+
+
+@mcp.tool()
+def ghoststack_metrics_prometheus() -> str:
+    """Get Prometheus-formatted metrics."""
+    url = f"{GHOSTSTACK_API_URL}/metrics/prometheus"
+    try:
+        req = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.read().decode("utf-8")
+    except Exception as e:
+        return f"Error: {e}"
+
+
+def main() -> None:
+    print(
+        f"[fastmcp] GhostStack MCP server starting on port {MCP_PORT}",
+        flush=True,
     )
-
-
-@mcp.tool
-def ghoststack_floci_execute(action: str, payload: dict | None = None) -> dict:
-    """Run a Floci adapter action (create_s3_bucket, invoke_lambda, etc.)."""
-    return _request(
-        "POST",
-        "/runtime/floci/execute",
-        {"action": action, "payload": payload or {}},
+    print(
+        f"[fastmcp] API target: {GHOSTSTACK_API_URL}",
+        flush=True,
     )
-
-
-@mcp.tool
-def ghoststack_adapters() -> dict:
-    """Return vendored adapter manifest and Floci probe."""
-    return _request("GET", "/runtime/adapters")
-
-
-@mcp.tool
-def ghoststack_run_e2e(strict: bool = True, cleanup: bool = True) -> dict:
-    """Run federation E2E: S3 bucket → Lambda deploy → invoke (requires live Floci)."""
-    return _request(
-        "POST",
-        "/runtime/e2e/federation",
-        {"strict": strict, "cleanup": cleanup},
-    )
-
-
-@mcp.tool
-def ghoststack_federation_status() -> dict:
-    """Return persisted federation supervisor status."""
-    return _request("GET", "/runtime/federation/status")
+    mcp.run(transport="streamable-http")
 
 
 if __name__ == "__main__":
-    transport = os.environ.get("GHOSTSTACK_MCP_TRANSPORT", "streamable-http")
-    mcp.run(transport=transport, host=MCP_HOST, port=MCP_PORT)
+    main()

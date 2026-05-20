@@ -15,9 +15,10 @@ describe("GhostStack v1.1 Operational Stress & High-Load Benchmarks", () => {
   const cacheDbPath = path.join(testDir, "stress_cache.json");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {

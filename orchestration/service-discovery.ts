@@ -39,12 +39,20 @@ export class HealthMonitor implements IHealthMonitor {
   }
 
   async startMonitoring(): Promise<void> {
-    await this.pollChecks();
+    // In offline mode, skip the initial synchronous poll (which would time out trying to
+    // reach Floci and other services that aren't running). The periodic timer still runs
+    // unref'd so if services appear later they'll be detected.
+    const offlineMode = process.env.GHOSTSTACK_OFFLINE_MODE === "1" ||
+      (process.env.GHOSTSTACK_OFFLINE_MODE ?? "").toLowerCase() === "true";
+    if (!offlineMode) {
+      await this.pollChecks();
+    }
     this.timer = setInterval(() => {
       this.pollChecks().catch((err) => {
         console.error("Health monitor loop failure:", err);
       });
     }, 5000);
+    this.timer.unref();
   }
 
   async stopMonitoring(): Promise<void> {
@@ -72,7 +80,12 @@ export class HealthMonitor implements IHealthMonitor {
         let probeLatencyMs: number | undefined;
 
         if (serviceName === "floci") {
-          const probe = await probeFlociHealth(resolveFlociEndpoint());
+          // Use a much shorter timeout when offline (200ms vs 4s) to avoid cascading delays
+          const timeoutMs = process.env.GHOSTSTACK_OFFLINE_MODE === "1" ||
+            (process.env.GHOSTSTACK_OFFLINE_MODE ?? "").toLowerCase() === "true"
+            ? 200
+            : 4000;
+          const probe = await probeFlociHealth(resolveFlociEndpoint(), timeoutMs);
           probeLatencyMs = probe.latencyMs;
           status = probe.reachable ? "healthy" : "offline";
         } else if (hc?.path && def?.port) {

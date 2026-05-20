@@ -2,23 +2,23 @@
 
 GhostStack is a strictly governed, local-first orchestration nucleus built for deterministic, verifiable workflow execution. It acts as a lightweight execution fabric that provides sandboxed environment execution, crash recovery via event-sourcing, and rigorous capability policy enforcement across local machine operations and Model Context Protocol (MCP) tool integration.
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+Run `npm run test`, `npm run healthcheck`, and `npm run lint` locally to verify this checkout.
 
 ## Core Architecture
 
 GhostStack's architecture avoids autonomous "swarms" or recursive unverified planning in favor of a **deterministic execution pipeline**:
 - **Orchestration Nucleus**: Safe boot sequencing, topological DAG dependency resolution, and task prioritization queueing.
-- **State Persistence & Replay**: A file-locked safe persistence layer ensuring zero-contention I/O writes. The system supports full crash recovery via event-log replays.
+- **State persistence & replay**: Append-only **JSONL event log** plus atomic JSON state snapshots (not a distributed durability WAL). Supports best-effort replay; corrupt lines are skipped with diagnostics.
 - **Workflow Engine**: Maps JSON-defined declarative workflows to actionable execution traces.
-- **Observability**: Exhaustive tracing, structured logging, and microsecond-precision metrics tracking outputted to JSONL files.
+- **Observability**: Structured logging, in-process timings/counters (`MetricsCollector`), and optional JSONL exports — no synthetic “scores”; measure what you run.
 - **Sandboxed Execution**: Isolated browser environments and absolute-resolved filesystem bounds.
 
 ## Feature Highlights
 
 - **Governed Workflows**: Explicit budget limits, strict policy evaluations, and required manual/automatic approval hooks.
-- **Replay Recovery**: Deterministic state rebuilding from historical telemetry and execution logs.
+- **Replay recovery**: Rebuild state from the JSONL event log and persisted snapshots (best-effort when lines are corrupt).
 - **Browser & Scraping Integration**: Enforced crawl quotas and safe Chromium process management.
 - **Diagnostic APIs**: Native HTTP endpoints to inspect execution queues, memory states, and dependency resolution.
 
@@ -32,8 +32,9 @@ GhostStack's architecture avoids autonomous "swarms" or recursive unverified pla
 ├── schemas/             # JSON schemas defining tasks, state, and specs
 ├── specs/               # Declarative workflow spec examples (e.g. demo-etl)
 ├── apps/                # Vendored open-source integration repos (10 projects)
-├── ghoststack_dossier.html   # 12-repo architecture intelligence dossier
-├── resource-readme.html      # 6 core repos quick reference sheet
+├── archive/quarantine/  # Archived non-shipped narrative/spec trees (see README inside)
+├── ghoststack_dossier.html   # Source of truth: 12-repo systems thesis (open in browser)
+├── resource-readme.html      # Source of truth: 6 core repos reference sheet
 └── docker/              # Container build and optional Phase 2 compose stacks
 ```
 
@@ -80,9 +81,24 @@ Ensure the orchestration system operates as expected:
 npm run test
 ```
 
-### 6. Executing Benchmarks
+### 6. Operator CLI (`gs`)
 
-GhostStack averages ~19ms loop latencies with high queue throughput:
+After `npm install`, use the CLI for day-to-day operations:
+
+```bash
+npx ts-node runtime/cli.ts init          # scaffold data-runtime/, specs/, config
+npx ts-node runtime/cli.ts bootstrap     # boot orchestrator + replay events
+npx ts-node runtime/cli.ts status        # API / Floci / MCP health snapshot
+npm start                                # HTTP API on port 3000 (foreground)
+npx ts-node runtime/cli.ts start:federation   # Docker Floci + API + optional MCP
+npx ts-node runtime/cli.ts stop          # graceful federation shutdown
+```
+
+Aliases: `npm run gs -- <command>` (see `package.json`).
+
+### 7. Executing Benchmarks
+
+See measured numbers in [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) (from the benchmark runner on a reference machine):
 
 ```bash
 npm run benchmark
@@ -155,7 +171,7 @@ Web UI: `http://localhost:8001`. Use the consume volume for watch-folder ingesti
 We strictly mandate schema adherence and static checking.
 * **Format**: `npm run format` (Workspace-wide Prettier standards)
 * **Lint**: `npm run lint` (ESLint verification)
-* **Tests**: `npm run test` (Jest verification with 100% pipeline passing required)
+* **Tests**: `npm run test` (Jest)
 
 ## Known Limitations
 

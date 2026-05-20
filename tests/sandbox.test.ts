@@ -7,9 +7,10 @@ describe("Milestone 1: Filesystem Sandbox & Path Isolation", () => {
   const constraint = new SandboxConstraint(100, rootDir); // 100 bytes limit
 
   beforeEach(() => {
-    if (!fs.existsSync(rootDir)) {
-      fs.mkdirSync(rootDir, { recursive: true });
+    if (fs.existsSync(rootDir)) {
+      fs.rmSync(rootDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(rootDir, { recursive: true });
   });
 
   afterEach(() => {

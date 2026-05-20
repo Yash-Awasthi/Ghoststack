@@ -44,3 +44,11 @@ build/
 # Operating system files
 .DS_Store
 Thumbs.db
+nul
+
+# Local operator config (use ghoststack.config.example.json)
+ghoststack.config.json
+
+# Quarantined research trees (see archive/quarantine/README.md)
+archive/quarantine/*
+!archive/quarantine/README.md

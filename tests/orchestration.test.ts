@@ -67,9 +67,10 @@ describe("GhostStack Orchestrator Crash Recovery & Core Integration", () => {
   const eventLogPath = path.join(testDir, "integration_events.jsonl");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
 
-function runHealthcheck() {
+export function runHealthcheck(): boolean {
   console.log("\x1b[36m=========================================================================");
   console.log("             GHOSTSTACK V1.1 PLATFORM SYSTEM HEALTHCHECK                ");
   console.log("=========================================================================\x1b[0m\n");
@@ -12,7 +12,8 @@ function runHealthcheck() {
     { name: "Workspace Core Folders Structure", check: checkFolders },
     { name: "YAML Configuration Validation", check: checkYAMLConfigs },
     { name: "Orchestrator Classes Compilation Integrity", check: checkCompilationIntegrity },
-    { name: "Interface Schemas Verification", check: checkSchemas }
+    { name: "Interface Schemas Verification", check: checkSchemas },
+    { name: "MCP Bridge & Runtime Composition", check: checkMcpBridgeHealth }
   ];
 
   for (const check of checks) {
@@ -35,13 +36,12 @@ function runHealthcheck() {
     console.log("\x1b[32m=========================================================================");
     console.log("  ALL SYSTEM CHECKS PASSED: GHOSTSTACK V1.1 CORE IS HEALTHY & OPERATIONAL");
     console.log("=========================================================================\x1b[0m");
-    process.exit(0);
   } else {
     console.log("\x1b[31m=========================================================================");
     console.log("  CRITICAL SYSTEM HEALTH SANITY FAILURE: PLEASE INSPECT MALFORMED ASSETS");
     console.log("=========================================================================\x1b[0m");
-    process.exit(1);
   }
+  return healthy;
 }
 
 function checkFolders(): boolean {
@@ -122,4 +122,63 @@ function checkSchemas(): boolean {
   return true;
 }
 
-runHealthcheck();
+/**
+ * Verify MCP bridge and runtime composition assets are present.
+ * Checks for:
+ *   - GhostStack MCP bridge orchestration module
+ *   - FastMCP host adapter
+ *   - MCP registry schema
+ *   - Python MCP server entrypoint (if Python is available)
+ */
+function checkMcpBridgeHealth(): boolean {
+  const root = path.join(__dirname, "..");
+  let allOk = true;
+
+  // 1. GhostStack MCP bridge orchestration module
+  const bridgePath = path.join(root, "orchestration", "ghoststack-mcp-bridge.ts");
+  if (fs.existsSync(bridgePath)) {
+    console.log(`  [OK] GhostStack MCP bridge module: ghoststack-mcp-bridge.ts`);
+  } else {
+    console.error(`  [ERR] Missing MCP bridge module: ghoststack-mcp-bridge.ts`);
+    allOk = false;
+  }
+
+  // 2. FastMCP host adapter
+  const fastMcpHostPath = path.join(root, "runtime", "adapters", "fastmcp-host.ts");
+  if (fs.existsSync(fastMcpHostPath)) {
+    console.log(`  [OK] FastMCP host adapter: fastmcp-host.ts`);
+  } else {
+    console.error(`  [ERR] Missing FastMCP host adapter: fastmcp-host.ts`);
+    allOk = false;
+  }
+
+  // 3. MCP registry schema
+  const mcpRegistryPath = path.join(root, "schemas", "mcp_registry.json");
+  if (fs.existsSync(mcpRegistryPath)) {
+    try {
+      const content = fs.readFileSync(mcpRegistryPath, "utf8");
+      JSON.parse(content);
+      console.log(`  [OK] MCP registry schema: mcp_registry.json`);
+    } catch (err: any) {
+      console.error(`  [ERR] Malformed MCP registry schema: ${err.message}`);
+      allOk = false;
+    }
+  } else {
+    console.error(`  [ERR] Missing MCP registry schema: mcp_registry.json`);
+    allOk = false;
+  }
+
+  // 4. Python MCP server entrypoint (optional — warn only)
+  const pythonMcpPath = path.join(root, "runtime", "mcp", "ghoststack_mcp_server.py");
+  if (fs.existsSync(pythonMcpPath)) {
+    console.log(`  [OK] Python MCP server entrypoint: ghoststack_mcp_server.py`);
+  } else {
+    console.warn(`  [WARN] Python MCP server entrypoint not found (optional if MCP external is disabled): ghoststack_mcp_server.py`);
+  }
+
+  return allOk;
+}
+
+if (require.main === module) {
+  process.exit(runHealthcheck() ? 0 : 1);
+}

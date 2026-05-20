@@ -1,10 +1,13 @@
+# GhostStack Health Checks Configuration
+# Health check paths and intervals for each service.
+
 healthchecks:
   floci:
-    path: /_floci/health
+    path: "/_floci/health"
     interval: 5000
-  fcc:
-    path: /admin
-    interval: 2000
-  mcp:
+  orchestrator:
+    path: /health
+    interval: 5
+  fastmcp:
     path: /mcp
-    interval: 2000
+    interval: 10

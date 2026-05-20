@@ -9,9 +9,10 @@ describe("Milestone 3: Replayable Approvals & Safety Guards", () => {
   const eventLogPath = path.join(testDir, "approval_events.jsonl");
 
   beforeEach(() => {
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {
