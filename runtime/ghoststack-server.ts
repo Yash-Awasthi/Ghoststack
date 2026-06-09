@@ -74,6 +74,20 @@ export async function createGhostStackServer(repoRoot: string): Promise<GhostSta
         return;
       }
 
+      // ── API token auth guard ─────────────────────────────────────────────
+      // Set GHOSTSTACK_API_TOKEN to require Bearer token auth on all non-health endpoints.
+      const apiToken = process.env.GHOSTSTACK_API_TOKEN;
+      if (apiToken && pathname !== "/health" && pathname !== "/healthz") {
+        const authHeader = (req.headers["authorization"] as string) ?? "";
+        const provided = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+        if (provided !== apiToken) {
+          res.statusCode = 401;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ error: "Unauthorized: invalid or missing API token" }));
+          return;
+        }
+      }
+
       res.setHeader("Content-Type", "application/json");
 
       if (method === "GET") {

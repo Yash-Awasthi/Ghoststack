@@ -213,9 +213,9 @@ describe("TaskDelegationAgent", () => {
     const bus = new AgentBus(eventBus);
 
     await bus.registerCapability("executor", ["bench-press"]);
-    const delegator = new TaskDelegationAgent(bus);
+    const _delegator = new TaskDelegationAgent(bus);
 
-    const messageId = await bus.send({
+    const _messageId = await bus.send({
       from: "planner",
       to: "task-delegator",
       type: "delegation",
@@ -238,9 +238,9 @@ describe("TaskDelegationAgent", () => {
   test("reports error when no agent found", async () => {
     const eventBus = new LocalEventBus();
     const bus = new AgentBus(eventBus);
-    const delegator = new TaskDelegationAgent(bus);
+    const _delegator = new TaskDelegationAgent(bus);
 
-    const messageId = await bus.send({
+    const _messageId = await bus.send({
       from: "planner",
       to: "task-delegator",
       type: "delegation",

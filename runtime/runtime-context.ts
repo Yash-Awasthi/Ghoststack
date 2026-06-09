@@ -18,7 +18,7 @@ import { MemoryStore, TraceIndexer } from "../orchestration/memory-store";
 import { AgentBus, TaskDelegationAgent } from "../orchestration/agent-bus";
 import { CircuitBreaker, HealthAwareCircuitBreaker, CircuitBreakerAdapterWrapper } from "../orchestration/circuit-breaker";
 import { RuntimeCompactor, LeakDetector, ResourceQuotaManager } from "../orchestration/runtime-compactor";
-import { dispatchExtendedAction, EXTENDED_FLOCI_ACTIONS } from "../orchestration/floci-extended";
+import { EXTENDED_FLOCI_ACTIONS } from "../orchestration/floci-extended";
 import { resolveFlociEndpoint } from "../orchestration/floci-client";
 import { GHOSTSTACK_MCP_TOOLS } from "../orchestration/ghoststack-mcp-bridge";
 import { LocalServiceDiscovery, HealthMonitor } from "../orchestration/service-discovery";
@@ -186,7 +186,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
   const traceIndexer = new TraceIndexer(eventStore, memoryStore);
   // Subscribe to event bus to auto-index events as memory entries
   const cleanupFns: Array<() => void> = [];
-  const wildcardSub = eventBus.subscribe("*", async (payload: any) => {
+  const wildcardSub = eventBus.subscribe("*", async (_payload: any) => {
     // Fire-and-forget index; never block event processing
     traceIndexer.indexRecentEvents().catch(() => {});
   });

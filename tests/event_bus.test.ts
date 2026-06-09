@@ -99,7 +99,7 @@ describe("Event Bus — History Ring Buffer", () => {
   it("replayEvents(since) should return events after the given time", async () => {
     const bus = new LocalEventBus({ maxHistorySize: 100 });
     // Publish two "before" events with a known timestamp ceiling
-    const before1 = new Date();
+    const _before1 = new Date();
     await bus.publish("before.1", {});
     await bus.publish("before.2", {});
 
@@ -266,12 +266,12 @@ describe("Event Bus — Backpressure", () => {
 
   it("should drop events when backpressure threshold is exceeded", async () => {
     const bus = new LocalEventBus();
-    let slowCount = 0;
+    let _slowCount = 0;
 
     // Slow handler — introduces backpressure
     bus.subscribe("slow", async () => {
       await new Promise((r) => setTimeout(r, 50));
-      slowCount++;
+      _slowCount++;
     });
 
     // Fire many events rapidly to exceed MAX_PENDING

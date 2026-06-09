@@ -9,7 +9,6 @@ import {
   WorkflowRegistry,
   WorkflowTelemetry,
   WorkflowEngine,
-  BrowserResearchWorkflowTemplate,
   LocalCloudProvisioningTemplate,
   DocumentProcessingTemplate
 } from "../orchestration/workflow-engine";
@@ -57,7 +56,7 @@ describe("Crash Recovery & Workflow Checkpointing", () => {
     const metrics = new MetricsCollector();
     const tracer = new TraceRecorder();
     const queue = new MemoryQueueBackend();
-    const discovery = new LocalServiceDiscovery();
+    const _discovery = new LocalServiceDiscovery();
     const approval = new ApprovalWorkflow(eventStore, eventBus);
     const browserAdapter = new BrowserExecutionAdapter(new EnvironmentTelemetry(), true);
     const scrapingAdapter = new ScrapingExecutionAdapter(new EnvironmentTelemetry(), true);
@@ -101,9 +100,9 @@ describe("Crash Recovery & Workflow Checkpointing", () => {
     await engine.executeWorkflow("cp-check-wf", "exec-cp-01");
 
     // Checkpoint should exist
-    const cp = engine.getCheckpoint("exec-cp-01");
+    const _cp = engine.getCheckpoint("exec-cp-01");
     // After successful execution, checkpoints are cleaned up
-    expect(cp).toBeUndefined();
+    expect(_cp).toBeUndefined();
   });
 
   it("cancels a completed execution and prevents re-execution", async () => {
@@ -177,7 +176,7 @@ describe("Crash Recovery & Workflow Checkpointing", () => {
     const metrics2 = new MetricsCollector();
     const tracer2 = new TraceRecorder();
     const queue2 = new MemoryQueueBackend();
-    const discovery2 = new LocalServiceDiscovery();
+    const _discovery2 = new LocalServiceDiscovery();
     const approval2 = new ApprovalWorkflow(eventStore2, eventBus2);
     const browserAdapter2 = new BrowserExecutionAdapter(new EnvironmentTelemetry(), true);
     const scrapingAdapter2 = new ScrapingExecutionAdapter(new EnvironmentTelemetry(), true);
@@ -274,7 +273,7 @@ describe("Crash Recovery & Workflow Checkpointing", () => {
     expect(exec.status).toBe("failed");
 
     // Failed executions should not leave a paused checkpoint (they just fail)
-    const cp = engine.getCheckpoint("exec-fail-cp-01");
+    const _cp = engine.getCheckpoint("exec-fail-cp-01");
     // If constraint violation happens before checkpoint creation, cp will be undefined
     // The checkpoint is only created after constraints pass
     // This is fine — the failure is clean with no residual state
@@ -315,7 +314,7 @@ describe("WorkflowEngine Integration with MemoryStore", () => {
     const metrics = new MetricsCollector();
     const tracer = new TraceRecorder();
     const queue = new MemoryQueueBackend();
-    const discovery = new LocalServiceDiscovery();
+    const _discovery = new LocalServiceDiscovery();
     const approval = new ApprovalWorkflow(eventStore, eventBus);
     const browserAdapter = new BrowserExecutionAdapter(new EnvironmentTelemetry(), true);
     const scrapingAdapter = new ScrapingExecutionAdapter(new EnvironmentTelemetry(), true);

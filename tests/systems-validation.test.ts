@@ -17,7 +17,6 @@ import { CircuitBreaker } from "../orchestration/circuit-breaker";
 import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
 import { MemoryStore } from "../orchestration/memory-store";
 import { IExecutionAdapter, IExecutionContext } from "../orchestration/interfaces/execution.interface";
-import { QueueJob } from "../orchestration/interfaces/queue.interface";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -47,7 +46,7 @@ class FailInjectorAdapter implements IExecutionAdapter {
     return taskType === "floci" || taskType === "inject";
   }
 
-  async execute(task: any, _context: IExecutionContext): Promise<any> {
+  async execute(_task: any, _context: IExecutionContext): Promise<any> {
     this.callCount++;
     const mode = this.mode;
 
@@ -103,9 +102,6 @@ function cleanDir(): void {
   fs.mkdirSync(testDir, { recursive: true });
 }
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
-}
 
 // ─── Systems Validation Suite ─────────────────────────────────────────────
 

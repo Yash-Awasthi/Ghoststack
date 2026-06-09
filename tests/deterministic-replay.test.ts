@@ -59,7 +59,7 @@ function buildEngine() {
   const metrics = new MetricsCollector();
   const tracer = new TraceRecorder();
   const queue = new MemoryQueueBackend();
-  const discovery = new LocalServiceDiscovery();
+  const _discovery = new LocalServiceDiscovery();
   const approval = new ApprovalWorkflow(eventStore, eventBus);
   const browserAdapter = new BrowserExecutionAdapter(new EnvironmentTelemetry(), true);
   const scrapingAdapter = new ScrapingExecutionAdapter(new EnvironmentTelemetry(), true);

@@ -109,8 +109,8 @@ export class RuntimeInspector implements IRuntimeInspector {
     memoryStore?: IMemoryStore,
     agentBus?: IAgentBus,
     circuitBreaker?: CircuitBreaker,
-    circuitBreakerWrapper?: any,
-    traceIndexer?: any
+    _circuitBreakerWrapper?: any,
+    _traceIndexer?: any
   ) {
     this.metrics = metrics;
     this.queue = queue;

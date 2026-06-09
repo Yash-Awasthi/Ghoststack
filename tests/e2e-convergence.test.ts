@@ -211,7 +211,7 @@ describe("E2E Convergence: Workflow → Floci → Memory → Graph → Inspector
   });
 
   it("inspects workflow execution via RuntimeInspector", async () => {
-    const { registry, engine, inspector, telemetry, orchestrator } = setupFullStack();
+    const { registry, engine, inspector, telemetry: _telemetry, orchestrator } = setupFullStack();
     await orchestrator.start();
 
     const cloudTemplate = new LocalCloudProvisioningTemplate();
@@ -242,7 +242,7 @@ describe("E2E Convergence: Workflow → Floci → Memory → Graph → Inspector
     expect(wfList.some((w: any) => w.id === "e2e-inspect-wf")).toBe(true);
 
     // Templates
-    const templates = inspector.getWorkflowTemplates();
+    const _templates = inspector.getWorkflowTemplates();
     // Templates come from registry, which we didn't populate with templates
     // The inspector already has templates via registry, but none registered yet
   });

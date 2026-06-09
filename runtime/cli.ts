@@ -11,7 +11,6 @@ import { createRuntimeContext, startRuntime, stopRuntime } from "./runtime-conte
 import { createGhostStackServer } from "./ghoststack-server";
 import { runFederationE2e } from "./e2e-federation";
 import { ADAPTER_MANIFEST } from "./adapters/manifest";
-import { probeFlociHealth, resolveFlociEndpoint } from "../orchestration/floci-client";
 import { runHealthcheck } from "./healthcheck";
 
 const repoRoot = path.resolve(__dirname, "..");

@@ -635,7 +635,7 @@ export class RuntimeGraph {
 
       this.snapshots.push(snapshot);
       if (this.snapshots.length > this.MAX_SNAPSHOTS) {
-        const removed = this.snapshots.shift()!;
+        const _removed = this.snapshots.shift()!;
         // Note: we don't try to delete old persisted snapshots here because
         // the persistence layer (FileRuntimePersistence) writes to a single
         // JSON file and can't delete individual keys. Old snapshots are left

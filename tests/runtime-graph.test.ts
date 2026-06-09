@@ -10,7 +10,7 @@
  * - Cascade-on-remove semantics
  */
 
-import { RuntimeGraph, MutationJournalEntry, IntegrityCheckpoint } from "../orchestration/runtime-graph";
+import { RuntimeGraph } from "../orchestration/runtime-graph";
 import { FileRuntimePersistence } from "../orchestration/persistence-manager";
 import { LocalEventBus } from "../orchestration/event-bus";
 import * as path from "path";
