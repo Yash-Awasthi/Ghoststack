@@ -201,4 +201,46 @@ export class GhostStackOrchestrator {
   getQueue(): MemoryQueueBackend {
     return this.queue;
   }
+
+  /**
+   * Start the executor's continuous run loop, draining the queue until empty
+   * or until `maxIterations` is reached.
+   *
+   * This is the primary way to run GhostStack as a long-lived process:
+   *   await orchestrator.start();
+   *   await orchestrator.submitCognitiveObjective("deploy ingestion pipeline");
+   *   const processed = await orchestrator.run();
+   *
+   * @param maxIterations  Safety ceiling — default 10 000.
+   * @param idleDelayMs    Poll interval when the queue is empty (default 100ms).
+   * @returns Number of tasks successfully executed.
+   */
+  async run(maxIterations = 10_000, idleDelayMs = 100): Promise<number> {
+    if (!this.executor) {
+      throw new Error("Orchestrator has no TaskExecutor registered. Provide one via the constructor.");
+    }
+    this.logger?.info("Orchestrator run loop starting", { maxIterations, idleDelayMs });
+    const processed = await this.executor.runLoop(maxIterations, idleDelayMs);
+    this.logger?.info("Orchestrator run loop completed", { processed });
+    return processed;
+  }
+
+  /**
+   * Submit a cognitive objective and immediately drain the queue.
+   * Convenience wrapper for one-shot use cases.
+   */
+  async submitAndRun(
+    objective: string,
+    runOptions?: { maxIterations?: number; idleDelayMs?: number }
+  ): Promise<{ planId: string; allowed: boolean; reason?: string; processed: number }> {
+    const result = await this.submitCognitiveObjective(objective);
+    if (!result.allowed) {
+      return { ...result, processed: 0 };
+    }
+    const processed = await this.run(
+      runOptions?.maxIterations,
+      runOptions?.idleDelayMs
+    );
+    return { ...result, processed };
+  }
 }

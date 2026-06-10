@@ -8,6 +8,85 @@ import { registerGhostStackMcpBridge } from "../orchestration/ghoststack-mcp-bri
 import { IExecutionContext } from "../orchestration/interfaces/execution.interface";
 import { runFederationE2e } from "./e2e-federation";
 
+// ─── Structured health response ──────────────────────────────────────────────
+
+async function buildHealthResponse(ctx: GhostStackRuntimeContext, bootMs: number): Promise<{
+  status: "healthy" | "degraded" | "unhealthy";
+  version: string;
+  uptime_ms: number;
+  boot_ms: number;
+  timestamp: string;
+  components: Record<string, { status: string; detail?: string }>;
+}> {
+  const components: Record<string, { status: string; detail?: string }> = {};
+
+  // Queue
+  try {
+    const queueLen = await ctx.queue?.getQueueLength?.() ?? 0;
+    components.queue = { status: "healthy", detail: `${queueLen} job(s) pending` };
+  } catch (e: any) {
+    components.queue = { status: "error", detail: e?.message };
+  }
+
+  // Floci adapter
+  try {
+    const flociHealth = ctx.flociAdapter?.getLastHealth?.();
+    if (flociHealth?.reachable === false) {
+      components.floci = { status: "offline", detail: `latency: ${flociHealth.latencyMs ?? "-"}ms` };
+    } else if (flociHealth?.reachable === true) {
+      components.floci = { status: "healthy", detail: `latency: ${flociHealth.latencyMs}ms` };
+    } else {
+      components.floci = { status: "unknown", detail: "not yet probed" };
+    }
+  } catch (e: any) {
+    components.floci = { status: "error", detail: e?.message };
+  }
+
+  // Event bus
+  try {
+    const history = ctx.eventBus?.getHistory?.();
+    components.event_bus = {
+      status: "healthy",
+      detail: `${Array.isArray(history) ? history.length : "?"} event(s) in history`
+    };
+  } catch (e: any) {
+    components.event_bus = { status: "error", detail: e?.message };
+  }
+
+  // Workflow engine
+  try {
+    const wfStats = ctx.inspector?.getWorkflowTelemetryStats?.();
+    components.workflow_engine = {
+      status: "healthy",
+      detail: `${wfStats?.totalExecutions ?? 0} total execution(s)`
+    };
+  } catch (e: any) {
+    components.workflow_engine = { status: "error", detail: e?.message };
+  }
+
+  const hasError = Object.values(components).some((c) => c.status === "error" || c.status === "unhealthy");
+  const hasDegraded = Object.values(components).some((c) => c.status === "degraded" || c.status === "offline");
+  const overall = hasError ? "unhealthy" : hasDegraded ? "degraded" : "healthy";
+
+  // Read version from package.json — resolved relative to the dist or source root
+  let version = "unknown";
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    version = (require("../package.json") as { version: string }).version;
+  } catch {
+    // ignore
+  }
+
+  return {
+    status: overall,
+    version,
+    uptime_ms: Date.now() - bootMs,
+    boot_ms: bootMs,
+    timestamp: new Date().toISOString(),
+    components
+  };
+}
+
 function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -40,6 +119,7 @@ export async function createGhostStackServer(repoRoot: string): Promise<GhostSta
 
   const diagnosticApi = new RuntimeDiagnosticAPI(ctx.inspector);
   const port = Number(process.env.GHOSTSTACK_API_PORT || "3000");
+  const bootMs = bootStarted;
   ctx.metrics.recordTiming("ghoststack.boot_ms", Date.now() - bootStarted);
 
   const server = http.createServer(async (req, res) => {
@@ -49,6 +129,15 @@ export async function createGhostStackServer(repoRoot: string): Promise<GhostSta
     const pathname = url.pathname;
 
     try {
+      // ── Health check — always public, no auth required ────────────────────
+      if (method === "GET" && (pathname === "/health" || pathname === "/healthz")) {
+        const health = await buildHealthResponse(ctx, bootMs);
+        res.statusCode = health.status === "healthy" ? 200 : health.status === "degraded" ? 200 : 503;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(health, null, 2));
+        return;
+      }
+
       if (method === "GET" && pathname === "/metrics/prometheus") {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/plain; version=0.0.4");

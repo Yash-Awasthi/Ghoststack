@@ -1,4 +1,5 @@
 import * as path from "path";
+import { loadEnvFromRoot } from "./env-loader";
 import { GhostStackOrchestrator } from "./orchestrator";
 import { RuntimeManager } from "../orchestration/runtime-manager";
 import { YAMLConfigLoader } from "./config-loader";
@@ -91,6 +92,9 @@ export type GhostStackRuntimeContext = {
 };
 
 export async function createRuntimeContext(repoRoot: string): Promise<GhostStackRuntimeContext> {
+  // Load .env file before anything reads process.env — existing vars always win.
+  loadEnvFromRoot(repoRoot);
+
   const sandbox = createRuntimeSandbox(repoRoot);
   const runtimeDbDir = sandbox.dataDir;
   const eventLogPath = path.join(runtimeDbDir, "events.jsonl");

@@ -12,6 +12,7 @@ import { createGhostStackServer } from "./ghoststack-server";
 import { runFederationE2e } from "./e2e-federation";
 import { ADAPTER_MANIFEST } from "./adapters/manifest";
 import { runHealthcheck } from "./healthcheck";
+import { PlanningEngine } from "../orchestration/planning-engine";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -50,6 +51,9 @@ Commands:
   graph:repair         Repair RuntimeGraph integrity (remove dangling edges, fix deps)
   workflows:idempotency  List idempotency tokens for duplicate-safe execution tracking
   workflows:verify <id>  Verify workflow execution state integrity (checkpoint vs telemetry)
+  plan <objective>     Generate a governed execution plan from a natural-language objective
+  queue                Show current executor queue state (pending + dead-letter jobs)
+  version              Print GhostStack version and runtime info
   help                 Show this help
 
 Config: ghoststack.config.json + .env (see ghoststack.config.example.json)
@@ -694,6 +698,104 @@ async function cmdMemory(): Promise<void> {
   }
 }
 
+async function cmdVersion(): Promise<void> {
+  let version = "unknown";
+  const nodeVersion = process.versions.node;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    version = (require("../package.json") as { version: string }).version;
+  } catch {
+    // ignore
+  }
+  console.log(`\nGhostStack v${version}`);
+  console.log(`Node.js  ${nodeVersion}`);
+  console.log(`Platform ${process.platform} / ${process.arch}`);
+  console.log(`PID      ${process.pid}\n`);
+}
+
+async function cmdPlan(objective: string | undefined): Promise<void> {
+  if (!objective || objective.trim() === "") {
+    console.error("Usage: gs plan <objective>");
+    console.error(`  Example: gs plan "deploy ingestion pipeline bucketName=my-data"`);
+    process.exit(1);
+  }
+
+  const engine = new PlanningEngine();
+  const plan = await engine.generatePlan(objective);
+  const total = plan.synthesisResults.reduce(
+    (sum, t) => sum + (t.governanceMetadata?.costEstimate ?? 0),
+    0
+  );
+
+  console.log(`\n======================== Generated Plan ============================`);
+  console.log(`  Plan ID:   ${plan.planId}`);
+  console.log(`  Objective: ${plan.objective}`);
+  console.log(`  Tasks:     ${plan.synthesisResults.length}`);
+  console.log(`  Est. cost: $${total.toFixed(4)}`);
+  console.log(`  Generated: ${plan.timestamp.toISOString()}`);
+  console.log(`----------------------------------------------------------------------`);
+
+  for (let i = 0; i < plan.synthesisResults.length; i++) {
+    const t = plan.synthesisResults[i];
+    const priority = `[${t.priority.toUpperCase().padEnd(6)}]`;
+    const deps = t.dependencies.length > 0 ? `deps: ${t.dependencies.join(", ")}` : "deps: none";
+    const dangerous = t.governanceMetadata?.dangerous ? " ⚠ DANGEROUS" : "";
+    console.log(`\n  #${i + 1}  ${t.action}  ${priority}  ${deps}${dangerous}`);
+    console.log(`       cost: $${(t.governanceMetadata?.costEstimate ?? 0).toFixed(4)}  scope: ${t.governanceMetadata?.resourceScope}`);
+    if (Object.keys(t.arguments).length > 0) {
+      console.log(`       args: ${JSON.stringify(t.arguments)}`);
+    }
+    console.log(`       id:   ${t.taskId}`);
+  }
+
+  console.log(`\n======================================================================`);
+  if (plan.synthesisResults.some((t) => t.governanceMetadata?.dangerous)) {
+    console.log(`  ⚠  Plan contains dangerous operations — governance approval required.`);
+  }
+  console.log(`\n`);
+}
+
+async function cmdQueue(): Promise<void> {
+  const ctx = await createRuntimeContext(repoRoot);
+  await startRuntime(ctx);
+  try {
+    const active = await ctx.queue?.getActiveJobs?.() ?? [];
+    const dlq = await ctx.queue?.getDeadLetterQueue?.() ?? [];
+
+    console.log(`\n======================== Queue Status ==============================`);
+    console.log(`  Pending:     ${active.length}`);
+    console.log(`  Dead letter: ${dlq.length}`);
+    console.log(`----------------------------------------------------------------------`);
+
+    if (active.length === 0) {
+      console.log("  (queue is empty)");
+    } else {
+      console.log(`  ${"JOB ID".padEnd(32)} ${"PRIORITY".padEnd(10)} ${"RETRIES".padEnd(8)} TYPE`);
+      console.log(`  ${"─".repeat(70)}`);
+      for (const job of active) {
+        const id = job.id.padEnd(32);
+        const pri = (job.priority ?? "?").padEnd(10);
+        const retries = `${job.retries}/${job.maxRetries}`.padEnd(8);
+        const type = job.payload?.type ?? "?";
+        console.log(`  ${id} ${pri} ${retries} ${type}`);
+      }
+    }
+
+    if (dlq.length > 0) {
+      console.log(`\n  Dead-letter jobs:`);
+      for (const job of dlq) {
+        const id = job.id.padEnd(32);
+        const pri = (job.priority ?? "?").padEnd(10);
+        console.log(`  ✗ ${id} ${pri} retries: ${job.retries}/${job.maxRetries}`);
+      }
+    }
+
+    console.log(`======================================================================\n`);
+  } finally {
+    await stopRuntime(ctx);
+  }
+}
+
 async function main(): Promise<void> {
   const command = process.argv[2] ?? "help";
 
@@ -792,6 +894,17 @@ async function main(): Promise<void> {
     case "diagnose":
       loadGhostStackConfig(repoRoot);
       await cmdDiagnose();
+      break;
+    case "version":
+    case "--version":
+    case "-v":
+      await cmdVersion();
+      break;
+    case "plan":
+      await cmdPlan(process.argv.slice(3).join(" ") || process.argv[3]);
+      break;
+    case "queue":
+      await cmdQueue();
       break;
     default:
       console.error(`Unknown command: ${command}`);
