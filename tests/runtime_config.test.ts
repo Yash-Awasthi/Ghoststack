@@ -21,7 +21,7 @@ describe("Runtime Config Loader System", () => {
     const services = await loader.loadServices();
     expect(services.services.floci.type).toBe("docker");
     expect(services.services.floci.port).toBe(4566);
-    expect(services.services.mcp.cmd).toBe("fastmcp run server.py");
+    expect(services.services.mcp.cmd).toBe("python runtime/mcp/ghoststack_mcp_server.py");
   });
 
   it("should successfully load strongly typed healthchecks config", async () => {

@@ -21,7 +21,7 @@ export type AdapterManifestEntry = {
 export const ADAPTER_MANIFEST: AdapterManifestEntry[] = [
   {
     id: "floci",
-    path: "apps/floci",
+    path: "runtime/services/floci",
     mode: "orchestrated",
     defaultPort: 4566,
     healthPath: "/health",
@@ -29,7 +29,7 @@ export const ADAPTER_MANIFEST: AdapterManifestEntry[] = [
   },
   {
     id: "stealth-browser",
-    path: "apps/CloakBrowser",
+    path: "runtime/bridges/stealth_browser_bridge.py",
     mode: "orchestrated",
     defaultPort: 7701,
     healthPath: "/health",
@@ -37,7 +37,7 @@ export const ADAPTER_MANIFEST: AdapterManifestEntry[] = [
   },
   {
     id: "scraping",
-    path: "apps/Scrapling",
+    path: "runtime/bridges/web_scraping_bridge.py",
     mode: "orchestrated",
     defaultPort: 7702,
     healthPath: "/health",
@@ -45,7 +45,7 @@ export const ADAPTER_MANIFEST: AdapterManifestEntry[] = [
   },
   {
     id: "local-inference",
-    path: "apps/airllm",
+    path: "runtime/bridges/local_inference_bridge.py",
     mode: "orchestrated",
     defaultPort: 7703,
     healthPath: "/health",
@@ -53,39 +53,39 @@ export const ADAPTER_MANIFEST: AdapterManifestEntry[] = [
   },
   {
     id: "mcp-server",
-    path: "apps/fastmcp",
+    path: "runtime/bridges/mcp_server_bridge.py",
     mode: "orchestrated",
     defaultPort: 7704,
     healthPath: "/health",
-    description: "MCP server exposing GhostStack capabilities as tools via FastMCP framework."
+    description: "MCP server exposing GhostStack capabilities as tools over HTTP."
   },
   {
     id: "web-search",
-    path: "apps/Vane",
+    path: "orchestration/web-search-engine.ts",
     mode: "orchestrated",
     description: "Agentic web search + answer synthesis (classify → research → synthesize). Handles 'search'/'answer' task types."
   },
   {
     id: "code-agents",
-    path: "apps/codebuff",
+    path: "orchestration/code-agent-pool.ts",
     mode: "orchestrated",
     description: "Multi-agent code pool — FilePicker, CodeEditor, Reviewer, Researcher, Thinker. Handles code_explore/code_edit/code_review/research/reason task types."
   },
   {
     id: "free-model-provider",
-    path: "apps/free-claude-code",
+    path: "orchestration/language-model.ts",
     mode: "orchestrated",
-    description: "Multi-backend LLM routing — OpenRouter/Ollama/DeepSeek/local. Drop-in ILanguageModel for PlanningEngine."
+    description: "Multi-backend LLM routing — OpenRouter/Ollama/Groq/local. Drop-in ILanguageModel for PlanningEngine."
   },
   {
     id: "memory-compaction",
-    path: "apps/claude-mem",
+    path: "orchestration/memory-store.ts",
     mode: "orchestrated",
     description: "Rolling-window importance scoring for MemoryStore.compact() — recency + type weight + tag diversity."
   },
   {
-    id: "spec-kit",
-    path: "apps/spec-kit",
+    id: "spec-format",
+    path: "schemas/spec.schema.json",
     mode: "orchestrated",
     description: "Spec-driven workflow format — phases[], acceptance_criteria[], constraints{} fields in spec.schema.json."
   }

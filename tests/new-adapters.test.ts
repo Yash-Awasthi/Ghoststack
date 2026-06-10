@@ -2,7 +2,7 @@
  * Tests for v1.2.0 adapter integrations:
  *   - WebSearchAdapter  (web-search-engine → TaskExecutor)
  *   - CodeAgentPool     (five-agent code pool → TaskExecutor)
- *   - LocalInferenceAdapter (airllm bridge → TaskExecutor)
+ *   - LocalInferenceAdapter (local inference bridge → TaskExecutor)
  *
  * All tests run fully offline — no live HTTP calls, no Python bridges.
  * Bridge/LLM calls are intercepted at the module level.

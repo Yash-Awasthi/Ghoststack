@@ -50,10 +50,10 @@ describe("Milestone 1: Persistence & Replay Engine", () => {
   it("should save, retrieve, and clear key-value runtime states", async () => {
     const persistence = new FileRuntimePersistence(statePath);
 
-    await persistence.saveState("active_agent", { name: "spec-kit" });
+    await persistence.saveState("active_agent", { name: "ghoststack-worker" });
     const state = await persistence.getState<{ name: string }>("active_agent");
 
-    expect(state).toEqual({ name: "spec-kit" });
+    expect(state).toEqual({ name: "ghoststack-worker" });
 
     await persistence.clearState("active_agent");
     const cleared = await persistence.getState("active_agent");

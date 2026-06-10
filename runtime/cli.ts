@@ -25,7 +25,7 @@ Usage: gs <command> [options]
 Commands:
   init                 Scaffold config + folders + example specs (setup wizard)
   start                Start HTTP API server (foreground)
-  start:federation     Start Floci (Docker) + API + optional FastMCP
+  start:federation     Start Floci (Docker) + API + optional MCP server
   stop                 Stop federation resources (Docker Floci if we started it)
   restart              Restart federation services (stop, wait, start)
   ps                   List running federation services in a premium layout

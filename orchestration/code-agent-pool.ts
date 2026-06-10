@@ -1,7 +1,7 @@
 /**
  * CodeAgentPool — a pool of specialised code-focused execution agents.
  *
- * Adapted from the codebuff multi-agent pipeline:
+ * Agents:
  *   FilePicker  → finds relevant files in a codebase
  *   CodeEditor  → implements precise code changes
  *   Reviewer    → validates changes for correctness

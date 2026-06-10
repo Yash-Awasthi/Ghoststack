@@ -41,7 +41,7 @@ describe("Agent Registry Operations", () => {
 
     const agent: Agent = {
       id: "agent-01",
-      name: "codebuff",
+      name: "ghoststack-agent",
       type: "refactor",
       capabilities: ["ts-edit", "lint"],
       status: "idle"
@@ -54,7 +54,7 @@ describe("Agent Registry Operations", () => {
 
     const listers = await registry.findAgentsByCapability("ts-edit");
     expect(listers.length).toBe(1);
-    expect(listers[0].name).toBe("codebuff");
+    expect(listers[0].name).toBe("ghoststack-agent");
 
     await registry.deregister("agent-01");
     const gone = await registry.getAgent("agent-01");

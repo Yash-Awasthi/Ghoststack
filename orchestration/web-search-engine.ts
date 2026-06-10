@@ -1,14 +1,14 @@
 /**
  * WebSearchEngine — agentic web search + answer synthesis.
  *
- * Pipeline (extracted and adapted from Vane's search agent):
- *   1. classify()  — determine search mode, skip-search, source types
- *   2. research()  — iterative search → scrape → relevance ranking
+ * Pipeline:
+ *   1. classify()   — determine search mode, skip-search, source types
+ *   2. research()   — iterative search → scrape → relevance ranking
  *   3. synthesize() — LLM writer produces a cited answer from findings
  *
  * Uses:
  *   - Tavily API for web search (TAVILY_API_KEY env var or explicit key)
- *   - Scrapling bridge (optional) for deep content extraction
+ *   - Stealth scraping bridge (optional) for deep content extraction
  *   - ILanguageModel for classification + synthesis
  */
 
@@ -54,7 +54,7 @@ export interface SearchEngineOptions {
   tavilyApiKey?: string;
   /** Max web search iterations per research run */
   maxIterations?: number;
-  /** Attempt to deep-scrape top results via Scrapling bridge */
+  /** Attempt to deep-scrape top results via the stealth scraping bridge */
   deepScrape?: boolean;
 }
 

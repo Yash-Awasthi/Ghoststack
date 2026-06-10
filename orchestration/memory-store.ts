@@ -335,7 +335,7 @@ export class MemoryStore implements IMemoryStore {
   /**
    * Compact the memory store using rolling-window importance scoring.
    *
-   * Inspired by claude-mem's context compaction strategy:
+   * Strategy:
    *   1. Score each entry by recency + type weight + tag diversity
    *   2. Keep the top `keepCount` entries + all entries newer than `recentWindowMs`
    *   3. Evict the rest

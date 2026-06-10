@@ -5,7 +5,7 @@ import { probeFlociHealth, resolveFlociEndpoint } from "../orchestration/floci-c
 import { loadGhostStackConfig, GhostStackConfig } from "./ghoststack-config";
 import { runDockerCompose } from "./docker-compose-runner";
 import { createGhostStackServer, GhostStackServer } from "./ghoststack-server";
-import { FastMcpHost } from "./adapters/fastmcp-host";
+import { McpServerHost } from "./adapters/mcp-server-host";
 import type { RuntimeGraph } from "../orchestration/runtime-graph";
 
 export type FederationServiceStatus = {
@@ -87,7 +87,7 @@ export class FederationSupervisor {
   private readonly repoRoot: string;
   private config: GhostStackConfig;
   private gsServer: GhostStackServer | null = null;
-  private mcpHost: FastMcpHost | null = null;
+  private mcpHost: McpServerHost | null = null;
   private weStartedFlociDocker = false;
   private startedAt: string | null = null;
   private runtimeGraph: RuntimeGraph | null = null;
@@ -152,7 +152,7 @@ export class FederationSupervisor {
           port: state.apiPort
         },
         {
-          name: "fastmcp",
+          name: "mcp-server",
           status: mcpRunning ? "healthy" : "offline",
           pid: state.mcpPid,
           port: state.mcpPort
@@ -267,7 +267,7 @@ export class FederationSupervisor {
     if (this.config.features.mcpExternal && !options?.skipMcp) {
       const mcpPortFree = await isPortAvailable(this.config.mcpPort);
       if (!mcpPortFree) {
-        throw new Error(`Port conflict: FastMCP port ${this.config.mcpPort} is already in use.`);
+        throw new Error(`Port conflict: MCP port ${this.config.mcpPort} is already in use.`);
       }
     }
 
@@ -315,7 +315,7 @@ export class FederationSupervisor {
     });
     console.log(`[federation] Orchestrator API http://127.0.0.1:${this.gsServer.port}`);
 
-    // 3. FastMCP composite server last
+    // 3. MCP composite server last
     this.registerServiceNode("orchestrator-api", "mcp_server", "active", {
       port: this.config.apiPort,
       url: `http://127.0.0.1:${this.config.apiPort}`
@@ -327,24 +327,24 @@ export class FederationSupervisor {
     );
 
     if (this.config.features.mcpExternal && !options?.skipMcp) {
-      this.mcpHost = new FastMcpHost({ repoRoot: this.repoRoot });
+      this.mcpHost = new McpServerHost({ repoRoot: this.repoRoot });
       try {
         await this.mcpHost.start();
         const mcpPid = this.mcpHost.getPid();
         services.push({
-          name: "fastmcp",
+          name: "mcp-server",
           status: "healthy",
           detail: this.mcpHost.getMcpUrl(),
           pid: mcpPid,
           port: this.config.mcpPort
         });
-        console.log(`[federation] FastMCP ${this.mcpHost.getMcpUrl()} (PID: ${mcpPid})`);
+        console.log(`[federation] MCP ${this.mcpHost.getMcpUrl()} (PID: ${mcpPid})`);
       } catch (err) {
-        services.push({ name: "fastmcp", status: "skipped", detail: (err as Error).message });
-        console.warn("[federation] FastMCP skipped:", (err as Error).message);
+        services.push({ name: "mcp-server", status: "skipped", detail: (err as Error).message });
+        console.warn("[federation] MCP skipped:", (err as Error).message);
       }
     } else {
-      services.push({ name: "fastmcp", status: "skipped", detail: "mcpExternal=false" });
+      services.push({ name: "mcp-server", status: "skipped", detail: "mcpExternal=false" });
     }
 
     this.persistState(process.pid, this.mcpHost?.getPid());
@@ -402,12 +402,12 @@ export class FederationSupervisor {
       }
     }
 
-    // 1. Stop FastMCP in reverse order
+    // 1. Stop MCP in reverse order
     if (this.mcpHost?.isRunning()) {
-      console.log("[federation] Stopping FastMCP host...");
+      console.log("[federation] Stopping MCP host...");
       await this.mcpHost.stop();
     } else if (mcpPid && isProcessRunning(mcpPid)) {
-      console.log(`[federation] Killing external FastMCP process (PID: ${mcpPid})...`);
+      console.log(`[federation] Killing external MCP process (PID: ${mcpPid})...`);
       try {
         process.kill(mcpPid, "SIGTERM");
       } catch {
@@ -529,7 +529,7 @@ export class FederationSupervisor {
 
     const mcpPort = this.config.mcpPort;
     let mcpStatus: FederationServiceStatus = {
-      name: "fastmcp",
+      name: "mcp-server",
       status: "offline",
       port: mcpPort,
       pid: mcpPid
@@ -537,14 +537,14 @@ export class FederationSupervisor {
     try {
       await fetch(`http://127.0.0.1:${mcpPort}/mcp`, { signal: AbortSignal.timeout(2000) });
       mcpStatus = {
-        name: "fastmcp",
+        name: "mcp-server",
         status: "healthy",
         detail: `http://127.0.0.1:${mcpPort}/mcp`,
         pid: mcpPid,
         port: mcpPort
       };
     } catch {
-      mcpStatus = { name: "fastmcp", status: "skipped", detail: "not running", pid: mcpPid, port: mcpPort };
+      mcpStatus = { name: "mcp-server", status: "skipped", detail: "not running", pid: mcpPid, port: mcpPort };
     }
     services.push(mcpStatus);
 

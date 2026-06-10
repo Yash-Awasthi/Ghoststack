@@ -30,7 +30,7 @@ describe("FederationSupervisor Lifecycle", () => {
     expect(status.services.length).toBeGreaterThanOrEqual(3);
     expect(status.services.map((s) => s.name)).toContain("floci");
     expect(status.services.map((s) => s.name)).toContain("orchestrator");
-    expect(status.services.map((s) => s.name)).toContain("fastmcp");
+    expect(status.services.map((s) => s.name)).toContain("mcp-server");
 
     // All services should have a status field
     for (const s of status.services) {

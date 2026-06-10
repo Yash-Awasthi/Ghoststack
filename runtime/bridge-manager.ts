@@ -25,10 +25,10 @@ interface BridgeConfig {
 }
 
 const BRIDGE_CONFIGS: Record<BridgeName, BridgeConfig> = {
-  "stealth-browser": { script: "cloakbrowser_bridge.py", port: 7701, healthPath: "/health" },
-  "scraping":        { script: "scrapling_bridge.py",    port: 7702, healthPath: "/health" },
-  "local-inference": { script: "airllm_bridge.py",       port: 7703, healthPath: "/health" },
-  "mcp-server":      { script: "fastmcp_server.py",      port: 7704, healthPath: "/health" }
+  "stealth-browser": { script: "stealth_browser_bridge.py",  port: 7701, healthPath: "/health" },
+  "scraping":        { script: "web_scraping_bridge.py",     port: 7702, healthPath: "/health" },
+  "local-inference": { script: "local_inference_bridge.py",  port: 7703, healthPath: "/health" },
+  "mcp-server":      { script: "mcp_server_bridge.py",       port: 7704, healthPath: "/health" }
 };
 
 const BRIDGES_DIR = path.join(__dirname, "bridges");

@@ -11,4 +11,4 @@ services:
   mcp:
     type: process
     port: 8000
-    cmd: "fastmcp run server.py"
+    cmd: "python runtime/mcp/ghoststack_mcp_server.py"

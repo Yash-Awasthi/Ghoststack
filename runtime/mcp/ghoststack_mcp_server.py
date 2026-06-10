@@ -1,5 +1,5 @@
 """
-GhostStack FastMCP Composite Server
+GhostStack MCP Server
 =====================================
 Exposes GhostStack runtime capabilities as MCP tools via HTTP transport.
 
@@ -130,11 +130,11 @@ def ghoststack_metrics_prometheus() -> str:
 
 def main() -> None:
     print(
-        f"[fastmcp] GhostStack MCP server starting on port {MCP_PORT}",
+        f"[mcp-server] GhostStack MCP server starting on port {MCP_PORT}",
         flush=True,
     )
     print(
-        f"[fastmcp] API target: {GHOSTSTACK_API_URL}",
+        f"[mcp-server] API target: {GHOSTSTACK_API_URL}",
         flush=True,
     )
     mcp.run(transport="streamable-http")

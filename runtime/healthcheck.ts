@@ -126,7 +126,7 @@ function checkSchemas(): boolean {
  * Verify MCP bridge and runtime composition assets are present.
  * Checks for:
  *   - GhostStack MCP bridge orchestration module
- *   - FastMCP host adapter
+ *   - MCP host adapter
  *   - MCP registry schema
  *   - Python MCP server entrypoint (if Python is available)
  */
@@ -143,12 +143,12 @@ function checkMcpBridgeHealth(): boolean {
     allOk = false;
   }
 
-  // 2. FastMCP host adapter
-  const fastMcpHostPath = path.join(root, "runtime", "adapters", "fastmcp-host.ts");
-  if (fs.existsSync(fastMcpHostPath)) {
-    console.log(`  [OK] FastMCP host adapter: fastmcp-host.ts`);
+  // 2. MCP host adapter
+  const mcpServerHostPath = path.join(root, "runtime", "adapters", "mcp-server-host.ts");
+  if (fs.existsSync(mcpServerHostPath)) {
+    console.log(`  [OK] MCP host adapter: mcp-server-host.ts`);
   } else {
-    console.error(`  [ERR] Missing FastMCP host adapter: fastmcp-host.ts`);
+    console.error(`  [ERR] Missing MCP host adapter: mcp-server-host.ts`);
     allOk = false;
   }
 
