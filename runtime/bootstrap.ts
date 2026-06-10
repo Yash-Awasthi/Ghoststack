@@ -12,7 +12,7 @@ export async function bootstrap() {
   console.log(" | |__| | | | | (_) \\__ \\ |_ ____) | || (_| | (__|   <      \\  /    | |  | |");
   console.log("  \\_____|_| |_|\\___/|___/\\__|_____/ \\__\\__,_|\\___|_|\\_\\      \\/     |_|  |_|");
   console.log("                                                                               ");
-  console.log("       LOCAL-FIRST AUTONOMOUS CLOUD ENGINE - POLISHED V1.1 PLATFORM            ");
+  console.log("          LOCAL-FIRST AUTONOMOUS ORCHESTRATION ENGINE  —  v1.2.0");
   console.log("===============================================================================");
   console.log("\x1b[0m");
 

@@ -511,21 +511,26 @@ export class CodeAgentPool {
   }
 
   canExecute(taskType: string): boolean {
+    // "code" is the generic planner-assigned type — route to pool
+    if (taskType === "code") return true;
     return this.agents.some((a) => a.canExecute(taskType));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async execute(task: any, context: IExecutionContext): Promise<Record<string, unknown>> {
     const taskType: string = task?.type ?? task?.payload?.type ?? "";
-    const agent = this.agents.find((a) => a.canExecute(taskType));
+    // Generic "code" type: delegate to the CodeEditorAgent as the general-purpose agent
+    const resolvedType = taskType === "code" ? "code_edit" : taskType;
+    const agent = this.agents.find((a) => a.canExecute(resolvedType));
     if (!agent) {
       return { success: false, error: `No agent for task type: ${taskType}` };
     }
-    return agent.execute(task, context);
+    return agent.execute({ ...task, type: resolvedType }, context);
   }
 
   /** All task types handled by this pool */
   static readonly TASK_TYPES = [
+    "code",
     "code_explore", "file_picker",
     "code_edit", "edit",
     "code_review", "review",

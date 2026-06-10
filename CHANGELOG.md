@@ -6,6 +6,35 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.0] — 2026-06-10
+
+### Added
+- **WebSearchAdapter** — `IExecutionAdapter` wrapping the web-search engine for `search` / `answer` / `web_search` task types; wired into `TaskExecutor` adapter chain.
+- **CodeAgentPool** — Multi-agent pool (`FilePickerAgent`, `CodeEditorAgent`, `CodeReviewerAgent`, `ResearcherAgent`, `ThinkerAgent`) dispatching on `code` / `code_edit` / `code_explore` / `code_review` / `research` / `reason` task types; wired into executor.
+- **LocalInferenceAdapter** — Adapter routing `inference` / `local_llm` / `generate` tasks to the local inference bridge; wired into executor.
+- **Planning engine blueprints** — Three new blueprints added: `search`, `code`, `inference`; `PRIORITY_ORDER` extended to match; `adapterType` field threaded through `TaskTemplate` → `ITaskSynthesisResult` → `orchestrator.ts` so planner-generated tasks reach the correct adapter.
+- **`adapterType` on `ITaskSynthesisResult`** — New optional field carries the adapter routing token through the governance layer to the orchestrator.
+
+### Fixed
+- **offlineMode default** — `GHOSTSTACK_OFFLINE_MODE === undefined` condition removed; unset env var now correctly defaults to online mode instead of silently enabling mock responses everywhere.
+- **Planner → executor disconnect** — `submitCognitiveObjective` now threads `type`, `action`, and `arguments` from each `ITaskSynthesisResult` onto the enqueued `Task`; all three new adapters are now reachable from cognitive objectives.
+- **`task-payload.ts` fallback routing** — Added `search` / `code` / `inference` branches to the legacy description-matching path; added a type-only fast path for tasks that carry `type` but no `action`.
+- **`GroqModelProvider.generateObject` dual system message** — Provider no longer prepends its extraction system prompt when the caller (`classify()` et al.) already supplies one, eliminating the conflicting dual-system-message bug.
+- **`FreeModelProvider.streamText` fake streaming** — Provider now delegates to `GroqModelProvider.streamText` (real SSE chunking) for `groq:*` routes; single-chunk fallback retained only for non-streamable routes.
+- **`CodeAgentPool` generic "code" type** — Pool-level `canExecute` now accepts `"code"`; `execute` resolves it to `code_edit` for dispatch.
+
+### Changed
+- All third-party library names stripped from codebase (bridges, adapters, comments, variable names, health keys, error strings).
+- Bridge files renamed to GhostStack-native names: `stealth_browser_bridge.py`, `web_scraping_bridge.py`, `local_inference_bridge.py`, `mcp_server_bridge.py`.
+- `FastMcpHost` → `McpServerHost`; `"fastmcp"` service identifier → `"mcp-server"` throughout.
+- `apps/` directory cleaned — 9 third-party integration directories removed; `floci` (live service emulator) retained.
+- Root-level HTML artefacts (`ghoststack_dossier.html`, `resource-readme.html`) removed.
+- Temporary runtime DB directories (`temp-*-db/`) removed from repo (already gitignored by `temp-*/` pattern).
+- Bootstrap banner updated to v1.2.0.
+- 485 tests · 64 suites · 0 ESLint errors · 0 TypeScript errors.
+
+---
+
 ## [1.1.1] — 2026-06-10
 
 ### Added
