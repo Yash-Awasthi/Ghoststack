@@ -394,8 +394,9 @@ export class TraceIndexer {
         key: `event:${event.event}`,
         value: event.payload,
         tags: ["event-store", event.event],
-        workflowId: event.payload?.workflowId,
-        executionId: event.payload?.executionId || event.payload?.taskId,
+        workflowId: (event.payload as Record<string, unknown>)?.workflowId as string | undefined,
+        executionId: ((event.payload as Record<string, unknown>)?.executionId ||
+          (event.payload as Record<string, unknown>)?.taskId) as string | undefined,
         ttlMs: 7 * 24 * 60 * 60 * 1000 // 7 day TTL
       });
       indexed++;

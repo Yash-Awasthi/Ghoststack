@@ -24,7 +24,8 @@ describe("Milestone 2: Floci Client & Execution Adapter", () => {
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn()
+      error: jest.fn(),
+      debug: jest.fn()
     }
   };
 

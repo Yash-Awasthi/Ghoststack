@@ -168,4 +168,48 @@ describe("EnvLoader", () => {
       expect(result.loaded).toHaveLength(0);
     });
   });
+
+  describe("runtime propagation", () => {
+    it("variables written to .env propagate into process.env for runtime-context consumption", () => {
+      // Simulates the pattern used in createRuntimeContext():
+      //   loadEnvFromRoot(repoRoot) → process.env.GHOSTSTACK_OFFLINE_MODE etc.
+      cleanEnvKeys("GHOSTSTACK_OFFLINE_MODE", "GHOSTSTACK_API_PORT", "GS_TEST_CUSTOM_VAR");
+
+      fs.writeFileSync(
+        path.join(tmpDir, ".env"),
+        [
+          "GHOSTSTACK_OFFLINE_MODE=1",
+          "GHOSTSTACK_API_PORT=9999",
+          "GS_TEST_CUSTOM_VAR=propagated"
+        ].join("\n") + "\n",
+        "utf8"
+      );
+
+      const result = loadEnvFromRoot(tmpDir);
+
+      // All three vars must be in process.env after loading
+      expect(process.env.GHOSTSTACK_OFFLINE_MODE).toBe("1");
+      expect(process.env.GHOSTSTACK_API_PORT).toBe("9999");
+      expect(process.env.GS_TEST_CUSTOM_VAR).toBe("propagated");
+
+      // Result metadata should list all loaded keys
+      expect(result.loaded).toContain("GHOSTSTACK_OFFLINE_MODE");
+      expect(result.loaded).toContain("GHOSTSTACK_API_PORT");
+      expect(result.loaded).toContain("GS_TEST_CUSTOM_VAR");
+      expect(result.filePath).not.toBeNull();
+
+      cleanEnvKeys("GHOSTSTACK_OFFLINE_MODE", "GHOSTSTACK_API_PORT", "GS_TEST_CUSTOM_VAR");
+    });
+
+    it("pre-existing process.env values are not overwritten by .env (existing vars always win)", () => {
+      // runtime-context calls loadEnvFromRoot which calls loadEnvFile — existing env vars win
+      process.env.GS_TEST_PRIORITY = "original";
+      fs.writeFileSync(path.join(tmpDir, ".env"), "GS_TEST_PRIORITY=from-file\n", "utf8");
+
+      loadEnvFromRoot(tmpDir);
+
+      expect(process.env.GS_TEST_PRIORITY).toBe("original");
+      cleanEnvKeys("GS_TEST_PRIORITY");
+    });
+  });
 });

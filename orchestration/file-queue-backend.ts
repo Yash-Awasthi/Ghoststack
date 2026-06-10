@@ -25,6 +25,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { IQueueBackend, QueueJob } from "./interfaces/queue.interface";
+import { IMetricsCollector } from "./interfaces/observability.interface";
 
 const PRIORITY_WEIGHTS: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
@@ -34,10 +35,18 @@ export class FileQueueBackend implements IQueueBackend {
   private activeQueue: QueueJob[] = [];
   private deadLetterQueue: QueueJob[] = [];
   private _initialized = false;
+  private metrics?: IMetricsCollector;
 
-  constructor(dataDir: string) {
+  constructor(dataDir: string, metrics?: IMetricsCollector) {
     this.queuePath = path.join(dataDir, "queue.jsonl");
     this.dlqPath = path.join(dataDir, "queue-dlq.jsonl");
+    this.metrics = metrics;
+  }
+
+  private _emitQueueMetrics(): void {
+    if (!this.metrics) return;
+    this.metrics.recordGauge("queue.active_length", this.activeQueue.length);
+    this.metrics.recordGauge("queue.dlq_length", this.deadLetterQueue.length);
   }
 
   /**
@@ -100,6 +109,7 @@ export class FileQueueBackend implements IQueueBackend {
     }
     this.activeQueue.push(job);
     this._writeJobsToFile(this.queuePath, this.activeQueue);
+    this._emitQueueMetrics();
   }
 
   async pop(): Promise<QueueJob | undefined> {
@@ -116,6 +126,7 @@ export class FileQueueBackend implements IQueueBackend {
 
     const job = this.activeQueue.shift()!;
     this._writeJobsToFile(this.queuePath, this.activeQueue);
+    this._emitQueueMetrics();
     return job;
   }
 
@@ -125,6 +136,8 @@ export class FileQueueBackend implements IQueueBackend {
     this.deadLetterQueue.push(job);
     this._writeJobsToFile(this.queuePath, this.activeQueue);
     this._writeJobsToFile(this.dlqPath, this.deadLetterQueue);
+    this._emitQueueMetrics();
+    this.metrics?.increment("queue.dlq_total");
   }
 
   async getDeadLetterQueue(): Promise<QueueJob[]> {

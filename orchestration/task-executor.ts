@@ -80,12 +80,13 @@ export class TaskExecutor implements ITaskExecutor {
 
       this.metrics?.recordTiming("task.latency", durationMs);
       if (taskType === "floci" && result && typeof result === "object") {
-        if (typeof result.flociRequestMs === "number") {
-          this.metrics?.recordTiming("floci.request_ms", result.flociRequestMs);
+        const r = result as Record<string, unknown>;
+        if (typeof r.flociRequestMs === "number") {
+          this.metrics?.recordTiming("floci.request_ms", r.flociRequestMs);
         }
-        if (result.mocked === true) {
+        if (r.mocked === true) {
           this.metrics?.increment("floci.mocked");
-        } else if (result.mocked === false) {
+        } else if (r.mocked === false) {
           this.metrics?.increment("floci.live");
         }
       }

@@ -10,7 +10,7 @@ const runIntegration = process.env.GHOSTSTACK_FLOCI_INTEGRATION === "1";
     startTime: new Date(),
     attempt: 1,
     environment: {},
-    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() }
+    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() }
   };
 
   beforeAll(async () => {

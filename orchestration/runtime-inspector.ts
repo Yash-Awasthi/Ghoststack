@@ -154,28 +154,27 @@ export class RuntimeInspector implements IRuntimeInspector {
     const taskMap = new Map<string, ITaskSnapshot>();
 
     for (const event of events) {
+      // Event payloads come from a dynamic JSON log — cast to a loose record for access
+      const p = event.payload as Record<string, unknown>;
       if (event.event === "task_routed" || event.event === "task_queued") {
-        const task = event.payload;
-        taskMap.set(task.id, {
-          id: task.id,
-          status: task.status || "queued",
-          priority: task.priority || "medium",
-          dependencies: task.dependencies || [],
-          retries: task.retries || 0
+        taskMap.set(String(p.id ?? ""), {
+          id: String(p.id ?? ""),
+          status: String(p.status ?? "queued"),
+          priority: String(p.priority ?? "medium"),
+          dependencies: Array.isArray(p.dependencies) ? p.dependencies.map(String) : [],
+          retries: Number(p.retries ?? 0)
         });
       } else if (event.event === "execution_succeeded") {
-        const task = event.payload;
-        const existing = taskMap.get(task.taskId);
+        const existing = taskMap.get(String(p.taskId ?? ""));
         if (existing) {
           existing.status = "succeeded";
-          existing.executionTimeMs = task.durationMs;
+          existing.executionTimeMs = typeof p.durationMs === "number" ? p.durationMs : undefined;
         }
       } else if (event.event === "execution_failed") {
-        const task = event.payload;
-        const existing = taskMap.get(task.taskId);
+        const existing = taskMap.get(String(p.taskId ?? ""));
         if (existing) {
           existing.status = "failed";
-          existing.retries = task.attempts;
+          existing.retries = Number(p.attempts ?? existing.retries);
         }
       }
     }

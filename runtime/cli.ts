@@ -54,6 +54,9 @@ Commands:
   workflows:verify <id>  Verify workflow execution state integrity (checkpoint vs telemetry)
   plan <objective>     Generate a governed execution plan from a natural-language objective
   queue                Show current executor queue state (pending + dead-letter jobs)
+  dlq list             List all dead-letter queue entries
+  dlq retry <job-id>   Re-enqueue a specific dead-letter job (resets retry count)
+  dlq clear            Purge all dead-letter queue entries
   run <spec-path>      Load a workflow spec file, register, and execute it immediately
   submit <objective>   Plan + govern + execute a natural-language objective end-to-end
   version              Print GhostStack version and runtime info
@@ -799,6 +802,68 @@ async function cmdQueue(): Promise<void> {
   }
 }
 
+async function cmdDlq(subcommand: string | undefined, jobId?: string): Promise<void> {
+  const ctx = await createRuntimeContext(repoRoot);
+  await startRuntime(ctx);
+
+  try {
+    const dlq = await ctx.queue.getDeadLetterQueue();
+
+    if (!subcommand || subcommand === "list") {
+      console.log(`\n======================== Dead-Letter Queue ==========================`);
+      console.log(`  Total: ${dlq.length}`);
+      if (dlq.length === 0) {
+        console.log("  (empty)");
+      } else {
+        console.log(`\n  ${"JOB ID".padEnd(32)} ${"PRIORITY".padEnd(10)} ${"RETRIES".padEnd(10)} TYPE`);
+        console.log(`  ${"─".repeat(65)}`);
+        for (const job of dlq) {
+          const id = job.id.padEnd(32);
+          const pri = (job.priority ?? "?").padEnd(10);
+          const retries = `${job.retries}/${job.maxRetries}`.padEnd(10);
+          const type = (job.payload as Record<string, unknown>)?.type ?? "?";
+          console.log(`  ${id} ${pri} ${retries} ${type}`);
+        }
+      }
+      console.log(`======================================================================\n`);
+      return;
+    }
+
+    if (subcommand === "retry") {
+      if (!jobId) {
+        console.error("Usage: gs dlq retry <job-id>");
+        process.exit(1);
+      }
+      const job = dlq.find((j) => j.id === jobId);
+      if (!job) {
+        console.error(`No DLQ job found with id: ${jobId}`);
+        process.exit(1);
+      }
+      job.retries = 0;
+      await ctx.queue.push(job);
+      // Remove only this one job from DLQ by clearing and re-adding the rest
+      await ctx.queue.clearDeadLetterQueue();
+      for (const remaining of dlq.filter((j) => j.id !== jobId)) {
+        await ctx.queue.moveToDeadLetter(remaining, "preserved after retry of sibling");
+      }
+      console.log(`\n  Re-enqueued job ${jobId} (retries reset to 0).\n`);
+      return;
+    }
+
+    if (subcommand === "clear") {
+      await ctx.queue.clearDeadLetterQueue();
+      console.log(`\n  Cleared ${dlq.length} dead-letter job(s).\n`);
+      return;
+    }
+
+    console.error(`Unknown dlq subcommand: ${subcommand}`);
+    console.error("  Usage: gs dlq [list|retry <job-id>|clear]");
+    process.exit(1);
+  } finally {
+    await stopRuntime(ctx);
+  }
+}
+
 async function cmdRun(specPath: string | undefined): Promise<void> {
   if (!specPath) {
     console.error("Usage: gs run <spec-path>");
@@ -976,6 +1041,9 @@ async function main(): Promise<void> {
       break;
     case "queue":
       await cmdQueue();
+      break;
+    case "dlq":
+      await cmdDlq(process.argv[3], process.argv[4]);
       break;
     case "run":
       await cmdRun(process.argv[3]);

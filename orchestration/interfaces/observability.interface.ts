@@ -15,8 +15,9 @@ export interface IQueueSnapshot {
 
 export interface IEventSnapshot {
   event: string;
-  timestamp: Date;
-  payload: any;
+  /** ISO string from the event log JSON, or a Date when constructed in-process. */
+  timestamp: Date | string;
+  payload: unknown;
 }
 
 export interface IMetricsCollector {
