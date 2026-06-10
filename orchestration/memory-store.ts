@@ -332,6 +332,79 @@ export class MemoryStore implements IMemoryStore {
     return pruned;
   }
 
+  /**
+   * Compact the memory store using rolling-window importance scoring.
+   *
+   * Inspired by claude-mem's context compaction strategy:
+   *   1. Score each entry by recency + type weight + tag diversity
+   *   2. Keep the top `keepCount` entries + all entries newer than `recentWindowMs`
+   *   3. Evict the rest
+   *
+   * Returns the number of entries evicted.
+   */
+  async compact(opts: {
+    keepCount?: number;
+    recentWindowMs?: number;
+    preserveTypes?: MemoryEntry["type"][];
+  } = {}): Promise<number> {
+    await this.ensureLoaded();
+    const keepCount = opts.keepCount ?? 200;
+    const recentWindowMs = opts.recentWindowMs ?? 60 * 60 * 1000; // 1 hour
+    const preserveTypes: Set<string> = new Set(opts.preserveTypes ?? ["decision", "knowledge"]);
+
+    if (this.entries.size <= keepCount) return 0;
+
+    const now = Date.now();
+    // Type importance weights (decision + knowledge are high value)
+    const TYPE_WEIGHT: Record<string, number> = {
+      knowledge: 1.0,
+      decision: 0.9,
+      result: 0.7,
+      state: 0.6,
+      observation: 0.4,
+      error: 0.3
+    };
+
+    // Score each entry
+    const scored = Array.from(this.entries.entries()).map(([id, entry]) => {
+      const ageMs = now - entry.timestamp.getTime();
+      const recencyScore = Math.exp(-ageMs / (24 * 60 * 60 * 1000)); // decays over 24h
+      const typeScore = TYPE_WEIGHT[entry.type] ?? 0.5;
+      const tagDiversityBonus = Math.min(entry.tags.length * 0.05, 0.2);
+      const importanceScore = typeScore * 0.5 + recencyScore * 0.4 + tagDiversityBonus;
+      const isRecent = ageMs < recentWindowMs;
+      const isPreserved = preserveTypes.has(entry.type);
+      return { id, entry, importanceScore, isRecent, isPreserved };
+    });
+
+    // Always keep: recent entries + preserved types
+    const mustKeep = new Set(
+      scored.filter((s) => s.isRecent || s.isPreserved).map((s) => s.id)
+    );
+
+    // From remaining, keep top-scored up to keepCount
+    const remaining = scored.filter((s) => !mustKeep.has(s.id));
+    remaining.sort((a, b) => b.importanceScore - a.importanceScore);
+
+    const additionalKeep = Math.max(0, keepCount - mustKeep.size);
+    remaining.slice(0, additionalKeep).forEach((s) => mustKeep.add(s.id));
+
+    // Evict everything not in mustKeep
+    let evicted = 0;
+    for (const [id, entry] of this.entries) {
+      if (!mustKeep.has(id)) {
+        this._removeFromIndexes(id, entry);
+        evicted++;
+      }
+    }
+
+    if (evicted > 0) {
+      this.logger?.info(`MemoryStore.compact: evicted ${evicted} entries, retained ${this.entries.size}`);
+      await this.persist();
+    }
+    return evicted;
+  }
+
   async getStats(): Promise<{
     totalEntries: number;
     byType: Record<string, number>;

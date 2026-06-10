@@ -39,6 +39,9 @@ import {
 import { BrowserExecutionAdapter } from "../orchestration/browser-adapter";
 import { ScrapingExecutionAdapter } from "../orchestration/scraping-adapter";
 import { FlociExecutionAdapter } from "../orchestration/floci-adapter";
+import { WebSearchAdapter } from "../orchestration/web-search-adapter";
+import { CodeAgentPool } from "../orchestration/code-agent-pool";
+import { LocalInferenceAdapter } from "../orchestration/local-inference-adapter";
 import { EnvironmentTelemetry } from "../orchestration/environment-telemetry";
 import {
   WorkflowRegistry,
@@ -77,6 +80,9 @@ export type GhostStackRuntimeContext = {
   browserAdapter: BrowserExecutionAdapter;
   scrapingAdapter: ScrapingExecutionAdapter;
   flociAdapter: FlociExecutionAdapter;
+  webSearchAdapter: WebSearchAdapter;
+  codeAgentPool: CodeAgentPool;
+  localInferenceAdapter: LocalInferenceAdapter;
   configLoader: YAMLConfigLoader;
   memoryStore: MemoryStore;
   agentBus: AgentBus;
@@ -135,6 +141,9 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
   const scrapingTelemetry = new EnvironmentTelemetry();
   const browserAdapter = new BrowserExecutionAdapter(browserTelemetry, offlineMode);
   const scrapingAdapter = new ScrapingExecutionAdapter(scrapingTelemetry, offlineMode);
+  const webSearchAdapter = new WebSearchAdapter();
+  const codeAgentPool = new CodeAgentPool();
+  const localInferenceAdapter = new LocalInferenceAdapter();
   const flociStrict =
     process.env.GHOSTSTACK_FLOCI_STRICT === "1" ||
     (process.env.GHOSTSTACK_FLOCI_STRICT ?? "").toLowerCase() === "true";
@@ -206,7 +215,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
     eventBus,
     persistence,
     logger,
-    [browserAdapter, scrapingAdapter, wrappedFlociAdapter],
+    [browserAdapter, scrapingAdapter, wrappedFlociAdapter, webSearchAdapter, codeAgentPool, localInferenceAdapter],
     metrics,
     tracer
   );
@@ -477,6 +486,9 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
     browserAdapter,
     scrapingAdapter,
     flociAdapter: wrappedFlociAdapter,
+    webSearchAdapter,
+    codeAgentPool,
+    localInferenceAdapter,
     configLoader: loader,
     memoryStore,
     agentBus,

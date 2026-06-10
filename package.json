@@ -1,7 +1,7 @@
 {
   "name": "ghoststack",
-  "version": "1.1.4",
-  "description": "GhostStack v1.1 - Local-First Autonomous Cloud Orchestration Engine",
+  "version": "1.2.0",
+  "description": "GhostStack v1.2 - Local-First Autonomous Cloud Orchestration Engine with Multi-App Integration",
   "main": "dist/runtime/server.js",
   "bin": {
     "gs": "./runtime/cli.ts",

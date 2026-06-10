@@ -1,6 +1,7 @@
 import { IBrowserExecutionAdapter, IBrowserTask, IEnvironmentTelemetry } from "./interfaces/environment.interface";
 import { IExecutionContext } from "./interfaces/execution.interface";
 import { isSafeUrl } from "./security-utils";
+import { getBridgeManager, BridgeManager } from "../runtime/bridge-manager";
 
 export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
   constructor(
@@ -81,54 +82,56 @@ export class BrowserExecutionAdapter implements IBrowserExecutionAdapter {
       };
     }
 
-    // High fidelity production Playwright integration with active request filtering
+    // Stealth browser execution via patched Chromium bridge (anti-bot bypass)
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { chromium } = require("playwright");
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
+      const mgr = getBridgeManager();
+      const baseUrl = await mgr.url("stealth-browser");
+      logs.push("Stealth browser bridge connection established.");
 
-      logs.push("Real chromium browser context initiated.");
-
-      // Route intercepting to prevent DNS rebinding or in-page malicious redirects
-      await page.route("**/*", (route: any) => {
-        const reqUrl = route.request().url();
-        if (!isSafeUrl(reqUrl)) {
-          logs.push(`In-page redirect / asset load blocked by safety policy: ${reqUrl}`);
-          route.abort("blockedbyclient");
-        } else {
-          route.continue();
-        }
-      });
-
-      const loadPromise = page.goto(task.url);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout of ${task.timeoutMs}ms breached.`)), task.timeoutMs)
-      );
-
-      await Promise.race([loadPromise, timeoutPromise]);
-
-      for (const action of task.actions) {
-        if (action.type === "click" && action.selector) {
-          await page.click(action.selector);
-        } else if (action.type === "type" && action.selector && action.value) {
-          await page.type(action.selector, action.value);
-        }
+      const endpoint = task.actions.length > 0 ? "/interact" : "/browse";
+      const requestBody: Record<string, unknown> = {
+        url: task.url,
+        headless: true,
+        humanize: true,
+        timeout_ms: task.timeoutMs || 30_000,
+        disable_resources: false
+      };
+      if (task.actions.length > 0) {
+        requestBody.actions = task.actions.map((a) => ({
+          type: a.type,
+          selector: a.selector ?? null,
+          value: a.value ?? null
+        }));
       }
 
-      const content = await page.content();
-      await browser.close();
+      const result = await BridgeManager.post<{
+        success: boolean;
+        html: string;
+        title: string;
+        final_url: string;
+        screenshot_b64: string;
+        error: string;
+      }>(baseUrl, endpoint, requestBody);
+
       this.telemetry.browserSessionsActive -= 1;
 
+      if (!result.success) {
+        logs.push(`Stealth browser error: ${result.error}`);
+        return { success: false, content: result.error, logs };
+      }
+
+      logs.push(`Page loaded: ${result.title} (${result.final_url})`);
       return {
         success: true,
-        content,
+        content: result.html,
+        ...(result.screenshot_b64
+          ? { screenshotUrl: `data:image/png;base64,${result.screenshot_b64}` }
+          : {}),
         logs
       };
     } catch (err: any) {
       this.telemetry.browserSessionsActive -= 1;
-      logs.push(`Playwright execution failure: ${err.message}`);
+      logs.push(`Stealth browser execution failure: ${err.message}`);
       return {
         success: false,
         content: `Error: ${err.message}`,

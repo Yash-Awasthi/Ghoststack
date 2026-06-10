@@ -1,6 +1,7 @@
 import { IScrapingExecutionAdapter, IScrapingTask, IEnvironmentTelemetry } from "./interfaces/environment.interface";
 import { IExecutionContext } from "./interfaces/execution.interface";
 import { isSafeUrl } from "./security-utils";
+import { getBridgeManager, BridgeManager } from "../runtime/bridge-manager";
 
 export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
   constructor(
@@ -69,25 +70,54 @@ export class ScrapingExecutionAdapter implements IScrapingExecutionAdapter {
       };
     }
 
-    // High fidelity Scrapling wrapper implementation in production node contexts
+    // Adaptive web scraping via anti-detection engine bridge
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const axios = require("axios");
-      const response = await axios.get(task.url, { timeout: 10000 });
-      requestsCount = 1;
-      bytesFetched = Buffer.byteLength(response.data || "", "utf8");
-      this.telemetry.recordFetch(bytesFetched);
+      const mgr = getBridgeManager();
+      const baseUrl = await mgr.url("scraping");
 
-      for (const selector of task.selectors) {
-        data[selector] = `HTML node selection from ${task.url}`;
+      // Choose stealth mode for sites likely to have bot protection
+      const useStealthMode = task.url.includes("cloudflare") ||
+        task.url.includes("linkedin") ||
+        task.url.includes("twitter") ||
+        (task as any).stealth === true;
+
+      const endpoint = useStealthMode ? "/fetch_stealth" : "/fetch";
+
+      const result = await BridgeManager.post<{
+        success: boolean;
+        url: string;
+        status_code: number;
+        html: string;
+        text: string;
+        extracted: Record<string, string>;
+        pages_crawled: number;
+        bytes_fetched: number;
+        error: string;
+      }>(baseUrl, endpoint, {
+        url: task.url,
+        selectors: task.selectors || [],
+        timeout: 30_000,
+        disable_resources: true,
+        block_ads: true
+      });
+
+      if (!result.success) {
+        return { success: false, data: { error: result.error }, requestsCount: 0, bytesFetched: 0 };
       }
 
-      return {
-        success: true,
-        data,
-        requestsCount,
-        bytesFetched
-      };
+      requestsCount = result.pages_crawled || 1;
+      bytesFetched = result.bytes_fetched || 0;
+      this.telemetry.recordFetch(bytesFetched);
+
+      // Merge selector extractions + full text into data map
+      for (const selector of task.selectors) {
+        data[selector] = result.extracted?.[selector] ?? "";
+      }
+      if (!task.selectors.length) {
+        data["__text__"] = result.text || result.html?.slice(0, 10_000) || "";
+      }
+
+      return { success: true, data, requestsCount, bytesFetched };
     } catch (err: any) {
       return {
         success: false,

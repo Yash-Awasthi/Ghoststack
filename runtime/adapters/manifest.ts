@@ -25,63 +25,69 @@ export const ADAPTER_MANIFEST: AdapterManifestEntry[] = [
     mode: "orchestrated",
     defaultPort: 4566,
     healthPath: "/health",
-    description: "AWS emulator — structural execution substrate (S3/SQS/DynamoDB/Lambda)"
+    description: "AWS execution substrate — S3/SQS/DynamoDB/Lambda emulation"
   },
   {
-    id: "fastmcp",
+    id: "stealth-browser",
+    path: "apps/CloakBrowser",
+    mode: "orchestrated",
+    defaultPort: 7701,
+    healthPath: "/health",
+    description: "Stealth browser adapter — patched Chromium with anti-bot fingerprint bypass. Handles 'browser' task type."
+  },
+  {
+    id: "scraping",
+    path: "apps/Scrapling",
+    mode: "orchestrated",
+    defaultPort: 7702,
+    healthPath: "/health",
+    description: "Adaptive web scraping engine — anti-detection HTTP + stealth Chromium fetchers. Handles 'scrape'/'crawl' task types."
+  },
+  {
+    id: "local-inference",
+    path: "apps/airllm",
+    mode: "orchestrated",
+    defaultPort: 7703,
+    healthPath: "/health",
+    description: "Local LLM inference — sharded layer-by-layer execution (70B+ on 4GB VRAM). Handles 'inference' task type."
+  },
+  {
+    id: "mcp-server",
     path: "apps/fastmcp",
-    mode: "docker-only",
-    defaultPort: 8000,
-    healthPath: "/mcp",
-    description: "MCP server framework — spawn via Docker or local venv"
+    mode: "orchestrated",
+    defaultPort: 7704,
+    healthPath: "/health",
+    description: "MCP server exposing GhostStack capabilities as tools via FastMCP framework."
   },
   {
-    id: "codebuff",
+    id: "web-search",
+    path: "apps/Vane",
+    mode: "orchestrated",
+    description: "Agentic web search + answer synthesis (classify → research → synthesize). Handles 'search'/'answer' task types."
+  },
+  {
+    id: "code-agents",
     path: "apps/codebuff",
-    mode: "optional",
-    description: "Multi-agent coding runtime — integrate when workflow needs codegen"
+    mode: "orchestrated",
+    description: "Multi-agent code pool — FilePicker, CodeEditor, Reviewer, Researcher, Thinker. Handles code_explore/code_edit/code_review/research/reason task types."
+  },
+  {
+    id: "free-model-provider",
+    path: "apps/free-claude-code",
+    mode: "orchestrated",
+    description: "Multi-backend LLM routing — OpenRouter/Ollama/DeepSeek/local. Drop-in ILanguageModel for PlanningEngine."
+  },
+  {
+    id: "memory-compaction",
+    path: "apps/claude-mem",
+    mode: "orchestrated",
+    description: "Rolling-window importance scoring for MemoryStore.compact() — recency + type weight + tag diversity."
   },
   {
     id: "spec-kit",
     path: "apps/spec-kit",
-    mode: "optional",
-    description: "Spec-driven CLI — feeds specs/ workflow definitions"
-  },
-  {
-    id: "free-claude-code",
-    path: "apps/free-claude-code",
-    mode: "optional",
-    description: "Local Claude API proxy"
-  },
-  {
-    id: "CloakBrowser",
-    path: "apps/CloakBrowser",
-    mode: "docker-only",
-    description: "Stealth browser — used by browser-adapter when offline=false"
-  },
-  {
-    id: "Scrapling",
-    path: "apps/Scrapling",
-    mode: "optional",
-    description: "Scraping framework — scraping-adapter can shell out later"
-  },
-  {
-    id: "airllm",
-    path: "apps/airllm",
-    mode: "reference",
-    description: "Local LLM inference — external Ollama preferred"
-  },
-  {
-    id: "claude-mem",
-    path: "apps/claude-mem",
-    mode: "reference",
-    description: "Session memory plugin — not wired to orchestrator"
-  },
-  {
-    id: "Vane",
-    path: "apps/Vane",
-    mode: "reference",
-    description: "Weather/dashboard app — not part of orchestration core"
+    mode: "orchestrated",
+    description: "Spec-driven workflow format — phases[], acceptance_criteria[], constraints{} fields in spec.schema.json."
   }
 ];
 
