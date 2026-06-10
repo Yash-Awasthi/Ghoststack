@@ -52,3 +52,6 @@ ghoststack.config.json
 # Quarantined research trees (see archive/quarantine/README.md)
 archive/quarantine/*
 !archive/quarantine/README.md
+
+# Test fixtures are committed even though *.jsonl is ignored globally
+!tests/fixtures/*.jsonl
