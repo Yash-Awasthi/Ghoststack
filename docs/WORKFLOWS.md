@@ -1,6 +1,6 @@
-# GhostStack v1.1 Operational Workflows Catalog
+# GhostStack v1.2.0 Operational Workflows Catalog
 
-This document defines and catalogs the four core workflow templates implemented in the **GhostStack v1.1** application layer, focusing on the showcase execution pathways.
+This document defines and catalogs the four core workflow templates implemented in the **GhostStack v1.2.0** application layer, focusing on the showcase execution pathways.
 
 ---
 

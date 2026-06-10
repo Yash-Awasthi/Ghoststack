@@ -1,18 +1,19 @@
 # GhostStack
 
-**Local-first multi-agent orchestration nucleus** — a production-grade TypeScript runtime for spec-driven, governed, fault-tolerant task execution with no external AI dependency.
+**Local-first multi-agent orchestration nucleus** — a production-grade TypeScript runtime for spec-driven, governed, fault-tolerant task execution across heterogeneous execution adapters.
 
 ```bash
-gs submit "ingest data from S3 bucket my-dataset"
-# → Planning Engine generates a task graph from natural language
-# → Governance Engine evaluates constraints, policies, and guardrails
-# → Executor drains queue with exponential backoff and circuit breaking
+gs submit "search for the latest AI papers and summarise findings"
+# → PlanningEngine classifies objective → selects search blueprint
+# → GovernanceEngine evaluates constraints, policies, guardrails
+# → Orchestrator enqueues task with type=search
+# → TaskExecutor routes to WebSearchAdapter.execute()
 # → Results persisted; event log replayed automatically on crash recovery
 ```
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-blue)
-![Tests](https://img.shields.io/badge/tests-468%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-499%20passing-brightgreen)
 ![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen)
 
 ---
@@ -20,46 +21,44 @@ gs submit "ingest data from S3 bucket my-dataset"
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      GhostStack Runtime                         │
-│                                                                 │
-│  ┌──────────────┐   ┌──────────────┐   ┌────────────────────┐  │
-│  │  Planning    │   │  Governance  │   │  Approval          │  │
-│  │  Engine      │──▶│  Engine      │──▶│  Workflow          │  │
-│  │  8 blueprints│   │  constraints │   │  (human-in-loop)   │  │
-│  └──────────────┘   │  policies    │   └────────────────────┘  │
-│                     │  guardrails  │                            │
-│                     └──────┬───────┘                            │
-│                            │                                    │
-│  ┌─────────────────────────▼────────────────────────────────┐   │
-│  │                  GhostStackOrchestrator                  │   │
-│  │      submitAndRun(objective) → plan → govern → execute   │   │
-│  └──────────┬─────────────────────────────────┬─────────────┘   │
-│             │                                 │                 │
-│     ┌───────▼──────┐                ┌─────────▼──────────┐     │
-│     │ FileQueue    │                │   Task Executor    │     │
-│     │ Backend      │◀───────────────│   runLoop() +      │     │
-│     │ JSONL+DLQ    │                │   retry backoff    │     │
-│     └──────────────┘                └────────┬───────────┘     │
-│                                              │                 │
-│     ┌──────────────┐     ┌──────────────────▼──────────────┐  │
-│     │  Circuit     │     │         Execution Adapters       │  │
-│     │  Breaker     │─────│  Floci (AWS)  Browser  Scraping  │  │
-│     │  sliding     │     └─────────────────────────────────┘   │
-│     │  window      │                                           │
-│     └──────────────┘                                           │
-│                                                                 │
-│  ┌─────────────┐  ┌──────────────────┐  ┌───────────────────┐  │
-│  │ Memory      │  │  Runtime Graph   │  │  Runtime          │  │
-│  │ Store       │  │  topology +      │  │  Compactor        │  │
-│  │ 4 indexes   │  │  cycle detect +  │  │  adaptive         │  │
-│  │ TTL + prune │  │  validate+repair │  │  heuristics       │  │
-│  └─────────────┘  └──────────────────┘  └───────────────────┘  │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │          HTTP API  ·  gs CLI (30+ commands)  ·  MCP     │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                        GhostStack Runtime                           │
+│                                                                     │
+│  ┌──────────────────┐   ┌──────────────┐   ┌────────────────────┐  │
+│  │  Planning Engine │   │  Governance  │   │  Approval          │  │
+│  │  11 blueprints   │──▶│  Engine      │──▶│  Workflow          │  │
+│  │  + LLM classify  │   │  constraints │   │  (human-in-loop)   │  │
+│  └──────────────────┘   │  policies    │   └────────────────────┘  │
+│                         │  guardrails  │                            │
+│                         └──────┬───────┘                            │
+│                                │                                    │
+│  ┌─────────────────────────────▼──────────────────────────────────┐ │
+│  │                   GhostStackOrchestrator                       │ │
+│  │        submitAndRun(objective) → plan → govern → execute       │ │
+│  └──────────┬──────────────────────────────────────┬─────────────┘ │
+│             │                                      │               │
+│     ┌───────▼──────┐                  ┌────────────▼─────────────┐ │
+│     │  FileQueue   │                  │      Task Executor       │ │
+│     │  Backend     │◀─────────────────│   runLoop() + retry      │ │
+│     │  JSONL + DLQ │                  │   backoff + circuit      │ │
+│     └──────────────┘                  └────────────┬─────────────┘ │
+│                                                    │               │
+│  ┌─────────────────────────────────────────────────▼─────────────┐ │
+│  │                     Execution Adapters                        │ │
+│  │  Floci (AWS)  Browser  Scraping  WebSearch  Code  Inference   │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+│                                                                     │
+│  ┌─────────────┐  ┌──────────────────┐  ┌───────────────────────┐  │
+│  │ Memory      │  │  Runtime Graph   │  │  Runtime Compactor    │  │
+│  │ Store       │  │  topology +      │  │  adaptive heuristics  │  │
+│  │ 4 indexes   │  │  cycle detect +  │  │  + LeakDetector       │  │
+│  │ TTL + prune │  │  validate+repair │  │  + QuotaManager       │  │
+│  └─────────────┘  └──────────────────┘  └───────────────────────┘  │
+│                                                                     │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │          HTTP API  ·  gs CLI (33 commands)  ·  MCP server     │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -67,40 +66,52 @@ gs submit "ingest data from S3 bucket my-dataset"
 ## Key Features
 
 ### Execution Engine
-- **Priority-weighted FIFO queue** — `FileQueueBackend` backed by atomic JSONL writes with in-process priority ordering
+- **Priority-weighted FIFO queue** — `FileQueueBackend` backed by atomic JSONL writes with in-process priority ordering; metrics on every push/pop
 - **Exponential-backoff retry loop** — `runLoop(maxIterations, idleDelayMs)` with configurable thresholds; backoff delay respected between iterations
-- **Dead-letter queue** — exhausted jobs quarantined; operator recycling via `clearDeadLetterQueue()`; `gs dlq` CLI for inspection
+- **Dead-letter queue** — exhausted jobs quarantined; operator recycling via `gs dlq`; `clearDeadLetterQueue()` on interface
 - **Crash recovery** — append-only JSONL event log replayed on startup; corrupt lines quarantined automatically
 
+### Planning Engine
+- **11 blueprint types** — `ingestion`, `scraper`, `backup`, `etl`, `research`, `search`, `code`, `inference`, `dangerous`, `delete`, `default`
+- **Word-boundary keyword matching** — whole-word regex prevents `research` shadowing `search`; priority-ordered selection
+- **LLM-backed classification** — pass any `ILanguageModel` to `PlanningEngine(llm)` to route objectives via `generateObject()`; falls back to keyword matching if model is unavailable
+- **Argument overrides** — `key=value` pairs parsed from the objective string and merged into blueprint arguments at plan time
+
 ### Governance Stack
-- **Planning Engine** — 8 blueprint types (`ingestion`, `scraper`, `backup`, `etl`, `research`, `dangerous`, `delete`, `default`) with key=value arg extraction and priority-ordered keyword matching
-- **Governance Engine** — composable evaluation pipeline run before every execution:
-  - Constraints: `ResourceScopeConstraint`, `CostBudgetConstraint`
+- **GovernanceEngine** — composable evaluation pipeline run before every task:
+  - Constraints: `ResourceScopeConstraint`, `CostBudgetConstraint`, `TimeoutConstraint`
   - Policies: `DangerousOperationPolicy`, `WildcardPermissionsPolicy`
-  - Guardrails: `LoopDetectionGuardrail`, `RunawayRetriesGuardrail`, `TaskGraphLimitGuardrail`
-- **Approval Workflow** — human-in-the-loop gating with CLI approve/cancel and event-sourced audit trail
+  - Guardrails: `LoopDetectionGuardrail`, `RunawayRetriesGuardrail`, `TaskGraphLimitGuardrail`, `HighCostPlanGuardrail`, `DuplicateActionGuardrail`
+- **Approval Workflow** — human-in-the-loop gating with `gs approve`/`cancel` and event-sourced audit trail
+
+### Execution Adapters
+- **FlociAdapter** — LocalStack-compatible AWS emulator (S3, SQS, DynamoDB, Lambda, SNS); mock fallback for offline dev
+- **BrowserExecutionAdapter** — Playwright automation with crawl quota enforcement
+- **ScrapingExecutionAdapter** — Axios-based scraping with offline simulation fallback
+- **WebSearchAdapter** — web search and answer tasks via configurable search engine
+- **CodeAgentPool** — five-agent pool (`FilePickerAgent`, `CodeEditorAgent`, `CodeReviewerAgent`, `ResearcherAgent`, `ThinkerAgent`); dispatches on `code` / `code_edit` / `code_review` / `research` / `reason`
+- **LocalInferenceAdapter** — routes `inference` / `local_llm` / `generate` tasks to a local model bridge
 
 ### Resilience
 - **Circuit Breaker** — sliding-window failure counting (`failureWindowMs`, default 60 s); half-open recovery; `HealthAwareCircuitBreaker` with configurable health probe interval
-- **Runtime Compactor** — adaptive compaction triggered by journal growth rate, heap %, EventBus backpressure, and quota violations; `LeakDetector` tracks heap and subscription growth over rolling readings
-- **Write-verify persistence** — every state write is read back and compared; second-write retry on mismatch; corrupt files quarantined with timestamp suffix
+- **Runtime Compactor** — adaptive compaction triggered by journal growth, heap %, EventBus backpressure, and quota violations
+- **Write-verify persistence** — every state write is read back and compared; second-write retry on mismatch
 
 ### Observability
-- **Structured Logger** — `LOG_LEVEL`, `LOG_FORMAT=json`, `LOG_FILE` sink; `ILogger` interface threaded through every subsystem; `NullLogger` for tests
-- **Metrics Collector** + **Trace Recorder** — gauge, counter, timing, and span tracking; `DiagnosticEnricher` correlates metrics with traces
-- **TraceIndexer** — auto-indexes EventBus events into MemoryStore for cross-agent semantic retrieval
-- **RuntimeInspector** — unified diagnostic surface (queue depth, memory stats, workflow history, agent bus, circuit breaker state)
+- **Structured Logger** — `GHOSTSTACK_LOG_LEVEL`, `GHOSTSTACK_LOG_FORMAT=json`, `GHOSTSTACK_LOG_FILE` sink; `ILogger` threaded through every subsystem
+- **Metrics** — gauge, counter, timing tracking; `queue.push_total`, `queue.pop_total`, `queue.dlq_total`, `queue.active_length` all emitted
+- **Prometheus export** — `/metrics/prometheus` endpoint
+- **TraceIndexer** — auto-indexes EventBus events into MemoryStore for semantic retrieval
 
-### Memory & Knowledge Layer
-- **MemoryStore** — four index Sets (`byAgent`, `byType`, `byTag`, `byWorkflow`) with O(1) lookup; TTL eviction cleans all indexes atomically via `_removeFromIndexes()`; configurable auto-prune timer
-- **AgentBus** — bounded ring buffer (configurable `maxMessages`); TTL sweep on push and read; request-response delegation with timeout and subscription teardown; capability registry
-- **RuntimeGraph** — directed graph of agents, services, and workflow executions; Kahn-style topological sort; cycle detection; validate + repair operations; persisted journals with compaction
+### Memory & Knowledge
+- **MemoryStore** — four index Sets with O(1) lookup; TTL eviction cleans all indexes atomically; configurable auto-prune timer
+- **AgentBus** — bounded ring buffer; TTL sweep on push/read; capability registry
+- **RuntimeGraph** — directed execution graph; topological sort; cycle detection; validate + repair; persisted journals
 
 ### Workflow Engine
 - 5 built-in templates: `BrowserResearchWorkflow`, `LocalCloudProvisioning`, `DocumentProcessing`, `SpecToExecution`, `GovernedETL`
-- JSON spec loading with full structural validation: required fields per task, duplicate ID detection, dangling dependency references, priority enum enforcement
-- S3-event auto-trigger pipeline; idempotency tokens for duplicate-safe execution; state verification checkpoints
-- Workflow events automatically stored in MemoryStore and reflected in RuntimeGraph topology
+- JSON/YAML spec loading with full structural validation
+- S3-event auto-trigger pipeline; idempotency tokens; state verification checkpoints
 
 ---
 
@@ -108,29 +119,29 @@ gs submit "ingest data from S3 bucket my-dataset"
 
 | Layer | Technology |
 |---|---|
-| Language | TypeScript 6, strict, zero `any` in public interfaces |
+| Language | TypeScript 6, strict mode |
 | Runtime | Node.js 20+, `ts-node` for development |
 | Queue persistence | Priority-weighted JSONL (`FileQueueBackend`) |
 | Event persistence | Append-only JSONL event log (`FileEventStore`) |
 | State persistence | JSON KV store with write-verify (`FileRuntimePersistence`) |
 | Config | `.env` + `ghoststack.config.json` + YAML service registry |
 | HTTP API | Native `http.createServer` — zero framework overhead |
-| Testing | Jest — 473 tests, 63 suites, deterministic assertions |
-| Linting | ESLint + `@typescript-eslint` — 0 errors |
+| Testing | Jest — 499 tests, 65 suites, deterministic assertions |
+| Linting | ESLint + `@typescript-eslint` — 0 errors, 0 warnings |
 | Cloud emulation | Floci (LocalStack-compatible AWS API surface) |
 | Browser automation | Playwright (optional dependency) |
-| Scraping | Axios with offline simulation fallback |
+| LLM inference | Groq API / OpenRouter / Ollama via `ILanguageModel` |
 
 ---
 
 ## Project Stats
 
 ```
-Test suites : 62 passing / 63 total (1 environment-skipped)
-Tests       : 468 passing / 473 total (5 environment-skipped)
+Test suites : 65 passing / 66 total (1 environment-skipped)
+Tests       : 499 passing / 504 total (5 environment-skipped)
 TypeScript  : 0 errors
-ESLint      : 0 errors
-Version     : 1.1.3
+ESLint      : 0 errors, 0 warnings
+Version     : 1.2.0
 ```
 
 ---
@@ -157,7 +168,7 @@ npm run start
 npm run gs -- plan "deploy ingestion pipeline bucketName=raw-data"
 
 # Submit an objective end-to-end (plan → govern → queue → execute)
-npm run gs -- submit "ingest data from S3 bucket my-dataset"
+npm run gs -- submit "search for latest TypeScript performance benchmarks"
 
 # Load and run a workflow spec file directly
 npm run gs -- run ./specs/demo-etl/workflow-spec.json
@@ -175,7 +186,7 @@ npm run gs -- workflows:executions
 ```
 gs init                    Scaffold config, directories, and example spec
 gs start                   Start HTTP API server (foreground)
-gs start:federation        Boot Floci + API + FastMCP as supervised group
+gs start:federation        Boot Floci + API + MCP server as supervised group
 gs submit <objective>      Plan → govern → execute from natural language
 gs run <spec-path>         Execute a workflow spec file immediately
 gs plan <objective>        Preview generated task graph without executing
@@ -205,15 +216,17 @@ gs version                 Print version and runtime info
 |---|---|---|
 | `GHOSTSTACK_API_PORT` | `3000` | HTTP API listening port |
 | `GHOSTSTACK_FLOCI_URL` | `http://localhost:4566` | Floci/LocalStack endpoint |
-| `GHOSTSTACK_OFFLINE_MODE` | `true` | Disable live Floci calls (safe default) |
+| `GHOSTSTACK_OFFLINE_MODE` | `false` | Set to `1` to disable live adapter calls |
 | `GHOSTSTACK_FLOCI_STRICT` | `false` | Fail hard on Floci errors |
 | `GHOSTSTACK_MCP_PORT` | `8100` | MCP Bridge port |
 | `GHOSTSTACK_DATA_DIR` | `./data-runtime` | Queue, event log, and state directory |
-| `GHOSTSTACK_BACKUP_ON_START` | _(unset)_ | Snapshot persistence files on boot |
-| `LOG_LEVEL` | `info` | `debug` / `info` / `warn` / `error` |
-| `LOG_FORMAT` | _(plain)_ | Set to `json` for structured JSON output |
-| `LOG_FILE` | _(unset)_ | Append logs to a file path |
+| `GHOSTSTACK_BACKUP_ON_START` | _(unset)_ | Set to `1` to snapshot persistence files on boot |
 | `GHOSTSTACK_API_TOKEN` | _(unset)_ | Bearer token for API authentication |
+| `GHOSTSTACK_LOG_LEVEL` | `INFO` | `DEBUG` / `INFO` / `WARN` / `ERROR` |
+| `GHOSTSTACK_LOG_FORMAT` | _(plain)_ | Set to `json` for structured JSON output |
+| `GHOSTSTACK_LOG_FILE` | _(unset)_ | Append logs to a file path |
+| `GROQ_API_KEY` | _(unset)_ | Groq API key for LLM-backed planning |
+| `TAVILY_API_KEY` | _(unset)_ | Tavily API key for WebSearchAdapter |
 
 ---
 
@@ -258,17 +271,17 @@ Validation enforced at parse time: required fields, unique IDs, valid priority (
 
 ## Robustness Audit
 
-All correctness bugs identified across two systematic audit passes have been resolved. Selected highlights:
+All correctness bugs identified across systematic audit passes have been resolved:
 
-| Bug | Description | Fix |
+| ID | Description | Fix |
 |---|---|---|
+| F1 | `GHOSTSTACK_OFFLINE_MODE === undefined` forced offline on every unconfigured machine | Removed `=== undefined` branch; default is now online |
+| F2 | Planner tasks had no `type` field; all routed to `floci` regardless of blueprint | `submitCognitiveObjective` threads `type`/`action`/`arguments` from `ITaskSynthesisResult` |
+| F3 | `FreeModelProvider.streamText` did a full blocking call then yielded one chunk | Delegates to `GroqModelProvider.streamText` for real SSE streaming on groq routes |
+| F4 | `GroqModelProvider.generateObject` prepended its own system message even when caller provided one | Checks for existing system message before prepending |
 | B6 | `MemoryStore.prune()` left stale IDs in all 4 index Sets | `_removeFromIndexes()` helper cleans atomically |
-| B8 | DLQ recycling left jobs in both DLQ and active queue | `clearDeadLetterQueue()` added to interface + both backends |
 | B9 | CircuitBreaker tripped on lifetime failure count | Sliding-window `failureTimestamps[]` with configurable window |
-| B3 | `submitAndRun()` drained queue twice | Single-pass through `submitCognitiveObjective()` |
-| B2 | Retry backoff bypassed by raw `while` loop | Replaced with `runLoop()` which respects `_pendingRetryDelayMs` |
-| A2 | `AgentBus.messages[]` grew unbounded | Ring buffer cap + TTL sweep on push and read |
-| A5 | `parseWorkflowSpec()` had no per-task validation | Full structural validation: fields, IDs, deps, priority |
+| A8 | `RuntimeManager.getActiveServices()` silently polluted registry with phantom "unknown" entries | Config-declared services are no longer auto-registered; registry only holds explicit entries |
 
 ---
 

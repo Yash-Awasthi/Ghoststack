@@ -1,4 +1,4 @@
-# GhostStack v1.1 Micro-Benchmark Report
+# GhostStack v1.2.0 Micro-Benchmark Report
 
 Automated hardware profiling snapshot generated on 2026-05-18T17:40:12.060Z.
 

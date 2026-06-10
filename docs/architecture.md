@@ -1,6 +1,6 @@
-# GhostStack v1.1 System Architecture Blueprint
+# GhostStack v1.2.0 System Architecture Blueprint
 
-This document defines the production architecture, execution lifecycle, persistence schemas, local-first scheduling topology, and telemetry fabric of **GhostStack v1.1**.
+This document defines the production architecture, execution lifecycle, persistence schemas, local-first scheduling topology, and telemetry fabric of **GhostStack v1.2.0**.
 
 ```mermaid
 graph TD

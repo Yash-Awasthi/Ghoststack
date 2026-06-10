@@ -2,6 +2,43 @@
 
 ---
 
+## v1.2.0 — 2026-06-10
+
+### New Features
+- **WebSearchAdapter** — `IExecutionAdapter` for `search` / `answer` / `web_search` task types; wired into `TaskExecutor` adapter chain.
+- **CodeAgentPool** — five-agent pool (`FilePickerAgent`, `CodeEditorAgent`, `CodeReviewerAgent`, `ResearcherAgent`, `ThinkerAgent`) dispatching on `code` / `code_edit` / `code_review` / `research` / `reason` types.
+- **LocalInferenceAdapter** — routes `inference` / `local_llm` / `generate` tasks to the local model bridge.
+- **LLM-backed PlanningEngine** — `PlanningEngine(llm?)` accepts an optional `ILanguageModel`; uses `generateObject()` to classify objectives into blueprint keys; falls back to keyword matching on failure.
+- **11 planning blueprints** — three new blueprints added: `search`, `code`, `inference`; `adapterType` field threaded through `TaskTemplate` → `ITaskSynthesisResult` → orchestrator.
+- **`queue.push_total` / `queue.pop_total` counters** — `FileQueueBackend` now emits per-operation counters alongside existing gauge metrics.
+- **Injectable `ITaskDependencyResolver`** — `GhostStackOrchestrator.create({ resolver })` accepts a custom resolver; defaults to `TaskDependencyResolver`.
+- **`CONTRIBUTING.md`** — contribution guide covering setup, commit conventions, adapter/CLI extension, and governance rules.
+
+### Bug Fixes
+- `GHOSTSTACK_OFFLINE_MODE === undefined` silently forced offline mode everywhere — removed; default is now online.
+- Planner-generated tasks had no `type` field so all routed to `floci` regardless of blueprint — `submitCognitiveObjective` now threads `type`/`action`/`arguments` from `ITaskSynthesisResult`.
+- `task-payload.ts` fallback added `search` / `code` / `inference` branches and a type-only fast path.
+- `GroqModelProvider.generateObject` prepended its own system message when caller already provided one — fixed with caller-has-system-message guard.
+- `FreeModelProvider.streamText` did a full blocking call then yielded one chunk — now delegates to `GroqModelProvider.streamText` for real SSE streaming on groq routes.
+- `CodeAgentPool.canExecute` did not accept generic `"code"` type — added, resolves to `CodeEditorAgent`.
+- `RuntimeManager.getActiveServices()` silently polluted the services registry with phantom `"unknown"` entries for config-declared services — removed auto-registration side-effect.
+
+### Changed
+- All third-party library names stripped from bridges, adapters, comments, and error strings.
+- Bridge files renamed: `stealth_browser_bridge.py`, `web_scraping_bridge.py`, `local_inference_bridge.py`, `mcp_server_bridge.py`.
+- `FastMcpHost` → `McpServerHost`; `"fastmcp"` → `"mcp-server"` throughout.
+- `apps/` cleaned: 9 third-party directories removed; `floci` retained.
+- `IExecutionAdapter.execute()` return type narrowed from `Promise<any>` to `Promise<Record<string, unknown>>`.
+- `selectBlueprint()` upgraded to whole-word regex matching — prevents `research` from capturing `search` as a substring.
+- `OPERATIONS.md` fully rewritten for v1.2.0 with complete CLI table, env var reference, and metrics catalogue.
+- `schemas/mcp_registry.json` populated with all 27 GhostStack MCP tool names.
+- Bootstrap banner updated to v1.2.0.
+
+### Stats
+- 499 tests · 65 suites · 0 ESLint errors · 0 TypeScript errors
+
+---
+
 ## v1.1.2 — 2026-06-10
 
 ### Bug Fixes

@@ -1,12 +1,12 @@
-# GhostStack v1.1 Security Policy & Hardening Review
+# GhostStack v1.2.0 Security Policy & Hardening Review
 
-This document provides a security audit and architecture review of the defenses, sandboxing limits, and cryptographic governance controls implemented in **GhostStack v1.1**.
+This document provides a security audit and architecture review of the defenses, sandboxing limits, and cryptographic governance controls implemented in **GhostStack v1.2.0**.
 
 ---
 
 ## 1. Safety Principles & Architecture
 
-GhostStack v1.1 enforces three foundational security paradigms:
+GhostStack v1.2.0 enforces three foundational security paradigms:
 
 1. **Zero-Trust Input Sanitization**: All workflow specifications, templates, and dynamic task parameters are validated against strict JSON schemas and path containment rules before entering queue buffers.
 2. **Deterministic Governance Deciders**: The planning and validation substrates operate through pure, non-autonomous rules engines.

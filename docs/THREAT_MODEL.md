@@ -1,6 +1,6 @@
-# GhostStack v1.1 Threat Model & Concurrency Defense Blueprint
+# GhostStack v1.2.0 Threat Model & Concurrency Defense Blueprint
 
-This document details identified security vectors, systemic threats, validation boundaries, and active structural mitigations implemented in **GhostStack v1.1**.
+This document details identified security vectors, systemic threats, validation boundaries, and active structural mitigations implemented in **GhostStack v1.2.0**.
 
 ---
 
