@@ -1,7 +1,19 @@
 # GhostStack — Roadmap
 
 **Last updated:** 2026-06-10
-**Current state:** v1.2.0 · 485 tests · 64 suites · 0 ESLint errors · 0 TS errors
+**Current state:** v1.2.0 · 499 tests · 65 suites · 0 ESLint errors · 0 TS errors
+
+---
+
+## Completed post-v1.2.0
+
+| ID | Description |
+|---|---|
+| T7 | 14-case adapter routing test suite: `canExecute` matching, `adapterType` threading, E2E spy-based routing, LLM fallback coverage |
+| F-LLM-PLAN | `PlanningEngine` accepts optional `ILanguageModel`; LLM classifies objective → blueprint key with keyword fallback; word-boundary `selectBlueprint` (fixes `research`/`search` substring collision) |
+| A7 | `schemas/mcp_registry.json` populated with all 27 GhostStack MCP tool names |
+| Q3 | Confirmed already fixed — `spec.schema.json` priority enum includes `"medium"` |
+| T5 | Confirmed already implemented — `tests/submit-and-run.test.ts` passes |
 
 ---
 
@@ -45,9 +57,6 @@ Config-defined services not in the in-memory map get auto-registered as `status:
 ### F-WEBHOOK — Approval webhook / callback
 `ApprovalWorkflow` has no outbound notification. Wire up `GHOSTSTACK_APPROVAL_WEBHOOK_URL` for human-in-the-loop flows.
 
-### F-LLM-PLAN — LLM-backed planning engine
-`PlanningEngine` uses keyword matching. Replace `selectBlueprint` with an `ILanguageModel.generateObject` call that maps any objective to a structured plan JSON, with keyword matching as fallback.
-
 ---
 
 ## Open — Code Quality
@@ -72,9 +81,6 @@ Integration test covering the full plan → govern → execute → drain cycle.
 ### T6 — No test for `EnvLoader` propagation
 Verify that env vars loaded from `.env` via `loadEnvFromRoot` are visible to all downstream components.
 
-### T7 — No test for new adapter routing via cognitive objective
-End-to-end test: `submitCognitiveObjective("search for X")` → `WebSearchAdapter.execute()`.
-
 ---
 
 ## Open — Documentation
@@ -94,9 +100,6 @@ Add contribution guide covering branch naming, test requirements, and commit mes
 
 | ID | Impact | Effort | Priority |
 |---|---|---|---|
-| T7 | High | Low | Next |
-| T5 | High | Low | Next |
-| F-LLM-PLAN | High | Medium | Next |
 | T6 | Medium | Low | Next |
 | F-METRICS | Medium | Low | Backlog |
 | Q3 | Low | Low | Backlog |
