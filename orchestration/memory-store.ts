@@ -271,9 +271,9 @@ export class MemoryStore implements IMemoryStore {
     const sorted = Array.from(candidates)
       .map((id) => this.entries.get(id)!)
       .filter((e) => {
-        // TTL check
+        // TTL check — use _removeFromIndexes so stale IDs are cleaned from all index Sets
         if (e.ttlMs && Date.now() - e.timestamp.getTime() > e.ttlMs) {
-          this.entries.delete(e.id);
+          this._removeFromIndexes(e.id, e);
           return false;
         }
         return true;
@@ -288,12 +288,12 @@ export class MemoryStore implements IMemoryStore {
     return { entries, total, query };
   }
 
-  async delete(id: string): Promise<void> {
-    await this.ensureLoaded();
-    const entry = this.entries.get(id);
-    if (!entry) return;
+  /**
+   * Remove a single entry from the entries Map AND all four index Sets.
+   * Must be called whenever an entry is evicted (delete, prune, TTL eviction).
+   */
+  private _removeFromIndexes(id: string, entry: MemoryEntry): void {
     this.entries.delete(id);
-    // Cleanup indexes
     if (entry.agentId) {
       this.indexByAgent.get(entry.agentId)?.delete(id);
     }
@@ -304,6 +304,13 @@ export class MemoryStore implements IMemoryStore {
     for (const tag of entry.tags) {
       this.indexByTag.get(tag)?.delete(id);
     }
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.ensureLoaded();
+    const entry = this.entries.get(id);
+    if (!entry) return;
+    this._removeFromIndexes(id, entry);
     await this.persist();
   }
 
@@ -312,7 +319,7 @@ export class MemoryStore implements IMemoryStore {
     let pruned = 0;
     for (const [id, entry] of this.entries) {
       if (entry.ttlMs && Date.now() - entry.timestamp.getTime() > entry.ttlMs) {
-        this.entries.delete(id);
+        this._removeFromIndexes(id, entry);
         pruned++;
       }
     }

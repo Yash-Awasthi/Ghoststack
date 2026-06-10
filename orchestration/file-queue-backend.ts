@@ -132,6 +132,12 @@ export class FileQueueBackend implements IQueueBackend {
     return this.deadLetterQueue;
   }
 
+  async clearDeadLetterQueue(): Promise<void> {
+    this._ensureInit();
+    this.deadLetterQueue = [];
+    this._writeJobsToFile(this.dlqPath, []);
+  }
+
   async getQueueLength(): Promise<number> {
     this._ensureInit();
     return this.activeQueue.length;

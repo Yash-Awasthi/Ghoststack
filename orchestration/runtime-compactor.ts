@@ -427,6 +427,8 @@ export class RuntimeCompactor {
             await this.config.queue.push(job);
             recycledDeadLetter++;
           }
+          // Clear the DLQ after recycling so jobs don't persist in both queues
+          await this.config.queue.clearDeadLetterQueue();
         }
         activeJobsBefore = await this.config.queue.getQueueLength();
       } catch {

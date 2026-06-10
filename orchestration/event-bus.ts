@@ -359,7 +359,8 @@ export class LocalEventBus implements IEventBus {
     const cleared = this.recentDedupKeys.size;
     this.recentDedupKeys.clear();
     if (cleared > 0) {
-      console.log(`[EventBus] Compacted ${cleared} dedup key(s)`);
+      const msg = `[EventBus] Compacted ${cleared} dedup key(s)`;
+      if (this.logger) { this.logger.info(msg); } else { console.log(msg); }
     }
     return { dedupKeysCleared: cleared };
   }
@@ -373,7 +374,8 @@ export class LocalEventBus implements IEventBus {
     );
     const pruned = before - this.history.length;
     if (pruned > 0) {
-      console.log(`[EventBus] Compacted history: pruned ${pruned} event(s) older than ${maxAgeMs}ms`);
+      const msg = `[EventBus] Compacted history: pruned ${pruned} event(s) older than ${maxAgeMs}ms`;
+      if (this.logger) { this.logger.info(msg); } else { console.log(msg); }
     }
     return { prunedCount: pruned };
   }

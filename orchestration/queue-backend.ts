@@ -44,6 +44,10 @@ export class MemoryQueueBackend implements IQueueBackend {
     return this.deadLetterQueue;
   }
 
+  async clearDeadLetterQueue(): Promise<void> {
+    this.deadLetterQueue = [];
+  }
+
   async getQueueLength(): Promise<number> {
     return this.activeQueue.length;
   }

@@ -17,6 +17,8 @@ export interface IQueueBackend {
   pop(): Promise<QueueJob | undefined>;
   moveToDeadLetter(job: QueueJob, error: string): Promise<void>;
   getDeadLetterQueue(): Promise<QueueJob[]>;
+  /** Remove all jobs from the dead-letter queue (e.g. after recycling them). */
+  clearDeadLetterQueue(): Promise<void>;
   getQueueLength(): Promise<number>;
   getActiveJobs(): Promise<QueueJob[]>;
 }

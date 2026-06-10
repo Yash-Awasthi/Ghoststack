@@ -15,8 +15,14 @@ import { IMetricsCollector } from "./interfaces/observability.interface";
 export type CircuitState = "closed" | "open" | "half-open";
 
 export interface CircuitBreakerConfig {
-  /** Maximum consecutive failures before opening the circuit */
+  /** Maximum failures within the sliding window before opening the circuit */
   failureThreshold: number;
+  /**
+   * Sliding window (in ms) over which failures are counted.
+   * Only failures within the last `failureWindowMs` contribute to the threshold.
+   * Defaults to 60 000 ms (1 minute).
+   */
+  failureWindowMs?: number;
   /** Time in ms to wait before transitioning from open to half-open */
   recoveryTimeoutMs: number;
   /** Maximum number of requests allowed in half-open state */
@@ -56,7 +62,8 @@ export class CircuitBreakerOpenError extends Error {
 
 export class CircuitBreaker {
   private state: CircuitState = "closed";
-  private failureCount = 0;
+  /** Timestamps (ms) of recent failures — used for the sliding-window threshold check. */
+  private failureTimestamps: number[] = [];
   private successCount = 0;
   private totalRequests = 0;
   private lastFailureTime: number | null = null;
@@ -79,7 +86,7 @@ export class CircuitBreaker {
   getMetrics(): CircuitBreakerMetrics {
     return {
       state: this.state,
-      failureCount: this.failureCount,
+      failureCount: this._recentFailureCount(),
       successCount: this.successCount,
       totalRequests: this.totalRequests,
       lastFailureTime: this.lastFailureTime,
@@ -88,6 +95,20 @@ export class CircuitBreaker {
       halfOpenAllowed: this.halfOpenRequests,
       halfOpenSuccesses: this.halfOpenSuccesses
     };
+  }
+
+  /** Count failures that fall within the configured sliding window. */
+  private _recentFailureCount(): number {
+    const windowMs = this.config.failureWindowMs ?? 60_000;
+    const cutoff = Date.now() - windowMs;
+    return this.failureTimestamps.filter((t) => t >= cutoff).length;
+  }
+
+  /** Discard failure timestamps older than the sliding window. */
+  private _pruneFailureTimestamps(): void {
+    const windowMs = this.config.failureWindowMs ?? 60_000;
+    const cutoff = Date.now() - windowMs;
+    this.failureTimestamps = this.failureTimestamps.filter((t) => t >= cutoff);
   }
 
   /**
@@ -149,12 +170,14 @@ export class CircuitBreaker {
   }
 
   private onFailure(): void {
-    this.failureCount++;
-    this.lastFailureTime = Date.now();
+    const now = Date.now();
+    this.failureTimestamps.push(now);
+    this.lastFailureTime = now;
+    // Keep the timestamps array bounded to the window
+    this._pruneFailureTimestamps();
 
     if (this.state === "closed") {
-      const recentFailures = this.failureCount; // In a real implementation, use a sliding window
-      if (recentFailures >= this.config.failureThreshold) {
+      if (this._recentFailureCount() >= this.config.failureThreshold) {
         this.transitionToOpen();
       }
     } else if (this.state === "half-open") {
@@ -166,14 +189,15 @@ export class CircuitBreaker {
   private transitionToOpen(): void {
     this.state = "open";
     this.openedAt = Date.now();
+    const recentCount = this._recentFailureCount();
     this.logger?.warn(`Circuit breaker "${this.config.name}" OPENED`, {
-      failureCount: this.failureCount,
+      failureCount: recentCount,
       openedAt: new Date(this.openedAt).toISOString()
     });
     this.metrics?.recordGauge(`circuit_breaker.${this.config.name}.state`, 1, { state: "open" });
     this.eventBus?.publish("circuit_breaker_opened", {
       name: this.config.name,
-      failureCount: this.failureCount,
+      failureCount: recentCount,
       openedAt: new Date().toISOString()
     });
   }
@@ -192,7 +216,7 @@ export class CircuitBreaker {
 
   private transitionToClosed(): void {
     this.state = "closed";
-    this.failureCount = 0;
+    this.failureTimestamps = [];
     this.halfOpenRequests = 0;
     this.halfOpenSuccesses = 0;
     this.openedAt = null;
@@ -206,7 +230,7 @@ export class CircuitBreaker {
 
   reset(): void {
     this.state = "closed";
-    this.failureCount = 0;
+    this.failureTimestamps = [];
     this.successCount = 0;
     this.totalRequests = 0;
     this.halfOpenRequests = 0;
