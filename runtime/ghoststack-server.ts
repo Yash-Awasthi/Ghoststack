@@ -179,6 +179,22 @@ export async function createGhostStackServer(repoRoot: string): Promise<GhostSta
 
       res.setHeader("Content-Type", "application/json");
 
+      // ── GET /runtime/queue — must be checked before the generic diagnosticApi catch-all ──
+      if (method === "GET" && pathname === "/runtime/queue") {
+        const [activeJobs, dlqJobs] = await Promise.all([
+          ctx.queue.getActiveJobs(),
+          ctx.queue.getDeadLetterQueue()
+        ]);
+        res.statusCode = 200;
+        res.end(JSON.stringify({
+          activeCount: activeJobs.length,
+          dlqCount: dlqJobs.length,
+          activeJobs,
+          dlqJobs
+        }, null, 2));
+        return;
+      }
+
       if (method === "GET") {
         const data = await diagnosticApi.handle("GET", pathname);
         res.statusCode = 200;
@@ -249,6 +265,36 @@ export async function createGhostStackServer(repoRoot: string): Promise<GhostSta
         const result = await ctx.workflowEngine.approveAndTriggerWorkflow(approvalId);
         res.statusCode = 200;
         res.end(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      // ── POST /runtime/plan — plan + governance preview (no execution) ─────────
+      if (method === "POST" && pathname === "/runtime/plan") {
+        const bodyRaw = await readBody(req);
+        const body = bodyRaw ? JSON.parse(bodyRaw) : {};
+        const objective = body.objective as string;
+        if (!objective) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ error: "objective is required" }));
+          return;
+        }
+        const plan = await ctx.planningEngine.generatePlan(objective);
+        const governanceResult = await ctx.governanceEngine.evaluatePlan(plan);
+        res.statusCode = 200;
+        res.end(JSON.stringify({ plan, governance: governanceResult }, null, 2));
+        return;
+      }
+
+      // ── DELETE /runtime/queue/dlq/clear — flush dead-letter queue ─────────────
+      if (method === "DELETE" && pathname === "/runtime/queue/dlq/clear") {
+        if (typeof (ctx.queue as any).clear === "function") {
+          await (ctx.queue as any).clear(true); // includeDlq = true
+          res.statusCode = 200;
+          res.end(JSON.stringify({ cleared: true }));
+        } else {
+          res.statusCode = 501;
+          res.end(JSON.stringify({ error: "Queue backend does not support clear()" }));
+        }
         return;
       }
 

@@ -1,6 +1,7 @@
 import { IServiceDiscovery, ServiceHeartbeat, IHealthMonitor } from "./interfaces/discovery.interface";
 import { IConfigLoader } from "../runtime/config-loader";
 import { probeFlociHealth, resolveFlociEndpoint } from "./floci-client";
+import { ILogger } from "./interfaces/logger.interface";
 
 export class LocalServiceDiscovery implements IServiceDiscovery {
   private services = new Map<string, ServiceHeartbeat>();
@@ -31,11 +32,13 @@ export class LocalServiceDiscovery implements IServiceDiscovery {
 export class HealthMonitor implements IHealthMonitor {
   private configLoader: IConfigLoader;
   private discovery: IServiceDiscovery;
+  private logger?: ILogger;
   private timer: NodeJS.Timeout | null = null;
 
-  constructor(configLoader: IConfigLoader, discovery: IServiceDiscovery) {
+  constructor(configLoader: IConfigLoader, discovery: IServiceDiscovery, logger?: ILogger) {
     this.configLoader = configLoader;
     this.discovery = discovery;
+    this.logger = logger;
   }
 
   async startMonitoring(): Promise<void> {
@@ -49,7 +52,11 @@ export class HealthMonitor implements IHealthMonitor {
     }
     this.timer = setInterval(() => {
       this.pollChecks().catch((err) => {
-        console.error("Health monitor loop failure:", err);
+        if (this.logger) {
+          this.logger.error("Health monitor loop failure", err);
+        } else {
+          console.error("Health monitor loop failure:", err);
+        }
       });
     }, 5000);
     this.timer.unref();
@@ -109,7 +116,11 @@ export class HealthMonitor implements IHealthMonitor {
         });
       }
     } catch (e) {
-      console.error("Error in healthcheck polling:", e);
+      if (this.logger) {
+        this.logger.error("Error in healthcheck polling", e);
+      } else {
+        console.error("Error in healthcheck polling:", e);
+      }
     }
   }
 }

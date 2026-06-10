@@ -32,7 +32,7 @@
           "description": { "type": "string" },
           "type": { "type": "string" },
           "action": { "type": "string" },
-          "priority": { "type": "string", "enum": ["low", "normal", "high", "critical"] },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"] },
           "arguments": { "type": "object" },
           "dependencies": {
             "type": "array",

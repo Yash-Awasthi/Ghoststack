@@ -20,6 +20,7 @@ import { IRuntimePersistence } from "./interfaces/persistence.interface";
 import { IQueueBackend } from "./interfaces/queue.interface";
 import { MetricsCollector } from "./observability-manager";
 import { RuntimeGraph } from "./runtime-graph";
+import { ILogger } from "./interfaces/logger.interface";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -32,6 +33,8 @@ export interface RuntimeCompactorConfig {
   metrics?: MetricsCollector;
   options?: CompactorOptions;
   runtimeGraph?: RuntimeGraph;
+  /** Optional logger — used for compaction warnings and auto-compaction errors. */
+  logger?: ILogger;
 }
 
 export interface CompactionReport {
@@ -500,7 +503,11 @@ export class RuntimeCompactor {
         }
         await this.compact();
       } catch (err) {
-        console.error("[RuntimeCompactor] Auto-compaction failed:", err);
+        if (this.config.logger) {
+          this.config.logger.error("[RuntimeCompactor] Auto-compaction failed", err);
+        } else {
+          console.error("[RuntimeCompactor] Auto-compaction failed:", err);
+        }
       }
     }, intervalMs);
     if (this.timer && typeof this.timer === "object" && "unref" in this.timer) {

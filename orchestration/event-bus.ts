@@ -1,5 +1,6 @@
 import { IEventStore } from "./interfaces/event-store.interface";
 export { IEventStore };
+import { ILogger } from "./interfaces/logger.interface";
 
 export interface EventSubscription {
   unsubscribe(): void;
@@ -26,6 +27,8 @@ export interface EventBusConfig {
   eventStore?: IEventStore;
   /** Optional filter: only persist events whose name passes this predicate. */
   persistFilter?: (event: string) => boolean;
+  /** Optional logger — replaces raw console calls with structured output. */
+  logger?: ILogger;
 }
 
 export interface IEventBus {
@@ -92,11 +95,13 @@ export class LocalEventBus implements IEventBus {
   private readonly eventStore?: IEventStore;
   private readonly persistFilter?: (event: string) => boolean;
   private persistedEventCount = 0;
+  private readonly logger?: ILogger;
 
   constructor(config?: EventBusConfig) {
     this.maxHistorySize = config?.maxHistorySize ?? 10000;
     this.eventStore = config?.eventStore;
     this.persistFilter = config?.persistFilter;
+    this.logger = config?.logger;
   }
 
   async publish(
@@ -115,8 +120,8 @@ export class LocalEventBus implements IEventBus {
     if (this.pendingCount >= this.MAX_PENDING) {
       this.backpressureCount++;
       this.backpressureTotalWaitMs += waited;
-      console.error(`[EventBus] Backpressure threshold exceeded for event: ${event}. Dropping ` +
-        `(pending=${this.pendingCount}, wait=${waited}ms, totalDrops=${this.backpressureCount}).`);
+      const bpMsg = `[EventBus] Backpressure threshold exceeded for event: ${event}. Dropping (pending=${this.pendingCount}, wait=${waited}ms, totalDrops=${this.backpressureCount}).`;
+      if (this.logger) { this.logger.warn(bpMsg); } else { console.error(bpMsg); }
       return;
     }
     if (waited > 0) {
@@ -162,7 +167,11 @@ export class LocalEventBus implements IEventBus {
         await this.eventStore.saveEvent(event, envelope);
         this.persistedEventCount++;
       } catch (err) {
-        console.error(`[EventBus] Failed to persist event ${eventId}:`, err);
+        if (this.logger) {
+          this.logger.error(`[EventBus] Failed to persist event ${eventId}`, err);
+        } else {
+          console.error(`[EventBus] Failed to persist event ${eventId}:`, err);
+        }
       }
     }
 
@@ -186,7 +195,11 @@ export class LocalEventBus implements IEventBus {
             try {
               await handler(payload);
             } catch (err) {
-              console.error(`[EventBus] Error in handler for ${event}:`, err);
+              if (this.logger) {
+                this.logger.error(`[EventBus] Error in handler for ${event}`, err);
+              } else {
+                console.error(`[EventBus] Error in handler for ${event}:`, err);
+              }
             }
           })()
         );
@@ -202,7 +215,11 @@ export class LocalEventBus implements IEventBus {
             try {
               await handler(envelope);
             } catch (err) {
-              console.error(`[EventBus] Error in wildcard handler for ${event}:`, err);
+              if (this.logger) {
+                this.logger.error(`[EventBus] Error in wildcard handler for ${event}`, err);
+              } else {
+                console.error(`[EventBus] Error in wildcard handler for ${event}:`, err);
+              }
             }
           })()
         );

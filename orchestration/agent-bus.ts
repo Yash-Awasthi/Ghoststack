@@ -8,6 +8,7 @@
 import { IEventBus } from "./event-bus";
 import { IEventStore } from "./interfaces/persistence.interface";
 import { MemoryStore } from "./memory-store";
+import { ILogger } from "./interfaces/logger.interface";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -64,12 +65,16 @@ export class AgentBus implements IAgentBus {
   private capabilities = new Map<string, AgentCapability>();
   private handlers = new Map<string, (msg: AgentMessage) => Promise<unknown>>();
   private nextId = 0;
+  private logger?: ILogger;
 
   constructor(
     private eventBus: IEventBus,
     private eventStore?: IEventStore,
-    private memoryStore?: MemoryStore
-  ) {}
+    private memoryStore?: MemoryStore,
+    logger?: ILogger
+  ) {
+    this.logger = logger;
+  }
 
   async send(message: Omit<AgentMessage, "id" | "timestamp">): Promise<string> {
     const id = `msg-${Date.now()}-${++this.nextId}`;
@@ -98,7 +103,11 @@ export class AgentBus implements IAgentBus {
     if (full.to && this.handlers.has(full.to)) {
       const handler = this.handlers.get(full.to)!;
       handler(full).catch((err) => {
-        console.error(`[agent-bus] Handler for ${full.to} failed:`, err);
+        if (this.logger) {
+          this.logger.error(`[agent-bus] Handler for ${full.to} failed`, err);
+        } else {
+          console.error(`[agent-bus] Handler for ${full.to} failed:`, err);
+        }
       });
     }
 

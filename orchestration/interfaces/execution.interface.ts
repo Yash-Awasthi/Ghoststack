@@ -27,4 +27,5 @@ export interface ITaskDependencyResolver {
 export interface ITaskExecutor {
   start(): Promise<void>;
   executeNext(): Promise<boolean>;
+  runLoop(maxIterations?: number, idleDelayMs?: number): Promise<number>;
 }

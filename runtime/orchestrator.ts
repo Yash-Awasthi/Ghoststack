@@ -6,6 +6,7 @@ import { IEventStore } from "../orchestration/interfaces/persistence.interface";
 import { ILogger } from "../orchestration/interfaces/logger.interface";
 import { TaskDependencyResolver } from "../orchestration/dependency-resolver";
 import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { IQueueBackend } from "../orchestration/interfaces/queue.interface";
 import { TaskExecutor } from "../orchestration/task-executor";
 import { buildQueuePayloadFromTask } from "../orchestration/task-payload";
 import { IMetricsCollector, ITraceRecorder } from "../orchestration/interfaces/observability.interface";
@@ -24,7 +25,7 @@ export class GhostStackOrchestrator {
   private logger?: ILogger;
 
   private resolver: TaskDependencyResolver;
-  private queue: MemoryQueueBackend;
+  private queue: IQueueBackend;
   private executor?: TaskExecutor;
   private metrics?: IMetricsCollector;
   private tracer?: ITraceRecorder;
@@ -43,7 +44,7 @@ export class GhostStackOrchestrator {
     agentRegistry: IAgentRegistry,
     eventStore?: IEventStore,
     logger?: ILogger,
-    queue?: MemoryQueueBackend,
+    queue?: IQueueBackend,
     executor?: TaskExecutor,
     metrics?: IMetricsCollector,
     tracer?: ITraceRecorder,
@@ -62,7 +63,7 @@ export class GhostStackOrchestrator {
     this.tracer = tracer;
 
     this.resolver = new TaskDependencyResolver();
-    this.queue = queue || new MemoryQueueBackend();
+    this.queue = queue ?? new MemoryQueueBackend();
     this.executor = executor;
 
     this.planningEngine = planningEngine;
@@ -198,7 +199,7 @@ export class GhostStackOrchestrator {
     };
   }
 
-  getQueue(): MemoryQueueBackend {
+  getQueue(): IQueueBackend {
     return this.queue;
   }
 

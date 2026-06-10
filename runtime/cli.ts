@@ -13,6 +13,7 @@ import { runFederationE2e } from "./e2e-federation";
 import { ADAPTER_MANIFEST } from "./adapters/manifest";
 import { runHealthcheck } from "./healthcheck";
 import { PlanningEngine } from "../orchestration/planning-engine";
+import { specToWorkflowDefinition } from "../orchestration/spec-loader";
 
 const repoRoot = path.resolve(__dirname, "..");
 
@@ -53,6 +54,8 @@ Commands:
   workflows:verify <id>  Verify workflow execution state integrity (checkpoint vs telemetry)
   plan <objective>     Generate a governed execution plan from a natural-language objective
   queue                Show current executor queue state (pending + dead-letter jobs)
+  run <spec-path>      Load a workflow spec file, register, and execute it immediately
+  submit <objective>   Plan + govern + execute a natural-language objective end-to-end
   version              Print GhostStack version and runtime info
   help                 Show this help
 
@@ -796,6 +799,74 @@ async function cmdQueue(): Promise<void> {
   }
 }
 
+async function cmdRun(specPath: string | undefined): Promise<void> {
+  if (!specPath) {
+    console.error("Usage: gs run <spec-path>");
+    console.error("  Example: gs run ./specs/demo-etl/workflow-spec.json");
+    process.exit(1);
+  }
+
+  const absPath = path.resolve(specPath);
+  if (!fs.existsSync(absPath)) {
+    console.error(`Spec file not found: ${absPath}`);
+    process.exit(1);
+  }
+
+  const ctx = await createRuntimeContext(repoRoot);
+  await startRuntime(ctx);
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const rawSpec = JSON.parse(fs.readFileSync(absPath, "utf8"));
+    const workflowId = `run-${path.basename(absPath, path.extname(absPath))}-${Date.now()}`;
+    const workflowDef = specToWorkflowDefinition(rawSpec, workflowId);
+    ctx.registry.registerWorkflow(workflowDef);
+
+    const executionId = `exec-${Date.now()}`;
+    console.log(`\n=== gs run: ${absPath}`);
+    console.log(`  Workflow:  ${workflowId}`);
+    console.log(`  Execution: ${executionId}`);
+    console.log(`  Template:  ${rawSpec.template_id ?? "(none)"}`);
+    console.log(`  Tasks:     ${rawSpec.tasks?.length ?? 0}\n`);
+
+    const result = await ctx.workflowEngine.executeWorkflow(workflowId, executionId);
+    console.log(`  Status:  ${result.status.toUpperCase()}`);
+    if (result.error) console.error(`  Error:   ${result.error}`);
+    console.log("\n  Done.\n");
+
+    if (result.status !== "succeeded") process.exit(1);
+  } finally {
+    await stopRuntime(ctx);
+  }
+}
+
+async function cmdSubmit(objective: string | undefined): Promise<void> {
+  if (!objective || objective.trim() === "") {
+    console.error("Usage: gs submit <objective>");
+    console.error(`  Example: gs submit "ingest data from s3 bucket my-bucket"`);
+    process.exit(1);
+  }
+
+  const ctx = await createRuntimeContext(repoRoot);
+  await startRuntime(ctx);
+
+  try {
+    console.log(`\n=== gs submit: "${objective}"\n`);
+    const result = await ctx.orchestrator.submitAndRun(objective);
+    console.log(`  Allowed:    ${result.allowed}`);
+    console.log(`  Plan ID:    ${result.planId}`);
+    console.log(`  Processed:  ${result.processed} task(s)`);
+    if (!result.allowed && result.reason) {
+      console.error(`  Rejected:   ${result.reason}`);
+    }
+    console.log("\n");
+
+    if (!result.allowed) process.exit(1);
+  } finally {
+    await stopRuntime(ctx);
+  }
+}
+
 async function main(): Promise<void> {
   const command = process.argv[2] ?? "help";
 
@@ -905,6 +976,12 @@ async function main(): Promise<void> {
       break;
     case "queue":
       await cmdQueue();
+      break;
+    case "run":
+      await cmdRun(process.argv[3]);
+      break;
+    case "submit":
+      await cmdSubmit(process.argv.slice(3).join(" ") || process.argv[3]);
       break;
     default:
       console.error(`Unknown command: ${command}`);

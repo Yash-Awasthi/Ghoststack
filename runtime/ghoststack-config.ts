@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { loadEnvFile } from "./env-loader";
 
 export type GhostStackConfig = {
   apiPort: number;
@@ -29,30 +30,6 @@ const DEFAULTS: GhostStackConfig = {
   }
 };
 
-function parseEnvFile(content: string): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const line of content.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq <= 0) continue;
-    const key = trimmed.slice(0, eq).trim();
-    let val = trimmed.slice(eq + 1).trim();
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-      val = val.slice(1, -1);
-    }
-    out[key] = val;
-  }
-  return out;
-}
-
-function applyEnvMap(map: Record<string, string>): void {
-  for (const [k, v] of Object.entries(map)) {
-    if (process.env[k] === undefined) {
-      process.env[k] = v;
-    }
-  }
-}
 
 function envBool(key: string, fallback: boolean): boolean {
   const v = process.env[key];
@@ -110,10 +87,7 @@ function validateConfig(config: GhostStackConfig): void {
 
 /** Load `.env`, optional `ghoststack.config.json`, apply env overrides and command line flags. */
 export function loadGhostStackConfig(repoRoot: string): GhostStackConfig {
-  const envPath = path.join(repoRoot, ".env");
-  if (fs.existsSync(envPath)) {
-    applyEnvMap(parseEnvFile(fs.readFileSync(envPath, "utf8")));
-  }
+  loadEnvFile(path.join(repoRoot, ".env"));
 
   const configPath = path.join(repoRoot, "ghoststack.config.json");
   let fileConfig: Partial<GhostStackConfig> = {};

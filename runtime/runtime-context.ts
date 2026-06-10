@@ -12,7 +12,8 @@ import {
   backupRuntimePersistence
 } from "../orchestration/persistence-manager";
 import { StructuredLogger } from "../orchestration/logger";
-import { MemoryQueueBackend } from "../orchestration/queue-backend";
+import { FileQueueBackend } from "../orchestration/file-queue-backend";
+import { IQueueBackend } from "../orchestration/interfaces/queue.interface";
 import { TaskExecutor } from "../orchestration/task-executor";
 import { MetricsCollector, TraceRecorder, DiagnosticEnricher } from "../orchestration/observability-manager";
 import { MemoryStore, TraceIndexer } from "../orchestration/memory-store";
@@ -64,7 +65,7 @@ export type GhostStackRuntimeContext = {
   persistence: FileRuntimePersistence;
   metrics: MetricsCollector;
   tracer: TraceRecorder;
-  queue: MemoryQueueBackend;
+  queue: IQueueBackend;
   discovery: LocalServiceDiscovery;
   healthMonitor: HealthMonitor;
   approval: ApprovalWorkflow;
@@ -87,6 +88,8 @@ export type GhostStackRuntimeContext = {
   runtimeCompactor: RuntimeCompactor;
   leakDetector: LeakDetector;
   quotaManager: ResourceQuotaManager;
+  planningEngine: PlanningEngine;
+  governanceEngine: GovernanceEngine;
   /** Cleanup functions for event bus subscriptions and other resources */
   cleanup: Array<() => void>;
 };
@@ -108,7 +111,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
   });
 
   const logger = new StructuredLogger();
-  const eventBus = new LocalEventBus();
+  const eventBus = new LocalEventBus({ logger });
   const eventStore = new FileEventStore(eventLogPath);
   const persistence = new FileRuntimePersistence(cacheDbPath);
   const runtimeManager = new RuntimeManager(loader);
@@ -117,9 +120,10 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
 
   const metrics = new MetricsCollector();
   const tracer = new TraceRecorder();
-  const queue = new MemoryQueueBackend();
+  const queue = new FileQueueBackend(runtimeDbDir);
+  await queue.init();
   const discovery = new LocalServiceDiscovery();
-  const healthMonitor = new HealthMonitor(loader, discovery);
+  const healthMonitor = new HealthMonitor(loader, discovery, logger);
   const approval = new ApprovalWorkflow(eventStore, eventBus);
 
   const offlineMode =
@@ -138,7 +142,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
   // Unified Memory & Knowledge Layer
   // ------------------------------------------------------------------
   const memoryStore = new MemoryStore(persistence);
-  const agentBus = new AgentBus(eventBus, eventStore, memoryStore);
+  const agentBus = new AgentBus(eventBus, eventStore, memoryStore, logger);
   new TaskDelegationAgent(agentBus);
 
   // Register built-in agent capabilities
@@ -269,6 +273,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
     quotaManager,
     metrics,
     runtimeGraph,
+    logger,
     options: {
       autoCompact: false, // Don't auto-start; orchestrated lifecycle
       maxEventAgeMs: 3_600_000 // 1 hour
@@ -482,6 +487,8 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
     runtimeCompactor,
     leakDetector,
     quotaManager,
+    planningEngine,
+    governanceEngine,
     cleanup: cleanupFns
   };
 }
