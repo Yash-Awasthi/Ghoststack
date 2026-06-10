@@ -1,4 +1,5 @@
 import { IEventStore, IRuntimePersistence } from "./interfaces/persistence.interface";
+import { ILogger } from "./interfaces/logger.interface";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -10,9 +11,11 @@ export class FileEventStore implements IEventStore {
   private filePath: string;
   private appendQueue: Promise<void> = Promise.resolve();
   lastReplayCorruptLines = 0;
+  private logger?: ILogger;
 
-  constructor(filePath: string) {
+  constructor(filePath: string, logger?: ILogger) {
     this.filePath = filePath;
+    this.logger = logger;
     this.ensureFileExists();
   }
 
@@ -66,9 +69,8 @@ export class FileEventStore implements IEventStore {
     if (corruptLines.length > 0) {
       const quarantinePath = `${this.filePath}.corrupt.${Date.now()}.jsonl`;
       fs.appendFileSync(quarantinePath, corruptLines.join("\n") + "\n", "utf8");
-      console.warn(
-        `[GhostStack] event log replay skipped ${this.lastReplayCorruptLines} corrupt JSONL line(s); quarantined to ${quarantinePath}`
-      );
+      const msg = `[GhostStack] event log replay skipped ${this.lastReplayCorruptLines} corrupt JSONL line(s); quarantined to ${quarantinePath}`;
+      if (this.logger) { this.logger.warn(msg); } else { console.warn(msg); }
     }
 
     if (since) {
@@ -98,9 +100,11 @@ export class FileEventStore implements IEventStore {
 export class FileRuntimePersistence implements IRuntimePersistence {
   private filePath: string;
   private writeQueue: Promise<void> = Promise.resolve();
+  private logger?: ILogger;
 
-  constructor(filePath: string) {
+  constructor(filePath: string, logger?: ILogger) {
     this.filePath = filePath;
+    this.logger = logger;
     this.ensureFileExists();
   }
 
@@ -127,9 +131,8 @@ export class FileRuntimePersistence implements IRuntimePersistence {
       if (fs.existsSync(this.filePath)) {
         fs.copyFileSync(this.filePath, corruptPath);
       }
-      console.warn(
-        `[GhostStack] state file corrupt; reset to {} (backup: ${corruptPath})`
-      );
+      const corruptMsg = `[GhostStack] state file corrupt; reset to {} (backup: ${corruptPath})`;
+      if (this.logger) { this.logger.warn(corruptMsg); } else { console.warn(corruptMsg); }
       return {};
     }
   }
@@ -155,9 +158,8 @@ export class FileRuntimePersistence implements IRuntimePersistence {
           const expected = JSON.stringify(state);
           if (written !== expected) {
             // Write verification failed — attempt a second write
-            console.warn(
-              `[GhostStackPersistence] Write-verify mismatch for key: ${key}. Rewriting...`
-            );
+            const verifyMsg = `[GhostStackPersistence] Write-verify mismatch for key: ${key}. Rewriting...`;
+            if (this.logger) { this.logger.warn(verifyMsg); } else { console.warn(verifyMsg); }
             this.writeState(current);
             const verify2 = this.readState();
             if (JSON.stringify(verify2[key]) !== expected) {

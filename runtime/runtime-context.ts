@@ -112,8 +112,8 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
 
   const logger = new StructuredLogger();
   const eventBus = new LocalEventBus({ logger });
-  const eventStore = new FileEventStore(eventLogPath);
-  const persistence = new FileRuntimePersistence(cacheDbPath);
+  const eventStore = new FileEventStore(eventLogPath, logger);
+  const persistence = new FileRuntimePersistence(cacheDbPath, logger);
   const runtimeManager = new RuntimeManager(loader);
   const agentRegistry = new LocalAgentRegistry();
   const taskRouter = new TaskRouter(eventBus, eventStore);
@@ -141,7 +141,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
   // ------------------------------------------------------------------
   // Unified Memory & Knowledge Layer
   // ------------------------------------------------------------------
-  const memoryStore = new MemoryStore(persistence);
+  const memoryStore = new MemoryStore(persistence, logger);
   const agentBus = new AgentBus(eventBus, eventStore, memoryStore, logger);
   new TaskDelegationAgent(agentBus);
 
@@ -225,7 +225,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
   governanceEngine.registerGuardrail(new RunawayRetriesGuardrail(5));
   governanceEngine.registerGuardrail(new TaskGraphLimitGuardrail(50));
 
-  const orchestrator = new GhostStackOrchestrator(
+  const orchestrator = GhostStackOrchestrator.create({
     runtimeManager,
     eventBus,
     taskRouter,
@@ -238,8 +238,8 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
     tracer,
     planningEngine,
     governanceEngine,
-    approval
-  );
+    approvalWorkflow: approval
+  });
 
   // ------------------------------------------------------------------
   // Runtime Graph — Unified Topology
@@ -572,9 +572,6 @@ export async function stopRuntime(ctx: GhostStackRuntimeContext): Promise<void> 
   }
 
   if (errors.length > 0) {
-    console.warn(`[stopRuntime] ${errors.length} cleanup step(s) encountered errors:`);
-    for (const err of errors) {
-      console.warn(`  - ${err}`);
-    }
+    ctx.logger.warn(`[stopRuntime] ${errors.length} cleanup step(s) encountered errors:`, { errors });
   }
 }

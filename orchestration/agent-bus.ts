@@ -58,6 +58,15 @@ export interface IAgentBus {
   getCapabilities(): Promise<AgentCapability[]>;
 }
 
+export interface AgentBusOptions {
+  /**
+   * Maximum number of messages retained in the in-memory ring buffer.
+   * Oldest messages are evicted when the cap is reached.
+   * Defaults to 1 000.
+   */
+  maxMessages?: number;
+}
+
 // ─── Implementation ──────────────────────────────────────────────────
 
 export class AgentBus implements IAgentBus {
@@ -66,14 +75,17 @@ export class AgentBus implements IAgentBus {
   private handlers = new Map<string, (msg: AgentMessage) => Promise<unknown>>();
   private nextId = 0;
   private logger?: ILogger;
+  private readonly maxMessages: number;
 
   constructor(
     private eventBus: IEventBus,
     private eventStore?: IEventStore,
     private memoryStore?: MemoryStore,
-    logger?: ILogger
+    logger?: ILogger,
+    options?: AgentBusOptions
   ) {
     this.logger = logger;
+    this.maxMessages = options?.maxMessages ?? 1_000;
   }
 
   async send(message: Omit<AgentMessage, "id" | "timestamp">): Promise<string> {
@@ -84,6 +96,11 @@ export class AgentBus implements IAgentBus {
       timestamp: new Date()
     };
     this.messages.push(full);
+    // Evict expired TTL messages, then enforce the ring-buffer cap
+    this._evictExpired();
+    if (this.messages.length > this.maxMessages) {
+      this.messages.splice(0, this.messages.length - this.maxMessages);
+    }
     await this.eventBus.publish("agent_message", full);
     if (this.eventStore) {
       await this.eventStore.saveEvent("agent_message", full);
@@ -230,7 +247,17 @@ export class AgentBus implements IAgentBus {
     this.handlers.delete(agentId);
   }
 
+  /** Remove messages whose ttlMs has expired from the ring buffer. */
+  private _evictExpired(): void {
+    const now = Date.now();
+    this.messages = this.messages.filter(
+      (m) => !m.ttlMs || now - m.timestamp.getTime() <= m.ttlMs
+    );
+  }
+
   async getMessages(options?: { since?: Date; limit?: number }): Promise<AgentMessage[]> {
+    // Sweep expired messages on every read so callers never see stale entries
+    this._evictExpired();
     let result = this.messages;
     if (options?.since) {
       // Use > instead of >= to avoid including messages created at the exact same millisecond

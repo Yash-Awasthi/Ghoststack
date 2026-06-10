@@ -7,6 +7,7 @@
 
 import { IRuntimePersistence } from "./interfaces/persistence.interface";
 import { IEventStore } from "./interfaces/persistence.interface";
+import { ILogger } from "./interfaces/logger.interface";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -70,9 +71,11 @@ export class MemoryStore implements IMemoryStore {
 
   private autoPruneTimer: ReturnType<typeof setInterval> | null = null;
   private readonly DEFAULT_AUTO_PRUNE_INTERVAL_MS = 60_000; // 1 minute
+  private logger?: ILogger;
 
-  constructor(persistence?: IRuntimePersistence) {
+  constructor(persistence?: IRuntimePersistence, logger?: ILogger) {
     this.persistence = persistence;
+    this.logger = logger;
   }
 
   /**
@@ -88,10 +91,12 @@ export class MemoryStore implements IMemoryStore {
       try {
         const pruned = await this.prune();
         if (pruned > 0) {
-          console.warn(`[MemoryStore] Auto-prune evicted ${pruned} expired TTL entr(ies)`);
+          const msg = `[MemoryStore] Auto-prune evicted ${pruned} expired TTL entr(ies)`;
+          if (this.logger) { this.logger.info(msg); } else { console.warn(msg); }
         }
       } catch (err) {
-        console.warn(`[MemoryStore] Auto-prune error: ${(err as Error).message}`);
+        const errMsg = `[MemoryStore] Auto-prune error: ${(err as Error).message}`;
+        if (this.logger) { this.logger.error(errMsg, err); } else { console.warn(errMsg); }
       }
     }, intervalMs).unref();
   }

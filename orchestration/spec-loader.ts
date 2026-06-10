@@ -27,6 +27,13 @@ export interface WorkflowSpecFile {
   tasks: WorkflowSpecTask[];
 }
 
+// Required fields for each task entry
+const TASK_REQUIRED_FIELDS: Array<keyof WorkflowSpecTask> = [
+  "id", "title", "description", "type", "action", "priority"
+];
+
+const VALID_PRIORITIES = new Set(["low", "medium", "high", "critical"]);
+
 export function parseWorkflowSpec(raw: string, sourceLabel: string): WorkflowSpecFile {
   let parsed: unknown;
   try {
@@ -34,16 +41,75 @@ export function parseWorkflowSpec(raw: string, sourceLabel: string): WorkflowSpe
   } catch (e) {
     throw new Error(`Invalid workflow spec JSON (${sourceLabel}): ${(e as Error).message}`);
   }
-  if (!parsed || typeof parsed !== "object") {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error(`Workflow spec must be a JSON object (${sourceLabel})`);
   }
   const spec = parsed as WorkflowSpecFile;
-  if (!spec.template_id || !Array.isArray(spec.tasks) || spec.tasks.length === 0) {
-    throw new Error(`Workflow spec missing template_id or tasks (${sourceLabel})`);
+
+  // ── Top-level required fields ────────────────────────────────────────
+  if (!spec.template_id || typeof spec.template_id !== "string") {
+    throw new Error(`Workflow spec missing or invalid template_id (${sourceLabel})`);
   }
-  if (!spec.metadata?.name) {
+  if (!spec.metadata || typeof spec.metadata !== "object") {
+    throw new Error(`Workflow spec missing metadata object (${sourceLabel})`);
+  }
+  if (!spec.metadata.name || typeof spec.metadata.name !== "string") {
     throw new Error(`Workflow spec missing metadata.name (${sourceLabel})`);
   }
+  if (!Array.isArray(spec.tasks) || spec.tasks.length === 0) {
+    throw new Error(`Workflow spec must have a non-empty tasks array (${sourceLabel})`);
+  }
+
+  // ── Per-task validation ──────────────────────────────────────────────
+  const seenIds = new Set<string>();
+  const errors: string[] = [];
+
+  for (let i = 0; i < spec.tasks.length; i++) {
+    const task = spec.tasks[i];
+    const label = `tasks[${i}]`;
+
+    // Required fields present and non-empty strings
+    for (const field of TASK_REQUIRED_FIELDS) {
+      if (!task[field] || typeof task[field] !== "string") {
+        errors.push(`${label}: missing or invalid required field "${field}"`);
+      }
+    }
+
+    // Duplicate IDs
+    if (task.id) {
+      if (seenIds.has(task.id)) {
+        errors.push(`${label}: duplicate task id "${task.id}"`);
+      } else {
+        seenIds.add(task.id);
+      }
+    }
+
+    // Priority must be a known value
+    if (task.priority && !VALID_PRIORITIES.has(task.priority)) {
+      errors.push(`${label} (id: "${task.id}"): invalid priority "${task.priority}" — must be one of: ${[...VALID_PRIORITIES].join(", ")}`);
+    }
+
+    // dependencies must be an array if present
+    if (task.dependencies !== undefined && !Array.isArray(task.dependencies)) {
+      errors.push(`${label} (id: "${task.id}"): dependencies must be an array`);
+    }
+  }
+
+  // Dangling dependency references — every dependency ID must exist in the spec
+  for (const task of spec.tasks) {
+    for (const dep of task.dependencies ?? []) {
+      if (!seenIds.has(dep)) {
+        errors.push(`task "${task.id}" depends on unknown task id "${dep}"`);
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Workflow spec validation failed (${sourceLabel}):\n  • ${errors.join("\n  • ")}`
+    );
+  }
+
   return spec;
 }
 

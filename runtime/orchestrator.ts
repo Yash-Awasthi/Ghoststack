@@ -72,6 +72,44 @@ export class GhostStackOrchestrator {
     this.inspector = inspector;
   }
 
+  /**
+   * Options-object factory — preferred for new code.
+   * The positional constructor is retained for backward compatibility.
+   */
+  static create(opts: {
+    runtimeManager: IRuntimeManager;
+    eventBus: IEventBus;
+    taskRouter: TaskRouter;
+    agentRegistry: IAgentRegistry;
+    eventStore?: IEventStore;
+    logger?: ILogger;
+    queue?: IQueueBackend;
+    executor?: TaskExecutor;
+    metrics?: IMetricsCollector;
+    tracer?: ITraceRecorder;
+    planningEngine?: IPlanningEngine;
+    governanceEngine?: IGovernanceEngine;
+    approvalWorkflow?: IApprovalWorkflow;
+    inspector?: any;
+  }): GhostStackOrchestrator {
+    return new GhostStackOrchestrator(
+      opts.runtimeManager,
+      opts.eventBus,
+      opts.taskRouter,
+      opts.agentRegistry,
+      opts.eventStore,
+      opts.logger,
+      opts.queue,
+      opts.executor,
+      opts.metrics,
+      opts.tracer,
+      opts.planningEngine,
+      opts.governanceEngine,
+      opts.approvalWorkflow,
+      opts.inspector
+    );
+  }
+
   async start(): Promise<string[]> {
     const startTimeMs = Date.now();
     this.logger?.info("Starting GhostStack Unified Orchestrator Core...");
