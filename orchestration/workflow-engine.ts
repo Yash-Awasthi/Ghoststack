@@ -528,7 +528,21 @@ export class WorkflowEngine implements IWorkflowReplay {
         await this.orchestrator.submitAndExecuteTasks(tasksToExecute);
       }
 
+      // ── Load actual task results from persistence ───────────────────────────
+      // TaskExecutor.executeNext() saves each job's output to persistence under
+      // the job id (= task id). Read those back so downstream tasks and callers
+      // see real execution data rather than a synthetic { status: "completed" }.
       const results: Record<string, any> = { ...(existingCp?.taskResults ?? {}) };
+      for (const t of def.tasks) {
+        try {
+          const persisted = this.persistence
+            ? await this.persistence.getState<{ status: string; result?: unknown }>(t.id)
+            : undefined;
+          results[t.id] = persisted ?? { status: "completed" };
+        } catch {
+          results[t.id] = { status: "completed" };
+        }
+      }
 
       // ── Task completion events (suppressed during replay) ──
       if (!isReplay) {
@@ -538,12 +552,9 @@ export class WorkflowEngine implements IWorkflowReplay {
             executionId,
             workflowId,
             timestamp: new Date(),
-            payload: { taskId: t.id, status: "completed" }
+            payload: { taskId: t.id, status: results[t.id]?.status ?? "completed" }
           });
         }
-      }
-      for (const t of def.tasks) {
-        results[t.id] = { status: "completed" };
       }
 
       // ── Checkpoint update (suppressed during replay) ──
@@ -664,9 +675,17 @@ export class WorkflowEngine implements IWorkflowReplay {
     try {
       await this.orchestrator.submitAndExecuteTasks(def.tasks);
 
+      // Read actual task outputs from persistence (same fix as executeWorkflow path)
       const results: Record<string, any> = {};
       for (const t of def.tasks) {
-        results[t.id] = { status: "completed" };
+        try {
+          const persisted = this.persistence
+            ? await this.persistence.getState<{ status: string; result?: unknown }>(t.id)
+            : undefined;
+          results[t.id] = persisted ?? { status: "completed" };
+        } catch {
+          results[t.id] = { status: "completed" };
+        }
       }
 
       this.telemetry.recordExecutionSuccess(executionId, results);

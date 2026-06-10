@@ -156,6 +156,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
 
   const flociAdapter = new FlociExecutionAdapter({
     strict: flociStrict,
+    persistence,
     onEvent: async (event, payload) => {
       await eventBus.publish(event, payload);
       await eventStore.saveEvent(event, payload);

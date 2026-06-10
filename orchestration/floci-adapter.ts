@@ -13,6 +13,7 @@ import {
   flociInvokeLambda,
   NormalizedFlociResult
 } from "./floci-lambda";
+import { IRuntimePersistence } from "./interfaces/persistence.interface";
 
 export type FlociEventEmitter = (event: string, payload: Record<string, unknown>) => Promise<void>;
 
@@ -22,6 +23,13 @@ export type FlociAdapterOptions = {
   /** When false, never return mocked success — only used in tests with explicit opt-in */
   allowMockFallback?: boolean;
   onEvent?: FlociEventEmitter;
+  /**
+   * Optional persistence backend.  When provided, `filter_content` will
+   * attempt to load the upstream task's execution result from persistence
+   * (keyed by `sourceTaskId`) and run the regex against its actual output
+   * rather than the built-in sample lines.
+   */
+  persistence?: IRuntimePersistence;
 };
 
 function envStrict(): boolean {
@@ -46,6 +54,7 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
   private readonly strict: boolean;
   private readonly allowMockFallback: boolean;
   private readonly onEvent?: FlociEventEmitter;
+  private readonly persistence?: IRuntimePersistence;
   private lastHealth: FlociHealthStatus | null = null;
   private healthOkAt = 0;
   private static readonly HEALTH_TTL_MS = 5000;
@@ -60,6 +69,7 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
     this.strict = options?.strict ?? envStrict();
     this.allowMockFallback = options?.allowMockFallback ?? envAllowMock();
     this.onEvent = options?.onEvent;
+    this.persistence = options?.persistence;
   }
 
   private async emitFlociEvent(event: string, payload: Record<string, unknown>): Promise<void> {
@@ -426,7 +436,43 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
       throw new Error(`Invalid filter pattern: ${(err as Error).message}`);
     }
 
-    // Realistic ETL pipeline content simulating web scrape results
+    // ── Resolve source content ────────────────────────────────────────────────
+    // If sourceTaskId is given and persistence is wired in, try to read the
+    // actual execution result of the upstream task and extract text lines from it.
+    // This enables real ETL data flow: extract → filter_content → load.
+    let resolvedLines: string[] | undefined;
+    if (sourceTaskId && this.persistence) {
+      try {
+        const sourceState = await this.persistence.getState<{
+          status: string;
+          result?: Record<string, unknown>;
+        }>(sourceTaskId);
+        if (sourceState?.status === "success" && sourceState.result) {
+          const r = sourceState.result;
+          if (Array.isArray(r.lines)) {
+            resolvedLines = (r.lines as unknown[]).map(String);
+          } else if (typeof r.content === "string") {
+            resolvedLines = r.content.split(/\r?\n/).filter(Boolean);
+          } else if (r.data && typeof r.data === "object" && !Array.isArray(r.data)) {
+            resolvedLines = Object.values(r.data as Record<string, unknown>).map(String);
+          } else if (Array.isArray(r.matches)) {
+            resolvedLines = (r.matches as unknown[]).map(String);
+          }
+          if (resolvedLines && resolvedLines.length > 0) {
+            context.logger?.info?.("filter_content: resolved source from persistence", {
+              sourceTaskId,
+              lineCount: resolvedLines.length
+            });
+          } else {
+            resolvedLines = undefined;
+          }
+        }
+      } catch {
+        // Persistence unavailable or key not found — fall through to sample data
+      }
+    }
+
+    // Fall back to built-in sample lines when no live pipeline data is available
     const sampleLines = [
       "OpenAI releases GPT-5 with improved reasoning capabilities spanning mathematics and coding benchmarks across multiple domains",
       "Anthropic introduces Claude 3 Opus for enterprise AI deployments with enhanced safety guardrails and compliance certifications",
@@ -449,9 +495,16 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
       "Observability platform correlates metrics, traces, and logs in unified dashboard reducing MTTR by 65%",
       "Security compliance automation ensures SOC2 and HIPAA requirements through continuous policy enforcement and audit logging"
     ];
-    const matches = sampleLines.filter((line) => regex.test(line));
+    const linesToFilter = resolvedLines ?? sampleLines;
+    const matches = linesToFilter.filter((line) => regex.test(line));
+    const usedLiveData = resolvedLines !== undefined;
 
-    context.logger?.info?.("Floci filter_content completed", { sourceTaskId, matchCount: matches.length });
+    context.logger?.info?.("Floci filter_content completed", {
+      sourceTaskId,
+      usedLiveData,
+      matchCount: matches.length,
+      totalLines: linesToFilter.length
+    });
 
     return {
       status: "success",
@@ -459,9 +512,10 @@ export class FlociExecutionAdapter implements IExecutionAdapter {
       sourceTaskId,
       pattern,
       matches,
-      totalLines: sampleLines.length,
+      totalLines: linesToFilter.length,
       matchCount: matches.length,
-      mocked: false
+      usedLiveData,
+      mocked: !usedLiveData
     };
   }
 }

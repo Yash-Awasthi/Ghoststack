@@ -103,7 +103,11 @@ export class GhostStackOrchestrator {
     return services;
   }
 
-  async submitAndExecuteTasks(tasks: Task[]): Promise<void> {
+  async submitAndExecuteTasks(
+    tasks: Task[],
+    maxIterations = 10_000,
+    idleDelayMs = 100
+  ): Promise<number> {
     this.logger?.info(`Submitting ${tasks.length} tasks to dependency validation loop...`);
     const traceSpan = this.tracer?.startSpan("submit.tasks", undefined, { count: tasks.length });
 
@@ -132,20 +136,26 @@ export class GhostStackOrchestrator {
       this.metrics?.recordGauge("queue.size", length);
     }
 
+    let processed = 0;
     if (this.executor) {
-      this.logger?.info("Driving executor task processing loop...");
-      while ((await this.queue.getQueueLength()) > 0) {
-        await this.executor.executeNext();
-      }
-      this.logger?.info("All queued tasks executed successfully.");
+      this.logger?.info("Driving executor run loop with exponential backoff support...");
+      // Use runLoop — unlike a bare while loop, runLoop honours the retry backoff
+      // delays set by executeNext after a failed task, preventing hot-spin retries.
+      processed = await this.executor.runLoop(maxIterations, idleDelayMs);
+      this.logger?.info("Executor run loop completed.", { processed });
     }
 
     if (traceSpan) {
-      this.tracer?.endSpan(traceSpan.spanId, { status: "success" });
+      this.tracer?.endSpan(traceSpan.spanId, { status: "success", processed });
     }
+
+    return processed;
   }
 
-  async submitCognitiveObjective(objective: string): Promise<{ planId: string; allowed: boolean; reason?: string }> {
+  async submitCognitiveObjective(
+    objective: string,
+    runOptions?: { maxIterations?: number; idleDelayMs?: number }
+  ): Promise<{ planId: string; allowed: boolean; reason?: string; processed: number }> {
     if (!this.planningEngine || !this.governanceEngine) {
       throw new Error("Cognitive Planning and Governance systems are not registered in the Orchestrator.");
     }
@@ -158,7 +168,7 @@ export class GhostStackOrchestrator {
     // 1. Evaluate plan through global guardrails
     const planEval = await this.governanceEngine.evaluatePlan(plan);
     if (!planEval.allowed) {
-      return { planId: plan.planId, allowed: false, reason: planEval.reason };
+      return { planId: plan.planId, allowed: false, reason: planEval.reason, processed: 0 };
     }
 
     let hasPendingApprovals = false;
@@ -168,7 +178,7 @@ export class GhostStackOrchestrator {
     for (const synth of plan.synthesisResults) {
       const taskEval = await this.governanceEngine.evaluateTask(synth);
       if (!taskEval.allowed) {
-        return { planId: plan.planId, allowed: false, reason: taskEval.reason };
+        return { planId: plan.planId, allowed: false, reason: taskEval.reason, processed: 0 };
       }
 
       if (taskEval.requiresApproval) {
@@ -189,13 +199,19 @@ export class GhostStackOrchestrator {
     }
 
     // 3. Dispatch execution ONLY if there are no safety approval blocks pending
+    let processed = 0;
     if (!hasPendingApprovals) {
-      await this.submitAndExecuteTasks(tasksToExecute);
+      processed = await this.submitAndExecuteTasks(
+        tasksToExecute,
+        runOptions?.maxIterations,
+        runOptions?.idleDelayMs
+      );
     }
 
     return {
       planId: plan.planId,
-      allowed: true
+      allowed: true,
+      processed
     };
   }
 
@@ -229,19 +245,18 @@ export class GhostStackOrchestrator {
   /**
    * Submit a cognitive objective and immediately drain the queue.
    * Convenience wrapper for one-shot use cases.
+   *
+   * The queue is drained exactly once — inside `submitCognitiveObjective` →
+   * `submitAndExecuteTasks` → `runLoop`. There is no second drain pass, so
+   * the `processed` count is accurate and retry backoff is respected.
    */
   async submitAndRun(
     objective: string,
     runOptions?: { maxIterations?: number; idleDelayMs?: number }
   ): Promise<{ planId: string; allowed: boolean; reason?: string; processed: number }> {
-    const result = await this.submitCognitiveObjective(objective);
-    if (!result.allowed) {
-      return { ...result, processed: 0 };
-    }
-    const processed = await this.run(
-      runOptions?.maxIterations,
-      runOptions?.idleDelayMs
-    );
-    return { ...result, processed };
+    // Pass runOptions through so the caller can tune the underlying runLoop
+    const result = await this.submitCognitiveObjective(objective, runOptions);
+    // Queue is already drained by submitCognitiveObjective — no second run() needed
+    return result;
   }
 }
