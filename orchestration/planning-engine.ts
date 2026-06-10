@@ -1,4 +1,5 @@
 import { IPlanningEngine, ICognitiveTrace, ITaskSynthesisResult } from "./interfaces/governance.interface";
+import { ILanguageModel } from "./interfaces/language-model.interface";
 
 // ─── Task template & blueprint types ─────────────────────────────────────────
 
@@ -228,8 +229,10 @@ const PLAN_BLUEPRINTS: Record<string, PlanBlueprint> = {
   }
 };
 
-// Priority-ordered blueprint keys — first keyword match wins
-const PRIORITY_ORDER = ["ingestion", "scraper", "backup", "etl", "research", "search", "code", "inference", "dangerous", "delete"];
+// Priority-ordered blueprint keys — first whole-word match wins.
+// "search" is intentionally listed before "research" so a standalone "search"
+// objective does not accidentally match the research blueprint via substring.
+const PRIORITY_ORDER = ["ingestion", "scraper", "backup", "etl", "search", "research", "code", "inference", "dangerous", "delete"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -252,9 +255,14 @@ function extractArgumentOverrides(objective: string): Record<string, unknown> {
 }
 
 /** Returns the best-matching blueprint for the given normalised objective string. */
+// Pre-compiled whole-word regexes for each blueprint key
+const BLUEPRINT_WORD_REGEXES: Record<string, RegExp> = Object.fromEntries(
+  PRIORITY_ORDER.map((key) => [key, new RegExp(`\\b${key}\\b`)])
+);
+
 function selectBlueprint(normObjective: string): PlanBlueprint {
   for (const key of PRIORITY_ORDER) {
-    if (normObjective.includes(key)) {
+    if (BLUEPRINT_WORD_REGEXES[key].test(normObjective)) {
       return PLAN_BLUEPRINTS[key];
     }
   }
@@ -305,12 +313,28 @@ function synthesisFromBlueprint(
 
 // ─── PlanningEngine ───────────────────────────────────────────────────────────
 
+const BLUEPRINT_KEYS = Object.keys(PLAN_BLUEPRINTS) as Array<keyof typeof PLAN_BLUEPRINTS>;
+
 export class PlanningEngine implements IPlanningEngine {
+  private readonly llm?: ILanguageModel;
+
+  /**
+   * @param llm Optional language model for LLM-backed blueprint selection.
+   *            When omitted the engine falls back to keyword matching.
+   */
+  constructor(llm?: ILanguageModel) {
+    this.llm = llm;
+  }
+
   async generatePlan(objective: string, _context?: any): Promise<ICognitiveTrace> {
     const planId = `plan-${Date.now().toString(36)}-${Math.floor(Math.random() * 0xffff).toString(16)}`;
     const normObj = objective.toLowerCase().trim();
     const argumentOverrides = extractArgumentOverrides(normObj);
-    const blueprint = selectBlueprint(normObj);
+
+    const blueprint = this.llm
+      ? await this._llmSelectBlueprint(objective, normObj)
+      : selectBlueprint(normObj);
+
     const synthesisResults = synthesisFromBlueprint(planId, blueprint, argumentOverrides, objective);
 
     return {
@@ -319,5 +343,44 @@ export class PlanningEngine implements IPlanningEngine {
       synthesisResults,
       timestamp: new Date()
     };
+  }
+
+  /**
+   * Uses the language model to classify an objective into a blueprint key.
+   * Falls back to keyword matching when the model returns an unrecognised key
+   * or throws.
+   */
+  private async _llmSelectBlueprint(objective: string, normObj: string): Promise<PlanBlueprint> {
+    try {
+      const result = await this.llm!.generateObject<{ blueprintKey: string }>({
+        schema: {
+          type: "object",
+          properties: {
+            blueprintKey: { type: "string", enum: BLUEPRINT_KEYS }
+          },
+          required: ["blueprintKey"]
+        },
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI workflow planner. Given a user objective, select the most appropriate execution blueprint.
+Available blueprints: ${BLUEPRINT_KEYS.map((k) => `"${k}" (${PLAN_BLUEPRINTS[k].label})`).join(", ")}.
+Respond with a JSON object: { "blueprintKey": "<chosen key>" }.`
+          },
+          {
+            role: "user",
+            content: `Objective: ${objective}`
+          }
+        ]
+      });
+
+      const chosen = result?.blueprintKey as keyof typeof PLAN_BLUEPRINTS;
+      if (chosen && PLAN_BLUEPRINTS[chosen]) {
+        return PLAN_BLUEPRINTS[chosen];
+      }
+    } catch {
+      // Model unavailable or returned unusable response — fall through to keyword matching
+    }
+    return selectBlueprint(normObj);
   }
 }
