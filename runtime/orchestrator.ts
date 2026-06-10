@@ -232,7 +232,10 @@ export class GhostStackOrchestrator {
         description: `${synth.action} with ${JSON.stringify(synth.arguments)}`,
         priority: synth.priority,
         status: taskEval.requiresApproval ? "pending_approval" : "pending",
-        dependencies: synth.dependencies
+        dependencies: synth.dependencies,
+        type: synth.adapterType ?? "floci",
+        action: synth.action,
+        arguments: synth.arguments
       });
     }
 

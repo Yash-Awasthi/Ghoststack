@@ -8,6 +8,8 @@ interface TaskTemplate {
   governanceMetadata: { dangerous: boolean; costEstimate: number; resourceScope: string };
   /** Actions this template depends on (matched by action name within the same blueprint) */
   dependsOnActions: string[];
+  /** Executor adapter that handles this task — defaults to "floci" when absent */
+  adapterType?: string;
 }
 
 interface PlanBlueprint {
@@ -174,6 +176,45 @@ const PLAN_BLUEPRINTS: Record<string, PlanBlueprint> = {
     ]
   },
 
+  search: {
+    label: "Web Search & Synthesis",
+    templates: [
+      {
+        action: "web_search",
+        defaultArguments: { mode: "balanced" },
+        governanceMetadata: { dangerous: false, costEstimate: 0.01, resourceScope: "web:search" },
+        dependsOnActions: [],
+        adapterType: "search"
+      }
+    ]
+  },
+
+  code: {
+    label: "Code Generation & Editing",
+    templates: [
+      {
+        action: "code_agent_run",
+        defaultArguments: { maxIterations: 5 },
+        governanceMetadata: { dangerous: false, costEstimate: 0.05, resourceScope: "agent:code" },
+        dependsOnActions: [],
+        adapterType: "code"
+      }
+    ]
+  },
+
+  inference: {
+    label: "Local Model Inference",
+    templates: [
+      {
+        action: "local_inference",
+        defaultArguments: { maxNewTokens: 300 },
+        governanceMetadata: { dangerous: false, costEstimate: 0.0, resourceScope: "local:inference" },
+        dependsOnActions: [],
+        adapterType: "inference"
+      }
+    ]
+  },
+
   default: {
     label: "Generic Execution",
     templates: [
@@ -188,7 +229,7 @@ const PLAN_BLUEPRINTS: Record<string, PlanBlueprint> = {
 };
 
 // Priority-ordered blueprint keys — first keyword match wins
-const PRIORITY_ORDER = ["ingestion", "scraper", "backup", "etl", "research", "dangerous", "delete"];
+const PRIORITY_ORDER = ["ingestion", "scraper", "backup", "etl", "research", "search", "code", "inference", "dangerous", "delete"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -256,6 +297,7 @@ function synthesisFromBlueprint(
       arguments: mergedArgs,
       dependencies,
       priority: i === 0 ? "high" : "medium",
+      adapterType: template.adapterType ?? "floci",
       governanceMetadata: { ...template.governanceMetadata }
     } satisfies ITaskSynthesisResult;
   });

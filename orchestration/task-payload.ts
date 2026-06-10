@@ -7,8 +7,11 @@ export type QueueJobPayload = {
 
 /**
  * Maps a workflow task to the queue executor shape.
- * Uses explicit type/action/arguments when present; otherwise falls back to
- * description keyword routing for legacy templates and tests.
+ *
+ * Routing priority:
+ *   1. Explicit type + action on the task (set by planner or direct callers) — used as-is.
+ *   2. Explicit type only — payload falls back to task arguments.
+ *   3. No type — legacy keyword matching on description for backward-compat tests.
  */
 export function buildQueuePayloadFromTask(task: Task): QueueJobPayload {
   if (task.type && task.action) {
@@ -21,6 +24,15 @@ export function buildQueuePayloadFromTask(task: Task): QueueJobPayload {
     };
   }
 
+  // If type is set but action isn't, pass through with raw arguments
+  if (task.type) {
+    return {
+      type: task.type,
+      payload: { ...(task.arguments ?? {}) }
+    };
+  }
+
+  // Legacy description-based routing (backward compat for tests and old templates)
   let payloadType = "floci";
   let payloadPayload: Record<string, unknown> = {};
 
@@ -38,6 +50,15 @@ export function buildQueuePayloadFromTask(task: Task): QueueJobPayload {
       selectors: [".repo-title"],
       maxRequests: 3
     };
+  } else if (task.description.includes("search")) {
+    payloadType = "search";
+    payloadPayload = { query: task.description, mode: "balanced" };
+  } else if (task.description.includes("code")) {
+    payloadType = "code";
+    payloadPayload = { objective: task.description };
+  } else if (task.description.includes("inference")) {
+    payloadType = "inference";
+    payloadPayload = { prompt: task.description };
   } else {
     payloadPayload = task.description.includes("bucket")
       ? { action: "create_s3_bucket", bucketName: task.id }

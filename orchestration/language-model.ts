@@ -186,18 +186,26 @@ export class GroqModelProvider implements ILanguageModel {
   }
 
   async generateObject<T>(params: GenerateObjectParams<T>): Promise<T> {
-    const systemMessage: ChatMessage = {
-      role: "system",
-      content:
-        "You are a structured data extractor. Respond ONLY with valid JSON matching the schema provided. No explanation, no markdown fences."
-    };
+    // Only prepend the extraction system prompt when the caller hasn't already
+    // provided one — avoids conflicting dual system messages (e.g. from classify()).
+    const callerHasSystemMessage = params.messages.some((m) => m.role === "system");
     const schemaMsg: ChatMessage = {
       role: "user",
       content: `JSON Schema to conform to:\n${JSON.stringify(params.schema, null, 2)}`
     };
+    const prefixMessages: ChatMessage[] = callerHasSystemMessage
+      ? [schemaMsg]
+      : [
+          {
+            role: "system",
+            content:
+              "You are a structured data extractor. Respond ONLY with valid JSON matching the schema provided. No explanation, no markdown fences."
+          },
+          schemaMsg
+        ];
     const body = {
       model: this.model,
-      messages: [systemMessage, schemaMsg, ...params.messages].map((m) => ({
+      messages: [...prefixMessages, ...params.messages].map((m) => ({
         role: m.role,
         content: m.content
       })),
@@ -283,9 +291,22 @@ export class FreeModelProvider implements ILanguageModel {
   }
 
   async *streamText(params: StreamTextParams): AsyncIterable<TextChunk> {
-    // For free provider, fall back to generateText and emit as single chunk
-    const text = await this.generateText(params);
-    yield { contentChunk: text };
+    // Use native streaming for groq routes; single-chunk fallback for others.
+    for (const route of this.config.routes) {
+      const [provider, model] = route.split(":") as [string, string];
+      if (provider === "groq" && this.config.keys?.groq) {
+        const g = new GroqModelProvider({ apiKey: this.config.keys.groq, model });
+        yield* g.streamText(params);
+        return;
+      }
+      // Non-groq routes don't expose a streaming endpoint here — emit as single chunk
+      const text = await this.tryRoute(route, params);
+      if (text !== null) {
+        yield { contentChunk: text };
+        return;
+      }
+    }
+    throw new Error(`FreeModelProvider: all routes exhausted for streaming (${this.config.routes.join(", ")})`);
   }
 
   async generateObject<T>(params: GenerateObjectParams<T>): Promise<T> {

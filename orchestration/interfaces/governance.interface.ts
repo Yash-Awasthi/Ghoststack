@@ -6,6 +6,8 @@ export interface ITaskSynthesisResult {
   arguments: any;
   dependencies: string[];
   priority: "low" | "medium" | "high";
+  /** Executor adapter type — determines which TaskExecutor adapter handles this task */
+  adapterType?: string;
   governanceMetadata?: {
     dangerous?: boolean;
     costEstimate?: number;

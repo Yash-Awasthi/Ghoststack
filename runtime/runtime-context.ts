@@ -134,8 +134,7 @@ export async function createRuntimeContext(repoRoot: string): Promise<GhostStack
 
   const offlineMode =
     process.env.GHOSTSTACK_OFFLINE_MODE === "1" ||
-    (process.env.GHOSTSTACK_OFFLINE_MODE ?? "").toLowerCase() === "true" ||
-    process.env.GHOSTSTACK_OFFLINE_MODE === undefined;
+    (process.env.GHOSTSTACK_OFFLINE_MODE ?? "").toLowerCase() === "true";
 
   const browserTelemetry = new EnvironmentTelemetry();
   const scrapingTelemetry = new EnvironmentTelemetry();
