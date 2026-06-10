@@ -150,6 +150,7 @@ async function classify(
   try {
     const result = await llm.generateObject<SearchClassification>({
       messages: [
+        { role: "system", content: CLASSIFIER_PROMPT },
         ...history.slice(-4),
         { role: "user", content: query }
       ],

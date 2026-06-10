@@ -12,7 +12,6 @@
 
 import {
   ILanguageModel,
-  ChatMessage,
   TextChunk,
   GenerateTextParams,
   StreamTextParams,

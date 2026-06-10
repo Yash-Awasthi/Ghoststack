@@ -47,7 +47,6 @@ function buildFileTree(rootDir: string, maxDepth = 4, maxFiles = 200): string {
     for (const entry of filtered) {
       if (count >= maxFiles) break;
       const fullPath = path.join(dir, entry.name);
-      const rel = path.relative(rootDir, fullPath);
       if (entry.isDirectory()) {
         lines.push(`${prefix}${entry.name}/`);
         walk(fullPath, depth + 1, prefix + "  ");

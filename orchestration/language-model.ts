@@ -16,7 +16,6 @@ import {
   GenerateTextParams,
   StreamTextParams,
   GenerateObjectParams,
-  ToolDefinition
 } from "./interfaces/language-model.interface";
 
 // ─── Shared HTTP helpers ──────────────────────────────────────────────────────
@@ -105,7 +104,7 @@ async function* streamHttpsPost(
 
 // ─── SSE line parser ─────────────────────────────────────────────────────────
 
-function* parseSseLines(raw: string): Iterable<string> {
+function* _parseSseLines(raw: string): Iterable<string> {
   for (const line of raw.split("\n")) {
     const trimmed = line.trim();
     if (trimmed.startsWith("data: ") && trimmed !== "data: [DONE]") {

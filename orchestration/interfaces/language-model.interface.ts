@@ -49,9 +49,11 @@ export interface GenerateTextParams {
   temperature?: number;
 }
 
-export interface StreamTextParams extends GenerateTextParams {}
+// StreamTextParams is intentionally identical to GenerateTextParams —
+// kept as a distinct named type so call-sites remain self-documenting.
+export type StreamTextParams = GenerateTextParams;
 
-export interface GenerateObjectParams<T> {
+export interface GenerateObjectParams<_T = unknown> {
   messages: ChatMessage[];
   /** Zod-compatible JSON Schema object */
   schema: Record<string, unknown>;
