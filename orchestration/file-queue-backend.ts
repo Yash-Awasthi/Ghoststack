@@ -49,6 +49,14 @@ export class FileQueueBackend implements IQueueBackend {
     this.metrics.recordGauge("queue.dlq_length", this.deadLetterQueue.length);
   }
 
+  private _countPush(): void {
+    this.metrics?.increment("queue.push_total");
+  }
+
+  private _countPop(): void {
+    this.metrics?.increment("queue.pop_total");
+  }
+
   /**
    * Load persisted state from disk. Must be called once before using the backend.
    * Safe to call multiple times (idempotent after first call).
@@ -109,6 +117,7 @@ export class FileQueueBackend implements IQueueBackend {
     }
     this.activeQueue.push(job);
     this._writeJobsToFile(this.queuePath, this.activeQueue);
+    this._countPush();
     this._emitQueueMetrics();
   }
 
@@ -126,6 +135,7 @@ export class FileQueueBackend implements IQueueBackend {
 
     const job = this.activeQueue.shift()!;
     this._writeJobsToFile(this.queuePath, this.activeQueue);
+    this._countPop();
     this._emitQueueMetrics();
     return job;
   }

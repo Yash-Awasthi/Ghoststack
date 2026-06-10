@@ -69,26 +69,14 @@ export class RuntimeManager implements IRuntimeManager {
     try {
       const servicesConfig = await this.configLoader.loadServices();
       const configNames = Object.keys(servicesConfig?.services || {});
-
-      // Merge with runtime-registered services
       const runtimeNames = Array.from(this.services.keys());
-      const merged = new Set([...configNames, ...runtimeNames]);
-
-      // Auto-register config-defined services that aren't yet in the map
-      for (const name of configNames) {
-        if (!this.services.has(name)) {
-          this.services.set(name, {
-            name,
-            status: "unknown",
-            restartCount: 0,
-            detail: "Declared in services.yaml, not yet started"
-          });
-        }
-      }
-
-      return Array.from(merged);
-    } catch (err) {
-      console.error("RuntimeManager failed to load services:", err);
+      // Return the union of config-declared and runtime-registered service names.
+      // Config-declared services are NOT silently auto-registered as "unknown" —
+      // callers must call registerService() to get a lifecycle record.
+      // This keeps the registry unambiguous: status records exist only for services
+      // that have been explicitly registered.
+      return Array.from(new Set([...configNames, ...runtimeNames]));
+    } catch {
       return Array.from(this.services.keys());
     }
   }

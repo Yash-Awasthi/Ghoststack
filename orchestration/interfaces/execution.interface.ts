@@ -18,12 +18,14 @@ export interface IRuntimeEvent {
   payload: unknown;
 }
 
-// Adapter boundary: tasks are heterogeneous across adapters (floci, browser, scraping).
-// Using unknown + narrowing in implementations is the correct pattern here.
+// Adapter boundary: tasks are heterogeneous across adapters (floci, browser, scraping,
+// search, code, inference). The task parameter is `any` at this boundary; each adapter
+// narrows to its own payload shape internally. The return type is tightened to
+// Record<string, unknown> — callers may cast further when needed.
 export interface IExecutionAdapter {
   canExecute(taskType: string): boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute(task: any, context: IExecutionContext): Promise<any>;
+  execute(task: any, context: IExecutionContext): Promise<Record<string, unknown>>;
 }
 
 export interface ITaskDependencyResolver {

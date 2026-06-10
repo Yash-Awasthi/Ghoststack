@@ -5,6 +5,7 @@ import { IAgentRegistry } from "../orchestration/agent-registry";
 import { IEventStore } from "../orchestration/interfaces/persistence.interface";
 import { ILogger } from "../orchestration/interfaces/logger.interface";
 import { TaskDependencyResolver } from "../orchestration/dependency-resolver";
+import { ITaskDependencyResolver } from "../orchestration/interfaces/execution.interface";
 import { MemoryQueueBackend } from "../orchestration/queue-backend";
 import { IQueueBackend } from "../orchestration/interfaces/queue.interface";
 import { TaskExecutor } from "../orchestration/task-executor";
@@ -24,7 +25,7 @@ export class GhostStackOrchestrator {
   private eventStore?: IEventStore;
   private logger?: ILogger;
 
-  private resolver: TaskDependencyResolver;
+  private resolver: ITaskDependencyResolver;
   private queue: IQueueBackend;
   private executor?: TaskExecutor;
   private metrics?: IMetricsCollector;
@@ -90,9 +91,11 @@ export class GhostStackOrchestrator {
     planningEngine?: IPlanningEngine;
     governanceEngine?: IGovernanceEngine;
     approvalWorkflow?: IApprovalWorkflow;
+    /** Optional custom dependency resolver — defaults to TaskDependencyResolver. */
+    resolver?: ITaskDependencyResolver;
     inspector?: any;
   }): GhostStackOrchestrator {
-    return new GhostStackOrchestrator(
+    const inst = new GhostStackOrchestrator(
       opts.runtimeManager,
       opts.eventBus,
       opts.taskRouter,
@@ -108,6 +111,8 @@ export class GhostStackOrchestrator {
       opts.approvalWorkflow,
       opts.inspector
     );
+    if (opts.resolver) inst.resolver = opts.resolver;
+    return inst;
   }
 
   async start(): Promise<string[]> {
