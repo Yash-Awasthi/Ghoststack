@@ -1,7 +1,7 @@
 {
   "name": "ghoststack",
-  "version": "1.1.0",
-  "description": "GhostStack v1.1 - Local-First Autonomous Cloud Engine",
+  "version": "1.1.1",
+  "description": "GhostStack v1.1 - Local-First Autonomous Cloud Orchestration Engine",
   "main": "dist/runtime/server.js",
   "bin": {
     "gs": "./runtime/cli.ts",
@@ -11,6 +11,9 @@
     "doc": "docs"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
     "gs": "ts-node runtime/cli.ts",
     "start": "ts-node runtime/server.ts",
     "start:federation": "ts-node runtime/cli.ts start:federation",
@@ -22,33 +25,38 @@
     "diagnose": "ts-node runtime/diagnose-export.ts",
     "benchmark": "ts-node runtime/benchmark-runner.ts",
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write ."
   },
   "keywords": [
     "orchestration",
     "local-first",
     "mcp",
-    "workflow"
+    "workflow",
+    "autonomous",
+    "dag"
   ],
-  "author": "",
+  "author": "Yash Awasthi",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "js-yaml": "^4.1.1"
+  },
+  "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "jest": "^30.4.2",
-    "js-yaml": "^4.1.1",
     "playwright": "^1.60.0",
     "prettier": "^3.2.5",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.59.3",
-    "@typescript-eslint/parser": "^8.59.3"
   }
 }

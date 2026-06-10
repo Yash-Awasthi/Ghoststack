@@ -140,6 +140,70 @@ export class TaskGraphLimitGuardrail implements IRuntimeGuardrail {
   }
 }
 
+export class TimeoutConstraint implements IExecutionConstraint {
+  name = "TimeoutConstraint";
+  private maxExecutionMs: number;
+
+  constructor(maxExecutionMs = 300_000 /* 5 min */) {
+    this.maxExecutionMs = maxExecutionMs;
+  }
+
+  validate(task: ITaskSynthesisResult): { success: boolean; reason?: string } {
+    const declared = (task.governanceMetadata as any)?.maxExecutionMs;
+    if (typeof declared === "number" && declared > this.maxExecutionMs) {
+      return {
+        success: false,
+        reason: `Declared maxExecutionMs ${declared}ms exceeds ceiling ${this.maxExecutionMs}ms for task ${task.taskId}`
+      };
+    }
+    return { success: true };
+  }
+}
+
+export class HighCostPlanGuardrail implements IRuntimeGuardrail {
+  name = "HighCostPlanGuardrail";
+  private maxPlanCost: number;
+
+  constructor(maxPlanCost = 5.0) {
+    this.maxPlanCost = maxPlanCost;
+  }
+
+  check(tasks: ITaskSynthesisResult[], _executionLogs: any[]): { success: boolean; reason?: string } {
+    const totalCost = tasks.reduce((sum, t) => sum + (t.governanceMetadata?.costEstimate ?? 0), 0);
+    if (totalCost > this.maxPlanCost) {
+      return {
+        success: false,
+        reason: `Plan total cost estimate $${totalCost.toFixed(2)} exceeds plan budget ceiling $${this.maxPlanCost}`
+      };
+    }
+    return { success: true };
+  }
+}
+
+export class DuplicateActionGuardrail implements IRuntimeGuardrail {
+  name = "DuplicateActionGuardrail";
+  private maxDuplicates: number;
+
+  constructor(maxDuplicates = 1) {
+    this.maxDuplicates = maxDuplicates;
+  }
+
+  check(tasks: ITaskSynthesisResult[], _executionLogs: any[]): { success: boolean; reason?: string } {
+    const counts = new Map<string, number>();
+    for (const task of tasks) {
+      const count = (counts.get(task.action) ?? 0) + 1;
+      counts.set(task.action, count);
+      if (count > this.maxDuplicates) {
+        return {
+          success: false,
+          reason: `Duplicate action guardrail: action '${task.action}' appears ${count} times in plan (max ${this.maxDuplicates})`
+        };
+      }
+    }
+    return { success: true };
+  }
+}
+
 // 4. Governance Engine Core
 export class GovernanceEngine implements IGovernanceEngine {
   private constraints: IExecutionConstraint[] = [];

@@ -13,6 +13,11 @@ export class TaskExecutor implements ITaskExecutor {
   private adapters: IExecutionAdapter[];
   private metrics?: IMetricsCollector;
   private tracer?: ITraceRecorder;
+  /**
+   * Backoff delay (ms) set by executeNext when a retry is scheduled.
+   * Consumed and reset by runLoop so that executeNext stays non-blocking.
+   */
+  private _pendingRetryDelayMs = 0;
 
   constructor(
     queue: IQueueBackend,
@@ -133,10 +138,66 @@ export class TaskExecutor implements ITaskExecutor {
         this.metrics?.increment("task.dead_letter");
       } else {
         this.metrics?.increment("task.retry");
+        // Compute exponential backoff: 500ms * 2^(retries-1), capped at 30 s.
+        // Stored for runLoop to consume — executeNext itself stays non-blocking.
+        this._pendingRetryDelayMs = Math.min(500 * Math.pow(2, job.retries - 1), 30_000);
+        this.logger.info(`Task ${job.id} scheduled for retry ${job.retries}/${job.maxRetries} in ${this._pendingRetryDelayMs}ms`);
       }
       await this.queue.push(job); // will trigger dead letter inside push if exhausted
 
       return false;
     }
+  }
+
+  /**
+   * Continuously drains the queue until it is empty or `maxIterations` is reached.
+   * Applies exponential backoff delays between retries (scheduled by executeNext).
+   * Returns the total number of tasks processed successfully.
+   *
+   * @param maxIterations - Safety ceiling (default: 10 000). Pass Infinity to run until queue drains.
+   * @param idleDelayMs   - Idle poll interval when the queue returns nothing (default: 100ms).
+   */
+  async runLoop(maxIterations = 10_000, idleDelayMs = 100): Promise<number> {
+    let successCount = 0;
+    let iterations = 0;
+    let consecutiveEmpty = 0;
+    const MAX_CONSECUTIVE_EMPTY = 3;
+
+    this.logger.info("TaskExecutor runLoop started", { maxIterations, idleDelayMs });
+
+    while (iterations < maxIterations) {
+      this._pendingRetryDelayMs = 0;
+      const processed = await this.executeNext();
+      iterations++;
+
+      if (processed) {
+        successCount++;
+        consecutiveEmpty = 0;
+      } else {
+        // Apply any backoff delay set by executeNext for a scheduled retry
+        if (this._pendingRetryDelayMs > 0) {
+          await new Promise<void>((resolve) => setTimeout(resolve, this._pendingRetryDelayMs).unref());
+          this._pendingRetryDelayMs = 0;
+          consecutiveEmpty = 0;
+          continue;
+        }
+
+        consecutiveEmpty++;
+        if (consecutiveEmpty >= MAX_CONSECUTIVE_EMPTY) {
+          // Queue appears drained — confirm with a length check
+          const remaining = await this.queue.getQueueLength();
+          if (remaining === 0) {
+            this.logger.info("TaskExecutor runLoop: queue drained, exiting", { iterations, successCount });
+            break;
+          }
+          consecutiveEmpty = 0;
+        }
+        // Brief idle wait before next poll
+        await new Promise<void>((resolve) => setTimeout(resolve, idleDelayMs).unref());
+      }
+    }
+
+    this.logger.info("TaskExecutor runLoop completed", { iterations, successCount });
+    return successCount;
   }
 }

@@ -4,7 +4,7 @@ GhostStack is a strictly governed, local-first orchestration nucleus built for d
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Run `npm run test`, `npm run healthcheck`, and `npm run lint` locally to verify this checkout.
+Run `npm run typecheck`, `npm run test`, `npm run healthcheck`, and `npm run lint` locally to verify this checkout.
 
 ## Core Architecture
 
@@ -18,9 +18,12 @@ GhostStack's architecture avoids autonomous "swarms" or recursive unverified pla
 ## Feature Highlights
 
 - **Governed Workflows**: Explicit budget limits, strict policy evaluations, and required manual/automatic approval hooks.
+- **Blueprint-Based Planner**: `PlanningEngine` uses a typed blueprint registry (ingestion / scraper / backup / etl / research / dangerous / delete / default) with priority-ordered selection, `key=value` argument overrides extracted directly from the objective string, and auto-computed DAG dependency IDs — no hard-coded keyword chains.
 - **Replay recovery**: Rebuild state from the JSONL event log and persisted snapshots (best-effort when lines are corrupt).
 - **Browser & Scraping Integration**: Enforced crawl quotas and safe Chromium process management.
 - **Diagnostic APIs**: Native HTTP endpoints to inspect execution queues, memory states, and dependency resolution.
+- **API Token Auth**: Set `GHOSTSTACK_API_TOKEN` to require `Authorization: Bearer <token>` on all HTTP endpoints except `/health` and `/healthz`.
+- **Executor Run Loop**: `TaskExecutor.runLoop()` drains the queue continuously with configurable exponential backoff on retries (500ms × 2ⁿ, capped at 30 s).
 
 ## Repository Layout
 
@@ -117,17 +120,21 @@ Example declarative spec: [`specs/demo-etl/workflow-spec.json`](specs/demo-etl/w
 
 GhostStack runs tasks with a default-deny permissions model.
 - **Governance**: Every task undergoes policy evaluation through the `GovernanceEngine`.
+- **Constraints**: `ResourceScopeConstraint`, `CostBudgetConstraint`, and `TimeoutConstraint` block tasks that exceed declared limits before they reach the executor.
+- **Policies**: `DangerousOperationPolicy` and `WildcardPermissionsPolicy` gate high-risk tasks behind the approval workflow.
+- **Guardrails**: `LoopDetectionGuardrail`, `RunawayRetriesGuardrail`, `TaskGraphLimitGuardrail`, `HighCostPlanGuardrail`, and `DuplicateActionGuardrail` catch bad plans before execution begins.
 - **Capability Policies**: Explicit token allowance models constrain API usage and file modification depths.
 - **Sandboxing**: Hard-locked `FilesystemSandbox` adapters prevent path-traversal (LFI) via strictly enforced `path.relative()` evaluation constraints.
 - **Approvals**: The `ApprovalWorkflow` mandates manual resolution if tasks exceed automatic bounds.
+- **HTTP Auth**: `GHOSTSTACK_API_TOKEN` env var enables Bearer token authentication on the diagnostic HTTP server.
 
 ## Benchmarks
 
 Measurements from [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md):
-* **Avg Persistence Write Latency (Seq)**: 15.68 ms
-* **Avg Persistence Read Latency (Seq)**: 0.27 ms
-* **Avg Task Execution Dispatch Latency**: 19.27 ms
-* **System Dispatch Throughput Limit**: 52 tasks/sec
+* **Avg Persistence Write Latency (Seq)**: 13.4 ms  _(goal: < 25 ms)_
+* **Avg Persistence Read Latency (Seq)**: 0.82 ms  _(goal: < 2 ms)_
+* **Avg Task Execution Dispatch Latency**: 22.8 ms  _(goal: < 30 ms)_
+* **System Dispatch Throughput Limit**: 44 tasks/sec  _(goal: > 30 tasks/sec)_
 
 ## Documentation Index
 
@@ -169,9 +176,12 @@ Web UI: `http://localhost:8001`. Use the consume volume for watch-folder ingesti
 ## Development Guide
 
 We strictly mandate schema adherence and static checking.
-* **Format**: `npm run format` (Workspace-wide Prettier standards)
-* **Lint**: `npm run lint` (ESLint verification)
-* **Tests**: `npm run test` (Jest)
+* **Type-check**: `npm run typecheck` (zero TypeScript errors required)
+* **Build**: `npm run build` (compiles to `dist/`)
+* **Format**: `npm run format` (workspace-wide Prettier standards)
+* **Lint**: `npm run lint` / `npm run lint:fix` (ESLint verification / auto-fix)
+* **Tests**: `npm run test` (Jest) / `npm run test:coverage` (with coverage report)
+* **Watch mode**: `npm run test:watch`
 
 ## Known Limitations
 
